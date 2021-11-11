@@ -1,0 +1,19 @@
+[run]
+omit =
+    */python?.?/*
+    */site-packages/nose/*
+    *test*
+    data/*
+    */site-packages/nose/*
+    *__init__.py*
+branch = true
+source = .
+
+[report]
+omit =
+    */python?.?/*
+    */site-packages/nose/*
+    *__init__.py*
+    */pycharm/*
+    */pydev/*
+    *test*

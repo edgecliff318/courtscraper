@@ -1,0 +1,66 @@
+image: python:3.8.5
+test: &test
+  step:
+    name: Test
+    caches:
+      - pip
+    script:
+      - pip install -r requirements.txt
+      - pip install -r requirements_dev.txt
+      - pip install coverage-badge
+      - ./packages_install.sh
+      - pip install flake8
+      - nosetests --with-coverage
+      - coverage-badge -o coverage.svg
+    artifacts:
+      - coverage.svg
+    services:
+      - docker
+
+upload_coverage: &upload_coverage
+  step:
+    name: Upload coverage
+    script:
+      - pipe: docker://bitbucketpipelines/bitbucket-upload-file:0.1.4
+        variables:
+          BITBUCKET_USERNAME: $BB_USERNAME
+          BITBUCKET_APP_PASSWORD: $BB_PASSWORD
+          FILENAME: 'coverage.svg'
+
+push: &push
+  step:
+    name: Push and Tag
+    caches:
+      - pip
+    script:
+    - pip install semversioner
+    - ./bump-version.sh
+    - ./git-tag-and-push.sh
+
+build_docker: &build_docker
+  step:
+    name: Build the release Docker Image
+    services:
+      - docker
+    caches:
+      - docker
+    script:
+      - pip install semversioner
+      - ./bump-version.sh
+      - export IMAGE_NAME=neoinvest/allocation:$(semversioner current-version)
+      - export IMAGE_BUILD_NAME=neoinvest/allocation:latest
+      - docker build -t $IMAGE_NAME . --build-arg BB_USERNAME=$BB_USERNAME --build-arg BB_PASSWORD=$BB_PASSWORD
+      - docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD
+      - docker tag $IMAGE_NAME $IMAGE_BUILD_NAME
+      - docker push $IMAGE_NAME
+      - docker push $IMAGE_BUILD_NAME
+
+pipelines:
+  default:
+    - <<: *test
+  branches:
+    main:
+    - <<: *test
+    - <<: *upload_coverage
+    - <<: *build_docker
+    - <<: *push
