@@ -53,3 +53,5 @@ Thumbs.db
 coverage.svg
 htmlcov
 archive
+
+.ssh

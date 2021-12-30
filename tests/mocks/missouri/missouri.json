@@ -1,0 +1,157 @@
+[
+    {
+        "address_on_file": "BELTON, TX",
+        "case_detail": {
+            "case_header": {
+                "Case Type": "Criminal/Infract.- see Charges",
+                "Date Filed": "12/11/1996",
+                "Date of Disposition": "12/17/1996",
+                "Disposition": "Bndover Circ-Waive Prel Hrng",
+                "Judge/Commissioner Assigned": "DEL MURO, JUSTINE E",
+                "Judge/Commissioner At Disposition": "DEL MURO, JUSTINE E",
+                "Location": "Kansas City Criminal/Traffic"
+            },
+            "charges": {
+                "Charge/Judgment": {}
+            },
+            "dockets": [
+                "12/17/1996\r \r \r \r \u00a0\r \r \r Order for Change of Judge",
+                "Case Assigned to Division 4 , Docket A From Division 25 , Docket",
+                "Bndover Circ-Waive Prel Hrng",
+                "Arraignment Scheduled",
+                "Set Arraignment/Circuit 24-DEC-96 :0930 Hrs. Division: 4 Docket: Docket  A",
+                "12/12/1996\r \r \r \r \u00a0\r \r \r Initial Arraignment Hrng Held",
+                "Defendant Makes Initial Appearance in Associate Division and Enters Plea of Not Guilty",
+                "Commitment Order",
+                "Committed For Preliminary Hearing and/or Trial",
+                "Preliminary Hearing Scheduled",
+                "Set Preliminary Hearing/Associate 17-DEC-96 :0900 Hrs. Division: 25 Docket:",
+                "Warrant Served",
+                "Warrant Returned",
+                "12/11/1996\r \r \r \r \u00a0\r \r \r Order for Change of Judge",
+                "Case Assigned to Division 25   From Division  , Docket",
+                "Warrant Issued",
+                "Warrant Issued by division: 25 Reason: New Case Initiation",
+                "Entry of Appearance Filed",
+                "Appearance by: Brian C. Wimes, Filing Prosecutor",
+                "Bond Set",
+                "Bond Set, $15000. 10%",
+                "Filing:",
+                "Defendant in custody and confined to: Kansas City Police Department",
+                "Complaint Filed",
+                "Complaint Filed in Associate Division-Kansas City"
+            ],
+            "parties": "MONTANA, TONY I, Defendant\u00a0\u00a0\u00a0\n\n\n\n\n\n\n\n\n713 AVENUE PBELTON, TX 76513\n\nYear of Birth: 1967",
+            "services": [
+                {
+                    "Issuance": {
+                        "Date Issued": "12/11/1996",
+                        "Document ID": "96-ARWA-5847",
+                        "Document Issued": "Warrant for Arrest",
+                        "Issued To": "MONTANA\r \r\r\r, TONY\r \r\r\rI",
+                        "Service Text": "WARRANT ISSUED REASON : New Case Initiation"
+                    },
+                    "Return": {
+                        "Served To": "MONTANA,TONY  I",
+                        "Service Text": "Arresting Agency: KANSAS CITY POLICE DEPARTMENT",
+                        "Service/Attempt Date": "12/11/1996"
+                    }
+                },
+                {
+                    "Issuance": {
+                        "Date Issued": "12/11/1996",
+                        "Document ID": "96-ARWA-5847",
+                        "Document Issued": "Warrant for Arrest",
+                        "Issued To": "MONTANA\r \r\r\r, TONY\r \r\r\rI",
+                        "Service Text": "WARRANT ISSUED REASON : New Case Initiation"
+                    },
+                    "Return": {
+                        "Served To": "MONTANA,TONY  I",
+                        "Service Text": "Arresting Agency: KANSAS CITY POLICE DEPARTMENT",
+                        "Service/Attempt Date": "12/11/1996"
+                    }
+                }
+            ]
+        },
+        "case_number": "16CR96073710",
+        "case_type": "Criminal/Infract.-see Charges",
+        "circuit": "Circuit 16",
+        "county": "Jackson",
+        "court_id": "CT16",
+        "filing_date": "12/11/1996",
+        "location": "Kansas City Criminal/Traffic",
+        "party_name": "MONTANA, TONY I",
+        "party_type": "Defendant",
+        "style_of_case": "ST V TONY I MONTANA"
+    },
+    {
+        "address_on_file": "BELTON, TX",
+        "case_detail": {
+            "case_header": {
+                "Case Type": "Criminal/Infract.- see Charges",
+                "Date Filed": "12/23/1996",
+                "Date of Disposition": "01/15/1997",
+                "Disposition": "Guilty Plea",
+                "Judge/Commissioner Assigned": "DEL MURO, JUSTINE E",
+                "Judge/Commissioner At Disposition": "DEL MURO, JUSTINE E",
+                "Location": "Kansas City Criminal/Traffic"
+            },
+            "charges": {
+                "Charge/Judgment": {
+                    "Code": "3246500",
+                    "Date": "12/11/1996",
+                    "Description": "Dist/Del/Manf/Produce Or Attempt To Or Possess W/Intent To Dist/Del/Manf/Produce A Controlled Substance \r{\u00a0Felony B\u00a0RSMo:\u00a0195.211\u00a0}",
+                    "Disposition": "Guilty Plea\u00a0-\u00a001/15/1997",
+                    "OCN": "96004178"
+                },
+                "Sentence": {
+                    "Length": "5\u00a0Years",
+                    "Sentence": "Incarceration DOC",
+                    "Sentence\u00a0Date": "01/15/1997",
+                    "Start\u00a0Date": "01/15/1997"
+                }
+            },
+            "dockets": [
+                "01/21/1997\r \r \r \r \u00a0\r \r \r Sentencing Hearing Scheduled",
+                "Set Sentencing Hearing/Circuit 21-FEB-97 :1000 Hrs. Division: 4 Docket: Docket O",
+                "01/15/1997\r \r \r \r \u00a0\r \r \r Order for Continuance",
+                "Sentencing Deferred Pending Receipt of Pre-Sentence Investigation Report",
+                "Defendant Sentenced",
+                "Distribute, Deliver, Maufacture/Produce (or Attempt To/Possess With Intent)  A Controlled Substance ; Sentence Type Confinement;",
+                "Guilty Plea",
+                "01/06/1997\r \r \r \r \u00a0\r \r \r Entry of Appearance Filed",
+                "Appearance by: Ronna Holloman, Public Defender",
+                "12/24/1996\r \r \r \r \u00a0\r \r \r Motion for Discovery",
+                "Request For Discovery Filed By Public Defender",
+                "Arraignment Held",
+                "Defendant Arraigned In Circuit 4  A",
+                "Arraignment Held",
+                "Defendant Arraigned in Circuit Division and Enters Plea Of Not Guilty",
+                "Filing:",
+                "The Court FINDS This Cause To Be Drug-Related",
+                "Order",
+                "Standard Pre-Trial Order",
+                "Entry of Appearance Filed",
+                "Appearance by: Gregory B. Gillis, Current Prosecutor",
+                "Withdrawal of Attorney Filed",
+                "Withdrawal of: Brian C. Wimes, Filing Prosecutor",
+                "12/23/1996\r \r \r \r \u00a0\r \r \r Motion for Discovery",
+                "Request For Discovery Filed By State",
+                "Information Filed",
+                "Information Filed in Circuit Division-Kansas City"
+            ],
+            "parties": "MONTANA, TONY I, Defendant\u00a0\u00a0\u00a0\n\n\n\n\n\n\n\n\n713 AVENUE PBELTON, TX 76513\n\nYear of Birth: 1967",
+            "services": []
+        },
+        "case_number": "16CR96073710-01",
+        "case_type": "Criminal/Infract.-see Charges",
+        "circuit": "Circuit 16",
+        "county": "Jackson",
+        "court_id": "CT16",
+        "filing_date": "12/23/1996",
+        "location": "Kansas City Criminal/Traffic",
+        "party_name": "MONTANA, TONY I",
+        "party_type": "Defendant",
+        "style_of_case": "ST V TONY I MONTANA"
+    }
+]

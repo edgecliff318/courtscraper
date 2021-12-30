@@ -1,0 +1,306 @@
+[
+    {
+        "case_detail": {
+            "Case Type": "z-Traffic Citation",
+            "Charges": [
+                {
+                    "Charge": "NO VALID INSPECTION CERTIFICATE",
+                    "Date": "03/08/2005",
+                    "Level": "Misdemeanor Traffic",
+                    "Statute": "MVI"
+                }
+            ],
+            "DISPOSITIONS": [
+                {
+                    "Date": "04/13/2005",
+                    "Disposition": "1.\u00a0NO VALID INSPECTION CERTIFICATE Guilty",
+                    "Judgment": " (Judicial Officer: Kirkland, Kenny)"
+                },
+                {
+                    "Date": "04/13/2005",
+                    "Disposition": "1.\u00a0NO VALID INSPECTION CERTIFICATE Nolo Contendere",
+                    "Plea": " (Judicial Officer: Kirkland, Kenny)"
+                }
+            ],
+            "Date Filed": "03/10/2005",
+            "Defendant": "Smith, Adam Michael",
+            "Defendant Address": "413 Kirkwood DrLewisville, TX 75067",
+            "Dob": "DOB: 03/28/1978",
+            "Financial": [
+                {
+                    "Amount": "145.00",
+                    "Date": "03/17/2005",
+                    "Name": "",
+                    "Receipt": "",
+                    "Type": "Transaction Assessment"
+                },
+                {
+                    "Amount": "(145.00)",
+                    "Date": "04/13/2005",
+                    "Name": "SMITH, ADAM MICHAEL",
+                    "Receipt": "Receipt # 96183J1",
+                    "Type": "Payment"
+                }
+            ],
+            "Judicial Officer": "Kirkland, Kenny",
+            "Legacy Case Number (JP)": "349236",
+            "Location": "Justice of the Peace Pct #1",
+            "OTHER EVENTS AND HEARINGS": [
+                {
+                    "Content": "Case Filing",
+                    "Date": "03/10/2005",
+                    "Event": "Filed document"
+                },
+                {
+                    "Content": "Plea Due: 03/25/2005 - 4.5.05 DEF CALLED WILL BE MAILING MO..JAV",
+                    "Date": "03/10/2005",
+                    "Event": "Conversion"
+                },
+                {
+                    "Content": "Plea Due: 03/25/2005",
+                    "Date": "03/10/2005",
+                    "Event": "Conversion"
+                },
+                {
+                    "Content": "Plea Due: 03/18/2005",
+                    "Date": "03/10/2005",
+                    "Event": "Conversion"
+                },
+                {
+                    "Content": "(GUILTY) 04/13/2005\nPAID FINE",
+                    "Date": "04/13/2005",
+                    "Event": "Legacy Default Disposition"
+                }
+            ],
+            "Plaintiff": "State Of Texas"
+        },
+        "case_number": "05-2146J1",
+        "case_type": "z-Traffic Citation",
+        "charges": "NO VALID INSPECTION CERTIFICATE",
+        "citation_number": "H377430",
+        "defendant_dob": "03/28/1978",
+        "defendant_name": "Smith, Adam Michael",
+        "detail_url": "https://justice1.dentoncounty.gov/PublicAccess/CaseDetail.aspx?CaseID=838023",
+        "filed_date": "03/10/2005",
+        "judicial_officer": "Kirkland, Kenny",
+        "location": "Justice of the Peace Pct #1",
+        "status": "Disposed"
+    },
+    {
+        "case_detail": {
+            "Case Type": "Criminal Case",
+            "Charges": [
+                {
+                    "Charge": "EXPIRED REGISTRATION (BOAT, JET SKI)",
+                    "Date": "04/12/2007",
+                    "Level": "Conversion/Unknown",
+                    "Statute": "PW31021b"
+                }
+            ],
+            "DISPOSITIONS": [
+                {
+                    "Date": "05/11/2007",
+                    "Disposition": "1.\u00a0EXPIRED REGISTRATION (BOAT, JET SKI) Guilty",
+                    "Judgment": " (Judicial Officer: Bateman, Mike)"
+                },
+                {
+                    "Date": "05/11/2007",
+                    "Disposition": "1.\u00a0EXPIRED REGISTRATION (BOAT, JET SKI) Nolo Contendere",
+                    "Plea": " (Judicial Officer: Bateman, Mike)"
+                }
+            ],
+            "Date Filed": "04/12/2007",
+            "Defendant": "Smith, Adam Michael",
+            "Defendant Address": "413 Kirkwood DrLewisville, TX 75067",
+            "Dob": "DOB: 03/28/1978",
+            "Financial": [
+                {
+                    "Amount": "165.00",
+                    "Date": "04/12/2007",
+                    "Name": "",
+                    "Receipt": "",
+                    "Type": "Transaction Assessment"
+                },
+                {
+                    "Amount": "(165.00)",
+                    "Date": "05/11/2007",
+                    "Name": "SMITH, ADAM MICHAEL",
+                    "Receipt": "Receipt # 97550J5",
+                    "Type": "Payment"
+                }
+            ],
+            "Judicial Officer": "Bateman, Mike",
+            "Legacy Case Number (JP)": "424859",
+            "Location": "Justice of the Peace Pct #5",
+            "OTHER EVENTS AND HEARINGS": [
+                {
+                    "Content": "Case Filing",
+                    "Date": "04/12/2007",
+                    "Event": "Filed document"
+                },
+                {
+                    "Content": "Plea Due: 04/28/2007",
+                    "Date": "04/12/2007",
+                    "Event": "Conversion"
+                },
+                {
+                    "Content": "Plea Due: 04/22/2007",
+                    "Date": "04/12/2007",
+                    "Event": "Conversion"
+                },
+                {
+                    "Content": "(GUILTY) 05/11/2007",
+                    "Date": "05/11/2007",
+                    "Event": "Legacy Default Disposition"
+                }
+            ],
+            "Plaintiff": "State Of Texas"
+        },
+        "case_number": "G07-0125J5",
+        "case_type": "Criminal Case",
+        "charges": "EXPIRED REGISTRATION (BOAT, JET SKI)",
+        "citation_number": "A820450",
+        "defendant_dob": "03/28/1978",
+        "defendant_name": "Smith, Adam Michael",
+        "detail_url": "https://justice1.dentoncounty.gov/PublicAccess/CaseDetail.aspx?CaseID=916136",
+        "filed_date": "04/12/2007",
+        "judicial_officer": "Bateman, Mike",
+        "location": "Justice of the Peace Pct #5",
+        "status": "Disposed"
+    },
+    {
+        "case_detail": {
+            "Case Type": "Adult Misdemeanor",
+            "Charges": [
+                {
+                    "Charge": "POSS MARIJ <2OZ",
+                    "Date": "02/29/2008",
+                    "Level": "Misdemeanor B",
+                    "Statute": "481.121(b)(1) HSC"
+                }
+            ],
+            "DISPOSITIONS": [
+                {
+                    "Date": "06/20/2011",
+                    "Disposition": "1.\u00a0POSS MARIJ <2OZ Dismissed"
+                }
+            ],
+            "Date Filed": "04/29/2008",
+            "Defendant": "Smith, Adam Michael",
+            "Defendant Address": "8225 Mid Cities BLVD STE 100North Richland Hills, TX 76182",
+            "Dob": "DOB: 03/28/1978",
+            "File Custody/Location": "County Clerk's Office",
+            "Judicial Officer": "Vahlenkamp, Virgil L.",
+            "Legacy Criminal Track No.": "08-02737",
+            "Location": "County Criminal Court #5",
+            "OTHER EVENTS AND HEARINGS": [
+                {
+                    "Content": "772824",
+                    "Date": "04/29/2008",
+                    "Event": "Bond"
+                },
+                {
+                    "Content": "",
+                    "Date": "04/29/2008",
+                    "Event": "Affidavit for Arrest Warrant"
+                },
+                {
+                    "Content": "",
+                    "Date": "04/29/2008",
+                    "Event": "Complaint and Information (OCA)"
+                },
+                {
+                    "Content": "",
+                    "Date": "05/01/2008",
+                    "Event": "Order Of Transfer"
+                },
+                {
+                    "Content": "",
+                    "Date": "07/01/2008",
+                    "Event": "Certificate of Call"
+                },
+                {
+                    "Content": "",
+                    "Date": "07/01/2008",
+                    "Event": "Arraignment hearing"
+                },
+                {
+                    "Content": "",
+                    "Date": "07/15/2008",
+                    "Event": "Judgment Nisi Filed"
+                },
+                {
+                    "Content": "",
+                    "Date": "08/07/2008",
+                    "Event": "Bond"
+                },
+                {
+                    "Content": "",
+                    "Date": "09/30/2008",
+                    "Event": "Court's Admonition of Statutory and Constitutional Rights"
+                },
+                {
+                    "Content": "",
+                    "Date": "09/30/2008",
+                    "Event": "Reset"
+                },
+                {
+                    "Content": "",
+                    "Date": "09/30/2008",
+                    "Event": "Appearance"
+                },
+                {
+                    "Content": "",
+                    "Date": "12/02/2008",
+                    "Event": "Reset"
+                },
+                {
+                    "Content": "",
+                    "Date": "12/02/2008",
+                    "Event": "Announcement"
+                },
+                {
+                    "Content": "",
+                    "Date": "02/03/2009",
+                    "Event": "Reset"
+                },
+                {
+                    "Content": "",
+                    "Date": "02/03/2009",
+                    "Event": "Announcement"
+                },
+                {
+                    "Content": "",
+                    "Date": "04/14/2009",
+                    "Event": "Reset"
+                },
+                {
+                    "Content": "",
+                    "Date": "04/14/2009",
+                    "Event": "Announcement"
+                },
+                {
+                    "Content": "",
+                    "Date": "06/16/2009",
+                    "Event": "Motion for Continuance"
+                },
+                {
+                    "Content": "",
+                    "Date": "06/16/2009",
+                    "Event": "Plea Hearing"
+                }
+            ]
+        },
+        "case_number": "CR-2008-02843-A",
+        "case_type": "Adult Misdemeanor",
+        "charges": "POSS MARIJ <2OZ",
+        "citation_number": "",
+        "defendant_dob": "03/28/1978",
+        "defendant_name": "Smith, Adam Michael",
+        "detail_url": "https://justice1.dentoncounty.gov/PublicAccess/CaseDetail.aspx?CaseID=1454661",
+        "filed_date": "04/29/2008",
+        "judicial_officer": "Vahlenkamp, Virgil L.",
+        "location": "County Criminal Court #5",
+        "status": "Inactive: Disposed"
+    }
+]

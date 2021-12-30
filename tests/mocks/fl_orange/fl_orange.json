@@ -1,0 +1,457 @@
+[
+    {
+        "case_detail": {
+            "Bonds": [],
+            "Case Type": "Civil Traffic Infraction",
+            "Charge Details": [
+                {
+                    "Arrest": "",
+                    "Charge": "1. TR- SEAT BELT NOT WORN BY DRIVER\n Statute: 316.614(4)(b) No Degree - Infraction",
+                    "Disposition": "11/21/2019  Pay Civil Penalty Guilty",
+                    "Offense Date": "10/30/2019",
+                    "Plea": "11/21/2019  No Plea Entered",
+                    "Sentence": ""
+                }
+            ],
+            "Citation Number": "AC9K4GE",
+            "Compliance Date": "Monday, December 2, 2019",
+            "Date Filed": "10/31/2019",
+            "Docket Events": [
+                {
+                    "Date": "11/21/2019",
+                    "Description": "Disposition",
+                    "Doc": "",
+                    "Pages": "",
+                    "Request Doc": ""
+                },
+                {
+                    "Date": "11/21/2019",
+                    "Description": "Elected to Pay Civil Penalty",
+                    "Doc": "",
+                    "Pages": "",
+                    "Request Doc": ""
+                },
+                {
+                    "Date": "10/31/2019",
+                    "Description": "Payable Infraction Filed\n67599669",
+                    "Doc": "67599669\n\nDocument Icon",
+                    "Pages": "1",
+                    "Request Doc": ""
+                }
+            ],
+            "Financial": [
+                {
+                    "Amount": "114.00",
+                    "Date": "10/31/2019",
+                    "Description": "Transaction Assessment",
+                    "Player": ""
+                },
+                {
+                    "Amount": "-114.00",
+                    "Date": "11/21/2019",
+                    "Description": "Payment",
+                    "Player": "SMITH, ADAM MATTHEW"
+                }
+            ],
+            "Hearings": [],
+            "Judge": "95 Hearing Officer",
+            "Location": "Ocoee - TR",
+            "Parties": [
+                {
+                    "Attorney": "",
+                    "Atty Phone": "",
+                    "DOB": "6/24/1991",
+                    "Name": "ADAM MATTHEW SMITH",
+                    "Type": "Defendant"
+                },
+                {
+                    "Attorney": "",
+                    "Atty Phone": "",
+                    "DOB": "",
+                    "Name": "STATE OF FLORIDA",
+                    "Type": "Plaintiff"
+                }
+            ],
+            "Status": "Closed",
+            "UCN": "482019TR037409000AWX",
+            "Warrants": []
+        },
+        "case_number": "2019-TR-037409-A-W",
+        "date": "10/31/2019",
+        "description": "STATE OF FLORIDA vs. SMITH, ADAM MATTHEW",
+        "detail_url": "https://myeclerk.myorangeclerk.com//CaseDetails?caseId=11175442&caseIdEnc=9UkiTaKJNR4QYFI%2FCM8yKO4hCPkIY3ZtnRVuQtFPXNrqTPf9kS0y6CfsdIJzmH2PBtzh3TElGlxKmF4LuIZRhkG40mp0AprG0vi5oeKqZUU%3D",
+        "dob": "06/24/1991",
+        "judge_name": "95 Hearing Officer",
+        "status": "Closed",
+        "type": "Civil Traffic Infraction"
+    },
+    {
+        "case_detail": {
+            "Bonds": [],
+            "Case Type": "Civil Traffic Infraction",
+            "Charge Details": [
+                {
+                    "Arrest": "",
+                    "Charge": "1. TR-UNLAWFUL SPEED (SPEEDS REQUIRED)\n Statute: 316.189 No Degree - Infraction",
+                    "Disposition": "11/21/2019  Pay Civil Penalty Guilty",
+                    "Offense Date": "10/30/2019",
+                    "Plea": "11/21/2019  No Plea Entered",
+                    "Sentence": ""
+                }
+            ],
+            "Citation Number": "AC9K4DE",
+            "Compliance Date": "Monday, December 2, 2019",
+            "Date Filed": "10/31/2019",
+            "Docket Events": [
+                {
+                    "Date": "11/21/2019",
+                    "Description": "Disposition",
+                    "Doc": "",
+                    "Pages": "",
+                    "Request Doc": ""
+                },
+                {
+                    "Date": "10/31/2019",
+                    "Description": "Payable Infraction Filed\n67599665",
+                    "Doc": "67599665\n\nDocument Icon",
+                    "Pages": "1",
+                    "Request Doc": ""
+                }
+            ],
+            "Financial": [
+                {
+                    "Amount": "129.00",
+                    "Date": "10/31/2019",
+                    "Description": "Transaction Assessment",
+                    "Player": ""
+                },
+                {
+                    "Amount": "-129.00",
+                    "Date": "11/21/2019",
+                    "Description": "Payment",
+                    "Player": "SMITH, ADAM MATTHEW"
+                }
+            ],
+            "Hearings": [],
+            "Judge": "95 Hearing Officer",
+            "Location": "Ocoee - TR",
+            "Parties": [
+                {
+                    "Attorney": "",
+                    "Atty Phone": "",
+                    "DOB": "6/24/1991",
+                    "Name": "ADAM MATTHEW SMITH",
+                    "Type": "Defendant"
+                },
+                {
+                    "Attorney": "",
+                    "Atty Phone": "",
+                    "DOB": "",
+                    "Name": "STATE OF FLORIDA",
+                    "Type": "Plaintiff"
+                }
+            ],
+            "Status": "Closed",
+            "UCN": "482019TR037408000AWX",
+            "Warrants": []
+        },
+        "case_number": "2019-TR-037408-A-W",
+        "date": "10/31/2019",
+        "description": "STATE OF FLORIDA vs. SMITH, ADAM MATTHEW",
+        "detail_url": "https://myeclerk.myorangeclerk.com//CaseDetails?caseId=11175439&caseIdEnc=yQcgGUbYuyeeKBD8QKVWYtLiAlxEfwMv2D95speVKK%2FL2%2Bs1WNIZH4lqqAKG6%2FG0d0sb4jpJPsSYab5jHz5BqouYwo7T82lEgpVIC6UXk3Y%3D",
+        "dob": "06/24/1991",
+        "judge_name": "95 Hearing Officer",
+        "status": "Closed",
+        "type": "Civil Traffic Infraction"
+    },
+    {
+        "case_detail": {
+            "Bonds": [],
+            "Case Type": "Civil Traffic Infraction",
+            "Charge Details": [
+                {
+                    "Arrest": "",
+                    "Charge": "1. TR-UNLAWFUL SPEED (SPEEDS REQUIRED)\n Statute: 316.189 No Degree - Infraction",
+                    "Disposition": "8/10/2019  Pay Civil Penalty Guilty",
+                    "Offense Date": "7/8/2019",
+                    "Plea": "8/10/2019  No Plea Entered",
+                    "Sentence": ""
+                }
+            ],
+            "Citation Number": "AC9ATHE",
+            "Compliance Date": "Thursday, August 8, 2019",
+            "Date Filed": "7/10/2019",
+            "Docket Events": [
+                {
+                    "Date": "8/13/2019",
+                    "Description": "Suspension Satisfied Failure To Pay",
+                    "Doc": "",
+                    "Pages": "",
+                    "Request Doc": ""
+                },
+                {
+                    "Date": "8/10/2019",
+                    "Description": "Disposition",
+                    "Doc": "",
+                    "Pages": "",
+                    "Request Doc": ""
+                },
+                {
+                    "Date": "8/10/2019",
+                    "Description": "Elected to Pay Civil Penalty",
+                    "Doc": "",
+                    "Pages": "",
+                    "Request Doc": ""
+                },
+                {
+                    "Date": "7/10/2019",
+                    "Description": "Payable Infraction Filed\n66074978",
+                    "Doc": "66074978\n\nDocument Icon",
+                    "Pages": "1",
+                    "Request Doc": ""
+                }
+            ],
+            "Financial": [
+                {
+                    "Amount": "129.00",
+                    "Date": "7/10/2019",
+                    "Description": "Transaction Assessment",
+                    "Player": ""
+                },
+                {
+                    "Amount": "-129.00",
+                    "Date": "8/10/2019",
+                    "Description": "Payment",
+                    "Player": "SMITH, ADAM MATTHEW"
+                }
+            ],
+            "Hearings": [],
+            "Judge": "95 Hearing Officer",
+            "Location": "Ocoee - TR",
+            "Parties": [
+                {
+                    "Attorney": "",
+                    "Atty Phone": "",
+                    "DOB": "6/24/1991",
+                    "Name": "ADAM MATTHEW SMITH",
+                    "Type": "Defendant"
+                },
+                {
+                    "Attorney": "",
+                    "Atty Phone": "",
+                    "DOB": "",
+                    "Name": "STATE OF FLORIDA",
+                    "Type": "Plaintiff"
+                }
+            ],
+            "Status": "Closed",
+            "UCN": "482019TR022856000AWX",
+            "Warrants": []
+        },
+        "case_number": "2019-TR-022856-A-W",
+        "date": "07/10/2019",
+        "description": "STATE OF FLORIDA vs. SMITH, ADAM MATTHEW",
+        "detail_url": "https://myeclerk.myorangeclerk.com//CaseDetails?caseId=11048063&caseIdEnc=BgmxPM4kzfkeFHJKgZdogRpcCgaRvw3QojhLkkF532fR01YCLKwX8SPtDcjToNCN6K96VpMB6L4JsPfb1%2BKF%2Bp5VICrrbShdopoVKOcySgs%3D",
+        "dob": "06/24/1991",
+        "judge_name": "95 Hearing Officer",
+        "status": "Closed",
+        "type": "Civil Traffic Infraction"
+    },
+    {
+        "case_detail": {
+            "Bonds": [],
+            "Case Type": "Civil Traffic Infraction",
+            "Charge Details": [
+                {
+                    "Arrest": "",
+                    "Charge": "1. TR-DL NOT CARRIED OR EXHIBITED ON DEMAND\n Statute: 322.15(1) No Degree - Infraction",
+                    "Disposition": "2/25/2019  Dismissed",
+                    "Offense Date": "1/26/2019",
+                    "Plea": "2/25/2019  No Plea Entered",
+                    "Sentence": ""
+                }
+            ],
+            "Citation Number": "A9EVOGE",
+            "Compliance Date": "Tuesday, February 26, 2019",
+            "Date Filed": "1/29/2019",
+            "Docket Events": [
+                {
+                    "Date": "2/25/2019",
+                    "Description": "Disposition",
+                    "Doc": "",
+                    "Pages": "",
+                    "Request Doc": ""
+                },
+                {
+                    "Date": "2/25/2019",
+                    "Description": "Defendant Did Produce a Valid Driver's License\n \nComments: ISSUED 11/26/13",
+                    "Doc": "",
+                    "Pages": "",
+                    "Request Doc": ""
+                },
+                {
+                    "Date": "2/25/2019",
+                    "Description": "Paid Dismissal Fee/Must Still Provide Valid Item",
+                    "Doc": "",
+                    "Pages": "",
+                    "Request Doc": ""
+                },
+                {
+                    "Date": "1/29/2019",
+                    "Description": "Payable Infraction Filed\n63819715",
+                    "Doc": "63819715\n\nDocument Icon",
+                    "Pages": "1",
+                    "Request Doc": ""
+                }
+            ],
+            "Financial": [
+                {
+                    "Amount": "114.00",
+                    "Date": "1/29/2019",
+                    "Description": "Transaction Assessment",
+                    "Player": ""
+                },
+                {
+                    "Amount": "-114.00",
+                    "Date": "2/25/2019",
+                    "Description": "Transaction Assessment",
+                    "Player": ""
+                },
+                {
+                    "Amount": "10.00",
+                    "Date": "2/25/2019",
+                    "Description": "Transaction Assessment",
+                    "Player": ""
+                },
+                {
+                    "Amount": "3.50",
+                    "Date": "2/25/2019",
+                    "Description": "Transaction Assessment",
+                    "Player": ""
+                },
+                {
+                    "Amount": "-13.50",
+                    "Date": "2/25/2019",
+                    "Description": "Payment",
+                    "Player": "SMITH, ADAM MATTHEW"
+                }
+            ],
+            "Hearings": [],
+            "Judge": "95 Hearing Officer",
+            "Location": "Ocoee - TR",
+            "Parties": [
+                {
+                    "Attorney": "",
+                    "Atty Phone": "",
+                    "DOB": "6/24/1991",
+                    "Name": "ADAM MATTHEW SMITH",
+                    "Type": "Defendant"
+                },
+                {
+                    "Attorney": "",
+                    "Atty Phone": "",
+                    "DOB": "",
+                    "Name": "STATE OF FLORIDA",
+                    "Type": "Plaintiff"
+                }
+            ],
+            "Status": "Closed",
+            "UCN": "482019TR002821000AWX",
+            "Warrants": []
+        },
+        "case_number": "2019-TR-002821-A-W",
+        "date": "01/29/2019",
+        "description": "STATE OF FLORIDA vs. SMITH, ADAM MATTHEW",
+        "detail_url": "https://myeclerk.myorangeclerk.com//CaseDetails?caseId=10855018&caseIdEnc=R%2FXWdM35%2BdJKkRbEi%2BCH7jeuPj393gO0Z7ljIf4NhOmyenBrDwxVPx1Jmdb4dphxUmDzyAvvbIF0%2Bm2EBlCD3E4EPEvl9p5NKFZPXF5FdHw%3D",
+        "dob": "06/24/1991",
+        "judge_name": "95 Hearing Officer",
+        "status": "Closed",
+        "type": "Civil Traffic Infraction"
+    },
+    {
+        "case_detail": {
+            "Bonds": [],
+            "Case Type": "Civil Traffic Infraction",
+            "Charge Details": [
+                {
+                    "Arrest": "",
+                    "Charge": "1. TR- UNLAWFUL SPEED\n Statute: 316.189(1) No Degree - Infraction",
+                    "Disposition": "5/15/2017  Pay Civil Penalty Guilty",
+                    "Offense Date": "4/14/2017",
+                    "Plea": "5/15/2017  No Plea Entered",
+                    "Sentence": ""
+                }
+            ],
+            "Citation Number": "A6JP0GE",
+            "Compliance Date": "Monday, May 15, 2017",
+            "Date Filed": "4/24/2017",
+            "Docket Events": [
+                {
+                    "Date": "5/15/2017",
+                    "Description": "Disposition",
+                    "Doc": "",
+                    "Pages": "",
+                    "Request Doc": ""
+                },
+                {
+                    "Date": "5/15/2017",
+                    "Description": "Elected to Pay Civil Penalty",
+                    "Doc": "",
+                    "Pages": "",
+                    "Request Doc": ""
+                },
+                {
+                    "Date": "4/24/2017",
+                    "Description": "Payable Infraction Filed\n55573098",
+                    "Doc": "55573098\n\nDocument Icon",
+                    "Pages": "1",
+                    "Request Doc": ""
+                }
+            ],
+            "Financial": [
+                {
+                    "Amount": "129.00",
+                    "Date": "5/1/2017",
+                    "Description": "Transaction Assessment",
+                    "Player": ""
+                },
+                {
+                    "Amount": "-129.00",
+                    "Date": "5/15/2017",
+                    "Description": "Payment",
+                    "Player": "SMITH, ADAM MATTHEW"
+                }
+            ],
+            "Hearings": [],
+            "Judge": "98 Hearing Officer",
+            "Location": "Orlando - TR",
+            "Parties": [
+                {
+                    "Attorney": "",
+                    "Atty Phone": "",
+                    "DOB": "",
+                    "Name": "STATE OF FLORIDA",
+                    "Type": "Plaintiff"
+                },
+                {
+                    "Attorney": "",
+                    "Atty Phone": "",
+                    "DOB": "6/24/1991",
+                    "Name": "ADAM MATTHEW SMITH",
+                    "Type": "Defendant"
+                }
+            ],
+            "Status": "Closed",
+            "UCN": "482017TR049237000AOX",
+            "Warrants": []
+        },
+        "case_number": "2017-TR-049237-A-O",
+        "date": "04/24/2017",
+        "description": "STATE OF FLORIDA vs. SMITH, ADAM MATTHEW",
+        "detail_url": "https://myeclerk.myorangeclerk.com//CaseDetails?caseId=10126716&caseIdEnc=EVh1bSCt1hmHZ46JW38tG3ig8xUEJ%2Fnir7P080yMBvDbX0gS982I5QMJEjbV1eZIEtb5EepN%2FytWLdkeVxUuBLMFGIVipEy4SKYwdyhDbkY%3D",
+        "dob": "06/24/1991",
+        "judge_name": "98 Hearing Officer",
+        "status": "Closed",
+        "type": "Civil Traffic Infraction"
+    }
+]

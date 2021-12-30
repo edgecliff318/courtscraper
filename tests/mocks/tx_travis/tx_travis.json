@@ -1,0 +1,326 @@
+[
+    {
+        "case_detail": {
+            "case_number": "D-1-DC-15-200088",
+            "case_status": "DISCHARGED PROB",
+            "case_style": "STATE VS. WASHINGTON,JOHN",
+            "events": [
+                {
+                    "description": "DISCHARGED FROM PROBATION",
+                    "event_date": "1/8/2020",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "ORD: AMENDING CONDITIONS CSCD",
+                    "event_date": "7/10/2019",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "ORD: AMENDING CONDITIONS CSCD",
+                    "event_date": "2/8/2019",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "JAIL COMMITMENT RTRND EXECUTED",
+                    "event_date": "11/5/2018",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "REGULAR JAIL COMMITMENT",
+                    "event_date": "10/17/2018",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "FEE SHEET",
+                    "event_date": "10/17/2018",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "CONTINUED ON PROBATION",
+                    "event_date": "10/17/2018",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "ORD: AMENDING CONDITIONS CSCD",
+                    "event_date": "10/17/2018",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "INDIGENCE FORM",
+                    "event_date": "10/4/2018",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "INDIGENCE FORM",
+                    "event_date": "10/4/2018",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "INDIGENCE FORM",
+                    "event_date": "9/29/2018",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "WARRANT RETURNED EXECUTED",
+                    "event_date": "9/26/2018",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "MTRP WITH WARRANT",
+                    "event_date": "9/19/2018",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "ORD: RELEASE INTERLOCK DEVICE",
+                    "event_date": "8/18/2017",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "JAIL COMMITMENT RTRND EXECUTED",
+                    "event_date": "7/10/2016",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "REGULAR JAIL COMMITMENT",
+                    "event_date": "7/1/2016",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "FEE SHEET",
+                    "event_date": "2/17/2016",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "DOCKET SHEET",
+                    "event_date": "2/17/2016",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "PROBATION",
+                    "event_date": "2/17/2016",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "CONDITIONS OF COMM SUPERVISION",
+                    "event_date": "2/17/2016",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "TRIAL CRT CERT DEF RIGHT APPL",
+                    "event_date": "2/17/2016",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "DISCOVERY COMPLIANCE STATEMENT",
+                    "event_date": "1/11/2016",
+                    "party_type": "P"
+                },
+                {
+                    "description": "NEGOTIATED PLEA",
+                    "event_date": "1/11/2016",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "REFERRAL TO MAGISTRATE",
+                    "event_date": "1/11/2016",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "RESET DOCUMENT",
+                    "event_date": "11/23/2015",
+                    "party_type": ""
+                },
+                {
+                    "description": "RESET DOCUMENT",
+                    "event_date": "10/19/2015",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "INDICTMENT   390TH GRAND JURY",
+                    "event_date": "4/28/2015",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "ALCOHOL MONITOR INSTALL",
+                    "event_date": "2/5/2015",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "INDIGENCE FORM",
+                    "event_date": "1/16/2015",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "PERSONAL BOND",
+                    "event_date": "1/6/2015",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "MAGIS ORDER FOR INTERLOCK DVC",
+                    "event_date": "1/5/2015",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "ORDER OF COMMITMENT",
+                    "event_date": "1/5/2015",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "AFFIDAVIT OF WARRANT OF ARREST",
+                    "event_date": "1/5/2015",
+                    "party_type": "DF"
+                }
+            ],
+            "filed_date": "1/7/2015",
+            "hearing_date": "--",
+            "parties": [
+                {
+                    "attorney": "RITZ SANDRA CASTRO",
+                    "first_name": "JOHN",
+                    "full/business_name": "",
+                    "last_name": "WASHINGTON",
+                    "middle_name": "",
+                    "type": "DEFENDANT"
+                },
+                {
+                    "attorney": "",
+                    "first_name": "",
+                    "full/business_name": "STATE OF TEXAS",
+                    "last_name": "",
+                    "middle_name": "",
+                    "type": "PLAINTIFF"
+                }
+            ]
+        },
+        "case_number": "D-1-DC-15-200088",
+        "case_status": "DISCHARGED PROB",
+        "case_url": "/OnlineCaseInformationWeb/Default/CaseDetails?caseNumber=463983",
+        "file_date": "1/7/2015",
+        "first_name": "JOHN",
+        "full/business_name": "",
+        "last_name": "WASHINGTON",
+        "middle_name": ""
+    },
+    {
+        "case_detail": {
+            "case_number": "D-1-DC-10-300852",
+            "case_status": "TCJ SENTENCE",
+            "case_style": "STATE VS.WASHINGTON,JOHN",
+            "events": [
+                {
+                    "description": "CONVERTED ELECTRONIC RECORD",
+                    "event_date": "6/27/2012",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "REQ PYMNT SRVCS CRT APPT ATTY",
+                    "event_date": "7/28/2010",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "JAIL COMMITMENT RTRND EXECUTED",
+                    "event_date": "7/25/2010",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "REGULAR JAIL COMMITMENT",
+                    "event_date": "7/13/2010",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "DOCKET SHEET",
+                    "event_date": "7/13/2010",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "TCJ SENTENCE",
+                    "event_date": "7/13/2010",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "TRIAL CRT CERT DEF RIGHT APPL",
+                    "event_date": "7/13/2010",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "NEGOTIATED PLEA",
+                    "event_date": "7/13/2010",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "NOTICE OF INDICTMENT LISTING",
+                    "event_date": "5/20/2010",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "NOTICE OF INDICTMENT",
+                    "event_date": "5/19/2010",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "INDICTMENT   390TH GRAND JURY",
+                    "event_date": "5/18/2010",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "INDIGENCE FORM",
+                    "event_date": "5/10/2010",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "LETTER FROM APD / INVOICE",
+                    "event_date": "5/6/2010",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "WARRANT RETURNED EXECUTED",
+                    "event_date": "5/4/2010",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "ORDER OF COMMITMENT",
+                    "event_date": "4/30/2010",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "AFFIDAVIT OF WARRANT OF ARREST",
+                    "event_date": "4/29/2010",
+                    "party_type": "DF"
+                },
+                {
+                    "description": "MUNICIPAL WARRANT",
+                    "event_date": "4/29/2010",
+                    "party_type": "DF"
+                }
+            ],
+            "filed_date": "4/30/2010",
+            "hearing_date": "--",
+            "parties": [
+                {   
+                    "attorney": "WEBER STEVEN THOMAS",
+                    "first_name": "JOHN",
+                    "full/business_name": "",
+                    "last_name": "WASHINGTON",
+                    "middle_name": "",
+                    "type": "DEFENDANT"
+                },
+                {
+                    "attorney": "",
+                    "first_name": "",
+                    "full/business_name": "STATE OF TEXAS",
+                    "last_name": "",
+                    "middle_name": "",
+                    "type": "PLAINTIFF"
+                }
+            ]
+        },
+        "case_number": "D-1-DC-10-300852",
+        "case_status": "TCJ SENTENCE",
+        "case_url": "/OnlineCaseInformationWeb/Default/CaseDetails?caseNumber=320657",
+        "file_date": "4/30/2010",
+        "first_name": "JOHN",
+        "full/business_name": "",
+        "last_name": "WASHINGTON",
+        "middle_name": ""
+    }
+]

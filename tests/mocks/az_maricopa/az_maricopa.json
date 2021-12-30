@@ -1,0 +1,989 @@
+[
+    {
+        "aka": "",
+        "case_detail": {
+            "case_type": "Criminal",
+            "casecalendarevents": [],
+            "casedocuments": [
+                {
+                    "description": "022 - ME: Order Signed - Party (A)",
+                    "docketdate": "10/22/2012",
+                    "filingdate": "10/22/2012",
+                    "filingparty": ""
+                },
+                {
+                    "description": "ORD - Order - Party (A)",
+                    "docketdate": "10/25/2012",
+                    "filingdate": "10/17/2012",
+                    "filingparty": "",
+                    "note": "NOTE: TO DESIGNATE CLASS 6 UNDESIGNATED FELONY A MISDEMEANOR"
+                },
+                {
+                    "description": "ORD - Order - Party (A)",
+                    "docketdate": "11/8/2012",
+                    "filingdate": "10/17/2012",
+                    "filingparty": "",
+                    "note": "NOTE: FOR PROTECTED ADDRESS"
+                },
+                {
+                    "description": "PPM - Pro Per Motion/Notice/Mail - Party (A)",
+                    "docketdate": "10/1/2012",
+                    "filingdate": "9/26/2012",
+                    "filingparty": "Defendant (2)",
+                    "note": "NOTE: APPLICATION TO DESIGNATE A CLASS 6 UNDESIGNATED FELONY AS A MISDEMEANOR"
+                },
+                {
+                    "description": "PPM - Pro Per Motion/Notice/Mail - Party (A)",
+                    "docketdate": "10/4/2012",
+                    "filingdate": "9/26/2012",
+                    "filingparty": "Defendant (2)",
+                    "note": "NOTE: REQUEST FOR PROTECTED ADDRESS"
+                },
+                {
+                    "description": "SJU - Satisfaction Of Judgment - Party (A)",
+                    "docketdate": "2/22/2008",
+                    "filingdate": "2/21/2008",
+                    "filingparty": ""
+                },
+                {
+                    "description": "UPI - Updated Information Address and/or Name - Party (A)",
+                    "docketdate": "3/28/2007",
+                    "filingdate": "3/27/2007",
+                    "filingparty": "Defendant (2)"
+                },
+                {
+                    "description": "023 - ME: Order Entered By Court - Party (A)",
+                    "docketdate": "3/26/2007",
+                    "filingdate": "3/26/2007",
+                    "filingparty": ""
+                },
+                {
+                    "description": "RES - Response - Party (A)",
+                    "docketdate": "3/8/2007",
+                    "filingdate": "3/2/2007",
+                    "filingparty": "",
+                    "note": "NOTE: TO DEFENDANTS PETITION FOR TIME SERVED FILED ON 2-9-07"
+                },
+                {
+                    "description": "PTT - Petition - Party (A)",
+                    "docketdate": "2/14/2007",
+                    "filingdate": "2/9/2007",
+                    "filingparty": "Defendant (2)",
+                    "note": "NOTE: FOR TIME SERVED"
+                },
+                {
+                    "description": "LET - Letter - Party (A)",
+                    "docketdate": "9/17/2003",
+                    "filingdate": "9/15/2003",
+                    "filingparty": "",
+                    "note": "NOTE: RE: RESTITUTION"
+                },
+                {
+                    "description": "LET - Letter - Party (A)",
+                    "docketdate": "5/30/2003",
+                    "filingdate": "5/28/2003",
+                    "filingparty": ""
+                },
+                {
+                    "description": "022 - ME: Order Signed - Party (A)",
+                    "docketdate": "3/10/2003",
+                    "filingdate": "3/10/2003",
+                    "filingparty": ""
+                },
+                {
+                    "description": "CRR - Criminal Restitution Order - Party (A)",
+                    "docketdate": "3/21/2003",
+                    "filingdate": "3/5/2003",
+                    "filingparty": ""
+                },
+                {
+                    "description": "ODP - Order of Discharge of Probation - Party (A)",
+                    "docketdate": "3/26/2003",
+                    "filingdate": "3/5/2003",
+                    "filingparty": "",
+                    "note": "NOTE: OFFENSE TO REMAIN UNDESIGNATED"
+                },
+                {
+                    "description": "RES - Response - Party (A)",
+                    "docketdate": "3/8/2003",
+                    "filingdate": "2/27/2003",
+                    "filingparty": "",
+                    "note": "NOTE: TO PETITION FOR EARLY TERMINATION OF PROBATION"
+                },
+                {
+                    "description": "PTP - Petition Early Termination Probation Order - Party (A)",
+                    "docketdate": "2/28/2003",
+                    "filingdate": "2/19/2003",
+                    "filingparty": ""
+                },
+                {
+                    "description": "DRS - Disposition Report Supplemental - Party (A)",
+                    "docketdate": "9/27/2002",
+                    "filingdate": "9/17/2002",
+                    "filingparty": ""
+                },
+                {
+                    "description": "PMP - Petition to Modify Condition of Probation/Order - Party (A)",
+                    "docketdate": "10/9/2002",
+                    "filingdate": "9/5/2002",
+                    "filingparty": ""
+                },
+                {
+                    "description": "PMP - Petition to Modify Condition of Probation/Order - Party (A)",
+                    "docketdate": "10/15/2002",
+                    "filingdate": "9/5/2002",
+                    "filingparty": ""
+                },
+                {
+                    "description": "DRE - Disposition Report - Party (A)",
+                    "docketdate": "10/8/1999",
+                    "filingdate": "10/4/1999",
+                    "filingparty": ""
+                },
+                {
+                    "description": "102 - ME: Waiver Prelim Hrg/Plea - Party (A)",
+                    "docketdate": "9/23/1999",
+                    "filingdate": "9/23/1999",
+                    "filingparty": ""
+                },
+                {
+                    "description": "109 - ME: Sentence - Probation - Party (A)",
+                    "docketdate": "9/23/1999",
+                    "filingdate": "9/23/1999",
+                    "filingparty": ""
+                },
+                {
+                    "description": "INF - Information - Party (A)",
+                    "docketdate": "9/28/1999",
+                    "filingdate": "9/21/1999",
+                    "filingparty": "Plaintiff (1)",
+                    "note": "NOTE: CTS 1-4: UNLAWFUL USE OF FOOD STAMPS CL 6 FELONIES; CT 5: FRAUDULENT SCHEMES AND PRACTICES CL 5 FELONY; CT 6: THEFT CL 3 FELONY"
+                },
+                {
+                    "description": "STA - Statement - Party (A)",
+                    "docketdate": "9/28/1999",
+                    "filingdate": "9/21/1999",
+                    "filingparty": "",
+                    "note": "NOTE: DEF FINANCIAL"
+                },
+                {
+                    "description": "JOR - Judgment And Order - Party (A)",
+                    "docketdate": "9/17/1999 12:30:00 PM",
+                    "filingdate": "9/17/1999 12:30:00 PM",
+                    "filingparty": "",
+                    "note": "NOTE: This docket was added by the conversion for a judgment"
+                },
+                {
+                    "description": "NRR - Notice Of Rights - Party (A)",
+                    "docketdate": "9/28/1999",
+                    "filingdate": "9/17/1999",
+                    "filingparty": "",
+                    "note": "NOTE: OF RIGHT TO APPEAL"
+                },
+                {
+                    "description": "WWP - Waiver With a Plea - Party (A)",
+                    "docketdate": "9/28/1999",
+                    "filingdate": "9/17/1999",
+                    "filingparty": ""
+                },
+                {
+                    "description": "SUM - Summons - Party (A)",
+                    "docketdate": "8/3/1999",
+                    "filingdate": "8/3/1999",
+                    "filingparty": "Plaintiff (1)",
+                    "note": "NOTE: SERVED CERT MAIL 07/26/99"
+                },
+                {
+                    "description": "DCO - Direct Complaint - Party (A)",
+                    "docketdate": "7/22/1999",
+                    "filingdate": "7/20/1999",
+                    "filingparty": "Plaintiff (1)",
+                    "note": "NOTE: CT 1: FOODSTAMP FRAUD CL 6 FEL; CT 2: FOODSTAMP FRAUD CL 6 FEL; CT 3: FOODSTAMP FRAUD CL 6 FEL; CT 4: FOODSTAMP FRAUD CL 6 FEL; CT 5: FRAUD SCHEME/PRACTCS - CONCEAL CL 5 FEL"
+                },
+                {
+                    "description": "DCO - Direct Complaint - Party (A)",
+                    "docketdate": "7/22/1999",
+                    "filingdate": "7/20/1999",
+                    "filingparty": "Plaintiff (1)",
+                    "note": "NOTE: CT 6: THEFT-OBTAIN BY MISREPRESENTAT CL 3 FEL; DOC: ON 11/01/1997"
+                },
+                {
+                    "description": "DWL - Defendant/Witness List - Party (A)",
+                    "docketdate": "7/23/1999",
+                    "filingdate": "7/20/1999",
+                    "filingparty": ""
+                }
+            ],
+            "dispositions": [
+                {
+                    "arscode": "13-1802A3 (F3)",
+                    "crimedate": "11/1/1997",
+                    "date": "9/17/1999",
+                    "description": "THEFT-OBTAIN BY MISREPRESENT",
+                    "disposition": "Dismissed Due To Plea On Other Count",
+                    "dispositioncode": "Dismissed - Plea Other",
+                    "partyname": "Christina Marie Banks"
+                },
+                {
+                    "arscode": "13-2311 (F5)",
+                    "crimedate": "11/1/1997",
+                    "date": "9/17/1999",
+                    "description": "FRAUD SCHEME/PRACTICE-CONCEAL",
+                    "disposition": "Dismissed Due To Plea On Other Count",
+                    "dispositioncode": "Dismissed - Plea Other",
+                    "partyname": "Christina Marie Banks"
+                },
+                {
+                    "arscode": "13-3701A (M)",
+                    "crimedate": "7/1/1998",
+                    "date": "9/17/1999",
+                    "description": "UNLAWFUL USE OF FOOD STAMPS",
+                    "disposition": "Pled Guilty As Charged",
+                    "dispositioncode": "Pled Guilty As Charged",
+                    "partyname": "Christina Marie Banks"
+                },
+                {
+                    "arscode": "13-3701A (F6)",
+                    "crimedate": "4/1/1998",
+                    "date": "9/17/1999",
+                    "description": "UNLAWFUL USE OF FOOD STAMPS",
+                    "disposition": "Dismissed Due To Plea On Other Count",
+                    "dispositioncode": "Dismissed - Plea Other",
+                    "partyname": "Christina Marie Banks"
+                },
+                {
+                    "arscode": "13-3701A (F6)",
+                    "crimedate": "1/1/1998",
+                    "date": "9/17/1999",
+                    "description": "UNLAWFUL USE OF FOOD STAMPS",
+                    "disposition": "Dismissed Due To Plea On Other Count",
+                    "dispositioncode": "Dismissed - Plea Other",
+                    "partyname": "Christina Marie Banks"
+                },
+                {
+                    "arscode": "13-3701A (F6)",
+                    "crimedate": "11/1/1997",
+                    "date": "9/17/1999",
+                    "description": "UNLAWFUL USE OF FOOD STAMPS",
+                    "disposition": "Dismissed Due To Plea On Other Count",
+                    "dispositioncode": "Dismissed - Plea Other",
+                    "partyname": "Christina Marie Banks"
+                }
+            ],
+            "location": "Downtown",
+            "parties": [
+                {
+                    "attorney": "General, Attorney",
+                    "judge": "",
+                    "partyname": "State Of Arizona - (1)",
+                    "relationship": "Plaintiff",
+                    "sex": "N/A"
+                },
+                {
+                    "attorney": "Breidenbach-Moore, Marguerite",
+                    "judge": "Z Unassigned",
+                    "partyname": "Christina Marie Banks - (2)",
+                    "relationship": "Defendant",
+                    "sex": "F"
+                },
+                {
+                    "attorney": "To Be Determined",
+                    "judge": "",
+                    "partyname": "Clerk Of The Court - (3)",
+                    "relationship": "In The Matter Of (IMO)",
+                    "sex": "N/A"
+                }
+            ],
+            "url": "http://www.superiorcourt.maricopa.gov/docket/CriminalCourtCases/caseInfo.asp?caseNumber=CR1999-009997"
+        },
+        "case_number": "CR1999-009997",
+        "case_url": "http://www.superiorcourt.maricopa.gov/docket/CriminalCourtCases/caseInfo.asp?caseNumber=CR1999-009997",
+        "dob": "10/22/1978",
+        "party_name": "Banks, Christina"
+    },
+    {
+        "aka": "CHRISTINA MARIE BANKS",
+        "case_detail": {
+            "case_type": "Criminal",
+            "casecalendarevents": [
+                {
+                    "date": "7/3/2006",
+                    "event": "Preliminary Hearing",
+                    "time": "8:30"
+                },
+                {
+                    "date": "7/12/2006",
+                    "event": "Original Arraignment Hearing",
+                    "time": "8:30"
+                },
+                {
+                    "date": "8/17/2006",
+                    "event": "Initial Pretrial Conference",
+                    "time": "10:00"
+                },
+                {
+                    "date": "8/30/2006",
+                    "event": "Settlement Conference",
+                    "time": "13:30"
+                },
+                {
+                    "date": "9/15/2006",
+                    "event": "Status Conference",
+                    "time": "8:15"
+                },
+                {
+                    "date": "9/20/2006",
+                    "event": "Settlement Conference",
+                    "time": "13:30"
+                },
+                {
+                    "date": "10/16/2006",
+                    "event": "Status Conference",
+                    "time": "8:30"
+                },
+                {
+                    "date": "11/2/2006",
+                    "event": "Status Conference",
+                    "time": "8:30"
+                },
+                {
+                    "date": "11/2/2006",
+                    "event": "Trial Management Conference",
+                    "time": "8:30"
+                },
+                {
+                    "date": "11/8/2006",
+                    "event": "Hearing Pending Motion",
+                    "time": "8:00"
+                },
+                {
+                    "date": "11/8/2006",
+                    "event": "Trial",
+                    "time": "9:30"
+                },
+                {
+                    "date": "11/14/2006",
+                    "event": "Trial",
+                    "time": "8:30"
+                },
+                {
+                    "date": "1/24/2007",
+                    "event": "Trial Management Conference",
+                    "time": "8:30"
+                },
+                {
+                    "date": "1/31/2007",
+                    "event": "Trial",
+                    "time": "10:30"
+                },
+                {
+                    "date": "2/1/2007",
+                    "event": "Trial",
+                    "time": "10:30"
+                },
+                {
+                    "date": "2/5/2007",
+                    "event": "Trial",
+                    "time": "10:30"
+                }
+            ],
+            "casedocuments": [
+                {
+                    "description": "ORE - Order To Release/Exonerate Bond - Party (001)",
+                    "docketdate": "6/27/2007",
+                    "filingdate": "6/20/2007",
+                    "filingparty": ""
+                },
+                {
+                    "description": "TSP - Transcript of Proceedings - Party (001)",
+                    "docketdate": "5/3/2007",
+                    "filingdate": "4/24/2007",
+                    "filingparty": "",
+                    "note": "NOTE: 02/01/07 BY LORRAINE CHALKEY,RPR"
+                },
+                {
+                    "description": "TSP - Transcript of Proceedings - Party (001)",
+                    "docketdate": "5/3/2007",
+                    "filingdate": "4/19/2007",
+                    "filingparty": "",
+                    "note": "NOTE: 02/05/07 BY LORRAINE CHALKEY, RPR"
+                },
+                {
+                    "description": "TSP - Transcript of Proceedings - Party (001)",
+                    "docketdate": "5/3/2007",
+                    "filingdate": "4/19/2007",
+                    "filingparty": "",
+                    "note": "NOTE: 02/01/07 BY LORRAINE CHALKEY, RPR"
+                },
+                {
+                    "description": "TSP - Transcript of Proceedings - Party (001)",
+                    "docketdate": "5/3/2007",
+                    "filingdate": "4/19/2007",
+                    "filingparty": "",
+                    "note": "NOTE: 02/05/07 BY LORRAINE CHALKEY, RPR"
+                },
+                {
+                    "description": "DRE - Disposition Report - Party (001)",
+                    "docketdate": "2/21/2007",
+                    "filingdate": "2/15/2007",
+                    "filingparty": ""
+                },
+                {
+                    "description": "012 - ME: Trial - Party (001)",
+                    "docketdate": "2/12/2007",
+                    "filingdate": "2/12/2007",
+                    "filingparty": ""
+                },
+                {
+                    "description": "012 - ME: Trial - Party (001)",
+                    "docketdate": "2/12/2007",
+                    "filingdate": "2/12/2007",
+                    "filingparty": ""
+                },
+                {
+                    "description": "NRD - Notice Of Release Of Deposit - Party (001)",
+                    "docketdate": "2/20/2007",
+                    "filingdate": "2/8/2007",
+                    "filingparty": "",
+                    "note": "NOTE: $5400 PAID TO APRIL BAUMGARDNER (MAILED)"
+                },
+                {
+                    "description": "ORE - Order To Release/Exonerate Bond - Party (001)",
+                    "docketdate": "2/18/2007",
+                    "filingdate": "2/7/2007",
+                    "filingparty": ""
+                },
+                {
+                    "description": "021 - ME: Nunc Pro Tunc Order - Party (001)",
+                    "docketdate": "2/6/2007",
+                    "filingdate": "2/6/2007",
+                    "filingparty": ""
+                },
+                {
+                    "description": "005 - ME: Hearing - Party (001)",
+                    "docketdate": "2/6/2007",
+                    "filingdate": "2/6/2007",
+                    "filingparty": ""
+                },
+                {
+                    "description": "WSH - Worksheet - Party (001)",
+                    "docketdate": "2/12/2007",
+                    "filingdate": "2/5/2007",
+                    "filingparty": "",
+                    "note": "NOTE: TRIAL"
+                },
+                {
+                    "description": "JIN - Jury Instructions - Party (001)",
+                    "docketdate": "2/12/2007",
+                    "filingdate": "2/5/2007",
+                    "filingparty": "",
+                    "note": "NOTE: FINAL"
+                },
+                {
+                    "description": "EXW - Exhibits Work Sheet - Party (001)",
+                    "docketdate": "2/15/2007",
+                    "filingdate": "2/5/2007",
+                    "filingparty": ""
+                },
+                {
+                    "description": "VER - Verdict - Party (001)",
+                    "docketdate": "2/12/2007",
+                    "filingdate": "2/5/2007",
+                    "filingparty": "",
+                    "note": "NOTE: SIGNED"
+                },
+                {
+                    "description": "JIN - Jury Instructions - Party (001)",
+                    "docketdate": "2/12/2007",
+                    "filingdate": "2/1/2007",
+                    "filingparty": "",
+                    "note": "NOTE: PRELIMINARY"
+                },
+                {
+                    "description": "JUL - Jury List - Restricted if Filed after 1/1/2008 - Party (001)",
+                    "docketdate": "2/12/2007",
+                    "filingdate": "1/31/2007",
+                    "filingparty": ""
+                },
+                {
+                    "description": "085 - ME: Conference - Party (001)",
+                    "docketdate": "1/29/2007",
+                    "filingdate": "1/29/2007",
+                    "filingparty": ""
+                },
+                {
+                    "description": "RJI - Request for Jury Instructions - Party (001)",
+                    "docketdate": "2/1/2007",
+                    "filingdate": "1/24/2007",
+                    "filingparty": ""
+                },
+                {
+                    "description": "REQ - Request - Party (001)",
+                    "docketdate": "2/1/2007",
+                    "filingdate": "1/24/2007",
+                    "filingparty": "",
+                    "note": "NOTE: VOIR DIRE"
+                },
+                {
+                    "description": "STA - Statement - Party (001)",
+                    "docketdate": "2/2/2007",
+                    "filingdate": "1/24/2007",
+                    "filingparty": "",
+                    "note": "NOTE: JOINT PRE-TRIAL/"
+                },
+                {
+                    "description": "NDC - Notice Of Deposit With Court - Party (001)",
+                    "docketdate": "2/6/2007",
+                    "filingdate": "1/23/2007",
+                    "filingparty": "",
+                    "note": "NOTE: AND CASH BOND RECEPT;$5400"
+                },
+                {
+                    "description": "SUA - Subpoena And Affidavit Of Service - Party (001)",
+                    "docketdate": "1/24/2007",
+                    "filingdate": "1/22/2007",
+                    "filingparty": "",
+                    "note": "NOTE: SERVED 1-19-07"
+                },
+                {
+                    "description": "SUA - Subpoena And Affidavit Of Service - Party (001)",
+                    "docketdate": "1/22/2007",
+                    "filingdate": "1/18/2007",
+                    "filingparty": "",
+                    "note": "NOTE: SERVED 1-18-07"
+                },
+                {
+                    "description": "SUA - Subpoena And Affidavit Of Service - Party (001)",
+                    "docketdate": "1/22/2007",
+                    "filingdate": "1/18/2007",
+                    "filingparty": "",
+                    "note": "NOTE: SERVED 1-18-07"
+                },
+                {
+                    "description": "SUA - Subpoena And Affidavit Of Service - Party (001)",
+                    "docketdate": "1/22/2007",
+                    "filingdate": "1/18/2007",
+                    "filingparty": "",
+                    "note": "NOTE: SERVED 1-18-07"
+                },
+                {
+                    "description": "SUA - Subpoena And Affidavit Of Service - Party (001)",
+                    "docketdate": "1/22/2007",
+                    "filingdate": "1/18/2007",
+                    "filingparty": "",
+                    "note": "NOTE: SERVED 1-18-07"
+                },
+                {
+                    "description": "SUA - Subpoena And Affidavit Of Service - Party (001)",
+                    "docketdate": "1/22/2007",
+                    "filingdate": "1/18/2007",
+                    "filingparty": "",
+                    "note": "NOTE: SERVED 1-18-07"
+                },
+                {
+                    "description": "SUA - Subpoena And Affidavit Of Service - Party (001)",
+                    "docketdate": "1/22/2007",
+                    "filingdate": "1/18/2007",
+                    "filingparty": "",
+                    "note": "NOTE: SERVED 1-18-07"
+                },
+                {
+                    "description": "RMR - Response to Defendant's Motion - Party (001)",
+                    "docketdate": "1/16/2007",
+                    "filingdate": "1/16/2007",
+                    "filingparty": "",
+                    "note": "NOTE: eFile Id 43025 -- TO SUPPRESS STATEMENTS"
+                },
+                {
+                    "description": "MOT - Motion - Party (001)",
+                    "docketdate": "1/12/2007",
+                    "filingdate": "1/9/2007",
+                    "filingparty": "",
+                    "note": "NOTE: TO SUPPRESS STATEMENTS REQUEST FOR VOLUNTARINESS HEARING"
+                },
+                {
+                    "description": "NOT - Notice - Party (001)",
+                    "docketdate": "1/11/2007",
+                    "filingdate": "1/8/2007",
+                    "filingparty": "",
+                    "note": "NOTE: SUPPLEMENTAL/OF WITNESSES"
+                },
+                {
+                    "description": "019 - ME: Ruling - Party (001)",
+                    "docketdate": "11/20/2006",
+                    "filingdate": "11/20/2006",
+                    "filingparty": ""
+                },
+                {
+                    "description": "RMR - Response to Defendant's Motion - Party (001)",
+                    "docketdate": "11/15/2006",
+                    "filingdate": "11/15/2006",
+                    "filingparty": "",
+                    "note": "NOTE: eFile Id 29638 -- TO RECONSIDER CONDITIONS OF RELEASE"
+                },
+                {
+                    "description": "064 - ME: Trial Continued/Reset - Party (001)",
+                    "docketdate": "11/14/2006",
+                    "filingdate": "11/14/2006",
+                    "filingparty": ""
+                },
+                {
+                    "description": "MOT - Motion - Party (001)",
+                    "docketdate": "2/6/2007",
+                    "filingdate": "11/14/2006",
+                    "filingparty": "",
+                    "note": "NOTE: SUPPLEMENT/TO RECONSIDER CONDITIONS OF RELEASE"
+                },
+                {
+                    "description": "AFF - Affidavit - Party (001)",
+                    "docketdate": "11/17/2006",
+                    "filingdate": "11/13/2006",
+                    "filingparty": "",
+                    "note": "NOTE: FOR EXONERATION OF BOND"
+                },
+                {
+                    "description": "085 - ME: Conference - Party (001)",
+                    "docketdate": "11/10/2006",
+                    "filingdate": "11/10/2006",
+                    "filingparty": ""
+                },
+                {
+                    "description": "MOT - Motion - Party (001)",
+                    "docketdate": "2/6/2007",
+                    "filingdate": "11/9/2006",
+                    "filingparty": "",
+                    "note": "NOTE: TO RECONSIDER CONDTIONS OF RELEASE"
+                },
+                {
+                    "description": "SUA - Subpoena And Affidavit Of Service - Party (001)",
+                    "docketdate": "11/13/2006",
+                    "filingdate": "11/8/2006",
+                    "filingparty": "",
+                    "note": "NOTE: SERVED 11/03/06"
+                },
+                {
+                    "description": "MEM - Memorandum - Party (001)",
+                    "docketdate": "11/16/2006",
+                    "filingdate": "11/8/2006",
+                    "filingparty": ""
+                },
+                {
+                    "description": "MEM - Memorandum - Party (001)",
+                    "docketdate": "11/16/2006",
+                    "filingdate": "11/8/2006",
+                    "filingparty": ""
+                },
+                {
+                    "description": "SUA - Subpoena And Affidavit Of Service - Party (001)",
+                    "docketdate": "11/9/2006",
+                    "filingdate": "11/7/2006",
+                    "filingparty": "",
+                    "note": "NOTE: SERVED BY FAX 11/03/06"
+                },
+                {
+                    "description": "NDR - Notice of Defenses and Request for Notice of Rebuttal Witnesses - Party (001)",
+                    "docketdate": "11/14/2006",
+                    "filingdate": "11/7/2006",
+                    "filingparty": ""
+                },
+                {
+                    "description": "MFR - Motion For Reconsideration - Party (001)",
+                    "docketdate": "11/1/2006",
+                    "filingdate": "10/27/2006",
+                    "filingparty": "",
+                    "note": "NOTE: CONDITIONS OF RELEASE"
+                },
+                {
+                    "description": "SUA - Subpoena And Affidavit Of Service - Party (001)",
+                    "docketdate": "10/30/2006",
+                    "filingdate": "10/24/2006",
+                    "filingparty": "",
+                    "note": "NOTE: SERVED 10/10/06"
+                },
+                {
+                    "description": "MCO - Motion To Continue - Party (001)",
+                    "docketdate": "10/28/2006",
+                    "filingdate": "10/24/2006",
+                    "filingparty": "",
+                    "note": "NOTE: TRIAL"
+                },
+                {
+                    "description": "064 - ME: Trial Continued/Reset - Party (001)",
+                    "docketdate": "10/23/2006",
+                    "filingdate": "10/23/2006",
+                    "filingparty": ""
+                },
+                {
+                    "description": "IAD - Initial Appearance Document - Party (001)",
+                    "docketdate": "11/24/2006",
+                    "filingdate": "10/20/2006",
+                    "filingparty": ""
+                },
+                {
+                    "description": "MCO - Motion To Continue - Party (001)",
+                    "docketdate": "10/11/2006",
+                    "filingdate": "10/11/2006",
+                    "filingparty": "",
+                    "note": "NOTE: eFile Id20928 -- TRIAL"
+                },
+                {
+                    "description": "NOT - Notice - Party (001)",
+                    "docketdate": "10/11/2006",
+                    "filingdate": "10/3/2006",
+                    "filingparty": "",
+                    "note": "NOTE: OF SUPPLEMENTAL WITNESS"
+                },
+                {
+                    "description": "REQ - Request - Party (001)",
+                    "docketdate": "10/10/2006",
+                    "filingdate": "10/2/2006",
+                    "filingparty": "Defendant (2)",
+                    "note": "NOTE: FOR APPOINTMENT OF NEW COUNSEL"
+                },
+                {
+                    "description": "085 - ME: Conference - Party (001)",
+                    "docketdate": "9/26/2006",
+                    "filingdate": "9/26/2006",
+                    "filingparty": ""
+                },
+                {
+                    "description": "194 : Me: Initial Pretrial Conference - Party (001)",
+                    "docketdate": "8/21/2006",
+                    "filingdate": "8/21/2006",
+                    "filingparty": ""
+                },
+                {
+                    "description": "ALG - Allegation - Party (001)",
+                    "docketdate": "8/22/2006",
+                    "filingdate": "8/18/2006",
+                    "filingparty": "",
+                    "note": "NOTE: PURSUANT TO ARS SS 13-702.02"
+                },
+                {
+                    "description": "ACO - Allegation of Historical Priors - Party (001)",
+                    "docketdate": "8/22/2006",
+                    "filingdate": "8/18/2006",
+                    "filingparty": ""
+                },
+                {
+                    "description": "ALG - Allegation - Party (001)",
+                    "docketdate": "8/22/2006",
+                    "filingdate": "8/18/2006",
+                    "filingparty": "",
+                    "note": "NOTE: PURSUANT TO ARS SS 13-702.02"
+                },
+                {
+                    "description": "NOT - Notice - Party (001)",
+                    "docketdate": "8/23/2006",
+                    "filingdate": "8/18/2006",
+                    "filingparty": "",
+                    "note": "NOTE: SUPPLEMENTAL/OF DISCOVERY"
+                },
+                {
+                    "description": "LET - Letter - Party (001)",
+                    "docketdate": "8/23/2006",
+                    "filingdate": "8/17/2006",
+                    "filingparty": "Defendant (2)"
+                },
+                {
+                    "description": "LET - Letter - Party (001)",
+                    "docketdate": "8/23/2006",
+                    "filingdate": "8/17/2006",
+                    "filingparty": "Defendant (2)"
+                },
+                {
+                    "description": "ROR - Release Order - Party (001)",
+                    "docketdate": "8/23/2006",
+                    "filingdate": "8/17/2006",
+                    "filingparty": "",
+                    "note": "NOTE: BOND $5400 AND SUPERVISED 08-17-06"
+                },
+                {
+                    "description": "STA - Statement - Party (001)",
+                    "docketdate": "8/23/2006",
+                    "filingdate": "8/17/2006",
+                    "filingparty": "",
+                    "note": "NOTE: PRETRIAL MANAGEMENT"
+                },
+                {
+                    "description": "RTR - Return Receipt For Official Court Files/Transcripts/Exhibits - Party (001)",
+                    "docketdate": "8/16/2006",
+                    "filingdate": "8/11/2006",
+                    "filingparty": ""
+                },
+                {
+                    "description": "RRF - Release Receipt For Official Court Files/Transcripts/Exhibits - Party (001)",
+                    "docketdate": "8/21/2006",
+                    "filingdate": "8/10/2006",
+                    "filingparty": ""
+                },
+                {
+                    "description": "OFT - Order for Temporary Removal of Court File/Transcripts/Exhibits - Party (001)",
+                    "docketdate": "8/21/2006",
+                    "filingdate": "8/10/2006",
+                    "filingparty": ""
+                },
+                {
+                    "description": "MTR - Motion for Temporary Removal Of Court File/Transcripts/Exhibit - Party (001)",
+                    "docketdate": "8/21/2006",
+                    "filingdate": "8/10/2006",
+                    "filingparty": ""
+                },
+                {
+                    "description": "RTR - Return Receipt For Official Court Files/Transcripts/Exhibits - Party (001)",
+                    "docketdate": "8/8/2006",
+                    "filingdate": "8/7/2006",
+                    "filingparty": ""
+                },
+                {
+                    "description": "MTR - Motion for Temporary Removal Of Court File/Transcripts/Exhibit - Party (001)",
+                    "docketdate": "8/16/2006",
+                    "filingdate": "8/2/2006",
+                    "filingparty": ""
+                },
+                {
+                    "description": "OFT - Order for Temporary Removal of Court File/Transcripts/Exhibits - Party (001)",
+                    "docketdate": "8/16/2006",
+                    "filingdate": "8/2/2006",
+                    "filingparty": ""
+                },
+                {
+                    "description": "RRF - Release Receipt For Official Court Files/Transcripts/Exhibits - Party (001)",
+                    "docketdate": "8/16/2006",
+                    "filingdate": "8/2/2006",
+                    "filingparty": ""
+                },
+                {
+                    "description": "MOT - Motion - Party (001)",
+                    "docketdate": "8/9/2006",
+                    "filingdate": "8/1/2006",
+                    "filingparty": "Defendant (2)",
+                    "note": "NOTE: EXPEDITED/TO CHANGE RELEASE ORDER"
+                },
+                {
+                    "description": "BON - Bond - Party (001)",
+                    "docketdate": "8/1/2006",
+                    "filingdate": "7/31/2006",
+                    "filingparty": "",
+                    "note": "NOTE: PAPER/SURETY $5,400 BANKERS INSURANCE COMPANY"
+                },
+                {
+                    "description": "016 - ME: Ext/Time/Filing Granted - Party (001)",
+                    "docketdate": "7/31/2006",
+                    "filingdate": "7/31/2006",
+                    "filingparty": ""
+                },
+                {
+                    "description": "NDP - Notice of Discovery - Party (001)",
+                    "docketdate": "7/27/2006",
+                    "filingdate": "7/21/2006",
+                    "filingparty": "",
+                    "note": "NOTE: AND INTERVIEWS"
+                },
+                {
+                    "description": "ANP - Allegation of Aggravating Circumstances Other Than Prior Convictions - Party (001)",
+                    "docketdate": "7/27/2006",
+                    "filingdate": "7/21/2006",
+                    "filingparty": ""
+                },
+                {
+                    "description": "RET - Request For Extension Of Time - Party (001)",
+                    "docketdate": "7/26/2006",
+                    "filingdate": "7/20/2006",
+                    "filingparty": "",
+                    "note": "NOTE: TO CHALLENGE THE GRAND JURY PROCEEDINGS"
+                },
+                {
+                    "description": "MFD - Motion For Discovery - Party (001)",
+                    "docketdate": "7/26/2006",
+                    "filingdate": "7/20/2006",
+                    "filingparty": ""
+                },
+                {
+                    "description": "NDR - Notice of Defenses and Request for Notice of Rebuttal Witnesses - Party (001)",
+                    "docketdate": "7/27/2006",
+                    "filingdate": "7/20/2006",
+                    "filingparty": ""
+                },
+                {
+                    "description": "152 - ME: Not Guilty Plea Arraign - Party (001)",
+                    "docketdate": "8/3/2006",
+                    "filingdate": "7/20/2006",
+                    "filingparty": ""
+                },
+                {
+                    "description": "NSI - Notice of Supervening Indictment - Party (001)",
+                    "docketdate": "7/5/2006",
+                    "filingdate": "7/3/2006",
+                    "filingparty": "Plaintiff (1)"
+                },
+                {
+                    "description": "606 - ME: GJ Not/Supervening Indictment - Party (001)",
+                    "docketdate": "7/5/2006",
+                    "filingdate": "7/3/2006",
+                    "filingparty": ""
+                },
+                {
+                    "description": "IND - Indictment - Party (001)",
+                    "docketdate": "7/5/2006",
+                    "filingdate": "7/3/2006",
+                    "filingparty": "Plaintiff (1)"
+                },
+                {
+                    "description": "IAD - Initial Appearance Document - Party (001)",
+                    "docketdate": "7/5/2006",
+                    "filingdate": "6/29/2006",
+                    "filingparty": ""
+                },
+                {
+                    "description": "DCO - Direct Complaint - Party (001)",
+                    "docketdate": "6/27/2006",
+                    "filingdate": "6/27/2006",
+                    "filingparty": ""
+                }
+            ],
+            "dispositions": [
+                {
+                    "arscode": "13-1204 (F3)",
+                    "crimedate": "6/23/2006",
+                    "date": "7/5/2006",
+                    "description": "AGGRAVATED ASSAULT",
+                    "disposition": "Dismissed Due To Grand Jury Indictment",
+                    "dispositioncode": "Dismissed Due To Grand Jury Indictment",
+                    "partyname": "Christina Marie Banks"
+                },
+                {
+                    "arscode": "13-1204 (F3)",
+                    "crimedate": "6/23/2006",
+                    "date": "2/5/2007",
+                    "description": "AGGRAVATED ASSAULT",
+                    "disposition": "Not Guilty By Jury",
+                    "dispositioncode": "Not Guilty By Jury",
+                    "partyname": "Christina Marie Banks"
+                }
+            ],
+            "location": "Downtown",
+            "parties": [
+                {
+                    "attorney": "McGregor, Matthew",
+                    "judge": "",
+                    "partyname": "State Of Arizona - (1)",
+                    "relationship": "Plaintiff",
+                    "sex": "N/A"
+                },
+                {
+                    "attorney": "GRAY, FRANCES",
+                    "judge": "Fink",
+                    "partyname": "Christina Marie Banks - (2)",
+                    "relationship": "Defendant",
+                    "sex": "F"
+                }
+            ],
+            "url": "http://www.superiorcourt.maricopa.gov/docket/CriminalCourtCases/caseInfo.asp?caseNumber=CR2006-136691"
+        },
+        "case_number": "CR2006-136691",
+        "case_url": "http://www.superiorcourt.maricopa.gov/docket/CriminalCourtCases/caseInfo.asp?caseNumber=CR2006-136691",
+        "dob": "10/22/1978",
+        "party_name": "Banks, Christina"
+    }
+]

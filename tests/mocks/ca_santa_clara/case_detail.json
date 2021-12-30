@@ -1,0 +1,174 @@
+{
+  "data": {
+    "caseParties": [
+      {
+        "attorneys": [],
+        "casePartyId": "6888331",
+        "type": "Defendant",
+        "firstName": "STUART",
+        "middleName": "BELMONTE",
+        "lastName": "BAKER",
+        "nickName": null,
+        "businessName": null,
+        "fullName": "STUART BELMONTE BAKER",
+        "isDefendant": true
+      }
+    ],
+    "caseAttornies": [
+      {
+        "firstName": "",
+        "middleName": "",
+        "lastName": "Conversion Attorney",
+        "representing": "STUART BELMONTE BAKER",
+        "barNumber": "CONV",
+        "isLead": true
+      }
+    ],
+    "caseEvents": [],
+    "caseHearings": [
+      {
+        "hearingId": "4952649",
+        "calendar": "Conversion Department",
+        "type": "Information",
+        "date": "8/1/1994",
+        "time": "1:30PM",
+        "hearingResult": "Held",
+        "documentId": "",
+        "interpreter": "",
+        "hearingFlag": "",
+        "documents": []
+      },
+      {
+        "hearingId": "4952650",
+        "calendar": "Conversion Department",
+        "type": "Master Trial Calendar",
+        "date": "9/19/1994",
+        "time": "8:30AM",
+        "hearingResult": "Held",
+        "documentId": "",
+        "interpreter": "",
+        "hearingFlag": "",
+        "documents": []
+      },
+      {
+        "hearingId": "4952651",
+        "calendar": "Conversion Department",
+        "type": "Disposition Hearing",
+        "date": "9/23/1994",
+        "time": "9:00AM",
+        "hearingResult": "Held",
+        "documentId": "",
+        "interpreter": "",
+        "hearingFlag": "",
+        "documents": []
+      },
+      {
+        "hearingId": "4952652",
+        "calendar": "Conversion Department",
+        "type": "Master Trial Calendar",
+        "date": "9/26/1994",
+        "time": "8:30AM",
+        "hearingResult": "Held",
+        "documentId": "",
+        "interpreter": "",
+        "hearingFlag": "",
+        "documents": []
+      },
+      {
+        "hearingId": "4952653",
+        "calendar": "Conversion Department",
+        "type": "Trailing Status",
+        "date": "9/26/1994",
+        "time": "9:00AM",
+        "hearingResult": "Continued: Court",
+        "documentId": "",
+        "interpreter": "",
+        "hearingFlag": "",
+        "documents": []
+      },
+      {
+        "hearingId": "4952654",
+        "calendar": "Conversion Department",
+        "type": "Trailing Status",
+        "date": "9/27/1994",
+        "time": "8:30AM",
+        "hearingResult": "Held",
+        "documentId": "",
+        "interpreter": "",
+        "hearingFlag": "",
+        "documents": []
+      },
+      {
+        "hearingId": "4952655",
+        "calendar": "Conversion Department",
+        "type": "Hearing: Probation and Sentencing",
+        "date": "10/28/1994",
+        "time": "9:00AM",
+        "hearingResult": "Held",
+        "documentId": "",
+        "interpreter": "",
+        "hearingFlag": "",
+        "documents": []
+      },
+      {
+        "hearingId": "4952656",
+        "calendar": "Conversion Department",
+        "type": "Bench Warrant Hearing",
+        "date": "1/19/1995",
+        "time": "12:00AM",
+        "hearingResult": "Off Calendar by court",
+        "documentId": "",
+        "interpreter": "",
+        "hearingFlag": "",
+        "documents": []
+      }
+    ],
+    "caseOtherDocuments": [],
+    "caseCharges": [],
+    "caseFinancials": [],
+    "caseFinancialTransactions": [],
+    "caseArrestInfomation": [],
+    "casePartyDemographics": {
+      "race": null,
+      "sex": null,
+      "dateOfBirth": null,
+      "height": null,
+      "weight": null,
+      "hairColor": null,
+      "eyeColor": null
+    },
+    "casePartyAddress": {
+      "streetName": null,
+      "city": null,
+      "state": null,
+      "zip": null
+    },
+    "casePartyIdentification": [],
+    "caseDocuments": [],
+    "minuteOrders": [],
+    "caseFlags": [],
+    "partyInJailFlags": [],
+    "caseBonds": [],
+    "caseWarrants": [],
+    "caseCrossReferenceNumbers": [],
+    "relatedCases": [],
+    "id": "2050461",
+    "caseNumber": "174132",
+    "style": "The State of California vs BAKER, STUART BELMONTE",
+    "caseCategory": 0,
+    "type": "Citation - Criminal",
+    "typeId": "CIT",
+    "fileDate": "8/1/1994",
+    "securityGroup": null,
+    "status": "Inactive",
+    "courtLocation": "Hall of Justice",
+    "caseSubType": "General",
+    "nodeId": 21310,
+    "permission": 0,
+    "isSecuredAccess": false,
+    "isCriminal": true
+  },
+  "result": 0,
+  "created": "2020-05-11T23:47:21.5792469Z",
+  "message": "Case number 2050461 was found"
+}

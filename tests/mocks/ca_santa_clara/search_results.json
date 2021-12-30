@@ -1,0 +1,51 @@
+{
+  "data": [
+    {
+      "caseId": "2050461",
+      "nodeId": "21310",
+      "caseNumber": "174132",
+      "caseStyle": "The State of California vs BAKER, STUART BELMONTE",
+      "filingDate": "8/1/1994",
+      "caseStatus": "Inactive",
+      "caseType": "Citation - Criminal",
+      "caseSecurityGroup": null,
+      "caseLocation": null
+    },
+    {
+      "caseId": "3213904",
+      "nodeId": "21310",
+      "caseNumber": "C9495577",
+      "caseStyle": "The State of California vs BAKER, STUART BELMONTE",
+      "filingDate": "6/15/1994",
+      "caseStatus": "Inactive",
+      "caseType": "Citation - Criminal",
+      "caseSecurityGroup": null,
+      "caseLocation": null
+    },
+    {
+      "caseId": "3753951",
+      "nodeId": "21310",
+      "caseNumber": "H1351770",
+      "caseStyle": "The State of California vs BAKER, STUART B",
+      "filingDate": "6/10/1994",
+      "caseStatus": "Inactive",
+      "caseType": "Citation - Criminal",
+      "caseSecurityGroup": null,
+      "caseLocation": null
+    },
+    {
+      "caseId": "3926972",
+      "nodeId": "21311",
+      "caseNumber": "F0360657",
+      "caseStyle": "The State of California vs BAKER, STUART BELMONT",
+      "filingDate": "8/30/1992",
+      "caseStatus": "Inactive",
+      "caseType": "Citation - Criminal",
+      "caseSecurityGroup": null,
+      "caseLocation": null
+    }
+  ],
+  "result": 0,
+  "created": "2020-05-11T23:45:57.9467453Z",
+  "message": ""
+}

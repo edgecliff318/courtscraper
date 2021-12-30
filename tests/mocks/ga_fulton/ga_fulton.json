@@ -1,0 +1,319 @@
+[
+    {
+        "Address1": null,
+        "Address2": null,
+        "Address3": null,
+        "CaseResultCount": 1,
+        "CaseResults": [
+            {
+                "CaseCategoryKey": "CR",
+                "CaseDetail": {
+                    "Case Number": "93-CR-137947",
+                    "Case Status": "Conversion - Closed",
+                    "Case Type": "MISDEMEANOR",
+                    "Court": "State",
+                    "File Date": "11/05/1993",
+                    "Judicial Officer": "Tailor, Wesley B",
+                    "charges": {
+                        "charges": [
+                            {
+                                "Date": "11/05/1993",
+                                "Description": "CR Case without Offense",
+                                "Level": "Conversion",
+                                "Statute": "CONV"
+                            }
+                        ],
+                        "name": "BAKER, STUART"
+                    },
+                    "dispositions": [],
+                    "events": [
+                        {
+                            "Comment": "COMPANION CASES: : : : :",
+                            "Event": "11/05/1993 Conv - Def Companion Cases"
+                        },
+                        {
+                            "Comment": "DEFENDANT NOTIFICATION FLAG: N",
+                            "Event": "11/05/1993 Conv - Notify Flag"
+                        },
+                        {
+                            "Comment": "COMPANION CASES: : : : :",
+                            "Event": "11/05/1993 Conv - Def Companion Cases"
+                        },
+                        {
+                            "Comment": "CHARGE: DUI 2 CTS BOND: 01000 DISPO:  A/1 $650 12 SUSP/H  DISPO DATE: 02/04/1994",
+                            "Event": "11/05/1993 Conv - Charge #1"
+                        },
+                        {
+                            "Comment": "CHARGE: IMP LANE CHANGEBOND: 00200 DISPO:  MERGED W A/1/H DISPO DATE: 02/04/1994",
+                            "Event": "11/05/1993 Conv - Charge #2"
+                        },
+                        {
+                            "Comment": "BOND TYPE: CASH",
+                            "Event": "11/05/1993 Conv - Bond Amount"
+                        },
+                        {
+                            "Comment": "DEFENDANT NOTIFICATION FLAG: N",
+                            "Event": "11/05/1993 Conv - Notify Flag"
+                        },
+                        {
+                            "Event": "02/01/1994    PLEA AND ARRAIGNMENT",
+                            "Hearing Time": "9:00 AM",
+                            "Judicial Officer": "Tailor, Wesley B"
+                        },
+                        {
+                            "Event": "02/04/1994    Conversion",
+                            "Hearing Time": "9:00 AM",
+                            "Judicial Officer": "Tailor, Wesley B"
+                        }
+                    ],
+                    "financials": {
+                        "financials": []
+                    },
+                    "party": {
+                        "Address": "1404 WINDCLIFF DR*, MARIETTA, GA",
+                        "DOB": "XX/XX/XXXX",
+                        "Defendant": "BAKER, STUART",
+                        "Gender": "Male",
+                        "Race": "White"
+                    }
+                },
+                "CaseId": 1110079,
+                "CaseLoadUrl": "https://publicrecordsaccess.fultoncountyga.gov/Portal/Case/CaseDetail?eid=AuaSU_oggBF_Fp_x6BPjCg2&tabIndex=3",
+                "CaseNumber": "93-CR-137947",
+                "CaseStatusId": {
+                    "Description": "Conversion - Closed",
+                    "HasValue": true,
+                    "Word": "CONVC"
+                },
+                "CaseTypeId": {
+                    "Description": "MISDEMEANOR",
+                    "HasValue": true,
+                    "Word": "TCM"
+                },
+                "Charges": [],
+                "DateOfBirth": "XX/XX/XXXX",
+                "DefendantName": "BAKER, STUART",
+                "DoBSortKey": "/Date(-62135578800000)/",
+                "EncryptedCaseId": "AuaSU_oggBF_Fp_x6BPjCg2",
+                "FileDate": "11/5/1993 12:00:00 AM",
+                "FileDateParsed": "/Date(752475600000)/",
+                "LocationName": "State Court",
+                "NodeID": "201",
+                "PartyTypeKey": "Defendant",
+                "Style": "STATE VS BAKER, STUART"
+            }
+        ],
+        "CaseResultsProjected": [
+            {
+                "CaseCategoryKey": "CR",
+                "CaseId": 1110079,
+                "CaseLoadUrl": "https://publicrecordsaccess.fultoncountyga.gov/Portal/Case/CaseDetail?eid=AuaSU_oggBF_Fp_x6BPjCg2&tabIndex=3",
+                "CaseNumber": "93-CR-137947",
+                "CaseStatusId": {
+                    "Description": "Conversion - Closed",
+                    "HasValue": true,
+                    "Word": "CONVC"
+                },
+                "CaseTypeId": {
+                    "Description": "MISDEMEANOR",
+                    "HasValue": true,
+                    "Word": "TCM"
+                },
+                "Charges": [],
+                "DateOfBirth": "XX/XX/XXXX",
+                "DefendantName": "BAKER, STUART",
+                "DoBSortKey": "/Date(-62135578800000)/",
+                "EncryptedCaseId": "AuaSU_oggBF_Fp_x6BPjCg2",
+                "FileDate": "/Date(752475600000)/",
+                "FileDateText": "11/05/1993",
+                "LocationName": "State Court",
+                "NodeID": "201",
+                "PartyTypeKey": "Defendant",
+                "Style": "STATE VS BAKER, STUART"
+            }
+        ],
+        "CellPhoneNumber": "",
+        "City": null,
+        "DLNumber": null,
+        "DLState": "",
+        "DateOfBirth": "XX/XX/XXXX",
+        "DateOfBirthSort": null,
+        "EncryptedPartyId": "2vOD_9M_hpLjZgoL9fqjDw2",
+        "EyeColor": null,
+        "Gender": "Male",
+        "HairColor": null,
+        "Height": null,
+        "HomePhoneNumber": "",
+        "JudgmentResultCount": 0,
+        "JudgmentResults": [],
+        "Name": "BAKER, STUART",
+        "NameFirst": "STUART",
+        "NameLast": "BAKER",
+        "NameMid": null,
+        "NameSort": "baker, stuart",
+        "NodeID": "201",
+        "PartyId": 1500117,
+        "PersonId": 0,
+        "ProtectionOrderResultCount": 0,
+        "ProtectionOrderResults": [],
+        "Race": "White",
+        "State": null,
+        "WarrantResultCount": 0,
+        "WarrantResults": [],
+        "Weight": null,
+        "Zip": null
+    },
+    {
+        "Address1": null,
+        "Address2": null,
+        "Address3": null,
+        "CaseResultCount": 1,
+        "CaseResults": [
+            {
+                "CaseCategoryKey": "CV",
+                "CaseDetail": {
+                    "Case Number": "E49477",
+                    "Case Status": "Closed",
+                    "Case Type": "OTHER CIVIL CAUSE OF ACTION",
+                    "Court": "EJ7",
+                    "File Date": "06/12/1996",
+                    "Judicial Officer": "WRIGHT, CYNTHIA",
+                    "charges": {},
+                    "dispositions": [],
+                    "events": [
+                        {
+                            "Comment": "Case Filing",
+                            "Event": "06/12/1996 Conversion"
+                        },
+                        {
+                            "Comment": "E49477 06/12/96 OTHER VS-PLAS PET FOR DECLARATORY JUDGMENT SEEKING AUTHORIZATION  OTHER (OTH)",
+                            "Event": "06/12/1996 OTHER"
+                        },
+                        {
+                            "Comment": "E49477 06/12/96 OTHER TO DIVIDE TRUST  OTHER (OTH)",
+                            "Event": "06/12/1996 OTHER"
+                        },
+                        {
+                            "Event": "10/14/1996    MOTIONS HEARING",
+                            "Hearing Time": "10:00 AM",
+                            "Judicial Officer": "WRIGHT, CYNTHIA"
+                        },
+                        {
+                            "Comment": "E49477 10/14/96 ORDER OF DISMISSAL VS-ORD ON DISMISSAL FOR WANT OF PROS  ORDER OF DISMISSAL (TRM.DIS)",
+                            "Event": "10/14/1996 DISMISSAL ORDER"
+                        },
+                        {
+                            "Comment": "E49477 04/24/97 SERVED BAKER, BETSY C served on 04/24/97  ORDER TO SERVE (SERV)",
+                            "Event": "04/24/1997 ORDER TO SERVER"
+                        },
+                        {
+                            "Comment": "E49477 04/24/97 SERVED BAKER, DAVID S served on 04/24/97  ORDER TO SERVE (SERV)",
+                            "Event": "04/24/1997 ORDER TO SERVER"
+                        },
+                        {
+                            "Comment": "E49477 04/24/97 SERVED BAKER, STUART I served on 04/24/97  ORDER TO SERVE (SERV)",
+                            "Event": "04/24/1997 ORDER TO SERVER"
+                        },
+                        {
+                            "Comment": "E49477 04/24/97 SERVED BAKER, CURTIS A served on 04/24/97  ORDER TO SERVE (SERV)",
+                            "Event": "04/24/1997 ORDER TO SERVER"
+                        },
+                        {
+                            "Comment": "E49477 04/24/97 SERVED BAKER, TRUDY L served on 04/24/97  ORDER TO SERVE (SERV)",
+                            "Event": "04/24/1997 ORDER TO SERVER"
+                        }
+                    ],
+                    "financials": {
+                        "financials": []
+                    },
+                    "party": {
+                        "PLAINTIFF": "COHEN, N JEROLD"
+                    }
+                },
+                "CaseId": 6070594,
+                "CaseLoadUrl": "https://publicrecordsaccess.fultoncountyga.gov/Portal/Case/CaseDetail?eid=27Qfw55yzyMnPkWny_6gIA2&tabIndex=3",
+                "CaseNumber": "E49477",
+                "CaseStatusId": {
+                    "Description": "Closed",
+                    "HasValue": true,
+                    "Word": "SCLOS"
+                },
+                "CaseTypeId": {
+                    "Description": "OTHER CIVIL CAUSE OF ACTION",
+                    "HasValue": true,
+                    "Word": "SOCCA"
+                },
+                "Charges": [],
+                "DateOfBirth": null,
+                "DefendantName": "BAKER, BETSY C",
+                "DoBSortKey": "/Date(-62135578800000)/",
+                "EncryptedCaseId": "27Qfw55yzyMnPkWny_6gIA2",
+                "FileDate": "6/12/1996 12:00:00 AM",
+                "FileDateParsed": "/Date(834552000000)/",
+                "LocationName": "EJ7",
+                "NodeID": "156",
+                "PartyTypeKey": "Defendant",
+                "Style": "COHEN vs BAKER"
+            }
+        ],
+        "CaseResultsProjected": [
+            {
+                "CaseCategoryKey": "CV",
+                "CaseId": 6070594,
+                "CaseLoadUrl": "https://publicrecordsaccess.fultoncountyga.gov/Portal/Case/CaseDetail?eid=27Qfw55yzyMnPkWny_6gIA2&tabIndex=3",
+                "CaseNumber": "E49477",
+                "CaseStatusId": {
+                    "Description": "Closed",
+                    "HasValue": true,
+                    "Word": "SCLOS"
+                },
+                "CaseTypeId": {
+                    "Description": "OTHER CIVIL CAUSE OF ACTION",
+                    "HasValue": true,
+                    "Word": "SOCCA"
+                },
+                "Charges": [],
+                "DateOfBirth": null,
+                "DefendantName": "BAKER, BETSY C",
+                "DoBSortKey": "/Date(-62135578800000)/",
+                "EncryptedCaseId": "27Qfw55yzyMnPkWny_6gIA2",
+                "FileDate": "/Date(834552000000)/",
+                "FileDateText": "06/12/1996",
+                "LocationName": "EJ7",
+                "NodeID": "156",
+                "PartyTypeKey": "Defendant",
+                "Style": "COHEN vs BAKER"
+            }
+        ],
+        "CellPhoneNumber": "",
+        "City": null,
+        "DLNumber": null,
+        "DLState": "",
+        "DateOfBirth": null,
+        "DateOfBirthSort": null,
+        "EncryptedPartyId": "GCVivMScjnRjv9tfVFJhKQ2",
+        "EyeColor": null,
+        "Gender": null,
+        "HairColor": null,
+        "Height": null,
+        "HomePhoneNumber": "",
+        "JudgmentResultCount": 0,
+        "JudgmentResults": [],
+        "Name": "BAKER, STUART I",
+        "NameFirst": "STUART",
+        "NameLast": "BAKER",
+        "NameMid": "I",
+        "NameSort": "baker, stuart i",
+        "NodeID": "156",
+        "PartyId": 13217527,
+        "PersonId": 0,
+        "ProtectionOrderResultCount": 0,
+        "ProtectionOrderResults": [],
+        "Race": null,
+        "State": null,
+        "WarrantResultCount": 0,
+        "WarrantResults": [],
+        "Weight": null,
+        "Zip": null
+    }
+]

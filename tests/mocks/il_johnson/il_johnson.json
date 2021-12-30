@@ -1,0 +1,147 @@
+[
+    {
+        "case_detail": {
+            "case_dispositions": [
+                {
+                    "Date": "",
+                    "Desc": "Ticket Number: 34",
+                    "Name": "Count",
+                    "No.": "1",
+                    "Plea": "",
+                    "Qualifier": "",
+                    "Status": "",
+                    "Type": ""
+                },
+                {
+                    "Date": "",
+                    "Desc": "AGG BTRY/OFF/FIREMAN/EMP DHS",
+                    "Name": "Charge",
+                    "No.": "1",
+                    "Plea": "Guilty",
+                    "Qualifier": "Committed",
+                    "Status": "Class 3 Felony",
+                    "Type": "Original"
+                },
+                {
+                    "Date": "08/03/2005",
+                    "Desc": "101 - Guilty",
+                    "Name": "Disposition",
+                    "No.": "1",
+                    "Plea": "",
+                    "Qualifier": "",
+                    "Status": "",
+                    "Type": ""
+                },
+                {
+                    "Date": "08/03/2005",
+                    "Desc": "201 - DOC",
+                    "Name": "Sentence",
+                    "No.": "1",
+                    "Plea": "",
+                    "Qualifier": "",
+                    "Status": "Consecutive",
+                    "Type": "4 years"
+                }
+            ],
+            "case_fines_fees": [
+                {
+                    "Balance": "$0.00",
+                    "Due": "$110.00",
+                    "Due Date": "",
+                    "Fee": "Total",
+                    "Paid": "$110.00"
+                },
+                {
+                    "Balance": "$0.00",
+                    "Due": "$100.00",
+                    "Due Date": "",
+                    "Fee": "Clerk",
+                    "Paid": "$100.00"
+                },
+                {
+                    "Balance": "$0.00",
+                    "Due": "$5.00",
+                    "Due Date": "",
+                    "Fee": "Automation",
+                    "Paid": "$5.00"
+                },
+                {
+                    "Balance": "$0.00",
+                    "Due": "$5.00",
+                    "Due Date": "",
+                    "Fee": "Document Storage",
+                    "Paid": "$5.00"
+                }
+            ],
+            "case_history": [],
+            "case_information": {
+                "Address": {
+                    "City": "VIENNA",
+                    "Country": "",
+                    "Postal Code": "629950000",
+                    "State": "IL",
+                    "Street 1": "SECURED"
+                },
+                "Case": "2005CF34",
+                "Case Category": "Criminal",
+                "Case Type - Subtype": "Criminal Felony",
+                "Hearings": [
+                    {
+                        "Date": "07/13/2005",
+                        "Judge": "WILLIAMSON",
+                        "Location": "1",
+                        "Time": "10:00 A.M.",
+                        "Type": "20 - First appearance"
+                    },
+                    {
+                        "Date": "08/03/2005",
+                        "Judge": "WILLIAMSON",
+                        "Location": "1",
+                        "Time": "9:00 A.M.",
+                        "Type": "12 - Preliminary hrg"
+                    }
+                ],
+                "Identification": {
+                    "Eye Color": "",
+                    "Gender": "Male",
+                    "Hair Color": "",
+                    "Height": "",
+                    "Weight": ""
+                },
+                "Last Update": "05/13/2008",
+                "Last Upload": "03/15/2020 @ 10:26",
+                "Litigant Information": {
+                    "ArrestingOfficer": "UNKNOWN",
+                    "Date of Birth": "12/27/1978",
+                    "Full Name": "SMITH, RICHARD K02855",
+                    "Impounded": "No",
+                    "Initial Close Date": "08/03/2005",
+                    "Initial Open Date": "06/27/2005",
+                    "Physical File Location": "",
+                    "Reclose Date": "",
+                    "Reopen Date": "",
+                    "Role": "Defendant/Respondent",
+                    "Suppress Minutes": "No"
+                },
+                "Other Litigants": [],
+                "Phone Numbers": {}
+            },
+            "case_payment_history": [
+                {
+                    "Amount Applied": "$110.00",
+                    "Check/E-Pay #": "AF6649310",
+                    "Payment Type": "Company check",
+                    "Receipt #": "148425",
+                    "Receipt Date": "12/01/2005",
+                    "Transaction Type": "Voucher"
+                }
+            ]
+        },
+        "case_number": "2005CF34",
+        "case_url": "https://www.judici.com/courts/cases/case_information.jsp?court=IL044015J&ocl=IL044015J,2005CF34,IL044015JL2005CF34D1",
+        "dob": "December 27, 1978",
+        "e_pay": "",
+        "name": "SMITH, RICHARD K02855",
+        "role": "Defendant/Respondent"
+    }
+]

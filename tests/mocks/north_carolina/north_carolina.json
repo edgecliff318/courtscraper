@@ -1,0 +1,148 @@
+[
+    {
+        "age": "52",
+        "birth_date": "12/19/1967",
+        "detail": {
+            "names_of_record": [
+                {
+                    "first_name": "ADAM",
+                    "last_name": "SMITH",
+                    "middle_name": "JUNIOR",
+                    "name_type": "COMMITTED",
+                    "suffix": ""
+                },
+                {
+                    "first_name": "JUNIOR",
+                    "last_name": "SMITH",
+                    "middle_name": "",
+                    "name_type": "ALIAS",
+                    "suffix": ""
+                },
+                {
+                    "first_name": "ADAM",
+                    "last_name": "SMITHE",
+                    "middle_name": "JUNIOR",
+                    "name_type": "ALIAS",
+                    "suffix": ""
+                }
+            ],
+            "offender_information": {
+                "Age:": "52",
+                "Birth Date:": "12/19/1967",
+                "Ethnic Group:": "AFRICAN",
+                "Full Name": "ADAM JUNIOR SMITH",
+                "Gender:": "MALE",
+                "Offender Number:": "0373892",
+                "Printable Version": "Printable Version",
+                "Probation/Parole/Post Release Status:": "INACTIVE",
+                "Race:": "BLACK"
+            },
+            "sentence_history": [
+                {
+                    "Commitment Type:": "PROBATION/PAROLE",
+                    "Conviction Date:": "12/03/2003",
+                    "County Of Conviction:": "PITT",
+                    "Punishment Type:": "COMMUNITY SS (DCC)",
+                    "Sentence Number:": "06-001",
+                    "Sentence Type 1:": "PROBATION",
+                    "Sentence Type 2:": "SUSPENDED SENTENCE",
+                    "Sentence Type 3:": "COUNTY JAIL",
+                    "commitments": [
+                        {
+                            "Commitment": "CONCURRENT TO SENTENCE NUMBER 05-001",
+                            "Docket#": "03063656",
+                            "Offense (Qualifier)": "ASSAULT ON FEMALE (PRINCIPAL)",
+                            "Offense Date": "10/31/2003",
+                            "Sentencing Penalty Class Code": "CLASS A1 MISDEMEANOR SS",
+                            "Type": "MISD."
+                        },
+                        {
+                            "Commitment": "CONSOLIDATED FOR JUDGMENT",
+                            "Docket#": "03063656",
+                            "Offense (Qualifier)": "INTERFERING W/ EMERGENCY COMMU (PRINCIPAL)",
+                            "Offense Date": "10/31/2003",
+                            "Sentencing Penalty Class Code": "CLASS A1 MISDEMEANOR SS",
+                            "Type": "MISD."
+                        }
+                    ]
+                },
+                {
+                    "Commitment Type:": "PROBATION/PAROLE",
+                    "Conviction Date:": "06/12/2001",
+                    "County Of Conviction:": "PITT",
+                    "Punishment Type:": "COMMUNITY SS (DCC)",
+                    "Sentence Number:": "05-001",
+                    "Sentence Type 1:": "PROBATION",
+                    "Sentence Type 2:": "SUSPENDED SENTENCE",
+                    "Sentence Type 3:": "COUNTY JAIL",
+                    "commitments": [
+                        {
+                            "Commitment": "INITIAL",
+                            "Docket#": "00062615",
+                            "Offense (Qualifier)": "DRIV LICENSE REVOKED (PRINCIPAL)",
+                            "Offense Date": "11/01/2000",
+                            "Sentencing Penalty Class Code": "CLASS 1 MISDEMEANOR SS",
+                            "Type": "MISD."
+                        }
+                    ]
+                },
+                {
+                    "Commitment Type:": "PROBATION/PAROLE",
+                    "Conviction Date:": "10/15/1997",
+                    "County Of Conviction:": "MARTIN",
+                    "Punishment Type:": "INTERMEDIATE SS",
+                    "Sentence Number:": "04-001",
+                    "Sentence Type 1:": "PROBATION",
+                    "Sentence Type 2:": "SUSPENDED SENTENCE",
+                    "Sentence Type 3:": "COUNTY JAIL",
+                    "commitments": [
+                        {
+                            "Commitment": "CONCURRENT TO SENTENCE NUMBER 03-001",
+                            "Docket#": "97001994",
+                            "Offense (Qualifier)": "MISC MOTOR VEHICLE VIOLATION (PRINCIPAL)",
+                            "Offense Date": "07/18/1997",
+                            "Sentencing Penalty Class Code": "CLASS 1 MISDEMEANOR SS",
+                            "Type": "MISD."
+                        },
+                        {
+                            "Commitment": "CONSOLIDATED FOR JUDGMENT",
+                            "Docket#": "97001994",
+                            "Offense (Qualifier)": "DRIV LICENSE REVOKED (PRINCIPAL)",
+                            "Offense Date": "07/18/1997",
+                            "Sentencing Penalty Class Code": "CLASS 1 MISDEMEANOR SS",
+                            "Type": "MISD."
+                        }
+                    ]
+                },
+                {
+                    "Commitment Type:": "PROBATION/PAROLE",
+                    "Conviction Date:": "04/10/1992",
+                    "County Of Conviction:": "PITT",
+                    "Punishment Type:": "PRE-SS (FAIR) DCC",
+                    "Sentence Number:": "01-001",
+                    "Sentence Type 1:": "PROBATION",
+                    "Sentence Type 2:": "SUSPENDED SENTENCE",
+                    "Sentence Type 3:": "DEPT OF CORR   DIV OF PRISONS",
+                    "commitments": [
+                        {
+                            "Commitment": "INITIAL",
+                            "Docket#": "92007147",
+                            "Offense (Qualifier)": "LARCENY (OVER $200) (PRINCIPAL)",
+                            "Offense Date": "01/10/1991",
+                            "Sentencing Penalty Class Code": "MISD.(PRE-STRUCTURE)",
+                            "Type": "MISD."
+                        }
+                    ]
+                }
+            ]
+        },
+        "first_name": "ADAM",
+        "gender": "MALE",
+        "last_name": "SMITHE",
+        "middle_name": "J",
+        "name_suffix": "",
+        "offender_number": "0373892",
+        "offender_url": "https://webapps.doc.state.nc.us/opi/viewoffender.do?method=view&offenderID=0373892&searchLastName=Smith&searchFirstName=Adam&searchDOB=12/19/1967&searchDOBRange=0&listurl=pagelistoffendersearchresults&listpage=1",
+        "race": "BLACK"
+    }
+]
