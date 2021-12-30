@@ -35,12 +35,15 @@ def set_logging(app, logging_level):
             handler.setLevel(logging_level)
 
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.ZEPHYR],
+app = dash.Dash(name="Record Wash", external_stylesheets=[dbc.themes.ZEPHYR],
                 **config.pathname_params)
 
 auth = AdvancedAuth(
     app
 )
 
+filehandler = logging.FileHandler("app.log")
+
 app.logger.addHandler(dash_logger)
+app.logger.addHandler(filehandler)
 set_logging(app, config.logging_level)

@@ -8,3 +8,6 @@ gunicorn==20.1.0
 dash_auth==1.4.1
 typer==0.4.0
 gcloud==0.18.3
+commonregex
+google-cloud-vision
+docxtpl

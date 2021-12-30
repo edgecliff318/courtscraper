@@ -3,10 +3,10 @@ import dash.html as html
 
 
 def page(data=None):
-    return html.Div(
-        dbc.Container(
+    return dbc.Card(
+        dbc.CardBody(
             [
-                html.H1("Welcome to Ticket Flusher !", className="display-3"),
+                html.H3("Welcome to Ticket Washer !", className="display-3"),
                 html.P(
                     "Use it to process ticket data!",
                     className="lead",
@@ -20,8 +20,5 @@ def page(data=None):
                     dbc.Button("Learn more", color="primary"), className="lead"
                 ),
             ],
-            fluid=True,
-            className="py-3",
         ),
-        className="p-3 bg-light rounded-3",
     )

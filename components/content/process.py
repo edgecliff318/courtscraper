@@ -1,7 +1,10 @@
 import base64
+import os
 import dash_bootstrap_components as dbc
 from dash import html, dcc
 import dash_design_kit as ddk
+
+import config
 
 
 def generate_form_group(label, id, placeholder, type="Input", options=None,
@@ -18,8 +21,8 @@ def generate_form_group(label, id, placeholder, type="Input", options=None,
         field = dbc.Select(
             id=id,
             options=options,
-            value=value,
-            **kwargs
+            value=value
+                  **kwargs
         )
     elif type == "Dropdown":
         field = dcc.Dropdown(
@@ -115,7 +118,10 @@ def page(data: dict = None):
                         [
                             generate_form_group(
                                 label=e.get('field-label'),
-                                id=e.get('field-id'),
+                                id={
+                                    'type': 'parser',
+                                    'index': f"parser-{e.get('field-id')}"
+                                },
                                 placeholder=message_default,
                                 value=e.get('field-value')
                             ) for e in data.get('form')
@@ -127,15 +133,21 @@ def page(data: dict = None):
                 label_position='left',
                 control_position='right'
             ),
-            buttons
+            buttons,
+            html.Div(id="results-save"),
+            html.Div(id="results-generate"),
         ]
     )
 
     image_filename = data.get("image")  # replace with your own image
     if image_filename is not None:
-        encoded_image = base64.b64encode(open(image_filename, 'rb').read())
+        encoded_image = base64.b64encode(
+            open(image_filename,
+                 'rb').read())
         image = html.Img(src='data:image/png;base64,{}'.format(
-            encoded_image))
+            encoded_image.decode()),
+            width="100%"
+        )
     else:
         image = "No scan selected"
 

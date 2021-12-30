@@ -1,6 +1,7 @@
 import os
 import dash.html as html
 import dash_bootstrap_components as dbc
+from urllib import parse
 
 from app import app
 
@@ -19,14 +20,17 @@ def render_page_content(pathname):
         ticket_parser = TicketParser(filename)
         if filename == '':
             data = {
-                "form": ticket_parser.empty_data(),
+                "form": ticket_parser.get_fields(results={}),
                 "image": None
             }
         else:
+            filename = parse.unquote(filename)
             data = TicketParser(filename).parse()
         return content.process.page(data)
     elif pathname == "/history":
         return content.history.page()
+    elif pathname == "/leads":
+        return content.leads.page()
 
     # If the user tries to reach a different page, return a 404 message
     return dbc.Card(

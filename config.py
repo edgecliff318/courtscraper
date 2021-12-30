@@ -1,7 +1,7 @@
 import pathlib
 
 # Application title
-title = "Ticket Flusher"
+title = "Ticket Washer"
 
 # Parameter for the pathname configuration
 pathname_params = dict()
@@ -34,3 +34,9 @@ card_default_config = {
 # Salt
 SALT = b'#F+M\x80\xd7?t"\x9e\x9aP\x9d\xe0e\xb8\x06%\xcdy\x83?\xef\xc5\x82' \
        b'\xad\x15!\xa7\x1f\xa0\xed'
+
+
+# Case Net
+case_net_url = "https://www.courts.mo.gov/cnet"
+case_net_username = "smeyer4040"
+case_net_password = "MASfirm2021!!!!"

@@ -26,6 +26,10 @@ def download(path):
     """Serve a file from the upload directory."""
     return send_from_directory(config.upload_path, path, as_attachment=True)
 
+@server.route("/documents/<path:path>")
+def documents(path):
+    """Serve a file from the upload directory."""
+    return send_from_directory(config.output_path, path, as_attachment=True)
 
 # Validation Layout
 app.validation_layout = html.Div([
