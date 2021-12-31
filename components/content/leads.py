@@ -66,3 +66,8 @@ def page():
             )
         ]
     )
+
+def single():
+    return dbc.Row(
+        id="lead-single"
+    )

@@ -21,8 +21,8 @@ class ScraperMOCourt(ScraperBase):
             '=LBGHFOKMEPDNFOKHHDHIKAEDJGLEGOBNLKIFKPOKCODJDMLPOIEFKMONINACBPOANDJIPDFDGJCDHKPDKKDHEILOMGEAFECEFECAKDCHELCHINONFFCCINOJGFPHFNIC; _ga=GA1.2.258218475.1588935386; _gid=GA1.2.448862907.1589269663; ASP.NET_SessionId=jai1q23npcy2tdauzpiqtagm; __RequestVerificationToken_L09ubGluZUNhc2VJbmZvcm1hdGlvbldlYg2=ewAYv6ywvlpgLYDkDQ7aC-mFUyP-8JgmXdtw5C_lMj9y14YrMHWZEaBHIZoiudakojLDVTHMm37gIEwG4yD169Uo7sC3c_hx6gp3mRneUtU1; TS01508fb5_28=01b2c09b80fd5264c3325b6b657e7a4ba0c56cf438812186c1622902c514feb41e738b8018160608672126e572749fcb0ad2fbb49e; TS01508fb5=01798eb63477113256840bed946de5b599cacf68a0c34359c86f4772fbc14b62a7da0fbc4bcf78b135987b0c0c9debc15bf23509ea193b52c03328c99fc8ffb89c3502da5bdf7789e90adf38f762f12dd524b70cb4ea9f0b3528bc60283708fc413c05b03be84a337fe0bef1713b8bcf149602fbdb; _gat=1',
         'Content-Type': 'application/x-www-form-urlencoded'
     }
-
     BASE_URL = 'https://www.courts.mo.gov'
+    CASE_NO_SEARCH_URL = 'https://www.courts.mo.gov/cnet/caseNoSearch.do'
     SEARCH_RESULT_URL = 'https://www.courts.mo.gov/casenet/cases/nameSearch.do'
     CASE_HEADER_URL = 'https://www.courts.mo.gov/casenet/cases/header.do'
     PARTIES_URL = 'https://www.courts.mo.gov/casenet/cases/parties.do'
@@ -70,6 +70,18 @@ class ScraperMOCourt(ScraperBase):
                             case_header[key.replace(':', '')] = value
                         key = ''
         return case_header
+
+    def get_case_details(self, case_number):
+        data = f"courtType=&countyCode=&cortCode=SW&caseNumber={case_number}"
+        response = self.GLOBAL_SESSION.post(
+            self.CASE_NO_SEARCH_URL, headers=self.HEADERS,
+            data=data
+        )
+        url_pars = parse_qs(urlparse(response.url).query)
+        return {
+            "case_number": case_number,
+            "court_id": url_pars['inputVO.courtId'][0]
+        }
 
     def get_docket_entries(self, soup):
         """ Get docket entries of case detail by parsing rendered HTML page
@@ -195,8 +207,9 @@ class ScraperMOCourt(ScraperBase):
                         'inputVO.startingRecord': startingRecord
                     })
                 except requests.ConnectionError as e:
-                    print("Connection failure : " + str(e))
-                    print("Verification with InsightFinder credentials Failed")
+                    logger.error("Connection failure : " + str(e))
+                    logger.error(
+                        "Verification with InsightFinder credentials Failed")
 
                 if r:
                     soup = BeautifulSoup(r.text, features="html.parser")
@@ -219,13 +232,19 @@ class ScraperMOCourt(ScraperBase):
         """
         case_detail = {}
         try:
+            case_detail['details'] = self.get_case_details(case['case_number'])
+        except requests.ConnectionError as e:
+            logger.error(f"Connection failure : {str(e)}")
+            raise ValueError(f"Case not found : {case['case_number']}")
+        case['court_id'] = case_detail['details']['court_id']
+        try:
             r = self.GLOBAL_SESSION.post(self.CASE_HEADER_URL, {
                 'inputVO.caseNumber': case['case_number'],
                 'inputVO.courtId': case['court_id']
             })
         except requests.ConnectionError as e:
-            print("Connection failure : " + str(e))
-            print("Verification with InsightFinder credentials Failed")
+            logger.error("Connection failure : " + str(e))
+            logger.error("Verification with InsightFinder credentials Failed")
             case_detail['case_header'] = {}
 
         if r:
@@ -239,8 +258,8 @@ class ScraperMOCourt(ScraperBase):
                 'inputVO.courtId': case['court_id']
             })
         except requests.ConnectionError as e:
-            print("Connection failure : " + str(e))
-            print("Verification with InsightFinder credentials Failed")
+            logger.error("Connection failure : " + str(e))
+            logger.error("Verification with InsightFinder credentials Failed")
             case_detail['parties'] = ''
 
         if r:
@@ -257,8 +276,8 @@ class ScraperMOCourt(ScraperBase):
                 'inputVO.courtId': case['court_id']
             })
         except requests.ConnectionError as e:
-            print("Connection failure : " + str(e))
-            print("Verification with InsightFinder credentials Failed")
+            logger.error("Connection failure : " + str(e))
+            logger.error("Verification with InsightFinder credentials Failed")
             case_detail['dockets'] = {}
 
         if r:
@@ -273,8 +292,8 @@ class ScraperMOCourt(ScraperBase):
                 'inputVO.courtId': case['court_id']
             })
         except requests.ConnectionError as e:
-            print("Connection failure : " + str(e))
-            print("Verification with InsightFinder credentials Failed")
+            logger.error("Connection failure : " + str(e))
+            logger.error("Verification with InsightFinder credentials Failed")
             case_detail['services'] = {}
 
         if r:
@@ -288,8 +307,8 @@ class ScraperMOCourt(ScraperBase):
                 'inputVO.courtId': case['court_id']
             })
         except requests.ConnectionError as e:
-            print("Connection failure : " + str(e))
-            print("Verification with InsightFinder credentials Failed")
+            logger.error("Connection failure : " + str(e))
+            logger.error("Verification with InsightFinder credentials Failed")
             case_detail['charges'] = {}
 
         if r:
@@ -314,7 +333,7 @@ class ScraperMOCourt(ScraperBase):
                     case['party_name'] = cells[1].text.strip()
                     case['case_number'] = cells[2].text.strip()
                     case['court_id'] = ''
-                    print(case['case_number'])
+                    logger.info(case['case_number'])
                     if len(cells[2].find('a').attrs['href'].split("',")) == 2:
                         case['court_id'] = \
                             cells[2].find('a').attrs['href'].split("',")[
@@ -350,8 +369,8 @@ class ScraperMOCourt(ScraperBase):
                 'inputVO.firstName': first_name,
             })
         except requests.ConnectionError as e:
-            print("Connection failure : " + str(e))
-            print("Verification with InsightFinder credentials Failed")
+            logger.error("Connection failure : " + str(e))
+            logger.error("Verification with InsightFinder credentials Failed")
             return {'error': str(e)}
 
         soup = BeautifulSoup(r.text, features="html.parser")
@@ -362,7 +381,6 @@ class ScraperMOCourt(ScraperBase):
         total_count = int(
             result_description.text.strip().split('of')[1].split('records ')[
                 0].strip())
-        print(total_count)
         if total_count <= 8:
             # parse html response and get the matched cases
             cases = self.parse_search_results(soup)
@@ -393,9 +411,9 @@ class ScraperMOCourt(ScraperBase):
                         'inputVO.totalRecords': total_count
                     })
                 except requests.ConnectionError as e:
-                    print("Connection failure : " + str(e))
-                    print("Verification with InsightFinder credentials Failed")
-                print(r)
+                    logger.error("Connection failure : " + str(e))
+                    logger.error(
+                        "Verification with InsightFinder credentials Failed")
                 if r:
                     soup = BeautifulSoup(r.text, features="html.parser")
                     page_cases = self.parse_search_results(soup)
@@ -403,7 +421,6 @@ class ScraperMOCourt(ScraperBase):
                         case['case_detail'] = self.get_case_detail(case)
                         cases.append(case)
                 startingRecord = startingRecord + 8
-                print(startingRecord)
 
         return {'result': cases}
         # print(json.dumps(result, indent=4, sort_keys=True))
@@ -428,8 +445,7 @@ class ScraperMOCourt(ScraperBase):
 
 if __name__ == "__main__":
     case = {
-        "court_id": "CT16",
-        "case_number": "703766034"
+        "case_number": "210555271"
     }
 
     print(json.dumps(ScraperMOCourt().get_case_detail(case), indent=4,

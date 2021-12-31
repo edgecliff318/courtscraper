@@ -40,7 +40,7 @@ class CaseNet:
             'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
         }
 
-        self.session = self.session.request(
+        self.session.request(
             "POST", url, headers=headers, data=payload
         )
 

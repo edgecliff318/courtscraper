@@ -4,6 +4,7 @@ from dash import html
 import dash_design_kit as ddk
 import dash_bootstrap_components as dbc
 
+
 def table_type(df_column):
     if isinstance(df_column.dtype, pd.DatetimeTZDtype):
         return 'datetime',
@@ -67,9 +68,17 @@ def make_bs_table(results, size='md'):
 
     table_body = [html.Tbody(
         list(
-            html.Tr(list(
-                html.Td(round(v, 4) if isinstance(v, float) else v) for v in
-                data.values))
+            html.Tr(
+                list(
+                    html.Td(
+                        html.A(
+                            round(v, 4) if isinstance(v, float) else v,
+                            href=f"/leads/single/{data.caseNumber}"
+                        )
+                    )
+                    for v in data.values
+                )
+            )
             for i, data in results.reset_index().iterrows()
         )
     )]
