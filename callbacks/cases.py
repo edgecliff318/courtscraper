@@ -1,5 +1,7 @@
 import logging
 import os
+import sys
+from datetime import datetime
 
 from app import app
 import pandas as pd
@@ -11,11 +13,24 @@ from dash.dependencies import Input, Output, State, ALL
 import config
 
 import components.tables
+from components import content
+from core import tools, storage
 from loader.config import ConfigLoader
 from loader.leads import CaseNet
 from scrapers.missouri import ScraperMOCourt
 
 logger = logging.Logger(__name__)
+
+sys.setrecursionlimit(10000)
+
+
+@tools.cached(storage=storage.PickleStorage())
+def get_case_datails(case_id):
+    case = {
+        "case_number": case_id
+    }
+    results = ScraperMOCourt().get_case_detail(case)
+    return results
 
 
 @app.callback(
@@ -146,11 +161,83 @@ def render_case_details(pathname):
             ]
 
         else:
-            case = {
-                "case_number": case_id
-            }
-            results = ScraperMOCourt().get_case_detail(case)
+            results = get_case_datails(case_id)
+            if results.get('ticket') is not None:
+                ticket = content.process.page(results.get('ticket'),
+                                              filemanager=False)
+            else:
+                logger.error(f"No ticket found for case {case_id}, "
+                             f"received {results}")
+                ticket = []
+            year_of_birth = results['parties'].split("Year of Birth: ")
+            if len(year_of_birth) > 1:
+                try:
+                    year_of_birth = int(year_of_birth[-1])
+                except Exception:
+                    year_of_birth = None
+
+            name = results['parties'].split(", Defendant")
+            if len(name) > 1:
+                name = name[0]
+                try:
+                    first_name = " ".join(name.split(", ")[1:])
+                    last_name = " ".join(name.split(", ")[:1])
+                except Exception:
+                    first_name = None
+                    last_name = None
+
+            def get_beenverified_link(first_name=None, last_name=None,
+                                      year=None, state="MO"):
+                state = "MO"
+                url = f"https://www.beenverified.com/app/search/person?"
+                if first_name is not None:
+                    url += f"fname={first_name}&"
+                if last_name is not None:
+                    url += f"ln={last_name}&"
+                if state is not None:
+                    url += f"state={state}&"
+                if year is not None:
+                    age = datetime.now().year - year
+                    url += f"age={age}"
+                return url
+
+            buttons = html.Div(
+                [
+                    dbc.Button(
+                        "Find on BeenVerified", color="primary",
+                        href=get_beenverified_link(
+                            first_name, last_name, year_of_birth),
+                        external_link=True,
+                        className="mb-2 ml-1"
+                    ),
+                    dbc.Button(
+                        "Send SMS", color="primary",
+                        href=get_beenverified_link(
+                            first_name, last_name, year_of_birth),
+                        external_link=True,
+                        className="mb-2 ml-1"
+                    ),
+                    dbc.Button(
+                        "Flag", color="primary",
+                        href=get_beenverified_link(
+                            first_name, last_name, year_of_birth),
+                        external_link=True,
+                        className="mb-2 ml-1"
+                    ),
+                ]
+            )
             return [
+                dbc.Col(
+                    html.H2(
+                        f"Case ID: {case_id}, Defendent: {first_name}, "
+                        f"{last_name}, {year_of_birth}",
+                        className="text-left"),
+                    width=6
+                ),
+                dbc.Col(
+                    buttons,
+                    width=6
+                ),
                 dbc.Col(
                     get_table_data(
                         f"Case {results['details']['case_number']}",
@@ -162,4 +249,5 @@ def render_case_details(pathname):
                                    results["charges"]["Charge/Judgment"]),
                     width=6
                 ),
+                *ticket
             ]

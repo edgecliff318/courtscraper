@@ -23,7 +23,9 @@ def page():
                         placeholder="Select a Court",
                         type="Dropdown", options=[],
                         value="0",
-                        multi=True
+                        multi=True,
+                        persistence_type="session",
+                        persistence=True
                     ),
                     width=8
                 ),
@@ -32,7 +34,9 @@ def page():
                         label="Date",
                         id="date-selector",
                         placeholder="Select a Date",
-                        type="DatePickerSingle"
+                        type="DatePickerSingle",
+                        persistence_type="session",
+                        persistence=True
                     ),
                     width=2
                 ),

@@ -22,7 +22,7 @@ def generate_form_group(label, id, placeholder, type="Input", options=None,
             id=id,
             options=options,
             value=value
-                  **kwargs
+                  ** kwargs
         )
     elif type == "Dropdown":
         field = dcc.Dropdown(
@@ -42,46 +42,50 @@ def generate_form_group(label, id, placeholder, type="Input", options=None,
     )
 
 
-def page(data: dict = None):
-    file_manager_card = dbc.Row(
-        dbc.Col(
-            dbc.Card(
-                [
-                    dbc.CardHeader(
-                        html.H5("Upload")
-                    ),
-                    dbc.CardBody(
-                        [
-                            dcc.Upload(
-                                id="upload-data",
-                                children=html.Div(
-                                    [
-                                        "Drag and drop or click to select a "
-                                        "file "
-                                        "to "
-                                        "upload."]
+def page(data: dict = None, filemanager=True):
+    if filemanager:
+        file_manager_card = dbc.Row(
+            dbc.Col(
+                dbc.Card(
+                    [
+                        dbc.CardHeader(
+                            html.H5("Upload")
+                        ),
+                        dbc.CardBody(
+                            [
+                                dcc.Upload(
+                                    id="upload-data",
+                                    children=html.Div(
+                                        [
+                                            "Drag and drop or click to "
+                                            "select a "
+                                            "file "
+                                            "to "
+                                            "upload."]
+                                    ),
+                                    style={
+                                        "width": "100%",
+                                        "height": "60px",
+                                        "lineHeight": "60px",
+                                        "borderWidth": "1px",
+                                        "borderStyle": "dashed",
+                                        "borderRadius": "5px",
+                                        "textAlign": "center",
+                                        "margin": "10px",
+                                    },
+                                    multiple=True,
                                 ),
-                                style={
-                                    "width": "100%",
-                                    "height": "60px",
-                                    "lineHeight": "60px",
-                                    "borderWidth": "1px",
-                                    "borderStyle": "dashed",
-                                    "borderRadius": "5px",
-                                    "textAlign": "center",
-                                    "margin": "10px",
-                                },
-                                multiple=True,
-                            ),
-                            html.H6("Files Detected"),
-                            html.Ul(id="file-list"),
-                        ]
-                    )
-                ]
-            )
-        ),
-        className="mb-2"
-    )
+                                html.H6("Files Detected"),
+                                html.Ul(id="file-list"),
+                            ]
+                        )
+                    ]
+                )
+            ),
+            className="mb-2"
+        )
+    else:
+        file_manager_card = None
     message_default = "Enter a value ..."
 
     buttons = dbc.Row(
@@ -184,15 +188,18 @@ def page(data: dict = None):
         ]
     )
 
-    return html.Div(
-        dbc.Container(
-            [
-                file_manager_card,
-                parser_card
-            ]
-            ,
-            fluid=True,
-            className="py-3",
-        ),
-        className="p-3 bg-light rounded-3",
+    results = []
+
+    if file_manager_card is not None:
+        results.append(
+            dbc.Col(
+                file_manager_card, width=12
+            )
+        )
+    results.append(
+        dbc.Col(
+            parser_card, width=12
+        )
     )
+
+    return results

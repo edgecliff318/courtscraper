@@ -26,7 +26,7 @@ def render_page_content(pathname):
         else:
             filename = parse.unquote(filename)
             data = TicketParser(filename).parse()
-        return content.process.page(data)
+        return dbc.Row(content.process.page(data))
     elif pathname == "/history":
         return content.history.page()
     elif pathname == "/leads":

@@ -4,10 +4,13 @@ from urllib.parse import parse_qs, urlparse
 import requests
 import json
 from bs4 import BeautifulSoup
+from pdf2image import convert_from_path
 
 import config
 from base import NameNormalizer, TextNormalizer, ScraperBase, \
     InitializedSession
+from core.parser import TicketAnalyzer
+from loader.tickets import TicketParser
 
 logger = logging.Logger(__name__)
 
@@ -112,17 +115,20 @@ class ScraperMOCourt(ScraperBase):
                 f"{docket_di}"
             )
             try:
-                self.download(docket_file_url)
+                docket_filepath = self.download(docket_file_url)
+
             except Exception as e:
                 logger.error(f"Failed to download and save file"
                              f" {docket_file_url} with error {e}")
+                docket_filepath = None
 
             dockets.append(
                 {
                     "docket_content": content,
                     "docket_number": docket_di,
                     "docket_url": self.BASE_URL + a.attrs['href'],
-                    "docket_file_url": docket_file_url
+                    "docket_file_url": docket_file_url,
+                    "docket_filepath": docket_filepath
                 }
             )
         return docket_entries, dockets
@@ -284,6 +290,8 @@ class ScraperMOCourt(ScraperBase):
             soup = BeautifulSoup(r.text, features="html.parser")
             case_detail['dockets'], \
             case_detail['dockets_links'] = self.get_docket_entries(soup)
+            case_detail['ticket'] = self.parse_ticket(
+                case_detail['dockets_links'], case['case_number'])
             r = None
 
         try:
@@ -441,6 +449,31 @@ class ScraperMOCourt(ScraperBase):
                     f.flush()
         logger.info(f"File saved to {filepath}")
         return filepath
+
+    def parse_ticket(self, docket_links, case_number):
+        for docket in docket_links:
+            if 'citation' in docket.get('docket_content', ['',])[0].lower():
+                docket_filepath = docket.get('docket_filepath')
+                try:
+                    images = convert_from_path(docket_filepath)
+                    if images:
+                        image = images[0]
+                        docket_image_filepath = config.data_path.joinpath(
+                            f"{case_number}.png")
+                        image.save(
+                            docket_image_filepath,
+                            'PNG'
+                        )
+                        ticket_parser = TicketParser(
+                            filename=None,
+                            input_file_path=docket_image_filepath,
+                            output_file_path=config.data_path.joinpath(
+                            f"{case_number}.json")
+                        )
+                        return ticket_parser.parse()
+                except Exception as e :
+                    logger.error(e)
+                    return {'error': 'Failed to parse ticket'}
 
 
 if __name__ == "__main__":

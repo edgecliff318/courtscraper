@@ -33,10 +33,16 @@ class TicketsManager(object):
 
 
 class TicketParser(object):
-    def __init__(self, filename):
+    def __init__(self, filename, input_file_path=None, output_file_path=None):
         self.filename = filename
-        self.input_file_path = os.path.join(config.upload_path, filename)
-        self.output_file_path = os.path.join(config.output_path, filename)
+        if input_file_path is None:
+            self.input_file_path = os.path.join(config.upload_path, filename)
+        else:
+            self.input_file_path = input_file_path
+        if output_file_path is None:
+            self.output_file_path = os.path.join(config.output_path, filename)
+        else:
+            self.output_file_path = output_file_path
 
     def get_fields(self, results: dict):
         return [
