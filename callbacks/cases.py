@@ -162,6 +162,9 @@ def render_case_details(pathname):
 
         else:
             results = get_case_datails(case_id)
+            if results.get('ticket', {}).get("image") is None:
+                results = get_case_datails(case_id, no_cache=True)
+
             if results.get('ticket') is not None:
                 ticket = content.process.page(results.get('ticket'),
                                               filemanager=False)
@@ -181,12 +184,19 @@ def render_case_details(pathname):
                 name = name[0]
                 try:
                     first_name = " ".join(name.split(", ")[1:])
+                    r = first_name.split(" ")
+                    if len(r) >= 2:
+                        first_name = r[0]
+                        middle_name = r[1]
+                    else:
+                        middle_name = ""
                     last_name = " ".join(name.split(", ")[:1])
                 except Exception:
                     first_name = None
                     last_name = None
 
             def get_beenverified_link(first_name=None, last_name=None,
+                                      middle_name=None,
                                       year=None, state="MO"):
                 state = "MO"
                 url = f"https://www.beenverified.com/app/search/person?"
@@ -194,6 +204,8 @@ def render_case_details(pathname):
                     url += f"fname={first_name}&"
                 if last_name is not None:
                     url += f"ln={last_name}&"
+                if middle_name is not None:
+                    url += f"mn={middle_name}&"
                 if state is not None:
                     url += f"state={state}&"
                 if year is not None:
@@ -206,7 +218,7 @@ def render_case_details(pathname):
                     dbc.Button(
                         "Find on BeenVerified", color="primary",
                         href=get_beenverified_link(
-                            first_name, last_name, year_of_birth),
+                            first_name, last_name, middle_name, year_of_birth),
                         external_link=True,
                         className="mb-2 ml-1"
                     ),
@@ -245,8 +257,11 @@ def render_case_details(pathname):
                     width=6
                 ),
                 dbc.Col(
-                    get_table_data("Charges",
-                                   results["charges"]["Charge/Judgment"]),
+                    get_table_data(
+                        "Charges",
+                        results.get(
+                            "charges", {}
+                        ).get("Charge/Judgment", {})),
                     width=6
                 ),
                 *ticket

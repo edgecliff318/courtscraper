@@ -58,6 +58,9 @@ def cached(storage: Storage = None, memory_cache=True):
             kwargs_with_fn["fn_module"] = fn.__module__
             kwargs_with_fn["fn_name"] = fn.__name__
             hash_label = hash_multiple(args, kwargs_with_fn)
+            if kwargs.get("no_cache", False):
+                kwargs.pop("no_cache")
+                return fn(*args, **kwargs)
 
             if memory_cache:
                 #  exists in memory cache
