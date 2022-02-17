@@ -162,8 +162,11 @@ def render_case_details(pathname):
 
         else:
             results = get_case_datails(case_id)
-            if results.get('ticket', {}).get("image") is None:
+            if results.get('ticket') is None:
                 results = get_case_datails(case_id, no_cache=True)
+                if results.get('ticket') is not None:
+                    if results.get('ticket', {}).get("image") is None:
+                        results = get_case_datails(case_id, no_cache=True)
 
             if results.get('ticket') is not None:
                 ticket = content.process.page(results.get('ticket'),
