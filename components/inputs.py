@@ -12,6 +12,13 @@ def generate_form_group(label, id, placeholder, type="Input", options=None,
             value=value,
             **kwargs
         )
+    elif type == "Textarea":
+        field = dbc.Textarea(
+            id=id,
+            placeholder=placeholder,
+            value=value,
+            **kwargs
+        )
 
     elif type == "Select":
         field = dbc.Select(

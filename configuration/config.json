@@ -1080,5 +1080,19 @@
       "countycode": "WRI",
       "label": "Wright County - 44th Judicial Circuit"
     }
+  ],
+  "messages": [
+    {
+      "label": "Friendly",
+      "value": "Hi, I am a friendly message."
+    },
+    {
+      "label": "Formal",
+      "value": "Hi, I am a formal message."
+    },
+    {
+      "label": "New Formal",
+      "value": "Hi, I am a new formal message."
+    }
   ]
 }

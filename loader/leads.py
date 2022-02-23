@@ -1,5 +1,6 @@
 import datetime
 import os
+import json
 
 import requests
 
@@ -101,6 +102,22 @@ class CaseNet:
             data=payload,
         )
 
-
-
         return response.json()
+
+
+class LeadsLoader(object):
+    def __init__(self, path: str):
+        self.path = path
+        self.data = None
+
+    def load(self):
+        with open(self.path, 'r') as f:
+            self.data = json.load(f)
+        return self.data
+
+    def save(self, data):
+        with open(self.path, 'w') as f:
+            json.dump(data, f)
+
+    def get_interactions(self, case_number):
+        return self.data.get(case_number, {}).get("interactions", [])
