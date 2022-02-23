@@ -36,6 +36,7 @@ def set_logging(app, logging_level):
 
 
 app = dash.Dash(name="Record Wash", external_stylesheets=[dbc.themes.ZEPHYR],
+                suppress_callback_exceptions=True,
                 **config.pathname_params)
 
 auth = AdvancedAuth(
