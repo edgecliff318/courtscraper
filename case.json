@@ -1,0 +1,40 @@
+{
+  "details": {
+    "case_number": 210555271,
+    "court_id": "CT16"
+  },
+  "case_header": {
+    "Judge/Commissioner Assigned": "HELM, GARRY LEE",
+    "Date Filed": "12/30/2021",
+    "Location": "Sugar Creek Municipal",
+    "Case Type": "Municipal Ordinance - Traffic",
+    "Disposition": "Not Disposed",
+    "Financial Information ": ""
+  },
+  "parties": "NETZ, STEVEN DAVID, Defendant\u00a0\u00a0\u00a0\n\n\n\n\n\n\n\n\n4330 NORTON AVEINDEPENDENCE, MO 64130\n\nYear of Birth: 1971",
+  "dockets": [
+    "12/30/2021\u00a0\r \r \r \r Initial Appearance",
+    "Scheduled For:\r02/08/2022;\r\r \u00a05:00 PM\r;\u00a0\r  GARRY LEE HELM;\u00a0\r\r Sugar Creek Municipal",
+    "Information Filed by Citation"
+  ],
+  "dockets_links": [
+    {
+      "docket_content": [
+        "Information Filed by Citation"
+      ],
+      "docket_number": "19604285",
+      "docket_url": "https://www.courts.mo.gov/fv/s/fileviewer.do?courtCode=16&ci=210555271&di=19604285&so=D",
+      "docket_file_url": "https://www.courts.mo.gov/fv/c/?courtCode=16&di=19604285"
+    }
+  ],
+  "services": [],
+  "charges": {
+    "Charge/Judgment": {
+      "Description": "Exceeded Posted Speed Limit (20-25 Mph Over) \r{\u00a0Ordinance\u00a0RSMo:\u00a0Not Available\u00a0}",
+      "Date": "12/29/2021",
+      "Code": "ORD304.0-420N202154.0",
+      "Ticket\u00a0Number": "210555271",
+      "Arresting\u00a0Agency": "SUGAR CREEK PD"
+    }
+  }
+}

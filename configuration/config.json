@@ -250,7 +250,8 @@
       "courtdesc": "City of St. Louis - 22nd Judicial Circuit",
       "courtmessage": "",
       "countycode": "STL",
-      "label": "City of St. Louis - 22nd Judicial Circuit"
+      "label": "City of St. Louis - 22nd Judicial Circuit",
+      "enabled": true
     },
     {
       "value": "SMPDB0004_CT01",
@@ -268,7 +269,8 @@
       "courtdesc": "Clay County - 7th Judicial Circuit",
       "courtmessage": "",
       "countycode": "CLY",
-      "label": "Clay County - 7th Judicial Circuit"
+      "label": "Clay County - 7th Judicial Circuit",
+      "enabled": true
     },
     {
       "value": "SMPDB0005_CT43",
@@ -484,6 +486,7 @@
       "courtdesc": "Jackson County - 16th Judicial Circuit",
       "courtmessage": "",
       "countycode": "JAK",
+      "enabled": true,
       "label": "Jackson County - 16th Judicial Circuit"
     },
     {
@@ -961,7 +964,8 @@
       "courtdesc": "St. Louis County - 21st Judicial Circuit",
       "courtmessage": "",
       "countycode": "SLC",
-      "label": "St. Louis County - 21st Judicial Circuit"
+      "label": "St. Louis County - 21st Judicial Circuit",
+      "enabled": true
     },
     {
       "value": "SMPDB0005_CT24",

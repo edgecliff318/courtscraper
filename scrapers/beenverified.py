@@ -9,21 +9,28 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 from commonregex import CommonRegex
 
+from core import tools, storage
+
 logger = logging.Logger(__name__)
 
 
 class BeenVerifiedScrapper:
-    def __init__(self):
-        options = Options()
-        options.add_argument("--headless")
-        options.add_argument("--disable-gpu")
-        options.add_argument("--no-sandbox")
-        options.add_argument("enable-automation")
-        options.add_argument("--disable-infobars")
-        options.add_argument("--disable-dev-shm-usage")
-        self.driver = webdriver.Chrome(options=options)
+    def __init__(self, cache=False):
+        self.options = Options()
+        self.options.add_argument("--headless")
+        self.options.add_argument("--disable-gpu")
+        self.options.add_argument("--no-sandbox")
+        self.options.add_argument("enable-automation")
+        self.options.add_argument("--disable-infobars")
+        self.options.add_argument("--disable-dev-shm-usage")
         self.vars = {}
-        self.login()
+        self.cache = cache
+        if not cache:
+            self.driver = webdriver.Chrome(options=self.options)
+            self.login()
+
+    def __hash__(self):
+        return 1
 
     def teardown(self):
         self.driver.quit()
@@ -43,12 +50,17 @@ class BeenVerifiedScrapper:
             "sam@masfirm.net")
         # 5 | type | id=login-password | Marcus1995!
         self.driver.find_element(By.ID, "login-password").send_keys(
-            "Marcus1995!")
+            "Mam2022!")
         # 6 | click on connect
         self.driver.find_element(By.ID, "submit").click()
         sleep(5)
 
+    @tools.cached(storage=storage.PickleStorage())
     def retrieve_information(self, link):
+        if self.cache:
+            self.driver = webdriver.Chrome(options=self.options)
+            self.login()
+
         output = {
             "name": "",
             "details": "",
@@ -98,7 +110,8 @@ class BeenVerifiedScrapper:
         try:
             informations = [
                 i.text for i in self.driver.find_elements(
-                    By.CSS_SELECTOR, ".report-overview__section-summary-content")
+                    By.CSS_SELECTOR,
+                    ".report-overview__section-summary-content")
             ]
             output["address"] = informations[0]
             output["phone"] = informations[1]
@@ -116,7 +129,6 @@ class BeenVerifiedScrapper:
         except selenium.common.exceptions.NoSuchElementException:
             logger.error(f"No details found for {link}")
         return output
-
 
 
 if __name__ == "__main__":
