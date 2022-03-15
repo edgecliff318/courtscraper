@@ -1,4 +1,5 @@
 import datetime
+import signal
 import os
 import random
 import sys
@@ -15,9 +16,22 @@ from loader.config import ConfigLoader
 from loader.leads import CaseNet
 from scrapers.beenverified import BeenVerifiedScrapper
 
+
+class GracefulKiller:
+    kill_now = False
+
+    def __init__(self):
+        signal.signal(signal.SIGINT, self.exit_gracefully)
+        signal.signal(signal.SIGTERM, self.exit_gracefully)
+
+    def exit_gracefully(self, *args):
+        self.kill_now = True
+
+
 app = typer.Typer()
 
 sys.setrecursionlimit(10000)
+
 
 @app.command()
 def retrieve():
@@ -28,6 +42,8 @@ def retrieve():
         text="Starting the retrieve data process ...",
         spinner="dots"
     )
+    killer = GracefulKiller()
+
     config_loader = ConfigLoader(
         path=os.path.join(config.config_path, "config.json"))
 
@@ -40,7 +56,7 @@ def retrieve():
     scrapper = BeenVerifiedScrapper(cache=False)
     spinner.succeed(f"Logged to BeenVerified")
 
-    while True:
+    while not killer.kill_now:
         tz = pytz.timezone('US/Central')
         date = str(datetime.datetime.now(tz).date())
         spinner.start()
@@ -100,8 +116,12 @@ def retrieve():
             spinner.fail("Retrieve data process failed")
             print(e)
             sleep(random.randint(1, 10))
+        except BaseException as e:
+            spinner.fail("Retrieve data process failed")
+            print(e)
+            sleep(random.randint(1, 10))
 
-        scrapper.teardown()
+    scrapper.teardown()
 
 
 if __name__ == "__main__":
