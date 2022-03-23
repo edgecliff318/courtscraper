@@ -1,7 +1,7 @@
 import logging
 import os
 import sys
-from datetime import datetime
+from datetime import date, datetime
 
 from app import app
 import pandas as pd
@@ -288,11 +288,14 @@ def render_case_details(pathname):
                              f"received {results}")
                 ticket = []
             year_of_birth = results['parties'].split("Year of Birth: ")
+            age = None
             if len(year_of_birth) > 1:
                 try:
                     year_of_birth = int(year_of_birth[-1])
+                    age = date.today().year - year_of_birth
                 except Exception:
                     year_of_birth = None
+                    age = None
             name = results['parties'].split(", Defendant")
             first_name, last_name, link = get_verified_link(
                 name, year_of_birth
@@ -311,33 +314,33 @@ def render_case_details(pathname):
             )
 
             return [
-                       dbc.Col(
-                           html.H2(
-                               f"Case ID: {case_id}, Defendent: {first_name}, "
-                               f"{last_name}, {year_of_birth}",
-                               className="text-left"),
-                           width=8
-                       ),
-                       dbc.Col(
-                           buttons,
-                           width=4
-                       ),
-                       dbc.Col(
-                           get_table_data(
-                               f"Case {results['details']['case_number']}",
-                               results['case_header']),
-                           width=6
-                       ),
-                       dbc.Col(
-                           get_table_data(
-                               "Charges",
-                               results.get(
-                                   "charges", {}
-                               ).get("Charge/Judgment", {})),
-                           width=6
-                       ),
-                       *ticket
-                   ], ""
+                dbc.Col(
+                    html.H2(
+                        f"Case ID: {case_id}, Defendent: {first_name}, "
+                        f"{last_name}, {year_of_birth} ({age})",
+                        className="text-left"),
+                    width=8
+                ),
+                dbc.Col(
+                    buttons,
+                    width=4
+                ),
+                dbc.Col(
+                    get_table_data(
+                        f"Case {results['details']['case_number']}",
+                        results['case_header']),
+                    width=6
+                ),
+                dbc.Col(
+                    get_table_data(
+                        "Charges",
+                        results.get(
+                            "charges", {}
+                        ).get("Charge/Judgment", {})),
+                    width=6
+                ),
+                *ticket
+            ], ""
 
 
 @app.callback(

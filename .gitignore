@@ -67,6 +67,6 @@ archive
 .python_history
 .vscode-server/
 .wget-hsts
-data/
+data
 docker-compose.yml
 nohup.out

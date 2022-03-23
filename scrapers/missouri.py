@@ -64,7 +64,7 @@ class ScraperMOCourt(ScraperBase):
             key = ''
             value = ''
             for cell in detail_table.findAll('td'):
-                if cell.has_key('class'):
+                if cell.has_attr('class'):
                     if cell['class'][0] == 'detailLabels':
                         key = cell.text.strip()
                     elif cell['class'][0] == 'detailData':
@@ -149,7 +149,7 @@ class ScraperMOCourt(ScraperBase):
                     case_charges[category] = {}
                 else:
                     for cell in row.findAll('td'):
-                        if cell.has_key('class'):
+                        if cell.has_attr('class'):
                             if cell['class'][0] == 'detailLabels':
                                 key = cell.text.strip()
                             elif cell['class'][0] == 'detailData':
@@ -176,7 +176,7 @@ class ScraperMOCourt(ScraperBase):
                     separator = table.find('td',
                                            class_='detailSeperator').text.strip()
                     for cell in table.findAll('td'):
-                        if cell.has_key('class'):
+                        if cell.has_attr('class'):
                             if cell['class'][0] == 'detailLabels':
                                 key = cell.text.strip()
                             elif cell['class'][0] == 'detailData':
@@ -222,8 +222,8 @@ class ScraperMOCourt(ScraperBase):
                     service_tables = soup.findAll('table',
                                                   class_='detailRecordTable')
                     case_services = case_services + \
-                                    self.parse_case_service_table(
-                                        service_tables)
+                        self.parse_case_service_table(
+                            service_tables)
                 startingRecord = startingRecord + 2
         else:
             service_tables = soup.findAll('table', class_='detailRecordTable')
@@ -289,7 +289,7 @@ class ScraperMOCourt(ScraperBase):
         if r:
             soup = BeautifulSoup(r.text, features="html.parser")
             case_detail['dockets'], \
-            case_detail['dockets_links'] = self.get_docket_entries(soup)
+                case_detail['dockets_links'] = self.get_docket_entries(soup)
             case_detail['ticket'] = self.parse_ticket(
                 case_detail['dockets_links'], case['case_number'])
             r = None
@@ -335,7 +335,7 @@ class ScraperMOCourt(ScraperBase):
         case = {}
         for row in rows:
             if 'align' in row.attrs and row.attrs[
-                'align'] == 'left' and not row.find('td', class_='header'):
+                    'align'] == 'left' and not row.find('td', class_='header'):
                 cells = row.findAll('td')
                 if len(row.findAll('td')) == 7:
                     case['party_name'] = cells[1].text.strip()
@@ -369,7 +369,8 @@ class ScraperMOCourt(ScraperBase):
         """
         first_name = NameNormalizer(first_name).normalized()
         last_name = NameNormalizer(last_name).normalized()
-        if dob: dob = dob.strip()
+        if dob:
+            dob = dob.strip()
 
         try:
             r = self.GLOBAL_SESSION.post(self.SEARCH_RESULT_URL, {
@@ -448,11 +449,18 @@ class ScraperMOCourt(ScraperBase):
                     f.write(chunk)
                     f.flush()
         logger.info(f"File saved to {filepath}")
+
+        try:
+            files = {'file': open(filepath, 'rb')}
+            data = requests.post(config.remote_data_upload_url, files=files)
+        except Exception as e:
+            logger.error(f"Error uploading file to remote server : {e}")
+
         return filepath
 
     def parse_ticket(self, docket_links, case_number):
         for docket in docket_links:
-            if 'citation' in docket.get('docket_content', ['',])[0].lower():
+            if 'citation' in docket.get('docket_content', ['', ])[0].lower():
                 docket_filepath = docket.get('docket_filepath')
                 try:
                     images = convert_from_path(docket_filepath)
@@ -468,10 +476,17 @@ class ScraperMOCourt(ScraperBase):
                             filename=None,
                             input_file_path=docket_image_filepath,
                             output_file_path=config.data_path.joinpath(
-                            f"{case_number}.json")
+                                f"{case_number}.json")
                         )
+                        try:
+                            files = {'file': open(docket_image_filepath, 'rb')}
+                            data = requests.post(
+                                config.remote_data_upload_url, files=files)
+                        except Exception as e:
+                            logger.error(
+                                f"Error uploading file to remote server : {e}")
                         return ticket_parser.parse()
-                except Exception as e :
+                except Exception as e:
                     logger.error(e)
                     return {'error': 'Failed to parse ticket'}
 
