@@ -182,7 +182,7 @@ class TicketAnalyzer:
                         attribute.replace("_", "-")
                     ] = getattr(self, f"get_{attribute}")(output)
                 except Exception as e:
-                    logger.error(f"A problem occurred while trying to extract "
-                                 f"{attribute} from {output}")
+                    logger.info(f"A problem occurred while trying to extract "
+                                f"{attribute} from {output}")
 
         return results

@@ -4,6 +4,8 @@ import os
 import pickle
 from pathlib import Path
 
+import requests
+
 logger = logging.Logger(__name__)
 
 
@@ -45,7 +47,8 @@ class PickleStorage(Storage):
             with open(self.filepath(hash_label), 'rb') as fp:
                 data = pickle.load(fp)
         except Exception as e:
-            logger.error(f"Couldn't load pickle data for {hash_label} with error {e}")
+            logger.error(
+                f"Couldn't load pickle data for {hash_label} with error {e}")
             data = None
         return data
 
@@ -56,5 +59,37 @@ class PickleStorage(Storage):
                 pickle.dump(data, fp)
                 return True
         except Exception as e:
-            logger.error(f"Couldn't load pickle data for {hash_label} with error {e}")
+            logger.error(
+                f"Couldn't load pickle data for {hash_label} with error {e}")
+            return False
+
+
+class RemotePickleStorage(PickleStorage):
+    def __init__(self, folder="temp", url="http://localhost:8060/upload?cache=true"):
+        self.folder = folder
+        self.ensure_folder(folder)
+        self.url = url
+
+    def save(self, hash_label, data):
+        try:
+            logger.info(f"Saving to pickle cache")
+            with open(self.filepath(hash_label), 'wb') as fp:
+                pickle.dump(data, fp)
+
+            try:
+                files = {'file': open(self.filepath(hash_label), 'rb')}
+
+                data = requests.post(
+                    self.url,
+                    files=files
+                )
+                return True
+            except Exception as e:
+                logger.error(
+                    f"Couldn't upload pickle data for {hash_label} with error {e}")
+                return False
+
+        except Exception as e:
+            logger.error(
+                f"Couldn't load pickle data for {hash_label} with error {e}")
             return False
