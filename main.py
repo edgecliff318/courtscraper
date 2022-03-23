@@ -104,7 +104,7 @@ def retrieve():
                             data = scrapper.retrieve_information(link)
                         except Exception as e:
                             spinner.fail(
-                                f"Failed to retrieve information for case "
+                                f"Failed to retrieve information for case from beenverified"
                                 f"{case_id}")
                         spinner.succeed(
                             "Retrieve data from BeenVerified finished "

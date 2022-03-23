@@ -6,7 +6,7 @@ import config
 
 class InitializedSession(requests.Session):
     """ A pre-initialized session. 
-    
+
     This is a specialized subclass of Requests.Session
     which performs initialization when instantiated
     with some values.

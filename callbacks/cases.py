@@ -251,7 +251,7 @@ def render_case_details(pathname):
         error = False
         message = ""
         try:
-            case_id = int(case_id)
+            case_id = str(case_id)
         except:
             message = "Case ID must be a number"
             error = True

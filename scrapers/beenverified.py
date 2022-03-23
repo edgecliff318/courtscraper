@@ -1,4 +1,5 @@
 import logging
+import os
 from time import sleep
 
 import selenium.common.exceptions
@@ -17,7 +18,7 @@ logger = logging.Logger(__name__)
 class BeenVerifiedScrapper:
     def __init__(self, cache=False):
         self.options = Options()
-        self.options.add_argument("--headless")
+        # self.options.add_argument("--headless")
         self.options.add_argument("--disable-gpu")
         self.options.add_argument("--no-sandbox")
         self.options.add_argument("enable-automation")
@@ -25,6 +26,7 @@ class BeenVerifiedScrapper:
         self.options.add_argument("--disable-dev-shm-usage")
         self.vars = {}
         self.cache = cache
+        self.driver = None
         if not cache:
             self.driver = webdriver.Chrome(options=self.options)
             self.login()
@@ -33,7 +35,8 @@ class BeenVerifiedScrapper:
         return 1
 
     def teardown(self):
-        self.driver.quit()
+        if self.driver is not None:
+            self.driver.quit()
 
     def login(self):
         self.driver.get("https://www.beenverified.com/")
@@ -47,10 +50,13 @@ class BeenVerifiedScrapper:
         ).click()
         # 4 | type | id=login-email | sam@masfirm.net
         self.driver.find_element(By.ID, "login-email").send_keys(
-            "sam@masfirm.net")
+            os.environ.get("BEEN_VERIFIED_EMAIL",
+                           "ayoub.ennassiri@neoinvest.ai")
+        )
         # 5 | type | id=login-password | Marcus1995!
         self.driver.find_element(By.ID, "login-password").send_keys(
-            "Mam2022!")
+            os.environ.get("BEEN_VERIFIED_PASSWORD", "Murex2019!")
+        )
         # 6 | click on connect
         self.driver.find_element(By.ID, "submit").click()
         sleep(5)

@@ -55,3 +55,18 @@ htmlcov
 archive
 
 .ssh
+
+.bash_history
+.bash_logout
+.bashrc
+.cache/
+.config/
+.local/
+.pki/
+.profile
+.python_history
+.vscode-server/
+.wget-hsts
+data/
+docker-compose.yml
+nohup.out
