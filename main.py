@@ -1,4 +1,5 @@
 import datetime
+import logging
 import signal
 import os
 import random
@@ -15,6 +16,12 @@ from core.cases import get_case_datails, get_verified_link, \
 from loader.config import ConfigLoader
 from loader.leads import CaseNet
 from scrapers.beenverified import BeenVerifiedScrapper
+
+filehandler = logging.FileHandler("app.log")
+formatter = logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+logging.RootLogger(level=config.logging_level).addHandler(filehandler)
 
 
 class GracefulKiller:
@@ -58,7 +65,8 @@ def retrieve():
 
     while not killer.kill_now:
         tz = pytz.timezone('US/Central')
-        date = str(datetime.datetime.now(tz).date())
+        date = str(datetime.datetime.now(tz).date() -
+                   datetime.timedelta(days=1))
         spinner.start()
 
         try:
@@ -85,41 +93,44 @@ def retrieve():
                         case_id = case.get("caseNumber")
                         if case_id in cases:
                             continue
-                        results = get_case_datails(case_id)
+
+                        cases.add(case_id)
+                        try:
+                            results = get_case_datails(case_id)
+                        except Exception as e:
+                            spinner.fail(
+                                f"Failed to retrieve information for case from CaseNet "
+                                f"{case_id} - error {e}")
                         spinner.succeed(
                             f"Succeeded to get details for case "
                             f"{case_id}")
-                        year_of_birth = results['parties'].split(
-                            "Year of Birth: ")
-                        if len(year_of_birth) > 1:
-                            try:
-                                year_of_birth = int(year_of_birth[-1])
-                            except Exception:
-                                year_of_birth = None
-                        name = results['parties'].split(", Defendant")
-                        first_name, last_name, link = get_verified_link(
-                            name, year_of_birth
-                        )
+
                         try:
+                            year_of_birth = results['parties'].split(
+                                "Year of Birth: ")
+                            if len(year_of_birth) > 1:
+                                try:
+                                    year_of_birth = int(year_of_birth[-1])
+                                except Exception:
+                                    year_of_birth = None
+                            name = results['parties'].split(", Defendant")
+                            first_name, last_name, link = get_verified_link(
+                                name, year_of_birth
+                            )
                             data = scrapper.retrieve_information(link)
                         except Exception as e:
                             spinner.fail(
-                                f"Failed to retrieve information for case "
-                                f"{case_id}")
+                                f"Failed to retrieve information for case from BeenVerified "
+                                f"{case_id} - error {e}")
                         spinner.succeed(
                             "Retrieve data from BeenVerified finished "
                             "successfully")
-                        cases.add(case_id)
                         sleep(random.randint(1, 10))
 
         except Exception as e:
-            spinner.fail("Retrieve data process failed")
-            print(e)
+            spinner.fail(f"Retrieve data process failed - error {e}")
             sleep(random.randint(1, 10))
-        except BaseException as e:
-            spinner.fail("Retrieve data process failed")
-            print(e)
-            sleep(random.randint(1, 10))
+        sleep(random.randint(1000, 2000))
 
     scrapper.teardown()
 
