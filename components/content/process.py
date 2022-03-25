@@ -22,7 +22,7 @@ def generate_form_group(label, id, placeholder, type="Input", options=None,
             id=id,
             options=options,
             value=value
-                  ** kwargs
+            ** kwargs
         )
     elif type == "Dropdown":
         field = dcc.Dropdown(
@@ -128,7 +128,7 @@ def page(data: dict = None, filemanager=True):
                                 },
                                 placeholder=message_default,
                                 value=e.get('field-value')
-                            ) for e in data.get('form')
+                            ) for e in data.get('form', [])
                         ]
                     ),
 
@@ -143,7 +143,8 @@ def page(data: dict = None, filemanager=True):
         ]
     )
 
-    image_filename = data.get("image")  # replace with your own image
+    image_filename = config.data_path.joinpath(
+        data.get("image").name)  # replace with your own image
     if image_filename is not None:
         encoded_image = base64.b64encode(
             open(image_filename,
