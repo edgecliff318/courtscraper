@@ -10,6 +10,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 from commonregex import CommonRegex
 
+import config
 from core import tools, storage
 
 logger = logging.Logger(__name__)
@@ -59,9 +60,9 @@ class BeenVerifiedScrapper:
         )
         # 6 | click on connect
         self.driver.find_element(By.ID, "submit").click()
-        sleep(5)
+        sleep(30)
 
-    @tools.cached(storage=storage.PickleStorage())
+    @tools.cached(storage=storage.RemotePickleStorage(url=config.remote_upload_url))
     def retrieve_information(self, link):
         if self.cache:
             self.driver = webdriver.Chrome(options=self.options)
@@ -71,7 +72,8 @@ class BeenVerifiedScrapper:
             "name": "",
             "details": "",
             "phone": "",
-            "exact_match": False
+            "exact_match": True,
+            "error": True
         }
         # 7 | open the search screen
         self.driver.get(link)
@@ -108,7 +110,7 @@ class BeenVerifiedScrapper:
             By.CSS_SELECTOR, f"#{attribute_id} .btn"
         ).click()
 
-        WebDriverWait(self.driver, 30).until(
+        WebDriverWait(self.driver, 120).until(
             expected_conditions.presence_of_element_located(
                 (By.CSS_SELECTOR, ".report-header")))
         # 12 | click | css=.report_section__label_title |
@@ -125,6 +127,7 @@ class BeenVerifiedScrapper:
 
         except selenium.common.exceptions.NoSuchElementException:
             logger.error(f"No informations found for {link}")
+
             return output
 
         try:
@@ -134,6 +137,8 @@ class BeenVerifiedScrapper:
             output["details"] = summary
         except selenium.common.exceptions.NoSuchElementException:
             logger.error(f"No details found for {link}")
+            return output
+        output["error"] = False
         return output
 
 

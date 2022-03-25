@@ -1,13 +1,16 @@
+from distutils.command.config import config
 import logging
 from datetime import datetime
 
+import config
 from core import tools, storage
 from scrapers.beenverified import BeenVerifiedScrapper
 from scrapers.missouri import ScraperMOCourt
 
 logger = logging.Logger(__name__)
 
-@tools.cached(storage=storage.PickleStorage())
+
+@tools.cached(storage=storage.RemotePickleStorage(url=config.remote_upload_url))
 def get_case_datails(case_id):
     case = {
         "case_number": case_id
@@ -16,7 +19,7 @@ def get_case_datails(case_id):
     return results
 
 
-@tools.cached(storage=storage.PickleStorage())
+@tools.cached(storage=storage.RemotePickleStorage(url=config.remote_upload_url))
 def get_lead_single_been_verified(link):
     scrapper = BeenVerifiedScrapper(cache=True)
     try:
