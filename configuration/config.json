@@ -306,7 +306,8 @@
       "courtdesc": "Crawford County - 42nd Judicial Circuit",
       "courtmessage": "",
       "countycode": "CFD",
-      "label": "Crawford County - 42nd Judicial Circuit"
+      "label": "Crawford County - 42nd Judicial Circuit",
+      "enabled": true
     },
     {
       "value": "SMPDB0004_CT28",

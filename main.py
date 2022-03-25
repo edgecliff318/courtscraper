@@ -63,7 +63,7 @@ def retrieve():
     scrapper = BeenVerifiedScrapper(cache=False)
     spinner.succeed(f"Logged to BeenVerified")
 
-    while not killer.kill_now:
+    while True:
         tz = pytz.timezone('US/Central')
         date = str(datetime.datetime.now(tz).date() -
                    datetime.timedelta(days=1))
@@ -118,6 +118,9 @@ def retrieve():
                                 name, year_of_birth
                             )
                             data = scrapper.retrieve_information(link)
+                            if data.get("error", True):
+                                raise Exception(
+                                    "An issue happened with beenverified")
                         except Exception as e:
                             spinner.fail(
                                 f"Failed to retrieve information for case from BeenVerified "
@@ -125,7 +128,7 @@ def retrieve():
                         spinner.succeed(
                             "Retrieve data from BeenVerified finished "
                             "successfully")
-                        sleep(random.randint(1, 10))
+                        sleep(random.randint(20, 60))
 
         except Exception as e:
             spinner.fail(f"Retrieve data process failed - error {e}")
