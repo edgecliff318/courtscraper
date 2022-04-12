@@ -6,6 +6,7 @@ import random
 import sys
 from time import sleep
 import pytz
+import requests
 
 import typer
 from halo import Halo
@@ -16,6 +17,8 @@ from core.cases import get_case_datails, get_verified_link, \
 from loader.config import ConfigLoader
 from loader.leads import CaseNet
 from scrapers.beenverified import BeenVerifiedScrapper
+from pandas.tseries.offsets import BDay
+
 
 filehandler = logging.FileHandler("app.log")
 formatter = logging.Formatter(
@@ -65,8 +68,7 @@ def retrieve():
 
     while True:
         tz = pytz.timezone('US/Central')
-        date = str(datetime.datetime.now(tz).date() -
-                   datetime.timedelta(days=1))
+        date = str((datetime.datetime.now(tz) - BDay(1)).date())
         spinner.start()
 
         try:
@@ -94,9 +96,27 @@ def retrieve():
                         if case_id in cases:
                             continue
 
+                        case_info = {
+                            "case_id": case_id,
+                            "case_type": case_type,
+                            "court_code": court_code,
+                            "court_name": court.get("label"),
+                            "case_date": date,
+                            "first_name": "",
+                            "last_name": "",
+                            "been_verified": False,
+                            "age": "",
+                            "year_of_birth": "",
+                            "charges": "",
+                            "details": "",
+                            "email": ""
+                        }
+
                         cases.add(case_id)
                         try:
                             results = get_case_datails(case_id)
+                            case_info["charges"] = results.get("charges", {}).get(
+                                "Charge/Judgment", {}).get("Description")
                         except Exception as e:
                             spinner.fail(
                                 f"Failed to retrieve information for case from CaseNet "
@@ -111,23 +131,39 @@ def retrieve():
                             if len(year_of_birth) > 1:
                                 try:
                                     year_of_birth = int(year_of_birth[-1])
+                                    age = datetime.date.today().year - year_of_birth
+                                    case_info["age"] = age
                                 except Exception:
                                     year_of_birth = None
                             name = results['parties'].split(", Defendant")
                             first_name, last_name, link = get_verified_link(
                                 name, year_of_birth
                             )
+                            case_info["first_name"] = first_name
+                            case_info["last_name"] = last_name
+                            case_info["year_of_birth"] = year_of_birth
                             data = scrapper.retrieve_information(link)
+                            case_info["been_verified"] = True
+                            case_info["phone"] = data.get("phone")
+                            case_info["details"] = data.get("details")
+                            case_info["email"] = data.get("email")
+
+                            spinner.succeed(
+                                "Retrieve data from BeenVerified finished "
+                                "successfully"
+                            )
                             if data.get("error", True):
                                 raise Exception(
                                     "An issue happened with beenverified")
+                            requests.post(
+                                config.remote_update_url,
+                                json=case_info
+                            )
                         except Exception as e:
                             spinner.fail(
                                 f"Failed to retrieve information for case from BeenVerified "
                                 f"{case_id} - error {e}")
-                        spinner.succeed(
-                            "Retrieve data from BeenVerified finished "
-                            "successfully")
+
                         sleep(random.randint(20, 60))
 
         except Exception as e:

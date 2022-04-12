@@ -164,6 +164,51 @@ def render_results(search, court_code_list, date):
     ]
 
 
+@app.callback(
+    Output("leads-data", "children"),
+    Input('leads-button', "n_clicks"),
+    Input("court-selector", "value"),
+    Input("date-selector", "date")
+)
+def render_leads(search, court_code_list, date):
+    ctx = dash.callback_context
+    trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
+    results = "Empty"
+    data = []
+    if trigger_id == "leads-button":
+        lead_loader = LeadsLoader(
+            path=os.path.join(config.config_path, "leads.json")
+        )
+        data = lead_loader.load()
+        df = pd.DataFrame(data.values())
+        df["caseNumber"] = data.keys()
+        df['interactions'] = df["interactions"].map(
+            lambda i: True if not pd.isna(i) else False)
+        df["case_date"] = pd.to_datetime(df["case_date"])
+
+        if court_code_list is not None and court_code_list:
+            df = df[df.court_code.isin(court_code_list)]
+        if date is not None:
+            df = df[df["case_date"].dt.date == date]
+
+        results = components.tables.make_bs_table(
+            df[['caseNumber', 'interactions', 'court_name', 'case_date', 'first_name', 'last_name', 'telephone', 'been_verified', 'age', 'charges']])
+    return [
+        dbc.Col(
+            dbc.Card(
+                dbc.CardBody(
+                    [
+                        html.H3("Cases",
+                                className="card-title"),
+                        results,
+                    ]
+                ),
+            ),
+            width=12
+        )
+    ]
+
+
 def get_table_data(name, details):
     return dbc.Card(
         dbc.CardBody(

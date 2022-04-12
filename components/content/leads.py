@@ -28,7 +28,7 @@ def page():
                         persistence_type="session",
                         persistence=True
                     ),
-                    width=8
+                    width=7
                 ),
                 dbc.Col(
                     components.inputs.generate_form_group(
@@ -43,6 +43,10 @@ def page():
                 ),
                 dbc.Col(
                     dbc.Button("Search", id="search-button"),
+                    width=1
+                ),
+                dbc.Col(
+                    dbc.Button("Leads", id="leads-button"),
                     width=1
                 )
             ]
@@ -68,6 +72,10 @@ def page():
             dbc.Row(
                 [],
                 id="cases-data"
+            ),
+            dbc.Row(
+                [],
+                id="leads-data"
             )
         ]
     )

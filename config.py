@@ -44,3 +44,4 @@ case_net_password = "MASfirm2021!!!!"
 # Remote Instance
 remote_upload_url = "http://34.136.192.67:8060/upload?cache=true"
 remote_data_upload_url = "http://34.136.192.67:8060/upload?cache=false"
+remote_update_url = "http://34.136.192.67:8060/update"

@@ -5,6 +5,7 @@ from dash import html
 
 from flask import send_from_directory, Flask, flash, request, redirect, url_for
 from flask_cors import CORS
+import requests
 from werkzeug.utils import secure_filename
 
 from app import app
@@ -13,6 +14,7 @@ from components.layout import layout as main_layout
 import config
 
 import callbacks
+from loader.leads import LeadsLoader
 
 server = app.server
 
@@ -58,6 +60,21 @@ def upload_file():
         else:
             file.save(os.path.join(UPLOAD_DATA_FOLDER, filename))
 
+        return "success"
+
+
+@server.route('/update', methods=['POST'])
+def update_data():
+    if request.method == 'POST':
+        data = request.json
+        lead_loader = LeadsLoader(
+            path=os.path.join(config.config_path, "leads.json")
+        )
+        leads = lead_loader.load()
+        lead = leads.get(data.get("case_id"), {})
+        lead.update(data)
+        leads[data.get("case_id")] = lead
+        lead_loader.save(leads)
         return "success"
 
 
