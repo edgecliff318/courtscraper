@@ -1,12 +1,12 @@
-import os
-import dash_bootstrap_components as dbc
 import logging
-
-from dash import html
+import os
 
 import components
+import dash_bootstrap_components as dbc
 from components.figures import empty_figure
 from components.inputs import generate_form_group
+from dash import html
+from dash import dcc
 
 logger = logging.Logger(__name__)
 
@@ -107,6 +107,26 @@ def single():
             dbc.Row(
                 [
                     dbc.Col(
+                        "Phone Number",
+                        width=4
+                    ),
+                    dbc.Col(
+                        generate_form_group(
+                            label="Phone Number",
+                            id="lead-single-been-verified-phone",
+                            placeholder="Set the phone number",
+                            type="Input",
+                            persistence_type="session",
+                            persistence=True
+                        ),
+                        width=8
+
+                    )
+                ], className="mb-1",
+            ),
+            dbc.Row(
+                [
+                    dbc.Col(
                         "Message",
                         width=4
                     ),
@@ -114,7 +134,8 @@ def single():
                         generate_form_group(
                             label="Message", id="lead-single-message",
                             placeholder="Type in the message",
-                            type="Textarea"
+                            type="Textarea",
+                            style={'height': 300}
                         ),
                         width=8
                     )
@@ -174,11 +195,12 @@ def single():
                 dbc.Col(
                     id="lead-single-interactions",
                     width=12
-                )
+                ),
             ]
         ),
         dbc.Row(
             id="lead-single"
         ),
         html.Div(id="lead-single-been-verified-trigger"),
+        dcc.Store(id="lead-single-case-details")
     ]
