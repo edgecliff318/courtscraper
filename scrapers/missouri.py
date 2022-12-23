@@ -452,7 +452,9 @@ class ScraperMOCourt(ScraperBase):
 
         try:
             files = {'file': open(filepath, 'rb')}
-            data = requests.post(config.remote_data_upload_url, files=files)
+            if not config.production:
+                data = requests.post(
+                    config.remote_data_upload_url, files=files)
         except Exception as e:
             logger.error(f"Error uploading file to remote server : {e}")
 
@@ -480,8 +482,9 @@ class ScraperMOCourt(ScraperBase):
                         )
                         try:
                             files = {'file': open(docket_image_filepath, 'rb')}
-                            data = requests.post(
-                                config.remote_data_upload_url, files=files)
+                            if not config.production:
+                                data = requests.post(
+                                    config.remote_data_upload_url, files=files)
                         except Exception as e:
                             logger.error(
                                 f"Error uploading file to remote server : {e}")
