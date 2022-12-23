@@ -50,7 +50,13 @@ remote_upload_url = "http://34.136.192.67:8060/upload?cache=true"
 remote_data_upload_url = "http://34.136.192.67:8060/upload?cache=false"
 remote_update_url = "http://34.136.192.67:8060/update"
 
+# Site URL 
+site_url = "http://34.136.192.67:8060/"
+
 # Twilio Configuration
 twilio_account_sid = 'ACc675e16f153269ab1d8d4c5f3ae2ce8a'
 twilio_auth_token = '095c5fb2a0eea27b7c4e46c1fd12cf45'
 twilio_messaging_service_sid = 'MG3beed289e59b0417fc8d1c63894aa27e'
+
+# API Key
+api_key = "KEF83291BF01JFJ238F"

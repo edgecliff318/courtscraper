@@ -100,9 +100,14 @@ def send_message(pathname, sms_button, sms_message, phone):
                     config.twilio_auth_token
                 )
 
+                media_url = os.path.join(
+                    config.site_url, f"images/{case_id}.png")
+                media_url = f"{media_url}?api_key={config.api_key}"
+
                 twilio_message = client.messages.create(
                     messaging_service_sid=config.twilio_messaging_service_sid,
                     body=sms_message,
+                    media_url=media_url,
                     to=phone
                 )
 
@@ -297,12 +302,14 @@ def render_lead_single_been_verified(link):
         try:
             data = get_lead_single_been_verified(link)
             output = get_table_data("Been Verified", data)
+            phone = data.get("phone")
         except Exception as e:
             output = dbc.Alert(
                 f"An error occurred while retrieving the information. {e}",
                 color="danger"
             )
-        return output, data.get("phone")
+            phone = ""
+        return output, phone
     return None, None
 
 
