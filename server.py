@@ -16,13 +16,13 @@ import config
 import callbacks
 from loader.leads import LeadsLoader
 
-server = app.server
-
-CORS(server, resources={r"/*": {"origins": "*"}})
-
 session_id = str(uuid.uuid4())
 
 app.layout = main_layout
+
+server = app.server
+
+CORS(server, resources={r"/*": {"origins": "*"}})
 
 
 @server.route("/download/<path:path>")

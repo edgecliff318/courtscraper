@@ -61,8 +61,8 @@ def get_verified_link(name, year_of_birth):
             url += f"fname={first_name}&"
         if last_name is not None:
             url += f"ln={last_name}&"
-        if middle_name is not None:
-            url += f"mn={middle_name}&"
+        # if middle_name is not None:
+        #    url += f"mn={middle_name}&"
         if state is not None:
             url += f"state={state}&"
         if year is not None:

@@ -113,6 +113,10 @@ def retrieve():
                         }
 
                         cases.add(case_id)
+                        first_name = None
+                        last_name = None
+                        year_of_birth = None
+
                         try:
                             results = get_case_datails(case_id)
                             case_info["charges"] = results.get("charges", {}).get(
@@ -130,10 +134,14 @@ def retrieve():
                                 "Year of Birth: ")
                             if len(year_of_birth) > 1:
                                 try:
-                                    year_of_birth = int(year_of_birth[-1])
+                                    year_of_birth = int(
+                                        year_of_birth[-1].split("\n")[-1])
                                     age = datetime.date.today().year - year_of_birth
                                     case_info["age"] = age
-                                except Exception:
+                                except Exception as e:
+                                    spinner.error(
+                                        f"Failed to get age for case {case_id} - error {e}"
+                                    )
                                     year_of_birth = None
                             name = results['parties'].split(", Defendant")
                             first_name, last_name, link = get_verified_link(
@@ -164,7 +172,7 @@ def retrieve():
                                 f"Failed to retrieve information for case from BeenVerified "
                                 f"{case_id} - error {e}")
 
-                        sleep(random.randint(20, 60))
+                        sleep(random.randint(40, 70))
 
         except Exception as e:
             spinner.fail(f"Retrieve data process failed - error {e}")
