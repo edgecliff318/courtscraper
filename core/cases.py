@@ -11,11 +11,16 @@ logger = logging.Logger(__name__)
 
 
 @tools.cached(storage=storage.RemotePickleStorage(url=config.remote_upload_url))
-def get_case_datails(case_id):
+def get_case_datails(case_id, session=None):
     case = {
         "case_number": case_id
     }
-    results = ScraperMOCourt().get_case_detail(case)
+    scrapper = ScraperMOCourt()
+    #session = None
+    # if session is not None:
+    #    scrapper.GLOBAL_SESSION.cookies = session.cookies
+    #    scrapper.HEADERS = session.headers
+    results = scrapper.get_case_detail(case)
     return results
 
 

@@ -19,9 +19,9 @@ logger = logging.Logger(__name__)
 class BeenVerifiedScrapper:
     def __init__(self, cache=False):
         self.options = Options()
+        self.options.add_argument("--no-sandbox")
         # self.options.add_argument("--headless")
         self.options.add_argument("--disable-gpu")
-        self.options.add_argument("--no-sandbox")
         self.options.add_argument("enable-automation")
         self.options.add_argument("--disable-infobars")
         self.options.add_argument("--disable-dev-shm-usage")
@@ -133,7 +133,7 @@ class BeenVerifiedScrapper:
 
         self.driver.switch_to.window(self.driver.window_handles[-1])
 
-        WebDriverWait(self.driver, 30).until(
+        WebDriverWait(self.driver, 60).until(
             expected_conditions.presence_of_element_located(
                 (By.CSS_SELECTOR, ".report-header__title")))
         # 12 | click | css=.report_section__label_title |

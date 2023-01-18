@@ -43,13 +43,16 @@ class CaseNet:
                 'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
             }
 
-            self.session.request(
+            r = self.session.request(
                 "POST", url, headers=headers, data=payload
             )
+            pass
 
     def get_leads(self, court_code, county_code, date, case_type="Infraction"):
-        self.login()
+        # self.login()
         url = os.path.join(self.url, "searchResult.do")
+        if self.session is None:
+            self.session = requests.Session()
         payload = "{\"draw\":1,\"columns\":[{\"data\":0,\"name\":\"\"," \
                   "\"searchable\":true,\"orderable\":true,\"search\":{" \
                   "\"value\":\"\",\"regex\":false}}," \

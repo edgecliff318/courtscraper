@@ -3,6 +3,7 @@ import hashlib
 
 import pandas as pd
 import numpy as np
+import requests
 
 from core.storage import Storage
 
@@ -27,6 +28,8 @@ def hash_single(arg):
         m = hashlib.md5()
         m.update(arg.encode())
         return m.hexdigest()
+    elif isinstance(arg, requests.sessions.Session):
+        m = 1
     else:
         return hash(arg)
 
