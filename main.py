@@ -118,13 +118,15 @@ def retrieve():
                         year_of_birth = None
 
                         try:
-                            results = get_case_datails(case_id)
+                            results = get_case_datails(
+                                case_id, session=case_net.session)
                             case_info["charges"] = results.get("charges", {}).get(
                                 "Charge/Judgment", {}).get("Description")
                         except Exception as e:
                             spinner.fail(
                                 f"Failed to retrieve information for case from CaseNet "
                                 f"{case_id} - error {e}")
+                            raise e
                         spinner.succeed(
                             f"Succeeded to get details for case "
                             f"{case_id}")

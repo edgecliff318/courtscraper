@@ -39,7 +39,7 @@ SALT = b'#F+M\x80\xd7?t"\x9e\x9aP\x9d\xe0e\xb8\x06%\xcdy\x83?\xef\xc5\x82' \
 # Case Net
 case_net_url = "https://www.courts.mo.gov/cnet"
 case_net_username = "smeyer4040"
-case_net_password = "MASfirm2021!!!!"
+case_net_password = "MASdorm1993!MAS"
 
 # Remote Instance
 remote_upload_url = "http://34.136.192.67:8060/upload?cache=true"
