@@ -9,6 +9,7 @@ import dash
 import dash_bootstrap_components as dbc
 import dash.html as html
 from dash.dependencies import Input, Output
+from twilio.rest import Client
 
 import config
 
@@ -42,14 +43,17 @@ def render_content_persona_details_selector(pathname):
 @app.callback(
     Output("lead-single-message-selector", "options"),
     Input("url", "pathname"),
+    Input("lead-single-case-details", "data")
 )
-def render_message_selector(pathname):
+def render_message_selector(pathname, case_details):
     config_loader = ConfigLoader(
         path=os.path.join(config.config_path, "config.json"))
-
+    if case_details is None:
+        case_details = dict()
     messages = config_loader.load()['messages']
     options = [
-        {"label": c.get("label"), "value": c.get("value")}
+        {"label": c.get("label"), "value": c.get("value").replace(
+            "{first_name}", case_details.get("first_name", "{first_name}").title())}
         for c in messages
     ]
     return options
@@ -68,8 +72,9 @@ def render_selected_message(message):
     Input("url", "pathname"),
     Input("lead-single-send-sms-button", "n_clicks"),
     Input("lead-single-message", "value"),
+    Input("lead-single-been-verified-phone", "value")
 )
-def send_message(pathname, sms_button, message):
+def send_message(pathname, sms_button, sms_message, phone):
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
     if trigger_id == "lead-single-send-sms-button":
@@ -78,7 +83,7 @@ def send_message(pathname, sms_button, message):
             error = False
             message = ""
             try:
-                case_id = int(case_id)
+                case_id = str(case_id)
             except:
                 message = "Case ID must be a number"
                 error = True
@@ -90,20 +95,36 @@ def send_message(pathname, sms_button, message):
                 data = lead_loader.load()
 
                 # Send message
+                client = Client(
+                    config.twilio_account_sid,
+                    config.twilio_auth_token
+                )
+
+                media_url = os.path.join(
+                    config.site_url, f"images/{case_id}.png")
+                media_url = f"{media_url}?api_key={config.api_key}"
+
+                twilio_message = client.messages.create(
+                    messaging_service_sid=config.twilio_messaging_service_sid,
+                    body=sms_message,
+                    media_url=media_url,
+                    to=phone
+                )
 
                 # Save interaction
                 data.setdefault(case_id, {})
                 interactions = data.get(case_id, {}).get("interactions", [])
                 interactions.append({
                     "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                    "message": message,
+                    "message": sms_message,
                     "type": "sms",
-                    "status": "sent"
+                    "phone": phone,
+                    "status": twilio_message.status
                 })
                 data[case_id]["interactions"] = interactions
                 lead_loader.save(data)
                 message = dbc.Alert(
-                    "Message sent",
+                    f"Message {twilio_message.status}",
                     color="success",
                     dismissable=True,
                     className="alert-dismissible fade show"
@@ -183,16 +204,18 @@ def render_leads(search, court_code_list, date):
         df = pd.DataFrame(data.values())
         df["caseNumber"] = data.keys()
         df['interactions'] = df["interactions"].map(
-            lambda i: True if not pd.isna(i) else False)
+            lambda i: True if i else False)
         df["case_date"] = pd.to_datetime(df["case_date"])
 
         if court_code_list is not None and court_code_list:
+            if not isinstance(court_code_list, list):
+                court_code_list = [court_code_list, ]
             df = df[df.court_code.isin(court_code_list)]
         if date is not None:
             df = df[df["case_date"].dt.date == date]
 
         results = components.tables.make_bs_table(
-            df[['caseNumber', 'interactions', 'court_name', 'case_date', 'first_name', 'last_name', 'telephone', 'been_verified', 'age', 'charges']])
+            df[['caseNumber', 'interactions', 'court_name', 'case_date', 'first_name', 'last_name', 'phone', 'been_verified', 'age', 'charges']])
     return [
         dbc.Col(
             dbc.Card(
@@ -248,10 +271,12 @@ def get_interactions_data(name, interactions):
                             html.Tr(
                                 [
                                     html.Td(
-                                        i.get("interactionType"),
+                                        i.get("date"),
                                         style={"font-weight": "700"}
                                     ),
-                                    html.Td(i.get("interactionMessage"), )
+                                    html.Td(i.get("message")),
+                                    html.Td(i.get("type")),
+                                    html.Td(i.get("status"))
                                 ]
                             )
                             for i in interactions
@@ -267,6 +292,7 @@ def get_interactions_data(name, interactions):
 
 @app.callback(
     Output("lead-single-been-verified", "children"),
+    Output("lead-single-been-verified-phone", "value"),
     Input("lead-single-been-verified-button", "href")
 )
 def render_lead_single_been_verified(link):
@@ -276,18 +302,21 @@ def render_lead_single_been_verified(link):
         try:
             data = get_lead_single_been_verified(link)
             output = get_table_data("Been Verified", data)
+            phone = data.get("phone")
         except Exception as e:
             output = dbc.Alert(
                 f"An error occurred while retrieving the information. {e}",
                 color="danger"
             )
-        return output
-    return None
+            phone = ""
+        return output, phone
+    return None, None
 
 
 @app.callback(
     Output("lead-single", "children"),
     Output("lead-single-been-verified-trigger", "children"),
+    Output("lead-single-case-details", "data"),
     Input("url", "pathname")
 )
 def render_case_details(pathname):
@@ -346,6 +375,10 @@ def render_case_details(pathname):
                 name, year_of_birth
             )
 
+            case_details_stored = {
+                "first_name": first_name
+            }
+
             buttons = html.Div(
                 [
                     dbc.Button(
@@ -385,7 +418,7 @@ def render_case_details(pathname):
                     width=6
                 ),
                 *ticket
-            ], ""
+            ], "", case_details_stored
 
 
 @app.callback(
@@ -399,7 +432,7 @@ def render_case_interactions(pathname, status):
         error = False
         message = ""
         try:
-            case_id = int(case_id)
+            case_id = str(case_id)
         except:
             message = "Case ID must be a number"
             error = True

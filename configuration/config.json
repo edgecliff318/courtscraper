@@ -1088,16 +1088,16 @@
   ],
   "messages": [
     {
-      "label": "Friendly",
-      "value": "Hey, Got your DUI on a delayed dismissal and the speeding tickets dismissed altogether. Call or text if you need anything else, {first_name}. Let’s try to be a little safer on the road buddy! \n Shawn-Anthony Meyer \nAttorney at Law #72934 \n816.518.8838 \n masLawHouse.com"
+      "label": "Fubloo",
+      "value": "Hey! This is Sammie from Fubloo. We connect drivers that have received traffic tickets to attorneys who practice traffic law where the ticket was received. If you would like, we can send you a free quote and the likely outcome of hiring an attorney to fight your ticket. Answer 5 (yes or no), questions and we'll text you a quote. \n\nQuestion 1/5 (Yes/No): Would you like a free quote?"
     },
     {
-      "label": "Formal",
-      "value": "Hi, I am a formal message."
+      "label": "Friendly (Pierre)",
+      "value": "Got your DUI on a delayed dismissal and the speeding tickets dismissed altogether. Call or text if you need anything else, Pierre. Let's try to be a little safer on the road buddy!\nShawn-Anthony Meyer\nAttorney at Law #72934\n816.518.8838\nmasLawHouse.com"
     },
     {
-      "label": "New Formal",
-      "value": "Hi, I am a new formal message."
+      "label": "Courtesy",
+      "value": "ADVERTISEMENT\nCourtesy copy of your traffic citation from provided by Fubloo, a non-government organization.\nClick the below link for more information. https://www.fubloo.com"
     }
   ]
 }

@@ -37,6 +37,16 @@ def documents(path):
     return send_from_directory(config.output_path, path, as_attachment=True)
 
 
+@server.route("/images/<path:image>", methods=['GET'], )
+def images(image):
+    """Serve a file from the upload directory."""
+    api_key = request.args.get('api_key')
+    if api_key != config.api_key:
+        return "API Key Not Correct"
+    image = image.replace("/", "")
+    return send_from_directory(config.data_path, image, as_attachment=False)
+
+
 UPLOAD_CACHE_FOLDER = './temp'
 UPLOAD_DATA_FOLDER = './data'
 
@@ -92,4 +102,4 @@ app.validation_layout = html.Div([
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True, port=8060)
+    app.run_server(debug=True, port=8061)

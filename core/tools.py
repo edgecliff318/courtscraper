@@ -63,7 +63,9 @@ def cached(storage: Storage = None, memory_cache=True):
             hash_label = hash_multiple(args, kwargs_with_fn)
             if kwargs.get("no_cache", False):
                 kwargs.pop("no_cache")
-                return fn(*args, **kwargs)
+                res = fn(*args, **kwargs)
+                storage.save(hash_label, res)
+                return res
 
             if memory_cache:
                 #  exists in memory cache
