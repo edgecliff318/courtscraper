@@ -18,6 +18,6 @@ class InitializedSession(requests.Session):
 
         url = "https://www.courts.mo.gov/cnet/login"
 
-        payload = 'username=smeyer4040&password=MASfirm2021!!!!&logon=logon'
+        payload = 'username=smeyer4040&password=MASdorm1993!MAS&logon=logon'
 
         self.post(url, headers=headers, data=payload)
