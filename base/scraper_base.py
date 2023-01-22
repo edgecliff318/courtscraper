@@ -1,10 +1,14 @@
 """ Module containing ScraperBase class. """
 
+
 class ScraperBase:
     """ Base class which describes the interface that all scrapers should implement.
 
     Also contains some utility methods.
     """
+
+    def __init__(self) -> None:
+        self._GLOBAL_SESSION = None
 
     def scrape(self, search_parameters):
         """
@@ -20,5 +24,3 @@ class ScraperBase:
         """
 
         raise NotImplementedError()
-
-
