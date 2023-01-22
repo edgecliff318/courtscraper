@@ -76,7 +76,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
   deploy:
-    needs: build-docker-image
+    needs: build-and-push
     runs-on: ubuntu-latest
     steps:
       - name: Trigger the remote machine & start the container if it is not running
