@@ -32,6 +32,15 @@ class ScraperMOCourt(ScraperBase):
     SERVICE_URL = 'https://www.courts.mo.gov/casenet/cases/service.do'
     CHARGES_URL = 'https://www.courts.mo.gov/casenet/cases/charges.do'
 
+    @property
+    def GLOBAL_SESSION(self):
+        if self._GLOBAL_SESSION is None:
+            self._GLOBAL_SESSION = InitializedSession(
+                headers=self.HEADERS,
+                initial_url="https://www.courts.mo.gov/cnet/logon.do"
+            )
+        return self._GLOBAL_SESSION
+
     def scrape(self, search_parameters):
         """ Entry point for lambda.
 
@@ -48,9 +57,6 @@ class ScraperMOCourt(ScraperBase):
         first_name = search_parameters["firstName"]
         dob = search_parameters["dob"]
         return self.search_in_mo(first_name, last_name, dob)
-
-    GLOBAL_SESSION = InitializedSession(headers=HEADERS,
-                                        initial_url="https://www.courts.mo.gov/cnet/logon.do")
 
     def get_case_header(self, soup):
         """ Get case header of case detail by parsing rendered HTML page
