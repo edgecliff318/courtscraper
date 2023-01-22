@@ -46,12 +46,12 @@ case_net_password = "MASdorm1993!MAS"
 production = os.environ.get("PRODUCTION", "true").lower() == "true"
 
 # Remote Instance
-remote_upload_url = "http://34.136.192.67:8060/upload?cache=true"
-remote_data_upload_url = "http://34.136.192.67:8060/upload?cache=false"
-remote_update_url = "http://34.136.192.67:8060/update"
+remote_upload_url = "https://app.fubloo.comupload?cache=true"
+remote_data_upload_url = "https://app.fubloo.comupload?cache=false"
+remote_update_url = "https://app.fubloo.comupdate"
 
-# Site URL 
-site_url = "http://34.136.192.67:8060/"
+# Site URL
+site_url = "https://app.fubloo.com"
 
 # Twilio Configuration
 twilio_account_sid = 'ACc675e16f153269ab1d8d4c5f3ae2ce8a'
