@@ -46,9 +46,9 @@ case_net_password = "MASdorm1993!MAS"
 production = os.environ.get("PRODUCTION", "true").lower() == "true"
 
 # Remote Instance
-remote_upload_url = "https://app.fubloo.comupload?cache=true"
-remote_data_upload_url = "https://app.fubloo.comupload?cache=false"
-remote_update_url = "https://app.fubloo.comupdate"
+remote_upload_url = "https://app.fubloo.com/upload?cache=true"
+remote_data_upload_url = "https://app.fubloo.com/upload?cache=false"
+remote_update_url = "https://app.fubloo.com/update"
 
 # Site URL
 site_url = "https://app.fubloo.com"

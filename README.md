@@ -1,12 +1,10 @@
 # README #
 
-Add coverage here
-
 Version : 0.0.2
 
 # **Overview**
 
-Humanitics AI dashboard provides a user friendly interface for **Retail Monitoring**. From construction to results display, everything can be handled from the dashboard.
+Fubloo App provides a user friendly interface for **Leads Monitoring**. From construction to results display, everything can be handled from the dashboard.
 
 The dashboard was developed using **python 3.8.8**.
 
@@ -14,12 +12,11 @@ The dashboard was developed using **python 3.8.8**.
 
 # **How do I run the dashboard?**
 
-Using a python interpreter (version 3.8.8) you can run the dashboard by running [app.py](http://app.py/) file. Make sure to install the project dependencies referenced in requirement.txt `pip install -r requirements.txt`.
+Using a python interpreter (version 3.8.8) you can run the dashboard by running `server.py` file. Make sure to install the project dependencies referenced in requirement.txt `pip install -r requirements.txt`.
 
-Note : Don't run [app.py](http://app.py/) with python console (avoid program termination difficulties).
 
 ```
-python app.py
+python server.py
 ```
 
 ---
@@ -159,10 +156,21 @@ Accompany the changes with relevant documentation. Make it simple and as comple
 
 Note: Ensure that you have sufficient test coverage on your code before you commit any code.
 
+## Setting up the application locally
+
+- Install chromium 
+`brew install chromium`
+- Update Chrome to the latest version
+- Install Selenium 
+`pip install selenium`
+- Install poppler for PDF transformation 
+`brew install poppler`
+
 # **License**
 
-© All rights reserved, [Humanitics AI SAS](https://neoinvest.ai/), Grégory Amzel, [gregory.amzel@humanitics.ai](mailto:gregory.amzel@humanitics.ai)
+© All rights reserved, [Fubloo](https://fubloo.com/), Ayoub Ennassiri, [ayoub.ennassiri@neoinvest.ai](mailto:ayoub.ennassiri@neoinvest.ai)
 
 No part of this project may be used, published or shared under any circumstances unless expressly requested by the rights holder of this document.
 
-By contributing, you agree that your contributions will be fully accredited to [Humanitics AI SAS](https://humanitics.ai/). (Refer to the upper copyright statement)
+By contributing, you agree that your contributions will be fully accredited to [Fubloo](https://fubloo.com/). (Refer to the upper copyright statement)
+

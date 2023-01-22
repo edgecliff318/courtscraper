@@ -59,7 +59,7 @@ class BeenVerifiedScrapper:
             )
             # 5 | type | id=login-password | Marcus1995!
             self.driver.find_element(By.ID, "login-password").send_keys(
-                os.environ.get("BEEN_VERIFIED_PASSWORD", "Murex2019!")
+                os.environ.get("BEEN_VERIFIED_PASSWORD", "Murex2023@")
             )
             # 6 | click on connect
             self.driver.find_element(By.ID, "submit").click()
