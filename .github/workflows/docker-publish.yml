@@ -76,17 +76,16 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
   deploy:
-    trigger-remote-machine:
-      needs: build-docker-image
-      runs-on: ubuntu-latest
-      steps:
-        - name: Trigger the remote machine & start the container if it is not running
-          uses: appleboy/ssh-action@master
-          with:
-            host: ${{ secrets.HOST }}
-            username: ${{ secrets.USERNAME }}
-            key: ${{ secrets.KEY }}
-            port: ${{ secrets.PORT }}
-            script: |
-              cd  /home/ec2-user/devops
-              make app
+    needs: build-docker-image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger the remote machine & start the container if it is not running
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            cd  /home/ec2-user/devops
+            make app
