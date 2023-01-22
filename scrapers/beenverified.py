@@ -25,12 +25,6 @@ class BeenVerifiedScrapper:
         self.options.add_argument("enable-automation")
         self.options.add_argument("--disable-infobars")
         self.options.add_argument("--disable-dev-shm-usage")
-        chrome_profile_path = os.environ.get(
-            "CHROME_PROFILE_PATH",
-            '/Users/aennassiri/Library/Application Support/Google/Chrome'
-        )
-        self.options.add_argument("user-data-dir=" + chrome_profile_path)
-        self.options.add_argument("--profile-directory=Profile 1")
 
         # Selenium with
         self.vars = {}
