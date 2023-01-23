@@ -67,8 +67,12 @@ def get_verified_link(name, year_of_birth):
         if state is not None:
             url += f"state={state}&"
         if year is not None:
-            age = datetime.now().year - year
-            url += f"age={age}"
+            try:
+                age = datetime.now().year - year
+                url += f"age={age}"
+            except Exception as e:
+                year = None
+                logger.error(f"Error parsing the year. Exception{e} ")
         return url
 
     return first_name, last_name, get_beenverified_link(
