@@ -119,7 +119,7 @@ def retrieve():
 
                         try:
                             results = get_case_datails(
-                                case_id, session=case_net.session)
+                                case_id)
                             case_info["charges"] = results.get("charges", {}).get(
                                 "Charge/Judgment", {}).get("Description")
                         except Exception as e:
