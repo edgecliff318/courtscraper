@@ -28,22 +28,49 @@ def page():
                         persistence_type="session",
                         persistence=True
                     ),
-                    width=7
+                    width=5
                 ),
                 dbc.Col(
                     components.inputs.generate_form_group(
                         label="Date",
                         id="date-selector",
                         placeholder="Select a Date",
-                        type="DatePickerSingle",
+                        type="DateRangePicker",
                         persistence_type="session",
                         persistence=True
                     ),
-                    width=2
+                    width=3
                 ),
                 dbc.Col(
-                    dbc.Button("Search", id="search-button"),
-                    width=1
+                    components.inputs.generate_form_group(
+                        label="Interaction",
+                        id="interaction-selector",
+                        placeholder="Select the type",
+                        type="Select",
+                        persistence_type="session",
+                        persistence=True,
+                        value="not_contacted",
+                        options=[
+                            # "All", "Contacted", "Not Contacted"]
+                            {
+                                "label": "All",
+                                "value": "all"
+                            },
+                            {
+                                "label": "Contacted",
+                                "value": "contacted"
+                            },
+                            {
+                                "label": "Responded",
+                                "value": "responded"
+                            },
+                            {
+                                "label": "Not Contacted",
+                                "value": "not_contacted"
+                            }
+                        ]
+                    ),
+                    width=2
                 ),
                 dbc.Col(
                     dbc.Button("Leads", id="leads-button"),

@@ -133,12 +133,6 @@ def send_message(pathname, sms_button, sms_message, phone):
             return message
 
 
-@app.callback(
-    Output("cases-data", "children"),
-    Input('search-button', "n_clicks"),
-    Input("court-selector", "value"),
-    Input("date-selector", "date")
-)
 def render_results(search, court_code_list, date):
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
@@ -189,9 +183,11 @@ def render_results(search, court_code_list, date):
     Output("leads-data", "children"),
     Input('leads-button', "n_clicks"),
     Input("court-selector", "value"),
-    Input("date-selector", "date")
+    Input("date-selector", "start_date"),
+    Input("date-selector", "end_date"),
+    Input("interaction-selector", "value")
 )
-def render_leads(search, court_code_list, date):
+def render_leads(search, court_code_list, start_date, end_date, interaction):
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
     results = "Empty"
@@ -206,13 +202,23 @@ def render_leads(search, court_code_list, date):
         df['interactions'] = df["interactions"].map(
             lambda i: True if i else False)
         df["case_date"] = pd.to_datetime(df["case_date"])
+        df["interactions_counts"] = df.interactions.map(
+            lambda x: int(len(x) >= 1) if isinstance(x, list) else 0)
 
         if court_code_list is not None and court_code_list:
             if not isinstance(court_code_list, list):
                 court_code_list = [court_code_list, ]
             df = df[df.court_code.isin(court_code_list)]
-        if date is not None:
-            df = df[df["case_date"].dt.date == date]
+        if start_date is not None:
+            df = df[df["case_date"].dt.date >= pd.to_datetime(start_date)]
+        if end_date is not None:
+            df = df[df["case_date"].dt.date <= pd.to_datetime(end_date)]
+
+        if interaction is not None and interaction:
+            if interaction == "not_contacted":
+                df = df[~df.interactions]
+            elif interaction == "contacted":
+                df = df[df.interactions]
 
         results = components.tables.make_bs_table(
             df[['caseNumber', 'interactions', 'court_name', 'case_date', 'first_name', 'last_name', 'phone', 'been_verified', 'age', 'charges']])

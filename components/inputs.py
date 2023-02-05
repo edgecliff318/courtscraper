@@ -39,6 +39,11 @@ def generate_form_group(label, id, placeholder, type="Input", options=None,
             id=id,
             **kwargs
         )
+    elif type == "DateRangePicker":
+        field = dcc.DatePickerRange(
+            id=id,
+            **kwargs
+        )
     else:
         field = ""
 
