@@ -52,34 +52,21 @@ class BeenVerifiedScrapper:
                 ".nav__utils-btn:nth-child(2) > "
                 ".nav__utils-link"
             ).click()
-
-            # 4 | type | click on the magic link
-            self.driver.find_element(
-                By.ID, "magic_link"
-            ).click()
-
-            sleep(5)
-
-            # 5 | type | id=magic-link-email-field |
-            self.driver.find_element(By.ID, "magic-link-email-field").click()
-
-            # 5 | type | id=login-password | Marcus1995!
-            self.driver.find_element(By.ID, "magic-link-email-field").send_keys(
+            # 4 | type | id=login-email | sam@masfirm.net
+            self.driver.find_element(By.ID, "login-email").send_keys(
                 os.environ.get("BEEN_VERIFIED_EMAIL",
-                               "fublooman@gmail.com")
+                               "ayoub.ennassiri@neoinvest.ai")
+            )
+            # 5 | type | id=login-password | Marcus1995!
+            self.driver.find_element(By.ID, "login-password").send_keys(
+                os.environ.get("BEEN_VERIFIED_PASSWORD", "Murex2023@")
             )
             # 6 | click on connect
-            self.driver.find_element(
-                By.CSS_SELECTOR, "#send-magic-link-form > .btn").click()
-
-            sleep(60)
-        except Exception as e:
+            self.driver.find_element(By.ID, "submit").click()
+            sleep(30)
+        except Exception:
             logger.warning(
                 f"Continuing with the session as probably the user is already logged in")
-
-            logger.debug(
-                f"Issue with Beenverified {e}"
-            )
 
     @tools.cached(storage=storage.RemotePickleStorage(url=config.remote_upload_url))
     def retrieve_information(self, link):
