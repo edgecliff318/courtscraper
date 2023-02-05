@@ -102,4 +102,4 @@ app.validation_layout = html.Div([
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True, port=8061)
+    app.run_server(debug=False, port=8061, dev_tools_hot_reload=False)
