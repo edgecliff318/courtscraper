@@ -78,7 +78,7 @@ class CaseNet:
               f"countyCode={county_code}" \
               f"&courtCode={court_code}" \
               f"&startDate={date}" \
-              f"&caseStatus=A" \
+              f"&caseStatus=P" \
               f"&caseType={case_type}" \
               f"&locationCode="
 
