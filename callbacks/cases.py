@@ -199,8 +199,6 @@ def render_leads(search, court_code_list, start_date, end_date, interaction):
         data = lead_loader.load()
         df = pd.DataFrame(data.values())
         df["caseNumber"] = data.keys()
-        df['interactions'] = df["interactions"].map(
-            lambda i: True if i else False)
         df["case_date"] = pd.to_datetime(df["case_date"])
         df["interactions_counts"] = df.interactions.map(
             lambda x: int(len(x) >= 1) if isinstance(x, list) else 0)
@@ -216,12 +214,12 @@ def render_leads(search, court_code_list, start_date, end_date, interaction):
 
         if interaction is not None and interaction:
             if interaction == "not_contacted":
-                df = df[~df.interactions]
+                df = df[df.interactions_counts <= 0]
             elif interaction == "contacted":
-                df = df[df.interactions]
+                df = df[df.interactions_counts > 0]
 
         results = components.tables.make_bs_table(
-            df[['caseNumber', 'interactions', 'court_name', 'case_date', 'first_name', 'last_name', 'phone', 'been_verified', 'age', 'charges']])
+            df[['caseNumber', 'interactions_counts', 'court_name', 'case_date', 'first_name', 'last_name', 'phone', 'been_verified', 'age', 'charges']].set_index("caseNumber"))
     return [
         dbc.Col(
             dbc.Card(
