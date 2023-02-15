@@ -74,6 +74,7 @@ def make_bs_table(results, size='md'):
                         html.A(
                             round(v, 4) if isinstance(v, float) else v,
                             href=f"/leads/single/{data.caseNumber}"
+                            if "caseNumber" in data.index else "#"
                         )
                     )
                     for v in data.values
