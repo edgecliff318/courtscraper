@@ -75,7 +75,9 @@ def cached(storage: Storage = None, memory_cache=True):
 
             # If exists in storage cache
             if storage.exist(hash_label):
-                return storage.load(hash_label)
+                res = storage.load(hash_label)
+                if res is not None:
+                    return res
             # execute the function with all arguments passed
             res = fn(*args, **kwargs)
 
