@@ -61,11 +61,3 @@ tmp/
 dist/
 build/
 *egg-info*
-
-.cache
-.config
-.gnupg
-.local
-.pki
-.ssh
-.vscode-server

@@ -41,6 +41,6 @@ RUN rm -rf ./packages
 
 EXPOSE 8050
 
-ENV GOOGLE_APPLICATION_CREDENTIALS="./configuration/deeprl-326711-2dd88867b5e4.json" 
+ENV GOOGLE_APPLICATION_CREDENTIALS="./configuration/fubloo-app-1f213ca274de.json" 
 
 ENTRYPOINT ["gunicorn", "--config", "gunicorn_config.py", "server:server"]
