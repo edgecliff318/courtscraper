@@ -1,0 +1,140 @@
+import logging
+import os
+
+import dash.html as html
+import dash_bootstrap_components as dbc
+import pandas as pd
+import plotly.express as px
+from dash import Input, Output, callback
+
+from app import app
+from src.components import tables
+from src.core.config import get_settings
+from src.loader.leads import LeadsLoader
+
+logger = logging.Logger(__name__)
+
+settings = get_settings()
+
+
+@callback(
+    Output("overview", "children"),
+    Output('leads-by-county', 'figure'),
+    Output("interactions-by-date", "figure"),
+    Output("stats-for-each-county", "children"),
+    Input('interval-component', 'n_intervals')
+)
+def update_stats(n):
+    leads_loader = LeadsLoader(
+        path=os.path.join(settings.CONFIG_PATH, "leads.json")
+    )
+    data_raw = leads_loader.load()
+    data = pd.DataFrame(data_raw.values())
+    # Show in a graph the len of the data by county and by date
+    leads_by_country = px.bar(data.groupby(
+        "court_name").case_id.count(), title="Leads by county")
+    # Improve the style of the graph
+    leads_by_country.update_layout(
+        xaxis_title="County",
+        yaxis_title="Number of leads",
+        font=dict(
+            size=18,
+            color="#7f7f7f"
+        )
+    )
+
+    data["interactions_counts"] = data.interactions.map(
+        lambda x: int(len(x) >= 1) if isinstance(x, list) else 0)
+
+    # Plot the bars of the interactions by date from the total amount of cases
+    interactions = data.groupby("case_date").agg(
+        {"interactions_counts": "sum", "case_id": "count"})
+    interactions["interactions_per_case"] = interactions.interactions_counts / \
+        interactions.case_id
+    interactions_by_date = px.bar(data.groupby("case_date").interactions_counts.sum(
+    ), title="Interactions by date", color_discrete_sequence=["red"])
+    # Add the total number of cases by date in red
+    interactions_by_date.add_trace(px.bar(data.groupby(
+        "case_date").case_id.count(), title="Cases by date").data[0])
+
+    cases_with_phone_nb = data.phone.map(
+        lambda x: 1 if "no" not in x.lower() else 0).sum() / data.case_id.count()
+
+    total_cases_with_phone_nb = f"{cases_with_phone_nb*100:.2f}%"
+
+    overview = dbc.Row(
+        [
+            dbc.Col(
+                dbc.Card(
+                    dbc.CardBody(
+                        [
+                            html.H3("Total cases"),
+                            html.Hr(className="my-2"),
+                            html.H1(f"{data.case_id.count():.0f}",
+                                    className="display-3")
+                        ],
+                        className="text-center"
+                    )
+                ),
+                width=3
+            ),
+            dbc.Col(
+                dbc.Card(
+                    dbc.CardBody(
+                        [
+                            html.H3("Total interactions"),
+                            html.Hr(className="my-2"),
+                            html.H1(f"{data.interactions_counts.sum():.0f}",
+                                    className="display-3")
+                        ],
+                        className="text-center"
+                    )
+                ),
+                width=3
+            ),
+            dbc.Col(
+                dbc.Card(
+                    dbc.CardBody(
+                        [
+                            html.H3("Interactions per case"),
+                            html.Hr(className="my-2"),
+                            html.H1(f"{100*data.interactions_counts.sum() / data.case_id.count():.2f}%",
+                                    className="display-3")
+                        ],
+                        className="text-center"
+                    )
+                ),
+                width=3
+            ),
+            dbc.Col(
+                dbc.Card(
+                    dbc.CardBody(
+                        [
+                            html.H3("Cases with nb"),
+                            html.Hr(className="my-2"),
+                            html.H1(total_cases_with_phone_nb,
+                                    className="display-3")
+                        ],
+                        className="text-center"
+                    )
+                ),
+                width=3
+            ),
+        ], className="mb-2"
+    )
+
+    data_output = {}
+    for county, county_data in data.groupby("court_name"):
+        data_output[county] = {
+            "cases": county_data.case_id.count(),
+            "interactions": f"{county_data.interactions_counts.sum():.0f}",
+            "interactions_per_case": f"{100*county_data.interactions_counts.sum() / county_data.case_id.count():.2f}%",
+            "cases_with_phone_nb": f"{100*county_data.phone.map(lambda x: 1 if 'no' not in x.lower() else 0).sum() / county_data.case_id.count():.2f}%"
+        }
+
+    data_output_df = pd.DataFrame(data_output).T
+
+    stats_for_each_county = tables.make_bs_table(
+        data_output_df)
+
+    return overview, leads_by_country, interactions_by_date, stats_for_each_county
