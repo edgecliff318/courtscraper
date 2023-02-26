@@ -14,20 +14,24 @@ from pandas.tseries.offsets import Day
 from rich.console import Console
 from rich.logging import RichHandler
 
-import config
-from core.cases import get_case_datails, get_verified_link
-from loader.config import ConfigLoader
-from loader.leads import CaseNet
-from scrapers.beenverified import BeenVerifiedScrapper
+from src.core.config import get_settings
+from src.core.cases import get_case_datails, get_verified_link
+from src.loader.config import ConfigLoader
+from src.loader.leads import CaseNet
+from src.scrapers.beenverified import BeenVerifiedScrapper
+
+settings = get_settings()
 
 # Logging configuration
 logger = logging.getLogger()
 rich_handler = RichHandler()
 file_handler = logging.FileHandler(filename="core.log")
 rich_handler.setFormatter(
-    logging.Formatter("%(asctime)s | %(name)s | %(levelname)s | %(message)s"))
+    logging.Formatter("%(asctime)s | %(name)s | %(levelname)s | %(message)s")
+)
 file_handler.setFormatter(
-    logging.Formatter("%(asctime)s | %(name)s | %(levelname)s | %(message)s"))
+    logging.Formatter("%(asctime)s | %(name)s | %(levelname)s | %(message)s")
+)
 rich_handler.setLevel(logging.INFO)
 file_handler.setLevel(logging.DEBUG)
 logger.addHandler(file_handler)
@@ -56,54 +60,41 @@ def retrieve():
     Retrieve historical data for a given symbol
     """
     console = Console()
-    console.print(
-        ":rocket: [bold]Welcome to the BeenVerified Scraper[/bold] :rocket:"
-    )
+    console.print(":rocket: [bold]Welcome to the BeenVerified Scraper[/bold] :rocket:")
 
     killer = GracefulKiller()
 
-    config_loader = ConfigLoader(
-        path=os.path.join(config.config_path, "config.json"))
+    config_loader = ConfigLoader(path=os.path.join(settings.CONFIG_PATH, "config.json"))
 
     court_code_list = [
-        c for c in config_loader.load()['courts']
-        if c.get("enabled", False)
+        c for c in config_loader.load()["courts"] if c.get("enabled", False)
     ]
     cases = set()
 
     scrapper = BeenVerifiedScrapper(cache=False)
-    console.print(
-        f"Logged to BeenVerified"
-    )
+    console.print(f"Logged to BeenVerified")
 
     while True:
-        tz = pytz.timezone('US/Central')
+        tz = pytz.timezone("US/Central")
         for day in range(-85, -1):
             date = str((datetime.datetime.now(tz) + Day(day)).date())
 
-            console.log(
-                f"Retrieving cases for {date}"
-            )
+            console.log(f"Retrieving cases for {date}")
 
             try:
                 for case_type in ("Traffic%2FMunicipal",):
                     for court in court_code_list:
-                        court_code = court.get('value')
+                        court_code = court.get("value")
                         court = config_loader.get_court_details(court_code)
-                        console.log(
-                            f"Retrieving cases for {court.get('label')}"
-                        )
+                        console.log(f"Retrieving cases for {court.get('label')}")
 
                         case_net = CaseNet(
-                            url=config.case_net_url,
-                            username=config.case_net_username,
-                            password=config.case_net_password
+                            url=settings.CASE_NET_URL,
+                            username=settings.CASE_NET_USERNAME,
+                            password=settings.CASE_NET_PASSWORD,
                         )
                         courts_data = case_net.get_leads(
-                            court_code,
-                            court.get("countycode"),
-                            date,
-                            case_type
+                            court_code, court.get("countycode"), date, case_type
                         )
                         # Log the success message
 
@@ -112,7 +103,7 @@ def retrieve():
                             f"{len(courts_data.get('data', []))}"
                         )
 
-                        for case in courts_data.get('data', []):
+                        for case in courts_data.get("data", []):
                             case_id = case.get("caseNumber")
                             if case_id in cases:
                                 continue
@@ -130,7 +121,7 @@ def retrieve():
                                 "year_of_birth": "",
                                 "charges": "",
                                 "details": "",
-                                "email": ""
+                                "email": "",
                             }
 
                             cases.add(case_id)
@@ -139,10 +130,12 @@ def retrieve():
                             year_of_birth = None
 
                             try:
-                                results = get_case_datails(
-                                    case_id)
-                                case_info["charges"] = results.get("charges", {}).get(
-                                    "Charge/Judgment", {}).get("Description")
+                                results = get_case_datails(case_id)
+                                case_info["charges"] = (
+                                    results.get("charges", {})
+                                    .get("Charge/Judgment", {})
+                                    .get("Description")
+                                )
                                 case_info["casenet"] = results
                             except Exception as e:
                                 console.log(
@@ -151,19 +144,22 @@ def retrieve():
                                 )
                                 console.log(
                                     f"Failed to retrieve information for case from CaseNet "
-                                    f"{case_id} - error {e}")
+                                    f"{case_id} - error {e}"
+                                )
                                 raise e
                             console.log(
-                                f"Succeeded to get details for case "
-                                f"{case_id}")
+                                f"Succeeded to get details for case " f"{case_id}"
+                            )
 
                             try:
-                                year_of_birth = results['parties'].split(
-                                    "Year of Birth: ")
+                                year_of_birth = results["parties"].split(
+                                    "Year of Birth: "
+                                )
                                 if len(year_of_birth) > 1:
                                     try:
                                         year_of_birth = int(
-                                            year_of_birth[-1].split("\n")[-1])
+                                            year_of_birth[-1].split("\n")[-1]
+                                        )
                                         age = datetime.date.today().year - year_of_birth
                                         case_info["age"] = age
                                     except Exception as e:
@@ -171,7 +167,7 @@ def retrieve():
                                             f"Failed to get age for case {case_id} - error {e}"
                                         )
                                         year_of_birth = None
-                                name = results['parties'].split(", Defendant")
+                                name = results["parties"].split(", Defendant")
                                 first_name, last_name, link = get_verified_link(
                                     name, year_of_birth
                                 )
@@ -190,21 +186,23 @@ def retrieve():
                                 )
                                 if data.get("error", True):
                                     raise Exception(
-                                        "An issue happened with beenverified")
+                                        "An issue happened with beenverified"
+                                    )
 
                                 case_info = json.loads(
                                     json.dumps(
-                                        case_info, default=lambda o: '<not serializable>')
+                                        case_info,
+                                        default=lambda o: "<not serializable>",
+                                    )
                                 )
                                 requests.post(
-                                    config.remote_update_url,
-                                    json=case_info
+                                    settings.REMOTE_UPDATE_URL, json=case_info
                                 )
                             except Exception as e:
                                 console.print(
                                     f"Failed to retrieve information for case from BeenVerified "
                                     f"{case_id}",
-                                    style="bold red"
+                                    style="bold red",
                                 )
                                 logger.debug(
                                     f"Failed to retrieve information for case from BeenVerified "
@@ -216,12 +214,9 @@ def retrieve():
 
             except Exception as e:
                 console.print(
-                    f"Retrieve data process failed - error {e}",
-                    style="bold red"
+                    f"Retrieve data process failed - error {e}", style="bold red"
                 )
-                logger.debug(
-                    f"Retrieve data process failed - error {e}"
-                )
+                logger.debug(f"Retrieve data process failed - error {e}")
                 console.print_exception(show_locals=True)
                 with console.status("Retrying in few seconds ..."):
                     sleep(random.randint(1, 10))

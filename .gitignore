@@ -143,3 +143,4 @@ devops
 backup*
 temp*
 data*
+.ssh
