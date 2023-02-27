@@ -26,17 +26,26 @@ def set_logging(app, logging_level):
 def init_app():
     app = Dash(
         meta_tags=[
-            {"name": "viewport", "content": "width=device-width, initial-scale=1"}
+            {
+                "name": "viewport",
+                "content": "width=device-width, initial-scale=1",
+            }
         ],
         use_pages=True,
         external_stylesheets=[dbc.themes.BOOTSTRAP],
         pages_folder="src/pages",
         external_scripts=[
             {
-                "src": "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.0/html2canvas.min.js"
+                "src": (
+                    "https://cdnjs.cloudflare.com/ajax/libs/",
+                    "html2canvas/1.4.0/html2canvas.min.js",
+                )
             },
             {
-                "src": "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+                "src": (
+                    "https://cdnjs.cloudflare.com/ajax/libs/"
+                    "html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+                )
             },
         ],
         assets_folder="src/assets",

@@ -47,6 +47,9 @@ repos:
     hooks:
       - id: black
         language_version: python3.10
+        args:
+          - --line-length
+          - 79
 ci:
   autofix_commit_msg: 🎨 [pre-commit.ci] Auto format from pre-commit.com hooks
   autoupdate_commit_msg: ⬆ [pre-commit.ci] pre-commit autoupdate
