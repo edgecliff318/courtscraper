@@ -1,1 +1,1 @@
-from . import stats
+from . import stats  # noqa

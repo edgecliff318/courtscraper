@@ -28,24 +28,62 @@ def render_leads(search, court_code_list, start_date, end_date, status):
     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
     results = "Empty"
     if trigger_id == "leads-button":
-        leads_list = leads.get_leads(court_code_list, start_date, end_date, status)
-        df = pd.DataFrame([l.dict() for l in leads_list])
-
-        results = tables.make_bs_table(
-            df[
-                [
-                    "case_id",
-                    "creation_date",
-                    "first_name",
-                    "last_name",
-                    "phone",
-                    "email",
-                    "status",
-                    "age",
-                    "charges",
-                ]
-            ].set_index("caseNumber")
+        if status == "all":
+            status = None
+        leads_list = leads.get_leads(
+            court_code_list, start_date, end_date, status
         )
+        df = pd.DataFrame([lead.dict() for lead in leads_list])
+
+        if df.empty:
+            return [
+                dbc.Col(
+                    dbc.Card(
+                        dbc.CardBody(
+                            [
+                                html.H3("Leads", className="card-title"),
+                                "No leads found",
+                            ]
+                        ),
+                    ),
+                    width=12,
+                    className="mb-2",
+                )
+            ]
+
+        df["case_date"] = df["case_date"].dt.strftime("%m/%d/%Y")
+
+        df = df[
+            [
+                "case_id",
+                "case_date",
+                "first_name",
+                "last_name",
+                "phone",
+                "email",
+                "status",
+                "age",
+                "charges",
+                "disposition",
+            ]
+        ].set_index("case_id")
+
+        df = df.rename(
+            columns={
+                "first_name": "First Name",
+                "last_name": "Last Name",
+                "phone": "Phone",
+                "email": "Email",
+                "status": "Status",
+                "age": "Age",
+                "charges": "Charges",
+                "disposition": "Disposition",
+                "case_date": "Date",
+            }
+        )
+        df.index.name = "Case ID"
+
+        results = tables.make_bs_table(df)
     return [
         dbc.Col(
             dbc.Card(

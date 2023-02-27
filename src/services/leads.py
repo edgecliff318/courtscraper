@@ -1,20 +1,30 @@
+import pandas as pd
+
 from src.db import db
 from src.models import leads
 
 
-def get_leads(court_code_list=None, start_date=None, end_date=None, status=None):
+def get_leads(
+    court_code_list=None, start_date=None, end_date=None, status=None
+):
     leads_list = db.collection("leads")
     if court_code_list is not None and court_code_list:
         if not isinstance(court_code_list, list):
             court_code_list = [
                 court_code_list,
             ]
-        leads_list = db.collection("leads").where("court_code", "in", court_code_list)
+        leads_list = db.collection("leads").where(
+            "court_code", "in", court_code_list
+        )
 
     if start_date is not None:
-        leads_list = leads_list.where("creation_date", ">=", start_date)
+        if isinstance(start_date, str):
+            start_date = pd.to_datetime(start_date)
+        leads_list = leads_list.where("case_date", ">=", start_date)
     if end_date is not None:
-        leads_list = leads_list.where("creation_date", "<=", end_date)
+        if isinstance(end_date, str):
+            end_date = pd.to_datetime(end_date)
+        leads_list = leads_list.where("case_date", "<=", end_date)
     if status is not None:
         leads_list = leads_list.where("status", "==", status)
 

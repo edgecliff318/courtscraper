@@ -43,10 +43,15 @@ def send_message(case_id, sms_message, phone, media_enabled=False):
     return twilio_message.status
 
 
-def get_interactions(case_id) -> List[messages.Interaction]:
-    interactions = (
-        db.collection("interactions").where("case_id", "==", case_id).stream()
-    )
+def get_interactions(case_id=None) -> List[messages.Interaction]:
+    if case_id is None:
+        interactions = db.collection("interactions").stream()
+    else:
+        interactions = (
+            db.collection("interactions")
+            .where("case_id", "==", case_id)
+            .stream()
+        )
 
     return [messages.Interaction(**i.to_dict()) for i in interactions]
 
@@ -57,6 +62,10 @@ def get_single_interaction(interaction_id) -> messages.Interaction:
 
 
 def get_messages_templates() -> List[messages.MessageTemplate]:
-    messages = db.collection("message_templates").stream()
+    messages_list = db.collection("messages").stream()
+    return [messages.MessageTemplate(**i.to_dict()) for i in messages_list]
 
-    return [messages.MessageTemplate(**i.to_dict()) for i in messages]
+
+def get_single_message_template(message_id) -> messages.MessageTemplate:
+    message = db.collection("messages").document(message_id).get()
+    return messages.MessageTemplate(**message.to_dict())

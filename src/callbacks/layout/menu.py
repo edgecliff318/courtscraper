@@ -1,5 +1,5 @@
 import dash_bootstrap_components as dbc
-from dash import Input, Output, State, callback, html, page_registry, dcc
+from dash import Input, Output, State, callback, html, page_registry
 
 
 @callback(
@@ -9,6 +9,8 @@ from dash import Input, Output, State, callback, html, page_registry, dcc
 def generate_menu(navbar):
     menu_elements = {}
     for _, page in page_registry.items():
+        if page.get("exclude", False):
+            continue
         path_url = page.get("path")
         path_url_split = path_url.split("/")
 
@@ -35,7 +37,9 @@ def generate_menu(navbar):
                         html.Span(
                             [
                                 html.I(
-                                    className=page.get("class_icon", "ti ti-circle")
+                                    className=page.get(
+                                        "class_icon", "ti ti-circle"
+                                    )
                                 ),
                                 html.Span(page.get("name"), className="ms-1"),
                             ],
@@ -54,12 +58,14 @@ def generate_menu(navbar):
                     # Use row and col to control vertical alignment of logo / brand
                     dbc.Row(
                         [
-                            dbc.Col(dbc.NavbarBrand("App", className="ms-2")),
+                            dbc.Col(
+                                dbc.NavbarBrand("Fubloo", className="ms-2")
+                            ),
                         ],
                         align="center",
                         className="g-0",
                     ),
-                    href="https://plotly.com",
+                    href="https://fubloo.com",
                     style={"textDecoration": "none"},
                 ),
                 dbc.NavbarToggler(id="navbar-toggler", n_clicks=0),
