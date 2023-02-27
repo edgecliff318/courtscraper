@@ -136,6 +136,8 @@ def render_leads(search, court_code_list, start_date, end_date, status):
                         )
                     ),
                     width=3,
+                    lg=3,
+                    xs=12,
                 ),
                 dbc.Col(
                     dbc.Card(
@@ -152,6 +154,8 @@ def render_leads(search, court_code_list, start_date, end_date, status):
                         )
                     ),
                     width=3,
+                    lg=3,
+                    xs=12,
                 ),
                 dbc.Col(
                     dbc.Card(
@@ -168,6 +172,8 @@ def render_leads(search, court_code_list, start_date, end_date, status):
                         )
                     ),
                     width=3,
+                    lg=3,
+                    xs=12,
                 ),
                 dbc.Col(
                     dbc.Card(
@@ -184,6 +190,8 @@ def render_leads(search, court_code_list, start_date, end_date, status):
                         )
                     ),
                     width=3,
+                    lg=3,
+                    xs=12,
                 ),
             ],
             className="mb-2",
