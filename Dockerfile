@@ -29,10 +29,6 @@ WORKDIR /app
 RUN pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
-COPY ./packages ./packages
-
-RUN /app/packages_install.sh
-
 RUN pip install unidecode
 
 COPY ./ ./
