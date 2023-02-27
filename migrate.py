@@ -31,36 +31,36 @@ total = len(leads_list)
 # Start the DB transaction
 console.print("Loading messages...")
 
-# # Creating a new collection in Firestore
-# messages_collection = db.collection("messages")
+# Creating a new collection in Firestore
+messages_collection = db.collection("messages")
 
-# # Multiple documents can be added at once
-# for message_dict in track(config_dict.get("messages")):
-#     message = messages.MessageTemplate(
-#         template_id=message_dict.get("label"),
-#         template_name=message_dict.get("label"),
-#         template_type=message_dict.get("type"),
-#         template_text=message_dict.get("value"),
-#         template_language=message_dict.get("language", "en"),
-#     )
-#     messages_collection.document(message.template_id).set(message.dict())
+# Multiple documents can be added at once
+for message_dict in track(config_dict.get("messages")):
+    message = messages.MessageTemplate(
+        template_id=message_dict.get("label"),
+        template_name=message_dict.get("label"),
+        template_type=message_dict.get("type"),
+        template_text=message_dict.get("value"),
+        template_language=message_dict.get("language", "en"),
+    )
+    messages_collection.document(message.template_id).set(message.dict())
 
-# courts_collection = db.collection("courts")
+courts_collection = db.collection("courts")
 
-# # Loading the courts file
-# for court_dict in track(config_dict.get("courts")):
-#     court = courts.Court(
-#         code=court_dict.get("value"),
-#         type=court_dict.get("type"),
-#         availability=court_dict.get("availability"),
-#         description=court_dict.get("description"),
-#         message=court_dict.get("message"),
-#         country_code=court_dict.get("country_code"),
-#         name=court_dict.get("label"),
-#         enabled=court_dict.get("enabled"),
-#         state=court_dict.get("state"),
-#     )
-#     courts_collection.document(court.code).set(court.dict())
+# Loading the courts file
+for court_dict in track(config_dict.get("courts")):
+    court = courts.Court(
+        code=court_dict.get("value"),
+        type=court_dict.get("type"),
+        availability=court_dict.get("availability"),
+        description=court_dict.get("description"),
+        message=court_dict.get("message"),
+        country_code=court_dict.get("country_code"),
+        name=court_dict.get("label"),
+        enabled=court_dict.get("enabled"),
+        state=court_dict.get("state"),
+    )
+    courts_collection.document(court.code).set(court.dict())
 
 
 batch = db.batch()
@@ -188,9 +188,6 @@ for case_id, lead in track(leads_list.items()):
         console.print(f"Failed to add case : {case_id} - {e}")
         logger.error(f"Failed to add case : {case_id} - {e}")
         continue
-
-    if count >= 2:
-        break
     count += 1
 
 # Cases that are not in the cases contacted csv file
