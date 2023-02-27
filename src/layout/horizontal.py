@@ -2,6 +2,7 @@ from datetime import datetime
 import dash
 import dash.html as html
 import dash_bootstrap_components as dbc
+from dash import dcc
 
 
 class Layout:
@@ -81,6 +82,7 @@ class Layout:
         content_backdrop = html.Div(className="content-backdrop fade")
         content_wrapper = html.Div(
             [
+                dcc.Location(id="url"),
                 html.Div(id="navbar-menu"),
                 content,
                 self.build_footer(),
