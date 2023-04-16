@@ -7,7 +7,7 @@ from rich.console import Console
 from rich.progress import track
 
 from src.db import db
-from src.models import cases, leads, messages
+from src.models import cases, courts, leads, messages
 
 console = Console()
 
@@ -55,7 +55,7 @@ for court_dict in track(config_dict.get("courts")):
         availability=court_dict.get("availability"),
         description=court_dict.get("description"),
         message=court_dict.get("message"),
-        country_code=court_dict.get("country_code"),
+        county_code=court_dict.get("county_code"),
         name=court_dict.get("label"),
         enabled=court_dict.get("enabled"),
         state=court_dict.get("state"),
