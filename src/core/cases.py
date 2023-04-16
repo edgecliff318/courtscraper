@@ -11,17 +11,19 @@ settings = get_settings()
 logger = logging.Logger(__name__)
 
 
-@tools.cached(storage=storage.RemotePickleStorage(url=settings.REMOTE_UPLOAD_URL))
-def get_case_datails(case_id):
-    case = {
-        "case_number": case_id
-    }
+@tools.cached(
+    storage=storage.RemotePickleStorage(url=settings.REMOTE_UPLOAD_URL)
+)
+def get_case_details(case_id):
+    case = {"case_number": case_id}
     scrapper = ScraperMOCourt()
     results = scrapper.get_case_detail(case)
     return results
 
 
-@tools.cached(storage=storage.RemotePickleStorage(url=settings.REMOTE_UPLOAD_URL))
+@tools.cached(
+    storage=storage.RemotePickleStorage(url=settings.REMOTE_UPLOAD_URL)
+)
 def get_lead_single_been_verified(link):
     scrapper = BeenVerifiedScrapper(cache=True)
     try:
@@ -54,9 +56,13 @@ def get_verified_link(name, year_of_birth):
             first_name = None
             last_name = None
 
-    def get_beenverified_link(first_name=None, last_name=None,
-                              middle_name=None,
-                              year=None, state="MO"):
+    def get_beenverified_link(
+        first_name=None,
+        last_name=None,
+        middle_name=None,
+        year=None,
+        state="MO",
+    ):
         state = "MO"
         url = f"https://www.beenverified.com/app/search/person?"
         if first_name is not None:
@@ -76,7 +82,10 @@ def get_verified_link(name, year_of_birth):
                 logger.error(f"Error parsing the year. Exception{e} ")
         return url
 
-    return first_name, last_name, get_beenverified_link(
-        first_name, last_name, middle_name,
-        year_of_birth
+    return (
+        first_name,
+        last_name,
+        get_beenverified_link(
+            first_name, last_name, middle_name, year_of_birth
+        ),
     )

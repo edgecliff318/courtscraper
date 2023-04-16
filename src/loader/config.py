@@ -7,14 +7,14 @@ class ConfigLoader(object):
         self.data = None
 
     def load(self):
-        with open(self.path, 'r') as f:
+        with open(self.path, "r") as f:
             self.data = json.load(f)
         return self.data
 
     def get_court_details(self, court_code):
         if self.data is None:
-            self.load()
-        for court in self.data['courts']:
-            if court['value'] == court_code:
+            self.data = self.load()
+        for court in self.data["courts"]:
+            if court["value"] == court_code:
                 return court
-        return None
+        return {}
