@@ -66,6 +66,9 @@ lint: format ## Linter the code.
 	@echo "🚨 Linting code"
 	pre-commit run --all-files
 
+chrome: 
+	@brew upgrade --cask chromedriver
+
 re:  clean venv install
 
-.PHONY: all test coverage help install venv clean build lint re
+.PHONY: all test coverage help install venv clean build lint re chrome
