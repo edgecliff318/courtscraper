@@ -53,12 +53,12 @@ for court_dict in track(config_dict.get("courts")):
         code=court_dict.get("value"),
         type=court_dict.get("type"),
         availability=court_dict.get("availability"),
-        description=court_dict.get("description"),
-        message=court_dict.get("message"),
-        county_code=court_dict.get("county_code"),
+        description=court_dict.get("courtdesc"),
+        message=court_dict.get("courtmessage"),
+        county_code=court_dict.get("countycode"),
         name=court_dict.get("label"),
         enabled=court_dict.get("enabled"),
-        state=court_dict.get("state"),
+        state=court_dict.get("state", "MO"),
     )
     courts_collection.document(court.code).set(court.dict())
 
