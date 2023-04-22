@@ -2,12 +2,15 @@
 
 
 class ScraperBase:
-    """ Base class which describes the interface that all scrapers should implement.
+    """Base class which describes the interface that all scrapers should implement.
 
     Also contains some utility methods.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, username=None, password=None, url=None) -> None:
+        self.username = username
+        self.password = password
+        self.url = url
         self._GLOBAL_SESSION = None
 
     def scrape(self, search_parameters):
