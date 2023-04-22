@@ -10,7 +10,7 @@ class Court(BaseModel):
     availability: Optional[str] = None
     description: Optional[str] = None
     message: Optional[str] = None
-    country_code: Optional[str] = None
+    county_code: Optional[str] = None
     name: str
     creation_date: Optional[datetime] = None
     enabled: Optional[bool] = False

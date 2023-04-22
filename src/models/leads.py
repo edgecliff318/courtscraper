@@ -1,7 +1,8 @@
-from pydantic import BaseModel, validator
-from datetime import date, datetime
-from typing import Optional, Union
+from datetime import datetime
+from typing import Optional
+
 import pandas as pd
+from pydantic import BaseModel, validator
 
 
 class Lead(BaseModel):
@@ -25,6 +26,7 @@ class Lead(BaseModel):
     source: Optional[str] = None
     charges: Optional[str] = None
     disposition: Optional[str] = None
+    lead_details_scraped: bool = False
 
     @validator("last_updated", pre=True, always=True)
     def set_last_updated_date_now(cls, v):

@@ -11,9 +11,6 @@ settings = get_settings()
 logger = logging.Logger(__name__)
 
 
-@tools.cached(
-    storage=storage.RemotePickleStorage(url=settings.REMOTE_UPLOAD_URL)
-)
 def get_case_details(case_id):
     case = {"case_number": case_id}
     scrapper = ScraperMOCourt()
@@ -21,9 +18,6 @@ def get_case_details(case_id):
     return results
 
 
-@tools.cached(
-    storage=storage.RemotePickleStorage(url=settings.REMOTE_UPLOAD_URL)
-)
 def get_lead_single_been_verified(link):
     scrapper = BeenVerifiedScrapper(cache=True)
     try:
