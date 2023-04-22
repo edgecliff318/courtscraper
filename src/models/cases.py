@@ -1,5 +1,6 @@
-from pydantic import BaseModel, validator
 from typing import Dict, List, Optional, Union
+
+from pydantic import BaseModel, validator
 
 
 class Case(BaseModel):
@@ -23,9 +24,12 @@ class Case(BaseModel):
     current_date: Optional[str] = None
     # Image is a binary file
     image: Optional[bytes] = None
-    charges: Optional[Dict[str, Dict[str, str]]] = None
+    charges: Optional[str] = None
     dockets: Optional[List[Dict[str, Union[str, List]]]] = None
-    services: Optional[List[str]] = None
+    dockets_entries: Optional[List[str]] = None
+    services: Optional[
+        Union[List[str], List[Dict[str, Union[str, List]]]]
+    ] = None
     headers: Optional[Dict[str, str]] = None
     parties: Optional[str] = None
 
