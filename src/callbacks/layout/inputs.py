@@ -2,7 +2,7 @@ import logging
 
 from dash import Input, Output, callback
 
-from src.services import courts, leads
+from src.services import courts
 
 logger = logging.Logger(__name__)
 
