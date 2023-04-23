@@ -22,11 +22,10 @@ class Lead(BaseModel):
     creation_date: Optional[datetime] = None
     last_updated: Optional[datetime] = None
     case_date: Optional[datetime] = None
-    status: Optional[str] = None
+    status: Optional[str] = "new"
     source: Optional[str] = None
     charges: Optional[str] = None
     disposition: Optional[str] = None
-    lead_details_scraped: bool = False
 
     @validator("last_updated", pre=True, always=True)
     def set_last_updated_date_now(cls, v):

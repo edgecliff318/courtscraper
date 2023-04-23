@@ -48,6 +48,7 @@ leads_controls = dbc.Row(
                 value="not_contacted",
                 options=[
                     {"label": "All", "value": "all"},
+                    {"label": "New", "value": "new"},
                     {"label": "Contacted", "value": "contacted"},
                     {"label": "Responded", "value": "responded"},
                     {"label": "Converted", "value": "converted"},

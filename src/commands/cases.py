@@ -45,30 +45,36 @@ def retrieve_cases():
     for day in range(-settings.start_date, -settings.end_date):
         date = str((datetime.datetime.now(tz) + Day(day)).date())
         for court in courts:
-            console.log(f"Processing {court.name} ({court.code})")
-            cases_ignore = cases_service.get_cases(
-                court_code_list=court.code,
-                start_date=date,
-                end_date=date,
-            )
-            cases_imported = case_net.get_cases(
-                court=court,
-                case_type=case_type,
-                date=date,
-                cases_ignore=[case.case_id for case in cases_ignore],
-            )
-            console.log(f"Succeeded to retrieve " f"{len(cases_imported)}")
-            for case in cases_imported:
-                try:
-                    case_parsed = cases_model.Case.parse_obj(case)
-                    cases_service.insert_case(case_parsed)
-                except Exception as e:
-                    console.log(f"Failed to parse case {case} - {e}")
-                try:
-                    lead_parsed = leads_model.Lead.parse_obj(case)
-                    leads_service.insert_lead(lead_parsed)
-                except Exception as e:
-                    console.log(f"Failed to parse lead {case} - {e}")
+            while True:
+                console.log(f"Processing {court.name} ({court.code})")
+                cases_ignore = cases_service.get_cases(
+                    court_code_list=court.code,
+                    start_date=date,
+                    end_date=date,
+                )
+                cases_imported = case_net.get_cases(
+                    court=court,
+                    case_type=case_type,
+                    date=date,
+                    cases_ignore=[case.case_id for case in cases_ignore],
+                )
+                console.log(f"Succeeded to retrieve " f"{len(cases_imported)}")
+                if not cases_imported:
+                    console.log(
+                        f"Retrieved all cases from {court.name} ({court.code})"
+                    )
+                    break
+                for case in cases_imported:
+                    try:
+                        case_parsed = cases_model.Case.parse_obj(case)
+                        cases_service.insert_case(case_parsed)
+                    except Exception as e:
+                        console.log(f"Failed to parse case {case} - {e}")
+                    try:
+                        lead_parsed = leads_model.Lead.parse_obj(case)
+                        leads_service.insert_lead(lead_parsed)
+                    except Exception as e:
+                        console.log(f"Failed to parse lead {case} - {e}")
 
 
 if __name__ == "__main__":

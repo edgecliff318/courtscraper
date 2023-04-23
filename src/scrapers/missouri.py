@@ -1,6 +1,7 @@
 import datetime
 import json
 import logging
+import random
 import time
 from urllib.parse import parse_qs, urlparse
 
@@ -8,7 +9,7 @@ import requests
 from bs4 import BeautifulSoup
 from pdf2image.pdf2image import convert_from_path
 from requests.adapters import HTTPAdapter, Retry
-from rich.progress import track
+from rich.console import Console
 
 from src.core.config import get_settings
 from src.loader.tickets import TicketParser
@@ -18,6 +19,8 @@ from src.scrapers.base import InitializedSession, NameNormalizer, ScraperBase
 settings = get_settings()
 
 logger = logging.Logger(__name__)
+
+console = Console()
 
 
 class ScraperMOCourt(ScraperBase):
@@ -48,7 +51,7 @@ class ScraperMOCourt(ScraperBase):
                 initial_url="https://www.courts.mo.gov/cnet/logon.do",
                 payload=payload,
             )
-            retries = Retry(total=5, backoff_factor=1)
+            retries = Retry(total=1, backoff_factor=5)
 
             self._GLOBAL_SESSION.mount(
                 "http://", HTTPAdapter(max_retries=retries)
@@ -282,12 +285,15 @@ class ScraperMOCourt(ScraperBase):
         """
         case_detail = {}
         try:
+            console.print(f"Getting case detail : {case['case_number']}")
             case_detail["details"] = self.get_case_details(case["case_number"])
         except requests.ConnectionError as e:
             logger.error(f"Connection failure : {str(e)}")
             raise ValueError(f"Case not found : {case['case_number']}")
         case["court_id"] = case_detail["details"]["court_id"]
         try:
+            time.sleep(random.randint(1, 3))
+            console.print(f"Getting case header : {case['case_number']}")
             r = self.GLOBAL_SESSION.post(
                 self.CASE_HEADER_URL,
                 {
@@ -306,6 +312,8 @@ class ScraperMOCourt(ScraperBase):
             r = None
 
         try:
+            time.sleep(random.randint(1, 3))
+            console.print(f"Getting case charges : {case['case_number']}")
             r = self.GLOBAL_SESSION.post(
                 self.PARTIES_URL,
                 {
@@ -330,6 +338,8 @@ class ScraperMOCourt(ScraperBase):
                 )
 
         try:
+            time.sleep(random.randint(1, 3))
+            console.print(f"Getting case dockets : {case['case_number']}")
             r = self.GLOBAL_SESSION.post(
                 self.DOCKETS_URL,
                 {
@@ -354,6 +364,8 @@ class ScraperMOCourt(ScraperBase):
             r = None
 
         try:
+            time.sleep(random.randint(1, 3))
+            console.print(f"Getting case services : {case['case_number']}")
             r = self.GLOBAL_SESSION.post(
                 self.SERVICE_URL,
                 {
@@ -372,6 +384,8 @@ class ScraperMOCourt(ScraperBase):
             r = None
 
         try:
+            time.sleep(random.randint(1, 3))
+            console.print(f"Getting case charges : {case['case_number']}")
             r = self.GLOBAL_SESSION.post(
                 self.CHARGES_URL,
                 {
@@ -587,10 +601,17 @@ class ScraperMOCourt(ScraperBase):
             )
             raise e
 
-        return [
-            self.parse_case(case, case_type, court, date)
-            for case in track(cases_to_scrape)
-        ]
+        def parse_case_wrapper(case):
+            with console.status(
+                f"[bold green]Scraping case {case.get('caseNumber')} ..."
+            ) as status:
+                output = self.parse_case(case, case_type, court, date)
+                status.update(
+                    f"[bold green]Scraped case {case.get('caseNumber')} ..."
+                )
+                return output
+
+        return [parse_case_wrapper(case) for case in cases_to_scrape]
 
     def get_birthdate(self, results, case_id):
         year_of_birth = results["parties"].split("Year of Birth: ")
