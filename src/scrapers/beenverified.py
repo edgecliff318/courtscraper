@@ -1,17 +1,18 @@
 import logging
 import os
+from datetime import datetime
 from time import sleep
 
 import selenium.common.exceptions
+from commonregex import CommonRegex
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.chrome.options import Options
-from commonregex import CommonRegex
 
+from src.core import storage, tools
 from src.core.config import get_settings
-from src.core import tools, storage
 
 settings = get_settings()
 
@@ -44,21 +45,13 @@ class BeenVerifiedScrapper:
             self.driver.quit()
 
     def login(self):
-        self.driver.get("https://www.beenverified.com/")
+        self.driver.get("https://www.beenverified.com/app/login")
         # 2 | setWindowSize | 1680x1005 |
         # self.driver.set_window_size(1680, 1005)
         # 3 | click | css=.nav__utils-btn:nth-child(2) > .nav__utils-link |
         try:
-            self.driver.find_element(
-                By.CSS_SELECTOR,
-                ".nav__utils-btn:nth-child(2) > "
-                ".nav__utils-link"
-            ).click()
-
             # 4 | type | click on the magic link
-            self.driver.find_element(
-                By.ID, "magic_link"
-            ).click()
+            self.driver.find_element(By.ID, "magic_link").click()
 
             sleep(5)
 
@@ -66,24 +59,27 @@ class BeenVerifiedScrapper:
             self.driver.find_element(By.ID, "magic-link-email-field").click()
 
             # 5 | type | id=login-password | Marcus1995!
-            self.driver.find_element(By.ID, "magic-link-email-field").send_keys(
-                os.environ.get("BEEN_VERIFIED_EMAIL",
-                               "fublooman@gmail.com")
+            self.driver.find_element(
+                By.ID, "magic-link-email-field"
+            ).send_keys(
+                os.environ.get("BEEN_VERIFIED_EMAIL", "fublooman@gmail.com")
             )
             # 6 | click on connect
             self.driver.find_element(
-                By.CSS_SELECTOR, "#send-magic-link-form > .btn").click()
+                By.CSS_SELECTOR, "#send-magic-link-form > .btn"
+            ).click()
 
             sleep(60)
         except Exception as e:
             logger.warning(
-                f"Continuing with the session as probably the user is already logged in")
-
-            logger.debug(
-                f"Issue with Beenverified {e}"
+                f"Continuing with the session as probably the user is already logged in"
             )
 
-    @tools.cached(storage=storage.RemotePickleStorage(url=settings.REMOTE_UPLOAD_URL))
+            logger.debug(f"Issue with Beenverified {e}")
+
+    @tools.cached(
+        storage=storage.RemotePickleStorage(url=settings.REMOTE_UPLOAD_URL)
+    )
     def retrieve_information(self, link):
         if self.cache:
             self.driver = webdriver.Chrome(options=self.options)
@@ -94,14 +90,16 @@ class BeenVerifiedScrapper:
             "details": "",
             "phone": "",
             "exact_match": True,
-            "error": True
+            "error": True,
         }
         # 7 | open the search screen
         self.driver.get(link)
         # 8 | waitForElementPresent | css=.recent-reports__report | 30000
         WebDriverWait(self.driver, 30).until(
             expected_conditions.presence_of_element_located(
-                (By.CSS_SELECTOR, ".person-search-result-card")))
+                (By.CSS_SELECTOR, ".person-search-result-card")
+            )
+        )
         # Check the results:
         try:
             results_count = self.driver.find_element(
@@ -117,8 +115,7 @@ class BeenVerifiedScrapper:
         # Go through the results:
         try:
             results = self.driver.find_elements(
-                By.CSS_SELECTOR,
-                ".person-search-result-card"
+                By.CSS_SELECTOR, ".person-search-result-card"
             )
         except selenium.common.exceptions.NoSuchElementException:
             logger.error(f"No approximate results found for {link}")
@@ -144,14 +141,18 @@ class BeenVerifiedScrapper:
 
         WebDriverWait(self.driver, 60).until(
             expected_conditions.presence_of_element_located(
-                (By.CSS_SELECTOR, ".report-header__title")))
+                (By.CSS_SELECTOR, ".report-header__title")
+            )
+        )
         # 12 | click | css=.report_section__label_title |
 
         try:
             informations = [
-                i.text for i in self.driver.find_elements(
+                i.text
+                for i in self.driver.find_elements(
                     By.CSS_SELECTOR,
-                    ".report-overview__section-summary-content")
+                    ".report-overview__section-summary-content",
+                )
             ]
             output["address"] = informations[0]
             output["phone"] = informations[1]
@@ -172,6 +173,33 @@ class BeenVerifiedScrapper:
             return output
         output["error"] = False
         return output
+
+    def get_beenverified_link(
+        self,
+        first_name=None,
+        last_name=None,
+        middle_name=None,
+        year=None,
+        state="MO",
+    ):
+        state = "MO"
+        url = f"https://www.beenverified.com/app/search/person?"
+        if first_name is not None:
+            url += f"fname={first_name}&"
+        if last_name is not None:
+            url += f"ln={last_name}&"
+        # if middle_name is not None:
+        #    url += f"mn={middle_name}&"
+        if state is not None:
+            url += f"state={state}&"
+        if year is not None:
+            try:
+                age = datetime.now().year - year
+                url += f"age={age}"
+            except Exception as e:
+                year = None
+                logger.error(f"Error parsing the year. Exception{e} ")
+        return url
 
 
 if __name__ == "__main__":
