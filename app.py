@@ -1,4 +1,5 @@
 import logging
+import os
 
 import dash_bootstrap_components as dbc
 from dash import Dash
@@ -24,6 +25,7 @@ def set_logging(app, logging_level):
 
 
 def init_app():
+    pages_folder = os.path.abspath(os.path.join(os.path.dirname(__name__), "src/pages"))
     app = Dash(
         meta_tags=[
             {
@@ -33,7 +35,7 @@ def init_app():
         ],
         use_pages=True,
         external_stylesheets=[dbc.themes.BOOTSTRAP],
-        pages_folder="src/pages",
+        pages_folder=pages_folder,
         external_scripts=[
             {
                 "src": (
@@ -81,5 +83,10 @@ def init_app():
 
 app, server, auth = init_app()
 
+
 if __name__ == "__main__":
     app.run_server(debug=True, port=3000)
+
+
+
+
