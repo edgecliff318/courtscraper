@@ -110,6 +110,8 @@ class Settings(BaseSettings):
     JWT_PAYLOAD: str = os.getenv("JWT_PAYLOAD", "jwt_payload")
     PROFILE_KEY: str = os.getenv("PROFILE_KEY", "profile")
 
+    # firebase configuration
+    GOOGLE_APPLICATION_CREDENTIALS: str = os.getenv('GOOGLE_APPLICATION_CREDENTIALS', 'fubloo-1b0e8-firebase-adminsdk-5j6zr-6b8d8d1c0b.json')
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

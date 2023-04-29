@@ -12,7 +12,16 @@ endif
 
 include .env
 
-all:
+.DEFAULT_GOAL := help
+
+help: ## Show this help
+	@echo "Usage: make <target>"
+	@echo "Available targets:"
+	@echo
+	@awk -F':.*##' '/^[^.#][a-z_-]+:.*?##/ {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
+	@echo
+
+all: ## Run the server
 	@echo "run server"
 	@gunicorn --config  wsgi.py server:server
 	@echo "Server stopped"
@@ -28,10 +37,8 @@ coverage:
 	@pytest --cov=webapp
 	coverage report
 
-help: ## Show this help
-	@egrep -h '\s##\s' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-install:venv
+install: ## Install dependencies
 	: # Activate venv and install smthing inside
 	@echo "Installing..."
 	@$(INSTALL) --upgrade pip
@@ -39,20 +46,21 @@ install:venv
 	@$(INSTALL) -r requirements_dev.txt --no-cache-dir
 	@echo "Done."
 
-venv:
+venv: ## Create virtual environment
 	#: # Create venv if it doesn't exist
 	@echo "Creating venv..."
 	@$(VENV)
-	@echo "Done."
+	@echo "Virtual environment is ready."
 
-clean:
+clean: ## Remove generated files and directories
+	@echo "Removing generated files and directories..."
 	@rm -rf venv
 	@rm -rf dist build *.egg-info
 	@find . -name "*.pyc" -exec rm {} \;
 	@find . | grep -E '(__pycache__|\.pyc|\.pyo$$)' | xargs rm -rf
 
 
-build:
+build: ## Build Docker image
 	@echo "build image staging "
 	echo ${GITHUB_TOKEN}
 	@docker build -t ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}  . --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} --build-arg USERNAME_REPO=${USERNAME_REPO} --build-arg EMAIL_REPO=${EMAIL_REPO}
