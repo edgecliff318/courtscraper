@@ -2,11 +2,11 @@ import logging
 
 import dash
 import dash.html as html
+import dash_ag_grid as dag
 import dash_bootstrap_components as dbc
 import pandas as pd
 from dash import Input, Output, callback
 
-from src.components import tables
 from src.core.config import get_settings
 from src.services import leads
 
@@ -26,7 +26,7 @@ settings = get_settings()
 def render_leads(search, court_code_list, start_date, end_date, status):
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
-    results = "Empty"
+    grid = "Empty"
     if trigger_id == "leads-button":
         if status == "all":
             status = None
@@ -83,14 +83,51 @@ def render_leads(search, court_code_list, start_date, end_date, status):
         )
         df.index.name = "Case ID"
 
-        results = tables.make_bs_table(df)
+        df.reset_index(inplace=True)
+        df["Case ID"] = df["Case ID"].map(lambda x: f"[{x}](/case/{x})")
+
+        column_defs = [
+            {
+                "headerName": "Case ID",
+                "field": "Case ID",
+                "editable": False,
+                "filter": "agTextColumnFilter",
+                "sortable": True,
+                "resizable": True,
+                "flex": 1,
+                "cellRenderer": "markdown",
+            }
+        ] + [
+            {
+                "headerName": col,
+                "field": col,
+                "editable": True,
+                "filter": "agTextColumnFilter",
+                "sortable": True,
+                "resizable": True,
+                "flex": 1,
+            }
+            for col in df.columns
+            if col != "Case ID"
+        ]
+
+        grid = dag.AgGrid(
+            id="portfolio-grid",
+            columnDefs=column_defs,
+            rowData=df.to_dict("records"),
+            columnSize="sizeToFit",
+            dashGridOptions={
+                "undoRedoCellEditing": True,
+                "rowSelection": "single",
+            },
+        )
     return [
         dbc.Col(
             dbc.Card(
                 dbc.CardBody(
                     [
                         html.H3("Cases", className="card-title"),
-                        results,
+                        grid,
                     ]
                 ),
             ),

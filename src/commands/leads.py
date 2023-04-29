@@ -30,7 +30,7 @@ def retrieve_leads():
                 lead_data["phone"] = data.get("phone")
                 lead_data["details"] = data.get("details")
                 lead_data["email"] = data.get("email")
-                lead_data["status"]
+                lead_data["status"] = "not_contacted"
                 leads_service.insert_lead(leads_model.Lead(**lead_data))
                 error_count = 0
             except Exception as e:
