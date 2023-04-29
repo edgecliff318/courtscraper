@@ -172,8 +172,6 @@ def render_case_details(case_id):
 
         charges = case_details.charges
 
-        if charges and isinstance(charges, dict):
-            _, charges = charges.popitem()
         return (
             [
                 dbc.Col(
@@ -198,7 +196,15 @@ def render_case_details(case_id):
                     width=6,
                 ),
                 dbc.Col(
-                    get_table_data("Charges", charges),
+                    dbc.Card(
+                        dbc.CardBody(
+                            [
+                                html.H3("Charges", className="card-title"),
+                                html.P(charges),
+                            ]
+                        ),
+                        className="mb-2",
+                    ),
                     width=6,
                 ),
             ],
