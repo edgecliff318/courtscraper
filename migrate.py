@@ -117,7 +117,10 @@ for case_id, lead in track(leads_list.items()):
                 "ticket_posted_speed_limit"
             ),
             current_date=ticket_form_dict.get("current_date"),
-            charges=lead.get("casenet", {}).get("charges", {}),
+            charges=lead.get("casenet", {})
+            .get("charges", {})
+            .get("Charge/Judgment", {})
+            .get("Description", " "),
             dockets=lead.get("casenet", {}).get("dockets_links", []),
             services=lead.get("casenet", {}).get("services", []),
             headers=lead.get("casenet", {}).get("case_header", {}),
