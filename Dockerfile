@@ -29,10 +29,6 @@ WORKDIR /app
 RUN pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
-COPY ./packages ./packages
-
-RUN /app/packages_install.sh
-
 RUN pip install unidecode
 
 COPY ./ ./
@@ -41,6 +37,6 @@ RUN rm -rf ./packages
 
 EXPOSE 8050
 
-ENV GOOGLE_APPLICATION_CREDENTIALS="./configuration/deeprl-326711-2dd88867b5e4.json" 
+ENV GOOGLE_APPLICATION_CREDENTIALS="./configuration/fubloo-app-1f213ca274de.json" 
 
 ENTRYPOINT ["gunicorn", "--config", "gunicorn_config.py", "server:server"]
