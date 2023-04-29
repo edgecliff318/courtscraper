@@ -87,5 +87,5 @@ jobs:
           key: ${{ secrets.KEY }}
           port: ${{ secrets.PORT }}
           script: |
-            cd  /home/ec2-user/devops
+            cd  /home/ubuntu/devops
             make app
