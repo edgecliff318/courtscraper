@@ -29,8 +29,6 @@ COPY . .
 RUN pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
-RUN chmod +x ./scripts/entrypoint.sh
-
 EXPOSE 8060
 
 ENV GOOGLE_APPLICATION_CREDENTIALS="./configuration/fubloo-app-1f213ca274de.json" 
