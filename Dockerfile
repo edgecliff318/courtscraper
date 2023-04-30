@@ -1,4 +1,4 @@
-FROM python:3.8.5-slim
+FROM python:3.11.2-slim
 
 RUN apt-get -y update \
     && apt-get -y install curl gfortran wget gnupg2 \
