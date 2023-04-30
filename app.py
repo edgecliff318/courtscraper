@@ -25,7 +25,8 @@ def set_logging(app, logging_level):
 
 
 def init_app():
-    pages_folder = os.path.abspath(os.path.join(os.path.dirname(__name__), "src/pages"))
+    pages_folder = os.path.join(settings.ROOT_PATH, "src/pages")
+    assets_folder = os.path.join(settings.ROOT_PATH, "src/assets")
     app = Dash(
         meta_tags=[
             {
@@ -50,7 +51,7 @@ def init_app():
                 )
             },
         ],
-        assets_folder="src/assets",
+        assets_folder=assets_folder,
         suppress_callback_exceptions=True,
     )
 

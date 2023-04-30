@@ -23,7 +23,7 @@ help: ## Show this help
 
 all: ## Run the server
 	@echo "run server"
-	@gunicorn --config  wsgi.py server:server
+	@gunicorn --config  scripts/wsgi.py app:server
 	@echo "Server stopped"
 
 
