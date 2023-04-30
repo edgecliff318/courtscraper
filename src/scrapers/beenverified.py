@@ -69,6 +69,9 @@ class BeenVerifiedScrapper:
                 By.CSS_SELECTOR, "#send-magic-link-form > .btn"
             ).click()
 
+            ## get the magic link
+            sns = tools.SonsorEmails()
+            magic_link = sns()
             sleep(60)
         except Exception as e:
             logger.warning(
