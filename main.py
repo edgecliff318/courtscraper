@@ -4,8 +4,8 @@ import typer
 from rich.console import Console
 from rich.logging import RichHandler
 
-from src.commands.cases import retrieve_cases
-from src.commands.leads import retrieve_leads
+from src.commands.cases import retrieve_cases as retrieve_cases_fct
+from src.commands.leads import retrieve_leads as retrieve_leads_fct
 from src.core.config import get_settings
 
 settings = get_settings()
@@ -33,12 +33,12 @@ console.print(
     ":rocket: [bold]Welcome to the BeenVerified Scraper[/bold] :rocket:"
 )
 
-retrieve_cases = app.command(
-    help="Scrap the casenet website", no_args_is_help=True
-)(retrieve_cases)
-retrieve_leads = app.command(
-    help="Retrieve leads information", no_args_is_help=True
-)(retrieve_leads)
+retrieve_cases = app.command(help="Scrap the casenet website")(
+    retrieve_cases_fct
+)
+retrieve_leads = app.command(help="Retrieve leads information")(
+    retrieve_leads_fct
+)
 
 
 if __name__ == "__main__":
