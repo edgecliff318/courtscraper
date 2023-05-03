@@ -47,10 +47,17 @@ def retrieve_cases():
         for court in courts:
             while True:
                 console.log(f"Processing {court.name} ({court.code})")
+
+                # Set start date at 00:00:00 and end date at 23:59:59
+                start_date = datetime.datetime.strptime(date, "%Y-%m-%d")
+
+                end_date = datetime.datetime.strptime(date, "%Y-%m-%d")
+                end_date = end_date.replace(hour=23, minute=59, second=59)
+
                 cases_ignore = cases_service.get_cases(
                     court_code_list=court.code,
-                    start_date=date,
-                    end_date=date,
+                    start_date=start_date,
+                    end_date=end_date,
                 )
                 cases_imported = case_net.get_cases(
                     court=court,
@@ -65,6 +72,11 @@ def retrieve_cases():
                     )
                     break
                 for case in cases_imported:
+                    # Reimport the module cases_model
+                    # to avoid the error:
+                    # TypeError: Object of type Case is not JSON serializable
+                    # https://stackoverflow.com/questions/3768895/how-to-make-a-class-json-serializable
+
                     try:
                         case_parsed = cases_model.Case.parse_obj(case)
                         cases_service.insert_case(case_parsed)

@@ -3,7 +3,7 @@ from src.models import cases
 
 
 def get_cases(
-    court_code_list=None, start_date=None, end_date=None, status=None
+    court_code_list=None, start_date=None, end_date=None, disposition=None
 ):
     cases_list = db.collection("cases")
     if court_code_list is not None and court_code_list:
@@ -23,9 +23,9 @@ def get_cases(
         cases_list = cases_list.where(
             field_path="case_date", op_string="<=", value=end_date
         )
-    if status is not None:
+    if disposition is not None:
         cases_list = cases_list.where(
-            field_path="status", op_string="==", value=status
+            field_path="disposition", op_string="==", value=status
         )
 
     cases_list = cases_list.stream()

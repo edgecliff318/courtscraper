@@ -1,5 +1,7 @@
+from datetime import date, datetime
 from typing import Dict, List, Optional, Union
 
+import pandas as pd
 from pydantic import BaseModel, validator
 
 
@@ -9,10 +11,12 @@ class Case(BaseModel):
     disposition: Optional[str] = None
     judge: Optional[str] = None
     date_filed: Optional[str] = None
+    case_date: Optional[datetime] = None
     location: Optional[str] = None
     case_type: Optional[str] = None
     court_type: Optional[str] = None
     court_city: Optional[str] = None
+    court_code: Optional[str] = None
     court_jurisdiction: Optional[str] = None
     court_phone: Optional[str] = None
     court_time: Optional[str] = None
@@ -37,3 +41,12 @@ class Case(BaseModel):
     @validator("charges", pre=True, always=True)
     def set_charges(cls, v):
         return v or {}
+
+    @validator("case_date", pre=True)
+    def set_case_date(cls, v):
+        try:
+            v = pd.to_datetime(v)
+            # convert to datetime
+            return v.to_pydatetime()
+        except Exception:
+            return None

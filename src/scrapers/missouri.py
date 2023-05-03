@@ -51,7 +51,7 @@ class ScraperMOCourt(ScraperBase):
                 initial_url="https://www.courts.mo.gov/cnet/logon.do",
                 payload=payload,
             )
-            retries = Retry(total=1, backoff_factor=5)
+            retries = Retry(total=0, backoff_factor=5)
 
             self._GLOBAL_SESSION.mount(
                 "http://", HTTPAdapter(max_retries=retries)
@@ -292,7 +292,7 @@ class ScraperMOCourt(ScraperBase):
             raise ValueError(f"Case not found : {case['case_number']}")
         case["court_id"] = case_detail["details"]["court_id"]
         try:
-            time.sleep(random.randint(1, 3))
+            time.sleep(random.randint(5, 10))
             console.print(f"Getting case header : {case['case_number']}")
             r = self.GLOBAL_SESSION.post(
                 self.CASE_HEADER_URL,
@@ -312,7 +312,7 @@ class ScraperMOCourt(ScraperBase):
             r = None
 
         try:
-            time.sleep(random.randint(1, 3))
+            time.sleep(random.randint(5, 10))
             console.print(f"Getting case charges : {case['case_number']}")
             r = self.GLOBAL_SESSION.post(
                 self.PARTIES_URL,
@@ -338,7 +338,7 @@ class ScraperMOCourt(ScraperBase):
                 )
 
         try:
-            time.sleep(random.randint(1, 3))
+            time.sleep(random.randint(5, 10))
             console.print(f"Getting case dockets : {case['case_number']}")
             r = self.GLOBAL_SESSION.post(
                 self.DOCKETS_URL,
@@ -364,7 +364,7 @@ class ScraperMOCourt(ScraperBase):
             r = None
 
         try:
-            time.sleep(random.randint(1, 3))
+            time.sleep(random.randint(5, 10))
             console.print(f"Getting case services : {case['case_number']}")
             r = self.GLOBAL_SESSION.post(
                 self.SERVICE_URL,
@@ -384,7 +384,7 @@ class ScraperMOCourt(ScraperBase):
             r = None
 
         try:
-            time.sleep(random.randint(1, 3))
+            time.sleep(random.randint(5, 10))
             console.print(f"Getting case charges : {case['case_number']}")
             r = self.GLOBAL_SESSION.post(
                 self.CHARGES_URL,
@@ -512,7 +512,12 @@ class ScraperMOCourt(ScraperBase):
         return case_info
 
     def get_cases(
-        self, court: Court, date, case_type="Infraction", cases_ignore=None
+        self,
+        court: Court,
+        date,
+        case_type="Infraction",
+        cases_ignore=None,
+        limit=10,
     ):
         date = (
             datetime.datetime.fromisoformat(date)
@@ -538,8 +543,8 @@ class ScraperMOCourt(ScraperBase):
             '"regex":false}},{"data":"countyDesc","name":"",'
             '"searchable":true,"orderable":true,"search":{'
             '"value":"","regex":false}}],"order":[{'
-            '"column":0,"dir":"asc"}],"start":10,'
-            '"length":10,"search":{"value":"",'
+            '"column":0,"dir":"asc"}],"start":0,'
+            '"length":1000,"search":{"value":"",'
             '"regex":false}}'
         )
 
@@ -594,6 +599,7 @@ class ScraperMOCourt(ScraperBase):
                 for case in cases_data
                 if case.get("caseNumber") not in cases_ignore
             ]
+            cases_to_scrape = cases_to_scrape[:limit]
         except Exception as e:
             logger.error(
                 f"Failed to retrieve cases from CaseNet "
