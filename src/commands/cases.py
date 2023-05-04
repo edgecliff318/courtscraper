@@ -1,4 +1,5 @@
 import datetime
+import json
 import logging
 
 import pytz
@@ -81,6 +82,13 @@ def retrieve_cases():
                         case_parsed = cases_model.Case.parse_obj(case)
                         cases_service.insert_case(case_parsed)
                     except Exception as e:
+                        # Save the case in a file for a manual review
+                        with open(
+                            f"cases_to_review/{date}_{court.code}_{case.get('case_id')}.json",
+                            "w",
+                        ) as f:
+                            # Transform PosixPath to path in the dict case
+                            json.dump(case, f, default=str)
                         console.log(f"Failed to parse case {case} - {e}")
                     try:
                         lead_parsed = leads_model.Lead.parse_obj(case)
