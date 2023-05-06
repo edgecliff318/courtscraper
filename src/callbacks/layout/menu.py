@@ -65,7 +65,8 @@ def generate_menu(navbar):
                         align="center",
                         className="g-0",
                     ),
-                    href="https://fubloo.com",
+                    href="https://app.fubloo.com",
+                    
                     style={"textDecoration": "none"},
                 ),
                 dbc.NavbarToggler(id="navbar-toggler", n_clicks=0),

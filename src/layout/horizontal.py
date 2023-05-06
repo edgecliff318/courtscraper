@@ -47,7 +47,7 @@ class Layout:
                         f"© {datetime.now().year} Made with ❤️ by ",
                         html.A(
                             "Fubloo",
-                            href="https://fubloo.com",
+                            href="https://app.fubloo.com",
                             target="_blank",
                             className="fw-semibold",
                         ),
@@ -57,7 +57,7 @@ class Layout:
                 html.Div(
                     html.A(
                         "Terms & Conditions",
-                        href="https://fubloo.com/terms",
+                        href="https://app.fubloo.com/terms",
                         target="_blank",
                         className="footer-link me-4",
                     ),

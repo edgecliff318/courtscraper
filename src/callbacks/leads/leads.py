@@ -113,9 +113,10 @@ def render_leads(search, court_code_list, start_date, end_date, status):
 
         grid = dag.AgGrid(
             id="portfolio-grid",
+            style={"height": 700},
             columnDefs=column_defs,
             rowData=df.to_dict("records"),
-            columnSize="sizeToFit",
+            columnSize="autoSize",
             dashGridOptions={
                 "undoRedoCellEditing": True,
                 "rowSelection": "single",
