@@ -119,6 +119,7 @@ def render_leads(search, court_code_list, start_date, end_date, status):
             dashGridOptions={
                 "undoRedoCellEditing": True,
                 "rowSelection": "single",
+                "rowSelection":"multiple", "rowMultiSelectWithClick": True
             },
         )
     return [
@@ -134,4 +135,15 @@ def render_leads(search, court_code_list, start_date, end_date, status):
             width=12,
             className="mb-2",
         )
+
     ]
+
+### Multi Select Rows 
+@callback(
+    Output("selections-multiple-click-output", "children"),
+    Input("portfolio-grid", "selectedRows"),
+)
+def selected(selected):
+    if selected:
+        return f"You selected : {selected}"
+    return ""
