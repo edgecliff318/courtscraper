@@ -92,7 +92,7 @@ class Settings(BaseSettings):
 
     # flask
     SECRET_KEY: str = os.getenv("SECRET_KEY", "secret")
-    SESSION_COOKIE_NAME: str = os.getenv("SESSION_COOKIE_NAME", "fubloo")
+    SESSION_COOKIE_NAME: str = os.getenv("SESSION_COOKIE_NAME", "")
     SESSION_COOKIE_SECURE: bool = (
         os.getenv("SESSION_COOKIE_SECURE", "false").lower() == "true"
     )
