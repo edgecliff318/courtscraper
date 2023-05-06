@@ -1,5 +1,6 @@
 # Web framework 
 dash>=2.5.0
+dash[diskcache]
 dash-bootstrap-components>=1.1.0
 dash-ag-grid==2.0.0rc2
 gunicorn>=20.1.0

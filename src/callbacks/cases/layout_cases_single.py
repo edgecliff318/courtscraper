@@ -26,6 +26,7 @@ def render_message_selector(case_id):
     return options
 
 
+
 @callback(
     Output("lead-single-message", "value"),
     Output("lead-media-enabled", "value"),
@@ -43,3 +44,6 @@ def render_selected_message(message_id, case_details):
         case_details.get("first_name", "there").title(),
     )
     return message, message_template.media_enabled
+
+
+

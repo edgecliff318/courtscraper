@@ -5,7 +5,10 @@ import dash.html as html
 import dash_ag_grid as dag
 import dash_bootstrap_components as dbc
 import pandas as pd
-from dash import Input, Output, callback
+from dash import Input, Output, html, dcc, ctx, callback
+
+from src.components.inputs import generate_form_group
+
 
 from src.core.config import get_settings
 from src.services import leads
@@ -120,6 +123,8 @@ def render_leads(search, court_code_list, start_date, end_date, status):
                 "undoRedoCellEditing": True,
                 "rowSelection": "single",
                 "rowSelection":"multiple", "rowMultiSelectWithClick": True
+                # "rowSelection": "single"
+
             },
         )
     return [
@@ -127,7 +132,8 @@ def render_leads(search, court_code_list, start_date, end_date, status):
             dbc.Card(
                 dbc.CardBody(
                     [
-                        html.H3("Cases", className="card-title"),
+                        html.Div([html.H3("Cases", className="card-title"),dbc.Button("Cases Process", id="cases-process", className="card-title")], className="d-flex justify-content-between"),
+                       
                         grid,
                     ]
                 ),
@@ -138,12 +144,108 @@ def render_leads(search, court_code_list, start_date, end_date, status):
 
     ]
 
-### Multi Select Rows 
-@callback(
-    Output("selections-multiple-click-output", "children"),
-    Input("portfolio-grid", "selectedRows"),
-)
-def selected(selected):
-    if selected:
-        return f"You selected : {selected}"
-    return ""
+# # ### Multi Select Rows 
+# # @callback(
+# #     Output("selections-multiple-click-output", "children"),
+# #     Input("portfolio-grid", "selectedRows"),
+# # )
+# # def selected(selected):
+# #     if selected:
+# #         return f"You selected : {selected}"
+# #     return ""
+
+
+
+# def messaging_template():
+#     return html.Div(
+#         [
+#             dbc.Row(
+#                 [
+#                     dbc.Col(
+#                         generate_form_group(
+#                             label="Sample Message",
+#                             id="lead-single-message-selector",
+#                             placeholder="Select a Sample Message",
+#                             type="Dropdown",
+#                             options=[],
+#                             persistence_type="session",
+#                             persistence=True,
+#                         ),
+#                         width=8,
+#                     ),
+#                 ],
+#                 className="mb-1",
+#             ),
+#             dbc.Row(
+#                 [
+#                     dbc.Col(html.Div([
+#                         dbc.RadioButton(
+#                             id="lead-media-enabled",
+#                             persistence_type="session",
+#                             persistence=True,
+#                             value=False,
+#                         ),
+#                         html.Label("Include a Case Copy"),
+#                                                 # html.Div([html.H3("Cases", className="card-title"),dbc.Button("Cases Process", id="cases-process", className="card-title")], className="d-flex justify-content-between"),
+
+#                         ],  className="d-flex justify-content-start"),
+#                         width=8,
+#                     ),
+#                 ],
+#                 className="mb-1",
+#             ),
+#             # dbc.Row(
+#             #     [
+#             #         dbc.Col(
+#             #             [
+#             #                 generate_form_group(
+#             #                     label="Phone Number",
+#             #                     id="lead-single-been-verified-phone",
+#             #                     placeholder="Set the phone number",
+#             #                     type="Input",
+#             #                     persistence_type="session",
+#             #                     persistence=True,
+#             #                 )
+#             #             ],
+#             #             width=8,
+#             #         ),
+#             #     ],
+#             #     className="mb-1",
+#             # ),
+#             dbc.Row(
+#                 [
+#                     dbc.Col(
+#                         generate_form_group(
+#                             label="Message",
+#                             id="lead-single-message",
+#                             placeholder="Type in the message",
+#                             type="Textarea",
+#                             style={"height": 300},
+#                         ),
+#                         width=8,
+#                     ),
+#                 ]
+#             ),
+#             dbc.Row([dbc.Col(id="lead-single-message-status")]),
+#         ],
+#         className="d-flex flex-column justify-content-between justify-content-center",
+#     )
+
+
+# @callback(
+#     Output("modal", "is_open"),
+#     Output("modal-content", "children"),
+#     Input("portfolio-grid", "selectedRows"),
+#     # Input("close", "n_clicks"),
+#     Input("cases-process", "n_clicks"),
+    
+# )
+# def open_modal(selection, _):
+#     print("open_modal\n\n\n")
+#     if ctx.triggered_id == "close":
+#         return False, dash.no_update
+#     if selection and ctx.triggered_id == "cases-process":
+#         # return True, f"You selected {str(selection)}"
+#         return True, messaging_template()
+
+#     return dash.no_update, dash.no_update
