@@ -69,10 +69,14 @@ class BeenVerifiedScrapper:
                 By.CSS_SELECTOR, "#send-magic-link-form > .btn"
             ).click()
 
-            ## get the magic link
-            sns = tools.SonsorEmails()
+            # get the magic link
+            sns = tools.SensorEmail()
             magic_link = sns()
             sleep(60)
+
+            # 7 | open | magic link
+            self.driver.get(magic_link)
+            sleep(30)
         except Exception as e:
             logger.warning(
                 f"Continuing with the session as probably the user is already logged in"
