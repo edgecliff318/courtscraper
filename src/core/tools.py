@@ -1,13 +1,14 @@
-from typing import Any
+import datetime
+import email
 import functools
 import hashlib
-import datetime
-import time
+import imaplib
 import re
+import time
+from typing import Any
 
-import imaplib, email
-import pandas as pd
 import numpy as np
+import pandas as pd
 import requests
 
 from src.core.storage import Storage
@@ -23,7 +24,8 @@ def compound_exp(r):
 def hash_single(arg):
     if isinstance(arg, pd.Series) or isinstance(arg, pd.DataFrame):
         return hashlib.sha256(
-            pd.util.hash_pandas_object(arg, index=True).values).hexdigest()
+            pd.util.hash_pandas_object(arg, index=True).values
+        ).hexdigest()
     elif isinstance(arg, tuple) or isinstance(arg, list):
         m = hashlib.md5()
         for s in arg:
@@ -99,51 +101,52 @@ def cached(storage: Storage = None, memory_cache=True):
     return decorator
 
 
+class SensorEmail:
+    """
+    how to use:
+        create an instance of this class and call it
+        snsr = SensorEmail()
+        print(snsr())
+    """
 
-class SonsorEmail:
-    """
-        how to use:
-            create an instance of this class and call it
-            snsr = SonsorEmail()
-            print(snsr())
-    """
-    
     def __init__(self) -> None:
         ##TODO: add the email and password to the env file
-        self.user = 'fublooman@gmail.com' # Input your gmail address here
-        self.password = 'pauzlxwtzkwjyqyr'
-        self.imap_url = 'imap.gmail.com'
+        self.user = "fublooman@gmail.com"  # Input your gmail address here
+        self.password = "pauzlxwtzkwjyqyr"
+        self.imap_url = "imap.gmail.com"
         # self.threshold_time =  (datetime.datetime.now() - datetime.timedelta(days=1)).strftime('%d-%b-%Y')
-        self.threshold_time =  (datetime.datetime.now() - datetime.timedelta(hours=1)).strftime('%d-%b-%Y')
-        
+        self.threshold_time = (
+            datetime.datetime.now() - datetime.timedelta(hours=1)
+        ).strftime("%d-%b-%Y")
+
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         link = self.get_magic_link()
         return link
-        
-        
+
     def get_my_mail(self):
-        my_mail = imaplib.IMAP4_SSL(self.imap_url) # connect to gmail
-        my_mail.login(self.user, self.password) # sign in with your credentials
-        my_mail.select('Inbox') # select the folder that you want to retrieve
+        my_mail = imaplib.IMAP4_SSL(self.imap_url)  # connect to gmail
+        my_mail.login(
+            self.user, self.password
+        )  # sign in with your credentials
+        my_mail.select("Inbox")  # select the folder that you want to retrieve
         return my_mail
-    
-    def check_email_if_exist(self,data,my_mail):
+
+    def check_email_if_exist(self, data, my_mail):
         list_ids = []
         for uid in data[0].split():
-            result, data = my_mail.uid('fetch', uid, '(RFC822)')
-            raw_email = data[0][1].decode('utf-8')
+            result, data = my_mail.uid("fetch", uid, "(RFC822)")
+            raw_email = data[0][1].decode("utf-8")
             email_message = email.message_from_string(raw_email)
-            sender = re.search(r'<(.+?)>', email_message['From']).group(1)
-            if 'support@email.beenverified.com' in sender:
+            sender = re.search(r"<(.+?)>", email_message["From"]).group(1)
+            if "support@email.beenverified.com" in sender:
                 list_ids.append(uid)
         return list_ids
-        
-    
-    def wait_for_magic_link(self, data,  my_mail):
+
+    def wait_for_magic_link(self, data, my_mail):
         list_ids = []
         start_time = time.time()
         while len(list_ids) == 0:
-            list_ids = self.check_email_if_exist(data,my_mail)
+            list_ids = self.check_email_if_exist(data, my_mail)
             if len(list_ids) > 0:
                 break
             ## wait for 40 seconds before checking again
@@ -151,34 +154,34 @@ class SonsorEmail:
             ## check if the time is over 5 minutes
             if time.time() - start_time > 5 * 60:
                 break
-            
+
         return list_ids
-    
+
     def get_boy_magic_link(self, my_mail, email_id):
-        status, email_data = my_mail.fetch(email_id, '(BODY[HEADER] BODY[TEXT])')
-        header = email_data[0][1].decode('utf-8')  # Decode the header bytes to a string
+        status, email_data = my_mail.fetch(
+            email_id, "(BODY[HEADER] BODY[TEXT])"
+        )
+        header = email_data[0][1].decode(
+            "utf-8"
+        )  # Decode the header bytes to a string
         return header
-    
+
     def get_link(self, email_txt):
-        link_pattern = re.compile(r'https://click\.email\.beenverified\.com/\?qs=\S*')
+        link_pattern = re.compile(
+            r"https://click\.email\.beenverified\.com/\?qs=\S*"
+        )
         link_match = link_pattern.search(email_txt)
         link = link_match.group()
         return link
-    
+
     def get_magic_link(self):
         my_mail = self.get_my_mail()
-        result, data = my_mail.uid('search', None, f'(SENTON {self.threshold_time})')
-        list_ids = self.wait_for_magic_link(data,my_mail)
-        if len(list_ids) == 0: 
-            raise Exception("No magic link found")      
-        email_txt = self.get_boy_magic_link(my_mail, list_ids[0])
+        result, data = my_mail.uid(
+            "search", None, f"(SENTON {self.threshold_time})"
+        )
+        list_ids = self.wait_for_magic_link(data, my_mail)
+        if len(list_ids) == 0:
+            raise Exception("No magic link found")
+        email_txt = self.get_boy_magic_link(my_mail, list_ids[-1])
         link = self.get_link(email_txt)
         return link
-        
-        
-
-       
-    
-    
-                
-                
