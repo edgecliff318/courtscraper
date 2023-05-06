@@ -287,7 +287,7 @@ class ScraperMOCourt(ScraperBase):
         try:
             console.print(f"Getting case detail : {case['case_number']}")
             case_detail["details"] = self.get_case_details(case["case_number"])
-        except requests.ConnectionError as e:
+        except Exception as e:
             logger.error(f"Connection failure : {str(e)}")
             raise ValueError(f"Case not found : {case['case_number']}")
         case["court_id"] = case_detail["details"]["court_id"]
@@ -611,13 +611,20 @@ class ScraperMOCourt(ScraperBase):
             with console.status(
                 f"[bold green]Scraping case {case.get('caseNumber')} ..."
             ) as status:
-                output = self.parse_case(case, case_type, court, date)
-                status.update(
-                    f"[bold green]Scraped case {case.get('caseNumber')} ..."
-                )
+                try:
+                    output = self.parse_case(case, case_type, court, date)
+                    status.update(
+                        f"[bold green]Scraped case {case.get('caseNumber')} ..."
+                    )
+                except Exception as e:
+                    console.log(
+                        f"[bold red]Failed to scrape case {case.get('caseNumber')} - error {e}"
+                    )
+                    return None
                 return output
 
-        return [parse_case_wrapper(case) for case in cases_to_scrape]
+        results = [parse_case_wrapper(case) for case in cases_to_scrape]
+        return [r for r in results if r is not None]
 
     def get_birthdate(self, results, case_id):
         year_of_birth = results["parties"].split("Year of Birth: ")
