@@ -62,4 +62,16 @@ def send_many_message(_, data: t.Dict , template: str, case_copy : bool):
     if ctx.triggered_id == "send-all-cases":
     # return #, False 
         return f"your operation is on progress {str(data), str(template)}   copy: {str(case_copy)}"
+    
+    for case in data:
+        case_id = case["case_id"]
+        phone = case["phone"]
+        try:
+            sms_message = template.format(**case)
+            messages.send_message(
+                case_id, sms_message , phone, media_enabled=case_copy
+            )
+        except Exception as e:
+            logger.error(f"An error occurred while sending the message. {e}")
+            return f"An error occurred while sending the message. {e}"
     return dash.no_update
