@@ -31,5 +31,6 @@ def layout():
             ),
             dbc.Row([], id="cases-data"),
             dbc.Row([], id="leads-data"),
+            dbc.Row([html.Div(id="selections-multiple-click-output")]),
         ]
     )
