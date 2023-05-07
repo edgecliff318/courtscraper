@@ -1,6 +1,6 @@
 import os
-from functools import lru_cache
 import pathlib
+from functools import lru_cache
 
 from pydantic import BaseSettings
 
@@ -32,7 +32,9 @@ class Settings(BaseSettings):
 
     # Configuration
     CONFIG_FILENAME: str = os.getenv("CONFIG_FILENAME", "config.json")
-    CONFIG_TEST_FILENAME: str = os.getenv("CONFIG_TEST_FILENAME", "config_test.json")
+    CONFIG_TEST_FILENAME: str = os.getenv(
+        "CONFIG_TEST_FILENAME", "config_test.json"
+    )
 
     # Root Path
     ROOT_PATH = pathlib.Path(__file__).parent.parent.parent
@@ -45,23 +47,14 @@ class Settings(BaseSettings):
     TEMPLATE: str = os.getenv("TEMPLATE", "plotly")
 
     # Case Net
-    CASE_NET_URL: str = os.getenv("CASE_NET_URL", "https://www.courts.mo.gov/cnet")
+    CASE_NET_URL: str = os.getenv(
+        "CASE_NET_URL", "https://www.courts.mo.gov/cnet"
+    )
     CASE_NET_USERNAME: str = os.getenv("CASE_NET_USERNAME", "smeyer4040")
     CASE_NET_PASSWORD: str = os.getenv("CASE_NET_PASSWORD", "MASdorm1993!MAS")
 
     # Production
     PRODUCTION: bool = os.getenv("PRODUCTION", "true").lower() == "true"
-
-    # Remote Instance
-    REMOTE_UPLOAD_URL: str = os.getenv(
-        "REMOTE_UPLOAD_URL", "https://app.fubloo.com/upload?cache=true"
-    )
-    REMOTE_DATA_UPLOAD_URL: str = os.getenv(
-        "REMOTE_DATA_UPLOAD_URL", "https://app.fubloo.com/upload?cache=false"
-    )
-    REMOTE_UPDATE_URL: str = os.getenv(
-        "REMOTE_UPDATE_URL", "https://app.fubloo.com/update"
-    )
 
     # Site URL
     SITE_URL: str = os.getenv("SITE_URL", "https://app.fubloo.com")
@@ -82,7 +75,9 @@ class Settings(BaseSettings):
 
     # AUTH0 Configuration
     AUTH0_DOMAIN: str = os.getenv("AUTH0_DOMAIN", "fubloo.us.auth0.com")
-    AUTH0_AUDIENCE: str = os.getenv("AUTH0_AUDIENCE", "https://fubloo.us.auth0.com")
+    AUTH0_AUDIENCE: str = os.getenv(
+        "AUTH0_AUDIENCE", "https://fubloo.us.auth0.com"
+    )
     AUTH0_CLIENT_ID: str = os.getenv("AUTH0_CLIENT_ID", "")
     AUTH0_CLIENT_SECRET: str = os.getenv("AUTH0_CLIENT_SECRET", "")
     AUTH0_CALLBACK_URL: str = os.getenv(
@@ -104,14 +99,21 @@ class Settings(BaseSettings):
     LOGIN_URL: str = os.getenv("LOGIN_URL", "/login")
     LOGOUT_URL: str = os.getenv("LOGOUT_URL", "/logout")
     CALLBACK_URL: str = os.getenv("CALLBACK_URL", "/callback")
-    REDIRECT_URI: str = os.getenv("REDIRECT_URI", "http://localhost:8000/callback")
+    REDIRECT_URI: str = os.getenv(
+        "REDIRECT_URI", "http://localhost:8000/callback"
+    )
 
     # keys session
     JWT_PAYLOAD: str = os.getenv("JWT_PAYLOAD", "jwt_payload")
     PROFILE_KEY: str = os.getenv("PROFILE_KEY", "profile")
 
     # firebase configuration
-    GOOGLE_APPLICATION_CREDENTIALS: str = os.getenv('GOOGLE_APPLICATION_CREDENTIALS', 'fubloo-1b0e8-firebase-adminsdk-5j6zr-6b8d8d1c0b.json')
+    GOOGLE_APPLICATION_CREDENTIALS: str = os.getenv(
+        "GOOGLE_APPLICATION_CREDENTIALS",
+        "fubloo-1b0e8-firebase-adminsdk-5j6zr-6b8d8d1c0b.json",
+    )
+    STORAGE_BUCKET: str = os.getenv("STORAGE_BUCKET", "fubloo-data")
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

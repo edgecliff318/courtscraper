@@ -9,6 +9,7 @@ class Lead(BaseModel):
     case_id: str
     first_name: Optional[str] = None
     last_name: Optional[str] = None
+    middle_name: Optional[str] = None
     court_code: Optional[str] = None
     age: Optional[int] = None
     year_of_birth: Optional[int] = None
@@ -24,7 +25,7 @@ class Lead(BaseModel):
     case_date: Optional[datetime] = None
     status: Optional[str] = "new"
     source: Optional[str] = None
-    charges: Optional[str] = None
+    charges_description: Optional[str] = None
     disposition: Optional[str] = None
 
     @validator("last_updated", pre=True, always=True)
