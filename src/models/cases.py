@@ -55,7 +55,8 @@ class Case(BaseModel):
     case_desc: Optional[str]
     court_desc: Optional[str]
     location: Optional[str]
-    filing_date: Optional[str]
+    filing_date: Optional[datetime] = None
+    case_date: Optional[datetime] = None
     formatted_filingdate: Optional[str]
     case_type: Optional[str]
     case_security: Optional[str]
@@ -81,6 +82,15 @@ class Case(BaseModel):
 
     @validator("case_date", pre=True)
     def set_case_date(cls, v):
+        try:
+            v = pd.to_datetime(v)
+            # convert to datetime
+            return v.to_pydatetime()
+        except Exception:
+            return None
+
+    @validator("filing_date", pre=True)
+    def set_filing_date(cls, v):
         try:
             v = pd.to_datetime(v)
             # convert to datetime

@@ -233,6 +233,7 @@ class ScraperMOCourt(ScraperBase):
             docket_file_path = self.download(
                 docket_file_url, filetype=doc.get("documentExtension", "pdf")
             )
+            self.sleep()
             self.upload_file(docket_file_path)
             if "citation" in doc.get("docketDesc", "").lower():
                 docker_image_path = self.convert_to_png(
@@ -302,6 +303,9 @@ class ScraperMOCourt(ScraperBase):
             case_info["charges_description"] = case_detail.get(
                 "charges", [{"charge_description": ""}]
             )[0].get("charge_description", "")
+            case_info["case_date"] = case_detail.get("filing_date", "")
+            case_info.update(case_detail)
+            case_info["court_code"] = court.code
 
         except Exception as e:
             logger.error(
