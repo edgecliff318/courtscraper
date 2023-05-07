@@ -86,6 +86,7 @@ class ScraperBase:
         response = requests.post(
             settings.REMOTE_DATA_UPLOAD_URL,
             files=files,
+            params={"api_key": settings.API_KEY},
         )
         if response.status_code != 200:
             logger.error(

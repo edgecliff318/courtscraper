@@ -58,7 +58,7 @@ class Settings(BaseSettings):
 
     # Remote Instance
     REMOTE_DATA_UPLOAD_URL: str = os.getenv(
-        "REMOTE_DATA_UPLOAD_URL", "http://localhost:3000/upload?cache=false"
+        "REMOTE_DATA_UPLOAD_URL", "http://localhost:3000/upload"
     )
 
     # Site URL

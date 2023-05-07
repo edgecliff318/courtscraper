@@ -84,9 +84,6 @@ class BeenVerifiedScrapper:
 
             logger.debug(f"Issue with Beenverified {e}")
 
-    @tools.cached(
-        storage=storage.RemotePickleStorage(url=settings.REMOTE_UPLOAD_URL)
-    )
     def retrieve_information(self, link):
         if self.cache:
             self.driver = webdriver.Chrome(options=self.options)
