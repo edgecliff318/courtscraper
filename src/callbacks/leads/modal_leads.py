@@ -111,15 +111,7 @@ def messaging_template(df):
     
 )
 def open_modal(selection, _, __, data):
-    print(f"open_moda: {data}l\n\n\n")
-    
-    
-    
-    
-    # if ctx.triggered_id == "send-all-cases":
-    #     return False, dash.no_update
     if selection and ctx.triggered_id == "cases-process":
-        # return True, f"You selected {str(selection)}"
         df = pd.DataFrame(selection)
         df_filter = df[["First Name","Last Name", "Phone"]]
         if data is None:

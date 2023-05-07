@@ -1,7 +1,6 @@
 import logging
 import os
-from typing import List
-
+import typing as t
 from twilio.rest import Client
 
 from src.core.config import get_settings
@@ -43,7 +42,7 @@ def send_message(case_id, sms_message, phone, media_enabled=False):
     return twilio_message.status
 
 
-def get_interactions(case_id=None) -> List[messages.Interaction]:
+def get_interactions(case_id=None) -> t.List[messages.Interaction]:
     if case_id is None:
         interactions = db.collection("interactions").stream()
     else:
@@ -61,7 +60,7 @@ def get_single_interaction(interaction_id) -> messages.Interaction:
     return messages.Interaction(**interaction.to_dict())
 
 
-def get_messages_templates() -> List[messages.MessageTemplate]:
+def get_messages_templates() -> t.List[messages.MessageTemplate]:
     messages_list = db.collection("messages").stream()
     return [messages.MessageTemplate(**i.to_dict()) for i in messages_list]
 
@@ -69,3 +68,17 @@ def get_messages_templates() -> List[messages.MessageTemplate]:
 def get_single_message_template(message_id) -> messages.MessageTemplate:
     message = db.collection("messages").document(message_id).get()
     return messages.MessageTemplate(**message.to_dict())
+
+
+def save_message_status(message: t.Dict):
+    try:
+        db.collection("messageStatus").add(message)
+    except Exception as e:
+        logger.error(e)
+        return False
+    return True
+
+
+def get_message_status(message_id):
+    message = db.collection("messageStatus").get()
+    return message.to_dict()

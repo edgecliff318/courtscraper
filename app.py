@@ -2,7 +2,9 @@ import logging
 import os
 
 import dash_bootstrap_components as dbc
-from dash import Dash
+from dash import Dash, DiskcacheManager
+import diskcache
+
 from flask_cors import CORS
 
 import src.callbacks as callbacks  # noqa
@@ -27,6 +29,9 @@ def set_logging(app, logging_level):
 def init_app():
     pages_folder = os.path.join(settings.ROOT_PATH, "src/pages")
     assets_folder = os.path.join(settings.ROOT_PATH, "src/assets")
+    
+    background_callback_manager = DiskcacheManager(diskcache.Cache("./.cache"))
+
     app = Dash(
         meta_tags=[
             {
@@ -53,6 +58,7 @@ def init_app():
         ],
         assets_folder=assets_folder,
         suppress_callback_exceptions=True,
+        background_callback_manager=background_callback_manager
     )
 
     # Set the app title

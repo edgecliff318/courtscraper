@@ -8,6 +8,7 @@ __pycache__/
 .isort.cfg
 cache
 .cache/*
+cache/*
 
 
 # Distribution / packaging

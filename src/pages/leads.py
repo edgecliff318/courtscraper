@@ -22,8 +22,8 @@ def layout():
             [
                 dbc.ModalHeader("More information about selected row"),
                 dbc.ModalBody(id="modal-content"),
-                html.Div(id="modal-content-sending-status"),
-                dbc.ModalFooter(dbc.Button("Send all cases", id="send-all-cases", className="ml-auto")),
+                html.Div(id="send-of-all"),   
+                dbc.ModalFooter([ html.Div(id="modal-content-sending-status"),dbc.Button("Send all cases", id="send-all-cases", className="ml-auto")], className="d-flex justify-content-between"),
             ],
             id="modal",
             size="xl",
