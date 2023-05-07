@@ -56,11 +56,6 @@ class Settings(BaseSettings):
     # Production
     PRODUCTION: bool = os.getenv("PRODUCTION", "true").lower() == "true"
 
-    # Remote Instance
-    REMOTE_DATA_UPLOAD_URL: str = os.getenv(
-        "REMOTE_DATA_UPLOAD_URL", "http://localhost:3000/upload"
-    )
-
     # Site URL
     SITE_URL: str = os.getenv("SITE_URL", "https://app.fubloo.com")
 
@@ -117,6 +112,7 @@ class Settings(BaseSettings):
         "GOOGLE_APPLICATION_CREDENTIALS",
         "fubloo-1b0e8-firebase-adminsdk-5j6zr-6b8d8d1c0b.json",
     )
+    STORAGE_BUCKET: str = os.getenv("STORAGE_BUCKET", "fubloo-data")
 
     class Config:
         env_file = ".env"

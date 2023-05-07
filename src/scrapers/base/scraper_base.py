@@ -4,11 +4,11 @@ import random
 import re
 import time
 
-import requests
 from pdf2image.pdf2image import convert_from_path
 from rich.console import Console
 
 from src.core.config import get_settings
+from src.db import bucket
 from src.loader.tickets import TicketParser
 
 settings = get_settings()
@@ -59,7 +59,7 @@ class ScraperBase:
                 f"{case_number}.png"
             )
             image.save(docket_image_filepath, "PNG")
-            return docket_image_filepath
+            return str(docket_image_filepath)
         return None
 
     def parse_ticket(self, ticket_filepath, case_number):
@@ -81,23 +81,10 @@ class ScraperBase:
             return {"error": "Failed to parse ticket"}
 
     def upload_file(self, filepath):
-        files = {"file": open(filepath, "rb")}
-        # TODO: #10 Protect the upload url with a secret key
-        response = requests.post(
-            settings.REMOTE_DATA_UPLOAD_URL,
-            files=files,
-            params={"api_key": settings.API_KEY},
-        )
-        if response.status_code != 200:
-            logger.error(
-                f"Error uploading file to remote" f" server : {response.text}"
-            )
-            console.log(
-                f"Error uploading file to remote" f" server : {response.text}"
-            )
-            raise Exception(
-                f"Error uploading file to remote server : {response.text}"
-            )
+        filename = filepath.split("/")[-1]
+        blob = bucket.blob(filename)
+        blob.upload_from_filename(filepath)
+        return filename
 
     def download(self, link, filetype="pdf"):
         """Download the pdf file from the given link."""

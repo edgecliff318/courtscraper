@@ -67,6 +67,7 @@ class Case(BaseModel):
     vine_display: Optional[str]
     vine_id: Optional[str]
     dockets: Optional[List[Dict]]
+    documents: Optional[List[Dict]]
     charges: Optional[List[Dict]]
     judge: Optional[Dict]
     court_type: Optional[str]
@@ -74,6 +75,7 @@ class Case(BaseModel):
     fine: Optional[Dict]
     plea_andpayind: Optional[str]
     ticket: Optional[Dict]
+    ticket_img: Optional[str]
 
     # Ignore parsing errors for now
     @validator("charges", pre=True, always=True)

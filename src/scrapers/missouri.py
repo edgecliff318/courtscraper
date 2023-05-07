@@ -226,6 +226,7 @@ class ScraperMOCourt(ScraperBase):
 
         # Download the docket files
         parsed_ticket = {}
+        parsed_documents = []
         for doc in documents:
             docket_file_url = self.get_docket_file_url(
                 doc["documentTitle"], court_id, doc["documentId"]
@@ -234,7 +235,8 @@ class ScraperMOCourt(ScraperBase):
                 docket_file_url, filetype=doc.get("documentExtension", "pdf")
             )
             self.sleep()
-            self.upload_file(docket_file_path)
+            file_path = self.upload_file(docket_file_path)
+            doc["file_path"] = file_path
             if "citation" in doc.get("docketDesc", "").lower():
                 docker_image_path = self.convert_to_png(
                     docket_file_path, case_number
@@ -242,9 +244,11 @@ class ScraperMOCourt(ScraperBase):
                 parsed_ticket = self.parse_ticket(
                     docker_image_path, case_number
                 )
-                self.upload_file(docker_image_path)
+                img_file_path = self.upload_file(docker_image_path)
+                case_detail["ticket_img"] = img_file_path
                 case_detail["ticket"] = parsed_ticket
-
+            parsed_documents.append(doc)
+        case_detail["documents"] = parsed_documents
         return self.t_dict(case_detail)
 
     def lower_case_dict(self, case):
