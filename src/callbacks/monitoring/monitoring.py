@@ -19,24 +19,30 @@ settings = get_settings()
 
 
 @callback(
-    Output("monitoring-data", "children"),
+    Output("message-monitoring", "children"),
     Input("monitoring-button", "n_clicks"),
     Input("court-selector", "value"),
     Input("date-selector", "start_date"),
     Input("date-selector", "end_date"),
-    Input("lead-status-selector", "value"),
+    Input("monitoring-status-selector", "value"),
 )
-def render_leads(search, court_code_list, start_date, end_date, status):
+# def render_leads(search, court_code_list, start_date, end_date, status):
+def render_leads(*args):
+    print(args, "clilc \n\n\n\n")
+   
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
     grid = "Empty"
-    if trigger_id == "leads-button":
-        if status == "all":
-            status = None
-        leads_list = leads.get_leads(
-            court_code_list, start_date, end_date, status
+    # if trigger_id == "leads-button":
+    if 1 == 1:
+        
+        # leads_list = leads.get_leads(
+        #     court_code_list, start_date, end_date, status
+        # )
+        # df = pd.DataFrame([lead.di÷ct() for lead in leads_list])
+        df = pd.read_csv(
+            "https://raw.githubusercontent.com/plotly/datasets/master/ag-grid/olympic-winners.csv"
         )
-        df = pd.DataFrame([lead.dict() for lead in leads_list])
 
         if df.empty:
             return [
@@ -54,85 +60,78 @@ def render_leads(search, court_code_list, start_date, end_date, status):
                 )
             ]
 
-        df["case_date"] = df["case_date"].dt.strftime("%m/%d/%Y")
+        
 
-        df = df[
-            [
-                "case_id",
-                "case_date",
-                "first_name",
-                "last_name",
-                "phone",
-                "email",
-                "status",
-                "age",
-                "charges",
-                "disposition",
-            ]
-        ].set_index("case_id")
 
-        df = df.rename(
-            columns={
-                "first_name": "First Name",
-                "last_name": "Last Name",
-                "phone": "Phone",
-                "email": "Email",
-                "status": "Status",
-                "age": "Age",
-                "charges": "Charges",
-                "disposition": "Disposition",
-                "case_date": "Date",
-            }
-        )
-        df.index.name = "Case ID"
 
-        df.reset_index(inplace=True)
-        df["Case ID"] = df["Case ID"].map(lambda x: f"[{x}](/case/{x})")
-
-        column_defs = [
+        columnDefs = [
             {
-                "headerName": "Case ID",
-                "field": "Case ID",
-                "editable": False,
-                "filter": "agTextColumnFilter",
-                "sortable": True,
-                "resizable": True,
-                "flex": 1,
-                "cellRenderer": "markdown",
-            }
-        ] + [
+                "headerName": "User Details",
+                "children": [
+                    {
+                        "field": "athlete",
+                        "width": 180,
+                        "filter": "agTextColumnFilter",
+                    },
+                    {
+                        "field": "age",
+                        "width": 90,
+                        "filter": "agNumberColumnFilter",
+                    },
+                    {"headerName": "Country", "field": "country", "width": 140},
+                ],
+            },
             {
-                "headerName": col,
-                "field": col,
-                "editable": True,
-                "filter": "agTextColumnFilter",
-                "sortable": True,
-                "resizable": True,
-                "flex": 1,
-            }
-            for col in df.columns
-            if col != "Case ID"
+                "headerName": "Message Results",
+                "children": [
+                    {"field": "sport", "width": 140},
+                    {
+                        "columnGroupShow": "closed",
+                        "field": "total",
+                        "width": 100,
+                        "filter": "agNumberColumnFilter",
+                    },
+                    {
+                        "columnGroupShow": "open",
+                        "field": "gold",
+                        "width": 100,
+                        "filter": "agNumberColumnFilter",
+                    },
+                    {
+                        "columnGroupShow": "open",
+                        "field": "silver",
+                        "width": 100,
+                        "filter": "agNumberColumnFilter",
+                    },
+                    {
+                        "columnGroupShow": "open",
+                        "field": "bronze",
+                        "width": 100,
+                        "filter": "agNumberColumnFilter",
+                    },
+                ],
+            },
         ]
 
-        grid = dag.AgGrid(
-            id="portfolio-grid",
-            columnDefs=column_defs,
-            rowData=df.to_dict("records"),
-            columnSize="sizeToFit",
-            dashGridOptions={
-                "undoRedoCellEditing": True,
-                "rowSelection": "single",
-                "rowSelection":"multiple", "rowMultiSelectWithClick": True
-                # "rowSelection": "single"
+        defaultColDef = {"resizable": True, "initialWidth": 200, "filter": True}
 
-            },
+        grid = html.Div(
+            [
+                dcc.Markdown("Demonstration column groups."),
+                dag.AgGrid(
+                    columnDefs=columnDefs,
+                    rowData=df.to_dict("records"),
+                    defaultColDef=defaultColDef,
+                ),
+            ]
         )
+
     return [
         dbc.Col(
             dbc.Card(
                 dbc.CardBody(
                     [
-                        html.Div([html.H3("Cases", className="card-title"),dbc.Button("Cases Process", id="cases-process", className="card-title")], className="d-flex justify-content-between"),
+                        # html.Div([html.H3("Cases", className="card-title"),dbc.Button("Cases Process", id="cases-process", className="card-title")], className="d-flex justify-content-between"),
                        
                         grid,
                     ]

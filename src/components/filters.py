@@ -62,7 +62,7 @@ leads_controls = dbc.Row(
             xs=12,
             lg=2,
         ),
-        dbc.Col(dbc.Button("Leads", id="leads-button"), width=1, lg=1, xs=12),
+        # dbc.Col(dbc.Button("Leads", id="leads-button"), width=1, lg=1, xs=12),
     ]
 )
 
@@ -121,7 +121,7 @@ monitoring_controls = dbc.Row(
             xs=12,
             lg=2,
         ),
-        dbc.Col(dbc.Button("Filter", id="monitoring-button"), width=2, lg=2, xs=12),
+        dbc.Col(dbc.Button("Monitoring", id="monitoring-button"), width=2, lg=2, xs=12),
     ]
 )
 

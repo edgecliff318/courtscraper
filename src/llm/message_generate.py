@@ -1,33 +1,14 @@
+from pydantic import BaseModel
+import os
+
 from langchain import PromptTemplate, LLMChain
 from langchain.llms import HuggingFacePipeline
 from langchain.llms import HuggingFaceHub, OpenAI
 
 
-from transformers import pipeline
-
-import torch
-
-from pydantic import BaseModel
-import os
-
-os.environ["HUGGINGFACEHUB_API_TOKEN"] = "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" # TODO: replace here
 # os.environ["OPENAI_API_KEY"] = ""
 
 
-# generate_text = pipeline(
-#     model="databricks/dolly-v2-3b",
-#     torch_dtype=torch.bfloat16,
-#     trust_remote_code=True,
-#     device_map="auto",
-#     return_full_text=True
-# )
-# llm = HuggingFacePipeline(pipeline=generate_text)
-
-
-repo_id = "databricks/dolly-v2-12b"
-# repo_id = "google/flan-ul2"   
-repo_id = "StabilityAI/stablelm-tuned-alpha-7b"
-llm = HuggingFaceHub(repo_id=repo_id, model_kwargs={"temperature":0.1, "max_new_tokens":250})
 # llm = OpenAI(temperature=0)
 
 prompt_with_context = PromptTemplate(

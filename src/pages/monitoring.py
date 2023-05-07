@@ -31,8 +31,9 @@ def layout():
                     ),
                 ]
             ),
-            dbc.Row([], id="cases-monitoring"),
-            dbc.Row([], id="leads-monitoring"),
-            dbc.Row([html.Div(id="selections-multiple-click-monitoring-output")]),
+            html.Div(id="message-monitoring"),
+            # dbc.Row([], id="message-monitoring"),
+            # dbc.Row([], id="leads-monitoring"),
+            # dbc.Row([html.Div(id="selections-multiple-click-monitoring-output")]),
         ]
     )

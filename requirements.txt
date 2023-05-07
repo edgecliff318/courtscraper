@@ -26,3 +26,6 @@ twilio
 
 firebase-admin
 
+#llm
+langchain
+
