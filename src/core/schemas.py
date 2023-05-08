@@ -1,10 +1,9 @@
+import datetime as dt
 import typing as t
 from enum import Enum
 
-from pydantic import BaseModel, Field
-import datetime as dt
 import pytz
-
+from pydantic import BaseModel, Field
 
 
 class Status(Enum, str):
@@ -16,15 +15,16 @@ class Status(Enum, str):
     undelivered = "undelivered"
     receiving = "receiving"
     received = "received"
-    
+
     @classmethod
     def choices(cls):
         return [(choice.value, choice.value) for choice in cls]
-    
-  
+
+
 # status_callback Twilio
 def status_callback():
     pass
+
 
 class MessageInfo(BaseModel):
     first_name: str = Field(..., description="First name of the person")
@@ -40,7 +40,6 @@ class MessageInfo(BaseModel):
     updated_at: t.Optional[dt.datetime] = Field(
         default_factory=lambda: dt.datetime.now(pytz.timezone("US/Eastern")),
     )
-    retry_count: int = Field(default=0, description="Number of times the SMS has been retried")
-    
-    
-        
+    retry_count: int = Field(
+        default=0, description="Number of times the SMS has been retried"
+    )

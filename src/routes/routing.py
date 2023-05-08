@@ -13,37 +13,46 @@ def add_routes(server):
     @server.route("/download/<path:path>")
     def download(path):
         """Serve a file from the upload directory."""
-        return send_from_directory(settings.UPLOAD_PATH, path, as_attachment=True)
+        return send_from_directory(
+            settings.UPLOAD_PATH, path, as_attachment=True
+        )
 
     @server.route("/documents/<path:path>")
     def documents(path):
         """Serve a file from the upload directory."""
-        return send_from_directory(settings.OUTPUT_PATH, path, as_attachment=True)
+        return send_from_directory(
+            settings.OUTPUT_PATH, path, as_attachment=True
+        )
 
-    @server.route("/images/<path:image>", methods=['GET'], )
+    @server.route(
+        "/images/<path:image>",
+        methods=["GET"],
+    )
     def images(image):
         """Serve a file from the upload directory."""
-        api_key = request.args.get('api_key')
+        api_key = request.args.get("api_key")
         if api_key != settings.API_KEY:
             return "API Key Not Correct"
         image = image.replace("/", "")
-        return send_from_directory(settings.DATA_PATH, image, as_attachment=False)
+        return send_from_directory(
+            settings.DATA_PATH, image, as_attachment=False
+        )
 
-    UPLOAD_CACHE_FOLDER = './temp'
+    UPLOAD_CACHE_FOLDER = "./temp"
     UPLOAD_DATA_FOLDER = settings.DATA_PATH
 
-    @server.route('/upload', methods=['POST'])
+    @server.route("/upload", methods=["POST"])
     def upload_file():
-        if request.method == 'POST':
+        if request.method == "POST":
             # check if the post request has the file part
-            if 'file' not in request.files:
-                flash('No file part')
+            if "file" not in request.files:
+                flash("No file part")
                 return redirect(request.url)
-            file = request.files['file']
+            file = request.files["file"]
             # If the user does not select a file, the browser submits an
             # empty file without a filename.
-            if file.filename == '':
-                flash('No selected file')
+            if file.filename == "":
+                flash("No selected file")
                 return redirect(request.url)
             filename = secure_filename(file.filename)
             if request.args.get("cache", "true").lower() == "true":
@@ -53,9 +62,9 @@ def add_routes(server):
 
             return "success"
 
-    @server.route('/update', methods=['POST'])
+    @server.route("/update", methods=["POST"])
     def update_data():
-        if request.method == 'POST':
+        if request.method == "POST":
             data = request.json
             lead_loader = LeadsLoader(
                 path=os.path.join(settings.CONFIG_PATH, "leads.json")

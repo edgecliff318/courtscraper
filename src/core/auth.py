@@ -11,7 +11,7 @@ from src.core.config import get_settings
 settings = get_settings()
 
 
-class AdvancedAuth(object):
+class AdvancedAuth:
     def __init__(self, app, authorization_hook=None, _overwrite_index=True):
         self.app = app
         self._index_view_name = app.config["routes_pathname_prefix"]
@@ -58,9 +58,9 @@ class AdvancedAuth(object):
     def _overwrite_index(self):
         original_index = self.app.server.view_functions[self._index_view_name]
 
-        self.app.server.view_functions[self._index_view_name] = self.index_auth_wrapper(
-            original_index
-        )
+        self.app.server.view_functions[
+            self._index_view_name
+        ] = self.index_auth_wrapper(original_index)
 
     def _protect_views(self):
         for view_name, view_method in self.app.server.view_functions.items():

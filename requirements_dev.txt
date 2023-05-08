@@ -1,4 +1,4 @@
-# Compilation 
+# Compilation
 wheel>=0.34.2
 
 # Testing and coverage

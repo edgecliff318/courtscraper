@@ -1,14 +1,10 @@
 import logging
 
-import dash
 import dash.html as html
 import dash_ag_grid as dag
 import dash_bootstrap_components as dbc
 import pandas as pd
-from dash import Input, Output, html, dcc, ctx, callback
-
-from src.components.inputs import generate_form_group
-
+from dash import Input, Output, callback, html
 
 from src.core.config import get_settings
 from src.services import leads
@@ -20,19 +16,16 @@ settings = get_settings()
 
 @callback(
     Output("leads-data", "children"),
-    # Input("leads-button", "n_clicks"),
     Input("court-selector", "value"),
     Input("date-selector", "start_date"),
     Input("date-selector", "end_date"),
     Input("lead-status-selector", "value"),
 )
-def render_leads( court_code_list, start_date, end_date, status):
+def render_leads(court_code_list, start_date, end_date, status):
     grid = "Empty"
     if status == "all":
         status = None
-    leads_list = leads.get_leads(
-        court_code_list, start_date, end_date, status
-    )
+    leads_list = leads.get_leads(court_code_list, start_date, end_date, status)
     df = pd.DataFrame([lead.dict() for lead in leads_list])
     if df.empty:
         return [
@@ -102,7 +95,7 @@ def render_leads( court_code_list, start_date, end_date, status):
             "flex": 1,
         }
         for col in df.columns
-        if col not in  ["Case ID", "Phone", "Email", "Status"]
+        if col not in ["Case ID", "Phone", "Email", "Status"]
     ]
     column_defs += [
         {
@@ -115,7 +108,7 @@ def render_leads( court_code_list, start_date, end_date, status):
             "flex": 1,
         }
         for col in ["Phone", "Email", "Status"]
-    ] 
+    ]
     grid = dag.AgGrid(
         id="portfolio-grid",
         columnDefs=column_defs,
@@ -124,8 +117,8 @@ def render_leads( court_code_list, start_date, end_date, status):
         style={"height": 700},
         dashGridOptions={
             "undoRedoCellEditing": True,
-            "rowSelection": "single",
-            "rowSelection":"multiple", "rowMultiSelectWithClick": True,
+            "rowSelection": "multiple",
+            "rowMultiSelectWithClick": True,
         },
     )
     return [
@@ -133,8 +126,17 @@ def render_leads( court_code_list, start_date, end_date, status):
             dbc.Card(
                 dbc.CardBody(
                     [
-                        html.Div([html.H3("Cases", className="card-title"),dbc.Button("Cases Process", id="cases-process", className="card-title")], className="d-flex justify-content-between"),
-                       
+                        html.Div(
+                            [
+                                html.H3("Cases", className="card-title"),
+                                dbc.Button(
+                                    "Cases Process",
+                                    id="cases-process",
+                                    className="card-title",
+                                ),
+                            ],
+                            className="d-flex justify-content-between",
+                        ),
                         grid,
                     ]
                 ),
@@ -142,7 +144,4 @@ def render_leads( court_code_list, start_date, end_date, status):
             width=12,
             className="mb-2",
         )
-
     ]
-
-

@@ -1,3 +1,1 @@
-from . import layout_leads
-from . import leads
-from . import modal_leads
+from . import layout_leads, leads, modal_leads

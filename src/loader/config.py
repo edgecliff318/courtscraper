@@ -1,13 +1,13 @@
 import json
 
 
-class ConfigLoader(object):
+class ConfigLoader:
     def __init__(self, path: str):
         self.path = path
         self.data = None
 
     def load(self):
-        with open(self.path, "r") as f:
+        with open(self.path) as f:
             self.data = json.load(f)
         return self.data
 

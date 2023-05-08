@@ -52,7 +52,6 @@ class CaseNet:
             r = self.session.request(
                 "POST", url, headers=headers, data=payload
             )
-            pass
 
     def get_cases(
         self, court, date, case_type="Infraction", cases_ignore=None
@@ -68,13 +67,13 @@ class CaseNet:
         )
 
 
-class LeadsLoader(object):
+class LeadsLoader:
     def __init__(self, path: str):
         self.path = path
         self.data = None
 
     def load(self):
-        with open(self.path, "r") as f:
+        with open(self.path) as f:
             self.data = json.load(f)
         return self.data
 

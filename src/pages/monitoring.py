@@ -2,7 +2,6 @@ import logging
 
 import dash
 import dash_bootstrap_components as dbc
-import dash_core_components as dcc
 from dash import html
 
 from src.components.filters import monitoring_controls
@@ -14,8 +13,7 @@ dash.register_page(__name__, class_icon="ti chart-bar", order=3)
 
 def layout():
     return html.Div(
-        [   
-           
+        [
             dbc.Row(
                 [
                     dbc.Col(
@@ -32,8 +30,5 @@ def layout():
                 ]
             ),
             html.Div(id="message-monitoring"),
-            # dbc.Row([], id="message-monitoring"),
-            # dbc.Row([], id="leads-monitoring"),
-            # dbc.Row([html.Div(id="selections-multiple-click-monitoring-output")]),
         ]
     )

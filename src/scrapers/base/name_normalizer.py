@@ -4,10 +4,12 @@ Contains NameNormalizer class.
 """
 
 from re import sub
+
 from unidecode import unidecode
 
-class NameNormalizer():
-    """ Name normalizer.
+
+class NameNormalizer:
+    """Name normalizer.
 
     This class provides the tools to "normalize" a
     string or a name, into a form which is easily
@@ -19,14 +21,17 @@ class NameNormalizer():
         self.original_name = original_name
 
     def normalized(self):
-        """ Returns a normalized version of a name string.
+        """Returns a normalized version of a name string.
 
         Removes all white space using a regular expression,
         removes accents, and changes the case to lower case.
         """
-        return ('' if self.original_name is None
-                else unidecode(sub(r"\s", "", self.original_name)).lower())
+        return (
+            ""
+            if self.original_name is None
+            else unidecode(sub(r"\s", "", self.original_name)).lower()
+        )
 
     def original(self):
-        """ Returns the name the instance was created with. """
+        """Returns the name the instance was created with."""
         return self.original_name

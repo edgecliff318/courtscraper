@@ -1,7 +1,3 @@
-
-
-
-
 prompt = f"""
 You work as an assistant to a lawyer in the USA,\
 and your role is to generate messages that the lawyer can send to clients. These messages should include a \

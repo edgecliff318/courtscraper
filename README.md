@@ -74,7 +74,7 @@ Before you start coding your contribution, it may be wise to raise an issue/use
 
 1. Download :
     - PyCharm or Visual Studio
-    - Github 
+    - Github
 2. Clone the repository **app** to your machine from Github
 3. Open Pycharm and select open then select the folder where you have cloned the repository
 4. Modify the project preferences of PyCharm as follow where you will setup a new virtual python environment(the importance is [explained here](https://towardsdatascience.com/getting-started-with-python-environments-using-conda-32e9f2779307) of having a separate environment for each project)
@@ -123,11 +123,11 @@ nosetests --with-coverage
 To display a report you can use the following command :
 
 ```bash
-coverage report 
+coverage report
 
 #or
 
-coverage html 
+coverage html
 ```
 
 → `coverage html` generate an html detailed report. You can access it from **index.html** in **htmlcov**.
@@ -158,12 +158,12 @@ Note: Ensure that you have sufficient test coverage on your code before you com
 
 ## Setting up the application locally
 
-- Install chromium 
+- Install chromium
 `brew install chromium`
 - Update Chrome to the latest version
-- Install Selenium 
+- Install Selenium
 `pip install selenium`
-- Install poppler for PDF transformation 
+- Install poppler for PDF transformation
 `brew install poppler`
 
 # **License**
@@ -173,4 +173,3 @@ Note: Ensure that you have sufficient test coverage on your code before you com
 No part of this project may be used, published or shared under any circumstances unless expressly requested by the rights holder of this document.
 
 By contributing, you agree that your contributions will be fully accredited to [Fubloo](https://fubloo.com/). (Refer to the upper copyright statement)
-

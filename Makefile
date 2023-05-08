@@ -70,11 +70,11 @@ build: ## Build Docker image
 	@echo "deploy image $(IMAGE_NAME)"
 
 
-lint: format ## Linter the code.
+lint:  ## Linter the code.
 	@echo "🚨 Linting code"
 	pre-commit run --all-files
 
-chrome: 
+chrome:
 	@brew upgrade --cask chromedriver
 
 re:  clean venv install

@@ -108,7 +108,6 @@ monitoring_controls = dbc.Row(
                 persistence=True,
                 value="not_contacted",
                 options=[
-                    
                     {
                         "label": "Success",
                         "value": "success",
@@ -121,7 +120,11 @@ monitoring_controls = dbc.Row(
             xs=12,
             lg=2,
         ),
-        dbc.Col(dbc.Button("Monitoring", id="monitoring-button"), width=2, lg=2, xs=12),
+        dbc.Col(
+            dbc.Button("Monitoring", id="monitoring-button"),
+            width=2,
+            lg=2,
+            xs=12,
+        ),
     ]
 )
-

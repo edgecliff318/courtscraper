@@ -1,7 +1,5 @@
 import logging
-import os
 import typing as t
-from twilio.rest import Client
 
 from src.core.config import get_settings
 from src.db import db
@@ -10,12 +8,13 @@ logger = logging.Logger(__name__)
 
 settings = get_settings()
 
-class  BaseService:
+
+class BaseService:
     collection_name: t.Optional[str] = None
 
-    def __init__(self,*args,**kwargs):
+    def __init__(self, *args, **kwargs):
         pass
-    
+
     @property
     def collection(self) -> str:
         return self.collection_name or str(self.__class__.__name__)

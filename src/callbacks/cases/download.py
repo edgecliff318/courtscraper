@@ -1,6 +1,5 @@
 import dash_bootstrap_components as dbc
-from dash import html
-from dash import Input, Output, callback
+from dash import Input, Output, callback, html
 
 from src.core.config import get_settings
 from src.loader.tickets import TicketsManager
@@ -25,10 +24,8 @@ def update_output(uploaded_filenames, uploaded_file_contents):
     else:
         list_group = dbc.ListGroup(
             [
-                dbc.ListGroupItem(
-                    filename,
-                    href=f"/process/{filename}"
-                ) for filename in files
+                dbc.ListGroupItem(filename, href=f"/process/{filename}")
+                for filename in files
             ]
         )
         return list_group

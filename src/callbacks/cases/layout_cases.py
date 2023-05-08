@@ -1,6 +1,6 @@
 import logging
 
-from dash import Input, Output, callback , State
+from dash import Input, Output, callback
 
 from src.core.config import get_settings
 from src.services import messages
@@ -30,9 +30,9 @@ def render_message_selector(_):
     Output("lead-single-message-modal", "value"),
     Input("lead-single-message-selector-modal", "value"),
 )
-def render_selected_message_modal(message_id):#, case_details):
+def render_selected_message_modal(message_id, *args):
     if message_id is None:
         return ""
     message_template = messages.get_single_message_template(message_id)
-    message = message_template.template_text    
+    message = message_template.template_text
     return message
