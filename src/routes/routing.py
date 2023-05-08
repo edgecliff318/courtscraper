@@ -4,7 +4,6 @@ from flask import flash, redirect, request, send_from_directory
 from werkzeug.utils import secure_filename
 
 from src.core.config import get_settings
-from src.loader.leads import LeadsLoader
 
 settings = get_settings()
 
@@ -38,11 +37,17 @@ def add_routes(server):
             settings.DATA_PATH, image, as_attachment=False
         )
 
-    UPLOAD_CACHE_FOLDER = "./temp"
+
+
     UPLOAD_DATA_FOLDER = settings.DATA_PATH
 
     @server.route("/upload", methods=["POST"])
     def upload_file():
+
+        api_key = request.args.get("api_key")
+        if api_key != settings.API_KEY:
+            return "API Key Not Correct"
+
         if request.method == "POST":
             # check if the post request has the file part
             if "file" not in request.files:
@@ -55,12 +60,8 @@ def add_routes(server):
                 flash("No selected file")
                 return redirect(request.url)
             filename = secure_filename(file.filename)
-            if request.args.get("cache", "true").lower() == "true":
-                file.save(os.path.join(UPLOAD_CACHE_FOLDER, filename))
-            else:
-                file.save(os.path.join(UPLOAD_DATA_FOLDER, filename))
+            file.save(os.path.join(UPLOAD_DATA_FOLDER, filename))
 
-            return "success"
 
     @server.route("/update", methods=["POST"])
     def update_data():

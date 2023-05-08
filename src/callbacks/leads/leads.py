@@ -121,6 +121,7 @@ def render_leads(court_code_list, start_date, end_date, status):
             "rowMultiSelectWithClick": True,
         },
     )
+
     return [
         dbc.Col(
             dbc.Card(

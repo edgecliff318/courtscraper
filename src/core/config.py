@@ -56,17 +56,6 @@ class Settings(BaseSettings):
     # Production
     PRODUCTION: bool = os.getenv("PRODUCTION", "true").lower() == "true"
 
-    # Remote Instance
-    REMOTE_UPLOAD_URL: str = os.getenv(
-        "REMOTE_UPLOAD_URL", "https://app.fubloo.com/upload?cache=true"
-    )
-    REMOTE_DATA_UPLOAD_URL: str = os.getenv(
-        "REMOTE_DATA_UPLOAD_URL", "https://app.fubloo.com/upload?cache=false"
-    )
-    REMOTE_UPDATE_URL: str = os.getenv(
-        "REMOTE_UPDATE_URL", "https://app.fubloo.com/update"
-    )
-
     # Site URL
     SITE_URL: str = os.getenv("SITE_URL", "https://app.fubloo.com")
 
@@ -98,7 +87,7 @@ class Settings(BaseSettings):
 
     # flask
     SECRET_KEY: str = os.getenv("SECRET_KEY", "secret")
-    SESSION_COOKIE_NAME: str = os.getenv("SESSION_COOKIE_NAME", "fubloo")
+    SESSION_COOKIE_NAME: str = os.getenv("SESSION_COOKIE_NAME", "")
     SESSION_COOKIE_SECURE: bool = (
         os.getenv("SESSION_COOKIE_SECURE", "false").lower() == "true"
     )
@@ -128,6 +117,9 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str = os.getenv(
         "OPENAI_API_KEY", "sk-2c2b2-2c2b2-2c2b2-2c2b2-2c2b2"
     )
+    
+    STORAGE_BUCKET: str = os.getenv("STORAGE_BUCKET", "fubloo-data")
+
 
     class Config:
         env_file = ".env"
