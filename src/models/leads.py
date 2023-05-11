@@ -26,7 +26,7 @@ class Lead(BaseModel):
     status: Optional[str] = "new"
     source: Optional[str] = None
     charges_description: Optional[str] = None
-    disposition: Optional[str] = None
+    disposed: Optional[bool] = False
 
     @validator("last_updated", pre=True, always=True)
     def set_last_updated_date_now(cls, v):

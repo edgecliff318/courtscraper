@@ -63,8 +63,8 @@ def render_leads(search, court_code_list, start_date, end_date, status):
                 "email",
                 "status",
                 "age",
-                "charges",
-                "disposition",
+                "charges_description",
+                "disposed",
             ]
         ].set_index("case_id")
 
@@ -76,8 +76,8 @@ def render_leads(search, court_code_list, start_date, end_date, status):
                 "email": "Email",
                 "status": "Status",
                 "age": "Age",
-                "charges": "Charges",
-                "disposition": "Disposition",
+                "charges_description": "Charges",
+                "disposed": "Disposed",
                 "case_date": "Date",
             }
         )
@@ -96,19 +96,90 @@ def render_leads(search, court_code_list, start_date, end_date, status):
                 "resizable": True,
                 "flex": 1,
                 "cellRenderer": "markdown",
-            }
-        ] + [
+            },
             {
-                "headerName": col,
-                "field": col,
-                "editable": True,
+                "headerName": "Date",
+                "field": "Date",
+                "editable": False,
                 "filter": "agTextColumnFilter",
                 "sortable": True,
                 "resizable": True,
                 "flex": 1,
-            }
-            for col in df.columns
-            if col != "Case ID"
+            },
+            {
+                "headerName": "First Name",
+                "field": "First Name",
+                "editable": False,
+                "filter": "agTextColumnFilter",
+                "sortable": True,
+                "resizable": True,
+                "flex": 1,
+            },
+            {
+                "headerName": "Last Name",
+                "field": "Last Name",
+                "editable": False,
+                "filter": "agTextColumnFilter",
+                "sortable": True,
+                "resizable": True,
+                "flex": 1,
+            },
+            {
+                "headerName": "Charges",
+                "field": "Charges",
+                "editable": False,
+                "filter": "agTextColumnFilter",
+                "sortable": True,
+                "resizable": True,
+                "flex": 2,
+            },
+            {
+                "headerName": "Phone",
+                "field": "Phone",
+                "editable": False,
+                "filter": "agTextColumnFilter",
+                "sortable": True,
+                "resizable": True,
+                "flex": 1,
+            },
+            {
+                "headerName": "Email",
+                "field": "Email",
+                "editable": False,
+                "filter": "agTextColumnFilter",
+                "sortable": True,
+                "resizable": True,
+                "flex": 1,
+            },
+            {
+                "headerName": "Status",
+                "field": "Status",
+                "editable": False,
+                "filter": "agTextColumnFilter",
+                "sortable": True,
+                "resizable": True,
+                "flex": 1,
+            },
+            {
+                "headerName": "Age",
+                "field": "Age",
+                "editable": False,
+                "filter": "agNumberColumnFilter",
+                "sortable": True,
+                "resizable": True,
+                "flex": 1,
+            },
+            # Show the disposed as badge
+            {
+                "headerName": "Disposed",
+                "field": "Disposed",
+                "editable": False,
+                "filter": "agTextColumnFilter",
+                "sortable": True,
+                "resizable": True,
+                "flex": 1,
+                "cellRenderer": "badgeRenderer",
+            },
         ]
 
         grid = dag.AgGrid(
@@ -120,7 +191,8 @@ def render_leads(search, court_code_list, start_date, end_date, status):
             dashGridOptions={
                 "undoRedoCellEditing": True,
                 "rowSelection": "single",
-                "rowSelection":"multiple", "rowMultiSelectWithClick": True
+                "rowSelection": "multiple",
+                "rowMultiSelectWithClick": True,
             },
         )
     return [
@@ -136,10 +208,10 @@ def render_leads(search, court_code_list, start_date, end_date, status):
             width=12,
             className="mb-2",
         )
-
     ]
 
-### Multi Select Rows 
+
+### Multi Select Rows
 @callback(
     Output("selections-multiple-click-output", "children"),
     Input("portfolio-grid", "selectedRows"),
