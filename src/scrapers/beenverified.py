@@ -4,19 +4,20 @@ from datetime import datetime
 from time import sleep
 
 import selenium.common.exceptions
-from commonregex import CommonRegex
+from rich.console import Console
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 
-from src.core import storage, tools
+from src.core import tools
 from src.core.config import get_settings
 
 settings = get_settings()
 
 logger = logging.Logger(__name__)
+console = Console()
 
 
 class BeenVerifiedScrapper:
@@ -28,11 +29,13 @@ class BeenVerifiedScrapper:
         self.options.add_argument("enable-automation")
         self.options.add_argument("--disable-infobars")
         self.options.add_argument("--disable-dev-shm-usage")
+        # self.options.add_argument("--window-size=1920,1080")
 
         # Selenium with
         self.vars = {}
         self.cache = cache
-        self.driver = None
+        self.magic_link = None
+        self.email_sensor = None
         if not cache:
             self.driver = webdriver.Chrome(options=self.options)
             self.login()
@@ -68,18 +71,25 @@ class BeenVerifiedScrapper:
             self.driver.find_element(
                 By.CSS_SELECTOR, "#send-magic-link-form > .btn"
             ).click()
+            console.log("Waiting 60 seconds")
+            sleep(60)
 
             # get the magic link
             sns = tools.SensorEmail()
+            console.log("Waiting for the magic link")
             magic_link = sns()
-            sleep(60)
 
             # 7 | open | magic link
+            self.magic_link = magic_link
+            self.email_sensor = sns
             self.driver.get(magic_link)
             sleep(30)
         except Exception as e:
+            self.driver.save_screenshot(
+                f"beenverified-{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.png"
+            )
             logger.warning(
-                f"Continuing with the session as probably the user is already logged in"
+                "Continuing with the session as probably the user is already logged in"
             )
 
             logger.debug(f"Issue with Beenverified {e}")
