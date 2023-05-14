@@ -19,6 +19,42 @@
             "program": "app.py",
             "console": "integratedTerminal",
             "justMyCode": true
+        },
+        // Gunicorn 
+        {
+            "name": "Gunicorn",
+            "type": "python",
+            "request": "launch",
+            "module": "gunicorn",
+            "args": [
+                "--config",
+                "gunicorn_config.py",
+                "server:server"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Retrieve Cases",
+            "type": "python",
+            "request": "launch",
+            "program": "main.py",
+            "args": [
+                "retrieve-cases",
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Retrieve Leads",
+            "type": "python",
+            "request": "launch",
+            "program": "main.py",
+            "args": [
+                "retrieve-leads",
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
         }
     ]
 }
