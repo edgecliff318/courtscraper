@@ -1,44 +1,22 @@
 import logging
+from datetime import timedelta
 from typing import List
 
 import dash
 import dash.html as html
+import dash_ag_grid as dag
 import dash_bootstrap_components as dbc
+import pandas as pd
 from dash import Input, Output, callback
 
 from src.core.config import get_settings
+from src.db import bucket
 from src.models import messages as messages_model
 from src.services import cases, leads, messages
 
 logger = logging.Logger(__name__)
 
 settings = get_settings()
-
-
-def get_table_data(name, details):
-    return dbc.Card(
-        dbc.CardBody(
-            [
-                html.H3(name, className="card-title"),
-                dbc.Table(
-                    html.Tbody(
-                        [
-                            html.Tr(
-                                [
-                                    html.Td(k, style={"font-weight": "700"}),
-                                    html.Td(v),
-                                ]
-                            )
-                            for k, v in details.items()
-                        ]
-                    ),
-                    hover=True,
-                    responsive=True,
-                ),
-            ]
-        ),
-        className="mb-2",
-    )
 
 
 @callback(
@@ -170,28 +148,168 @@ def render_case_details(case_id):
         year_of_birth = lead_details.year_of_birth
         age = lead_details.age
 
-        charges = case_details.charges
+        charges = lead_details.charges_description
+
+        parties = pd.DataFrame(case_details.parties)
+        columns = [
+            "desc",
+            "formatted_partyname",
+            "formatted_telephone",
+            "formatted_partyaddress",
+        ]
+        parties = parties[columns].rename(
+            columns={
+                "desc": "Party Type",
+                "formatted_partyname": "Name",
+                "formatted_telephone": "Phone",
+                "formatted_partyaddress": "Address",
+            }
+        )
+        column_defs = [
+            {"field": c, "sortable": True, "filter": True}
+            for c in parties.columns
+        ]
+        parties_ag_grid = dag.AgGrid(
+            id="portfolio-grid",
+            columnDefs=column_defs,
+            rowData=parties.to_dict("records"),
+            # Fit to content
+            columnSize="autoSize",
+            style={"height": 200},
+        )
+
+        # Documents
+        documents = pd.DataFrame(case_details.documents)
+        columns = ["docket_desc", "file_path", "document_extension"]
+        documents = documents[columns].rename(
+            columns={
+                "docket_desc": "Description",
+                "file_path": "File Path",
+                "document_extension": "Extension",
+            }
+        )
+        # Generate the link from Firebase bucket
+        documents["File Path"] = documents["File Path"].apply(
+            lambda x: (
+                f"[Download]"
+                f"({bucket.get_blob(x).generate_signed_url(expiration=timedelta(seconds=3600))})"
+            )
+        )
+
+        column_defs = [
+            {
+                "field": "Description",
+                "sortable": True,
+                "filter": True,
+                "flex": 1,
+            },
+            {
+                "field": "File Path",
+                "sortable": True,
+                "filter": True,
+                "flex": 1,
+                "sortable": True,
+                "resizable": True,
+                "cellRenderer": "markdown",
+            },
+            {
+                "field": "Extension",
+                "sortable": True,
+                "filter": True,
+                "flex": 1,
+            },
+        ]
+        documents_ag_grid = dag.AgGrid(
+            id="portfolio-grid",
+            columnDefs=column_defs,
+            rowData=documents.to_dict("records"),
+            # Fit to content
+            columnSize="autoSize",
+            style={"height": 200},
+        )
+
+        filing_date = case_details.filing_date
+        if filing_date is not None:
+            filing_date = filing_date.strftime("%m/%d/%Y")
+
+        case_details_info = dbc.Table(
+            html.Tbody(
+                [
+                    html.Tr(
+                        [
+                            html.Td("Case ID", className="font-weight-bold"),
+                            html.Td(case_id),
+                        ]
+                    ),
+                    html.Tr(
+                        [
+                            html.Td(
+                                "Filing Date", className="font-weight-bold"
+                            ),
+                            html.Td(filing_date),
+                        ]
+                    ),
+                    html.Tr(
+                        [
+                            html.Td("Case Type", className="font-weight-bold"),
+                            html.Td(case_details.case_type),
+                        ]
+                    ),
+                    html.Tr(
+                        [
+                            html.Td(
+                                "Case Status", className="font-weight-bold"
+                            ),
+                            html.Td(lead_details.status),
+                        ]
+                    ),
+                    html.Tr(
+                        [
+                            html.Td("Charges", className="font-weight-bold"),
+                            html.Td(charges),
+                        ]
+                    ),
+                    html.Tr(
+                        [
+                            html.Td(
+                                "Date of Birth", className="font-weight-bold"
+                            ),
+                            html.Td(year_of_birth),
+                        ]
+                    ),
+                    html.Tr(
+                        [
+                            html.Td("Age", className="font-weight-bold"),
+                            html.Td(age),
+                        ]
+                    ),
+                    html.Tr(
+                        [
+                            html.Td("Phone", className="font-weight-bold"),
+                            html.Td(lead_details.phone),
+                        ]
+                    ),
+                ]
+            ),
+            hover=True,
+            responsive=True,
+            striped=True,
+            bordered=True,
+        )
 
         return (
             [
                 dbc.Col(
                     dbc.Card(
                         dbc.CardBody(
-                            html.H4(
-                                f"Case ID: {case_id}, "
-                                f"Defendant: {lead_details.first_name}, "
-                                f"{lead_details.last_name}, {year_of_birth} ({age})",
-                                className="text-left",
-                            )
+                            [
+                                html.H3(
+                                    "Case Details", className="card-title"
+                                ),
+                                case_details_info,
+                            ]
                         ),
                         class_name="mb-2",
-                    ),
-                    width=12,
-                ),
-                dbc.Col(
-                    get_table_data(
-                        f"Case {case_id}",
-                        case_details.headers,
                     ),
                     width=6,
                 ),
@@ -199,13 +317,25 @@ def render_case_details(case_id):
                     dbc.Card(
                         dbc.CardBody(
                             [
-                                html.H3("Charges", className="card-title"),
-                                html.P(charges),
+                                html.H3("Documents", className="card-title"),
+                                documents_ag_grid,
                             ]
                         ),
                         className="mb-2",
                     ),
                     width=6,
+                ),
+                dbc.Col(
+                    dbc.Card(
+                        dbc.CardBody(
+                            [
+                                html.H3("Parties", className="card-title"),
+                                parties_ag_grid,
+                            ]
+                        ),
+                        className="mb-2",
+                    ),
+                    width=12,
                 ),
             ],
             "",
