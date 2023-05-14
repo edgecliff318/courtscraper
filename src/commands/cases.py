@@ -43,9 +43,10 @@ def retrieve_cases():
         password=case_net_account.password,
     )
 
-    for day in range(-settings.start_date, -settings.end_date):
+    for day in range(-settings.start_date - 1, -settings.end_date):
         date = str((datetime.datetime.now(tz) + Day(day)).date())
         for court in courts:
+            cases_retrieved = []
             while True:
                 console.log(f"Processing {court.name} ({court.code})")
 
@@ -56,15 +57,14 @@ def retrieve_cases():
                 end_date = end_date.replace(hour=23, minute=59, second=59)
 
                 cases_ignore = cases_service.get_cases(
-                    court_code_list=court.code,
-                    start_date=start_date,
-                    end_date=end_date,
+                    court_code_list=court.code, start_date=start_date
                 )
                 cases_imported = case_net.get_cases(
                     court=court,
                     case_type=case_type,
                     date=date,
-                    cases_ignore=[case.case_id for case in cases_ignore],
+                    cases_ignore=[case.case_id for case in cases_ignore]
+                    + cases_retrieved,
                 )
                 console.log(f"Succeeded to retrieve " f"{len(cases_imported)}")
                 if not cases_imported:
@@ -72,6 +72,10 @@ def retrieve_cases():
                         f"Retrieved all cases from {court.name} ({court.code})"
                     )
                     break
+                else:
+                    cases_retrieved += [
+                        case.get("case_id") for case in cases_imported
+                    ]
                 for case in cases_imported:
                     # Reimport the module cases_model
                     # to avoid the error:

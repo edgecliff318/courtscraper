@@ -37,10 +37,140 @@ def render_leads(court_code_list, start_date, end_date, status):
                             "No leads found",
                         ]
                     ),
-                ),
-                width=12,
-                className="mb-2",
-            )
+                    width=12,
+                    className="mb-2",
+                )
+            ]
+
+        df["case_date"] = df["case_date"].dt.strftime("%m/%d/%Y")
+
+        df = df[
+            [
+                "case_id",
+                "case_date",
+                "first_name",
+                "last_name",
+                "phone",
+                "email",
+                "status",
+                "age",
+                "charges_description",
+                "disposed",
+            ]
+        ].set_index("case_id")
+
+        df = df.rename(
+            columns={
+                "first_name": "First Name",
+                "last_name": "Last Name",
+                "phone": "Phone",
+                "email": "Email",
+                "status": "Status",
+                "age": "Age",
+                "charges_description": "Charges",
+                "disposed": "Disposed",
+                "case_date": "Date",
+            }
+        )
+        df.index.name = "Case ID"
+
+        df.reset_index(inplace=True)
+        df["Case ID"] = df["Case ID"].map(lambda x: f"[{x}](/case/{x})")
+
+        column_defs = [
+            {
+                "headerName": "Case ID",
+                "field": "Case ID",
+                "editable": False,
+                "filter": "agTextColumnFilter",
+                "sortable": True,
+                "resizable": True,
+                "flex": 1,
+                "cellRenderer": "markdown",
+            },
+            {
+                "headerName": "Date",
+                "field": "Date",
+                "editable": False,
+                "filter": "agTextColumnFilter",
+                "sortable": True,
+                "resizable": True,
+                "flex": 1,
+            },
+            {
+                "headerName": "First Name",
+                "field": "First Name",
+                "editable": False,
+                "filter": "agTextColumnFilter",
+                "sortable": True,
+                "resizable": True,
+                "flex": 1,
+            },
+            {
+                "headerName": "Last Name",
+                "field": "Last Name",
+                "editable": False,
+                "filter": "agTextColumnFilter",
+                "sortable": True,
+                "resizable": True,
+                "flex": 1,
+            },
+            {
+                "headerName": "Charges",
+                "field": "Charges",
+                "editable": False,
+                "filter": "agTextColumnFilter",
+                "sortable": True,
+                "resizable": True,
+                "flex": 2,
+            },
+            {
+                "headerName": "Phone",
+                "field": "Phone",
+                "editable": False,
+                "filter": "agTextColumnFilter",
+                "sortable": True,
+                "resizable": True,
+                "flex": 1,
+            },
+            {
+                "headerName": "Email",
+                "field": "Email",
+                "editable": False,
+                "filter": "agTextColumnFilter",
+                "sortable": True,
+                "resizable": True,
+                "flex": 1,
+            },
+            {
+                "headerName": "Status",
+                "field": "Status",
+                "editable": False,
+                "filter": "agTextColumnFilter",
+                "sortable": True,
+                "resizable": True,
+                "flex": 1,
+            },
+            {
+                "headerName": "Age",
+                "field": "Age",
+                "editable": False,
+                "filter": "agNumberColumnFilter",
+                "sortable": True,
+                "resizable": True,
+                "flex": 1,
+            },
+            # Show the disposed as badge
+            {
+                "headerName": "Disposed",
+                "field": "Disposed",
+                "editable": False,
+                "filter": "agTextColumnFilter",
+                "sortable": True,
+                "resizable": True,
+                "flex": 1,
+                "cellRenderer": "badgeRenderer",
+            },
         ]
     df["case_date"] = df["case_date"].dt.strftime("%m/%d/%Y")
     df = df[

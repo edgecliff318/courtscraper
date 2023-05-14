@@ -79,4 +79,12 @@ chrome:
 
 re:  clean venv install
 
-.PHONY: all test coverage help install venv clean build lint re chrome
+casenet: 
+	@echo "Running Casenet Scrapper for Missouri"
+	@python3 main.py retrieve-cases 
+
+beenverified:
+	@echo "Running BeenVerified Scrapper for Missouri"
+	@python3 main.py retrieve-leads
+
+.PHONY: all test coverage help install venv clean build lint re chrome casenet

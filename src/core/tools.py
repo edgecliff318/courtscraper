@@ -10,8 +10,11 @@ from typing import Any
 import numpy as np
 import pandas as pd
 import requests
+from rich.console import Console
 
 from src.core.storage import Storage
+
+console = Console()
 
 
 def compound_exp(r):
@@ -110,13 +113,13 @@ class SensorEmail:
     """
 
     def __init__(self) -> None:
-        ##TODO: add the email and password to the env file
+        # TODO: add the email and password to the env file
         self.user = "fublooman@gmail.com"  # Input your gmail address here
         self.password = "pauzlxwtzkwjyqyr"
         self.imap_url = "imap.gmail.com"
         # self.threshold_time =  (datetime.datetime.now() - datetime.timedelta(days=1)).strftime('%d-%b-%Y')
         self.threshold_time = (
-            datetime.datetime.now() - datetime.timedelta(hours=1)
+            datetime.datetime.now() - datetime.timedelta(minutes=5)
         ).strftime("%d-%b-%Y")
 
     def __call__(self, *args: Any, **kwds: Any) -> Any:
@@ -149,9 +152,10 @@ class SensorEmail:
             list_ids = self.check_email_if_exist(data, my_mail)
             if len(list_ids) > 0:
                 break
-            ## wait for 40 seconds before checking again
+            # wait for 40 seconds before checking again
+            console.log("Mail not yet received. Waiting 40 seconds")
             time.sleep(40)
-            ## check if the time is over 5 minutes
+            # check if the time is over 5 minutes
             if time.time() - start_time > 5 * 60:
                 break
 

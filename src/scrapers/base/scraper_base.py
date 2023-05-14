@@ -103,7 +103,7 @@ class ScraperBase:
     def sleep(self):
         """Sleeps for a random amount of time between requests"""
         # Show a message with an emoji for waiting time
-        waiting_time = random.randint(5, 10)
+        waiting_time = random.randint(1, 3)
         console.print(
             f"Waiting for {waiting_time} seconds :hourglass:", style="bold"
         )
