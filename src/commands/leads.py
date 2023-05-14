@@ -47,7 +47,7 @@ def retrieve_leads():
                 error_count += 1
                 # Sleep 60s
 
-                if error_count > 10:
+                if error_count > 20:
                     console.log("Too many consecutive errors, exiting")
                     return
 
