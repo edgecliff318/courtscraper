@@ -112,7 +112,14 @@ class Settings(BaseSettings):
         "GOOGLE_APPLICATION_CREDENTIALS",
         "fubloo-1b0e8-firebase-adminsdk-5j6zr-6b8d8d1c0b.json",
     )
+
+    # llm
+    OPENAI_API_KEY: str = os.getenv(
+        "OPENAI_API_KEY", "sk-2c2b2-2c2b2-2c2b2-2c2b2-2c2b2"
+    )
+    
     STORAGE_BUCKET: str = os.getenv("STORAGE_BUCKET", "fubloo-data")
+
 
     class Config:
         env_file = ".env"

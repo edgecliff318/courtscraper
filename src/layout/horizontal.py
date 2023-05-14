@@ -1,4 +1,5 @@
 from datetime import datetime
+
 import dash
 import dash.html as html
 import dash_bootstrap_components as dbc
@@ -17,7 +18,9 @@ class Layout:
                         # Use row and col to control vertical alignment of logo / brand
                         dbc.Row(
                             [
-                                dbc.Col(dbc.NavbarBrand("App", className="ms-2")),
+                                dbc.Col(
+                                    dbc.NavbarBrand("App", className="ms-2")
+                                ),
                             ],
                             align="center",
                             className="g-0",

@@ -1,5 +1,5 @@
-import dash_bootstrap_components as dbc
 import dash.html as html
+import dash_bootstrap_components as dbc
 
 
 def layout(data=None):

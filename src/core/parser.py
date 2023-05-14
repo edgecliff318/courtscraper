@@ -1,7 +1,6 @@
 import datetime
-import io
-import re
 import logging
+import re
 
 import pandas as pd
 from commonregex import CommonRegex
@@ -18,7 +17,7 @@ class TicketAnalyzer:
     def process(self):
         client = vision.ImageAnnotatorClient()
         logger.info(f"Processing {self.input_file_path}")
-        with io.open(self.input_file_path, 'rb') as image_file:
+        with open(self.input_file_path, "rb") as image_file:
             content = image_file.read()
 
         image = vision.Image(content=content)
@@ -31,19 +30,22 @@ class TicketAnalyzer:
         for text in texts:
             output += '\n"{}"'.format(text.description)
 
-            vertices = (['({},{})'.format(vertex.x, vertex.y)
-                         for vertex in text.bounding_poly.vertices])
+            vertices = [
+                "({},{})".format(vertex.x, vertex.y)
+                for vertex in text.bounding_poly.vertices
+            ]
 
-        with open(self.output_file_path, 'w') as text_file:
-            logger.info(
-                f"Saving the output file to {self.output_file_path}")
+        with open(self.output_file_path, "w") as text_file:
+            logger.info(f"Saving the output file to {self.output_file_path}")
             text_file.write(output)
 
         if response.error.message:
             raise Exception(
-                '{}\nFor more info on error messages, check: '
-                'https://cloud.google.com/apis/design/errors'.format(
-                    response.error.message))
+                "{}\nFor more info on error messages, check: "
+                "https://cloud.google.com/apis/design/errors".format(
+                    response.error.message
+                )
+            )
 
         return self.extract(output)
 
@@ -52,28 +54,33 @@ class TicketAnalyzer:
         return client_name
 
     def get_state(self, output):
-        state = re.search(r"(?<=STATE OF ).*?(?=\n)", output,
-                          flags=re.IGNORECASE).group(0)
+        state = re.search(
+            r"(?<=STATE OF ).*?(?=\n)", output, flags=re.IGNORECASE
+        ).group(0)
         return state
 
     def get_court_type(self, output):
-        court_type = re.search(r"(?<=IN THE ).*?(?= COURT OF)", output,
-                               flags=re.IGNORECASE).group(0)
+        court_type = re.search(
+            r"(?<=IN THE ).*?(?= COURT OF)", output, flags=re.IGNORECASE
+        ).group(0)
         return court_type
 
     def get_offense(self, output):
         offense = re.search(
             r"(?<=BELIEF ARE AS FOLLOWS:\n)(.|\n)*(?=O Subject taken into "
             r"custody)",
-            output, flags=re.IGNORECASE).group(0)
+            output,
+            flags=re.IGNORECASE,
+        ).group(0)
 
         return offense
 
     def _get_speeds(self, output):
         speeds = re.search(
-            r"(?<=STATIONARY RADAR)(.|\n)*(?=MPH MOVING RADAR)", output,
-            flags=re.IGNORECASE).group(
-            0)
+            r"(?<=STATIONARY RADAR)(.|\n)*(?=MPH MOVING RADAR)",
+            output,
+            flags=re.IGNORECASE,
+        ).group(0)
         l = []
         for s in speeds.split("\n"):
             s_parsed = re.search(r"\d{2,3}", s)
@@ -100,22 +107,30 @@ class TicketAnalyzer:
         return parsed_dates
 
     def get_client_birthdate(self, output):
-        reduced_search = re.search(r"(?<=DATE OF BIRTH)(.|\n)*(?=DRIVER)",
-                                   output, flags=re.IGNORECASE).group(0)
+        reduced_search = re.search(
+            r"(?<=DATE OF BIRTH)(.|\n)*(?=DRIVER)", output, flags=re.IGNORECASE
+        ).group(0)
         return min(self._get_dates(reduced_search)).strftime("%B %d, %Y")
 
     def get_court_time(self, output):
-        reduced_search = re.search(r"(?<=\(DATE\))(.|\n)*(?=WITHIN CITY)",
-                                   output, flags=re.IGNORECASE).group(0)
+        reduced_search = re.search(
+            r"(?<=\(DATE\))(.|\n)*(?=WITHIN CITY)", output, flags=re.IGNORECASE
+        ).group(0)
         return max(self._get_dates(reduced_search)).strftime("%B %d, %Y")
 
     def _get_court_address(self, output):
         address = ",,"
 
-        for e in re.search(
+        for e in (
+            re.search(
                 r"(?<=COURT ADDRESS \(Street, City, Zip\)\n)(.|\n)*("
                 r"?=\nCOURT DATE)",
-                output, flags=re.IGNORECASE).group(0).split("\n"):
+                output,
+                flags=re.IGNORECASE,
+            )
+            .group(0)
+            .split("\n")
+        ):
             if "," in e:
                 address = e
 
@@ -131,8 +146,15 @@ class TicketAnalyzer:
         return street, city, zip
 
     def get_court_phone(self, output):
-        details = re.search(r"(?<=COURT PHONE NO.\n)(.|\n)*(?=I, KNOWING)",
-                            output, flags=re.IGNORECASE).group(0).split("\n")
+        details = (
+            re.search(
+                r"(?<=COURT PHONE NO.\n)(.|\n)*(?=I, KNOWING)",
+                output,
+                flags=re.IGNORECASE,
+            )
+            .group(0)
+            .split("\n")
+        )
 
         for d in details:
             if "(" in d:
@@ -144,24 +166,32 @@ class TicketAnalyzer:
         return city
 
     def get_client_name(self, output):
-        return re.search(r"(?<=MIDDLE\)\n)(.|\n)*(?=\nSTREET)", output,
-                         flags=re.IGNORECASE).group(
-            0)
+        return re.search(
+            r"(?<=MIDDLE\)\n)(.|\n)*(?=\nSTREET)", output, flags=re.IGNORECASE
+        ).group(0)
 
     def get_client_driver_license(self, output):
-        driver_license = re.search(r"(?<=LIC. NO.\n).*?(?=\n)", output,
-                                   flags=re.IGNORECASE).group(
-            0)
+        driver_license = re.search(
+            r"(?<=LIC. NO.\n).*?(?=\n)", output, flags=re.IGNORECASE
+        ).group(0)
         if len(driver_license) <= 4:
-            driver_license = re.search(r"(?<=\nCDL\nSTATE\n).*?(?=\nO)",
-                                       output,
-                                       flags=re.IGNORECASE).group(
-                0).replace(" ", "")
+            driver_license = (
+                re.search(
+                    r"(?<=\nCDL\nSTATE\n).*?(?=\nO)",
+                    output,
+                    flags=re.IGNORECASE,
+                )
+                .group(0)
+                .replace(" ", "")
+            )
         return driver_license
 
     def get_court_jurisdiction(self, output):
-        return re.search(r"(?<=IN THE CIRCUIT COURT OF\n).*?(?=\nCOUNTY)",
-                         output, flags=re.IGNORECASE).group(0)
+        return re.search(
+            r"(?<=IN THE CIRCUIT COURT OF\n).*?(?=\nCOUNTY)",
+            output,
+            flags=re.IGNORECASE,
+        ).group(0)
 
     def get_current_date(self, output):
         return datetime.datetime.now().strftime("%B %d, %Y")
@@ -169,20 +199,31 @@ class TicketAnalyzer:
     def extract(self, output):
         results = {}
         attributes_list = [
-            "client_name", "case_id", "state", "court_type",
-            "court_city", "court_jurisdiction", "court_phone",
-            "court_time", "client_driver_license",
-            "client_birthdate", "offense", "ticket_speed",
-            "ticket_posted_speed_limit", "current_date"
+            "client_name",
+            "case_id",
+            "state",
+            "court_type",
+            "court_city",
+            "court_jurisdiction",
+            "court_phone",
+            "court_time",
+            "client_driver_license",
+            "client_birthdate",
+            "offense",
+            "ticket_speed",
+            "ticket_posted_speed_limit",
+            "current_date",
         ]
         for attribute in attributes_list:
             if hasattr(self, f"get_{attribute}"):
                 try:
-                    results[
-                        attribute.replace("_", "-")
-                    ] = getattr(self, f"get_{attribute}")(output)
-                except Exception as e:
-                    logger.info(f"A problem occurred while trying to extract "
-                                f"{attribute} from {output}")
+                    results[attribute.replace("_", "-")] = getattr(
+                        self, f"get_{attribute}"
+                    )(output)
+                except Exception:
+                    logger.info(
+                        f"A problem occurred while trying to extract "
+                        f"{attribute} from {output}"
+                    )
 
         return results

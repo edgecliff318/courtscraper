@@ -10,8 +10,8 @@ class Processor:
     def __init__(self, workers=None):
         if workers is not None:
             self.workers = workers
-        elif os.environ.get('PYLT_NUM_WORKERS', None) is not None:
-            self.workers = int(os.environ.get('PYLT_NUM_WORKERS'))
+        elif os.environ.get("PYLT_NUM_WORKERS", None) is not None:
+            self.workers = int(os.environ.get("PYLT_NUM_WORKERS"))
         else:
             self.workers = 10
 
@@ -35,7 +35,8 @@ class Processor:
         def wrapper(args_list):
             result = {}
             with concurrent.futures.ThreadPoolExecutor(
-                    max_workers=workers) as executor:
+                max_workers=workers
+            ) as executor:
                 tasks = {}
                 for args in args_list:
                     if isinstance(args, tuple):

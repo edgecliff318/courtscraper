@@ -1,7 +1,6 @@
 import logging
 from datetime import datetime
 
-from src.core import storage, tools
 from src.core.config import get_settings
 from src.scrapers.beenverified import BeenVerifiedScrapper
 from src.scrapers.missouri import ScraperMOCourt

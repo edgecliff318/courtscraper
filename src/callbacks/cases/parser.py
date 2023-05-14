@@ -1,11 +1,10 @@
 import os
-import dash.html as html
-import dash_bootstrap_components as dbc
-
-import pandas as pd
 
 import dash
-from dash import Input, Output, State, ALL, callback
+import dash.html as html
+import dash_bootstrap_components as dbc
+import pandas as pd
+from dash import ALL, Input, Output, State, callback
 from docxtpl import DocxTemplate
 
 from src.core.config import get_settings

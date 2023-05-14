@@ -12,7 +12,9 @@ def generate_form_group(
     label, id, placeholder, type="Input", options=None, value=None, **kwargs
 ):
     if type == "Input":
-        field = dbc.Input(id=id, placeholder=placeholder, value=value, **kwargs)
+        field = dbc.Input(
+            id=id, placeholder=placeholder, value=value, **kwargs
+        )
 
     elif type == "Select":
         field = dbc.Select(id=id, options=options, value=value**kwargs)
@@ -80,7 +82,9 @@ def page(data: dict = None, filemanager=True):
             dbc.Col(
                 [
                     dbc.Button("Save", id="ticket-save", className="m-1"),
-                    dbc.Button("Generate", id="ticket-generate", className="m-1"),
+                    dbc.Button(
+                        "Generate", id="ticket-generate", className="m-1"
+                    ),
                     dbc.Button(
                         "Export",
                         id="ticket-export",
@@ -99,7 +103,10 @@ def page(data: dict = None, filemanager=True):
                 [
                     generate_form_group(
                         label=e.get("field-label"),
-                        id={"type": "parser", "index": f"parser-{e.get('field-id')}"},
+                        id={
+                            "type": "parser",
+                            "index": f"parser-{e.get('field-id')}",
+                        },
                         placeholder=message_default,
                         value=e.get("field-value"),
                     )
@@ -118,7 +125,8 @@ def page(data: dict = None, filemanager=True):
     if image_filename is not None:
         encoded_image = base64.b64encode(open(image_filename, "rb").read())
         image = html.Img(
-            src="data:image/png;base64,{}".format(encoded_image.decode()), width="100%"
+            src="data:image/png;base64,{}".format(encoded_image.decode()),
+            width="100%",
         )
     else:
         image = "No scan selected"

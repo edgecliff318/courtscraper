@@ -1,8 +1,7 @@
 import os
 
-from dash import dcc
-import dash_bootstrap_components as dbc
 import dash.html as html
+import dash_bootstrap_components as dbc
 import pandas as pd
 
 from src.core.config import get_settings
@@ -20,7 +19,9 @@ def make_bs_table(results, size="md"):
     :rtype:
     """
     table_header = [
-        html.Thead(html.Tr([html.Th(c) for c in results.reset_index().columns]))
+        html.Thead(
+            html.Tr([html.Th(c) for c in results.reset_index().columns])
+        )
     ]
 
     table_body = [
@@ -54,7 +55,8 @@ def page(data=None):
                     dbc.Table(
                         id="table",
                         columns=[
-                            {"name": i, "id": i, "hideable": True} for i in data.columns
+                            {"name": i, "id": i, "hideable": True}
+                            for i in data.columns
                         ],
                         data=data.to_dict("rows"),
                         editable=True,

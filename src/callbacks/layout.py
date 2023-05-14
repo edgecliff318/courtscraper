@@ -4,7 +4,6 @@ import dash.html as html
 import dash_bootstrap_components as dbc
 from dash import Input, Output, callback
 
-from app import app
 from loader.tickets import TicketParser
 from src.components import content
 from src.core.config import get_settings
@@ -19,10 +18,10 @@ def render_page_content(pathname):
     elif pathname.startswith("/process"):
         filename = pathname.strip("/process").strip("/")
         ticket_parser = TicketParser(filename)
-        if filename == '':
+        if filename == "":
             data = {
                 "form": ticket_parser.get_fields(results={}),
-                "image": None
+                "image": None,
             }
         else:
             filename = parse.unquote(filename)

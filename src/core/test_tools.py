@@ -1,8 +1,5 @@
-import os
-import shutil
-import time
-import unittest
 import tempfile
+import unittest
 
 from src.core.storage import PickleStorage
 from src.core.tools import cached
@@ -17,12 +14,14 @@ class CacheTestCase(unittest.TestCase):
         @cached(PickleStorage(folder=self.storage_folder_path))
         def square_func_with_memory(x):
             self.check += 1
-            return x ** 2
+            return x**2
 
-        @cached(PickleStorage(folder=self.storage_folder_path), memory_cache=False)
+        @cached(
+            PickleStorage(folder=self.storage_folder_path), memory_cache=False
+        )
         def square_func_no_memory(x):
             self.check += 1
-            return x ** 2
+            return x**2
 
         self.square_func_with_memory = square_func_with_memory
         self.square_func_no_memory = square_func_no_memory

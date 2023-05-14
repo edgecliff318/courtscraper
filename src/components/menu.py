@@ -25,38 +25,52 @@ sidebar = html.Div(
                 [
                     html.Span("Ticket", className="font-weight-bold"),
                     "Washer.",
-                    html.Span("com", style={"color": "#F8795D"})
+                    html.Span("com", style={"color": "#F8795D"}),
                 ],
-                className="brand-text"
+                className="brand-text",
             )
         ),
         dbc.Nav(
             [
-                dbc.NavLink("Welcome", href="/", active="exact",
-                            className="justify-content-start"),
-                dbc.NavLink("Leads", href="/leads",
-                            active="exact",
-                            className="justify-content-start"),
-                dbc.NavLink("Stats", href="/stats",
-                            active="exact",
-                            className="justify-content-start"),
-                dbc.NavLink("Process", href="/process",
-                            active="exact",
-                            className="justify-content-start"),
-                dbc.NavLink("History",
-                            href="/history",
-                            active="exact",
-                            className="justify-content-start"
-                            )
+                dbc.NavLink(
+                    "Welcome",
+                    href="/",
+                    active="exact",
+                    className="justify-content-start",
+                ),
+                dbc.NavLink(
+                    "Leads",
+                    href="/leads",
+                    active="exact",
+                    className="justify-content-start",
+                ),
+                dbc.NavLink(
+                    "Stats",
+                    href="/stats",
+                    active="exact",
+                    className="justify-content-start",
+                ),
+                dbc.NavLink(
+                    "Process",
+                    href="/process",
+                    active="exact",
+                    className="justify-content-start",
+                ),
+                dbc.NavLink(
+                    "History",
+                    href="/history",
+                    active="exact",
+                    className="justify-content-start",
+                ),
             ],
             vertical=True,
             pills=True,
-            className="flex-column"
+            className="flex-column",
         ),
-        html.Hr()
+        html.Hr(),
     ],
     style=SIDEBAR_STYLE,
     className="main-menu menu-fixed menu-light menu-accordion menu-shadow "
-              "expanded"
+    "expanded",
 )
 span_class = "menu-title text-truncate"

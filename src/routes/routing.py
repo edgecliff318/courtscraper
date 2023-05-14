@@ -37,13 +37,17 @@ def add_routes(server):
             settings.DATA_PATH, image, as_attachment=False
         )
 
+
+
     UPLOAD_DATA_FOLDER = settings.DATA_PATH
 
     @server.route("/upload", methods=["POST"])
     def upload_file():
+
         api_key = request.args.get("api_key")
         if api_key != settings.API_KEY:
             return "API Key Not Correct"
+
         if request.method == "POST":
             # check if the post request has the file part
             if "file" not in request.files:
@@ -58,4 +62,17 @@ def add_routes(server):
             filename = secure_filename(file.filename)
             file.save(os.path.join(UPLOAD_DATA_FOLDER, filename))
 
+
+    @server.route("/update", methods=["POST"])
+    def update_data():
+        if request.method == "POST":
+            data = request.json
+            lead_loader = LeadsLoader(
+                path=os.path.join(settings.CONFIG_PATH, "leads.json")
+            )
+            leads = lead_loader.load()
+            lead = leads.get(data.get("case_id"), {})
+            lead.update(data)
+            leads[data.get("case_id")] = lead
+            lead_loader.save(leads)
             return "success"
