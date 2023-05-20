@@ -41,11 +41,18 @@ def retrieve_leads():
                 time.sleep(waiting_time)
                 error_count = 0
             except Exception as e:
-                scrapper.driver.save_screenshot(f"error_{lead.case_id}.png")
                 logger.error(f"Error retrieving lead {lead.case_id} - {e}")
                 console.log(f"Error retrieving lead {lead.case_id} - {e}")
                 error_count += 1
                 # Sleep 60s
+                try:
+                    scrapper.driver.save_screenshot(
+                        f"error_{lead.case_id}.png"
+                    )
+                except Exception:
+                    # Restarting the driver
+                    console.log("Restarting the driver")
+                    scrapper = BeenVerifiedScrapper(cache=False)
 
                 if error_count > 20:
                     console.log("Too many consecutive errors, exiting")
