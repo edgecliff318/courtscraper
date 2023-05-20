@@ -60,6 +60,8 @@ def render_leads(court_code_list, start_date, end_date, status):
         ]
     ].set_index("case_id")
 
+    df["case_index"] = df.index
+
     df = df.rename(
         columns={
             "first_name": "First Name",
@@ -88,6 +90,12 @@ def render_leads(court_code_list, start_date, end_date, status):
             "resizable": True,
             "flex": 1,
             "cellRenderer": "markdown",
+        },
+        {
+            # Hidden case id column
+            "headerName": "case_index",
+            "field": "case_index",
+            "hide": True,
         },
         {
             "headerName": "Date",

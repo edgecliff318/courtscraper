@@ -1,11 +1,10 @@
 import logging
 
 import dash
-import dash_bootstrap_components as dbc
 from dash import Input, Output, State, callback, ctx
 
 from src.core.config import get_settings
-from src.services import messages
+from src.services import leads, messages
 
 logger = logging.Logger(__name__)
 
@@ -39,55 +38,49 @@ def send_message(case_id, sms_button, sms_message, phone, media_enabled):
 
 
 @callback(
-    Output("send-all-cases", "disabled"),
     Output("modal-content-sending-status", "children"),
-    Input("send-all-cases", "n_clicks"),
-    Input("modal", "is_open"),
-)
-def send_many_message(*args, **kwargs):
-    if ctx.triggered_id == "send-all-cases":
-        return True, dbc.Alert("Sending messages in progress", color="success")
-    return False, ""
-
-
-@callback(
-    Output("send-of-all", "children"),
     Input("send-all-cases", "n_clicks"),
     Input("modal-content", "children"),
     State("memory", "data"),
-    Input("lead-single-message-modal", "value"),
-    Input("lead-media-enabled-modal", "value"),
+    State("lead-single-message-modal", "value"),
+    State("lead-media-enabled-modal", "value"),
     background=True,
-    # running=[
-    #     (Output("modal-content-sending-status", "children"), "start", dbc.Alert("Sending messages in progress", color="success")),
-    # ],
+    running=[
+        (Output("send-all-cases", "disabled"), True, False),
+        (Output("send-all-cases-cancel", "disabled"), False, True),
+    ],
+    cancel=[Input("send-all-cases-cancel", "n_clicks")],
 )
 def send_many_message(*args, **kwargs):
     if ctx.triggered_id == "send-all-cases":
         df = ctx.states["memory.data"]["df"] or []
-        template_msg = ctx.inputs["lead-single-message-modal.value"] or ""
+        template_msg = ctx.states["lead-single-message-modal.value"] or ""
         include_case_copy = (
-            ctx.inputs["lead-media-enabled-modal.value"] or False
+            ctx.states["lead-media-enabled-modal.value"] or False
         )
-        ctx.outputs[
-            "modal-content-sending-status.children"
-        ] = "Sending messages in progress"
         for case in df:
-            case_id = case["case_id"]
+            # Dict keys to lower and replace spaces with underscores
+            case = {k.lower().replace(" ", "_"): v for k, v in case.items()}
+            case_id = case["case_index"]
             phone = case["phone"]
             try:
-                ## TODO: add a check validation of template sending SMS with the case data by Twilio
+                # TODO: add a check validation of template sending SMS with the case data by Twilio
                 sms_message = template_msg.format(**case)
-                messages.send_message(
+                message_status = messages.send_message(
                     case_id,
                     sms_message,
                     phone,
                     media_enabled=include_case_copy,
                 )
+
+                if message_status == "queued" or message_status == "accepted":
+                    leads.update_lead_status(case_id, "contacted")
+
             except Exception as e:
                 logger.error(
                     f"An error occurred while sending the message. {e}"
                 )
-                return f"An error occurred while sending the message. {e}"
+                return f"An error occurred while sending the message"
+        return "Messages sent successfully"
 
-    return dash.no_update
+    return ""

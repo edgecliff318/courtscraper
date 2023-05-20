@@ -1,12 +1,14 @@
 import logging
 import os
 import typing as t
+from datetime import timedelta
 
 from twilio.rest import Client
 
 from src.core.config import get_settings
-from src.db import db
+from src.db import bucket, db
 from src.models import messages
+from src.services import cases
 
 logger = logging.Logger(__name__)
 
@@ -18,8 +20,10 @@ def send_message(case_id, sms_message, phone, media_enabled=False):
     client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
 
     if media_enabled:
-        media_url = os.path.join(settings.SITE_URL, f"images/{case_id}.png")
-        media_url = f"{media_url}?api_key={settings.API_KEY}"
+        case = cases.get_single_case(case_id)
+        media_url = bucket.get_blob(case.ticket_img).generate_signed_url(
+            expiration=timedelta(seconds=3600)
+        )
     else:
         media_url = None
 

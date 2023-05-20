@@ -5,7 +5,7 @@ import dash.html as html
 import dash_ag_grid as dag
 import dash_bootstrap_components as dbc
 import pandas as pd
-from dash import Input, Output, State, callback, ctx, html
+from dash import Input, Output, State, callback, ctx
 
 from src.components.inputs import generate_form_group
 from src.core.config import get_settings

@@ -40,3 +40,7 @@ def get_single_lead(case_id):
 
 def insert_lead(lead: leads.Lead):
     db.collection("leads").document(lead.case_id).set(lead.dict())
+
+
+def update_lead_status(case_id, status):
+    db.collection("leads").document(case_id).update({"status": status})
