@@ -1,6 +1,7 @@
 import datetime
 import json
 import logging
+import traceback
 from urllib.parse import urlencode
 
 import requests
@@ -22,8 +23,19 @@ class ScraperMOCourt(ScraperBase):
     """MO Court scraper"""
 
     HEADERS = {
-        "Cookie": "JSESSIONID=0002pphbtlp7uRm6dW_INFcHuXg:-750NJ; UJID=09f039e6-57e8-40ef-80e7-a6c50fad2b77; UJIA=-1807178247; _ga=GA1.2.1302091217.1672778481; _gid=GA1.2.2076773627.1672778481; visitorid=20230103144121770562; JSESSIONID=000239F0YlUH4oSeKr1nCvAdhRg:-RG2DR; crowd.token_key=SZeXgH84SekMvZQXzCDaIg00",
-        "Content-Type": "application/x-www-form-urlencoded",
+        "Accept": "application/json, text/javascript, */*; q=0.01",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Connection": "keep-alive",
+        "Cookie": "JSESSIONID=0001avpJJT87Y2zM8Nybi-F4szS:-100BK0M; UJID=540e1b6b-483b-40a1-8029-0d1d2bb6387f; visitorid=20230506105547481548; UJIA=-1807176160; crowd.token_key=ISkmqUMm2RJX2rzGAmGriw00; UJIA=-1807178708; UJID=540e1b6b-483b-40a1-8029-0d1d2bb6387f; crowd.token_key=ISkmqUMm2RJX2rzGAmGriw00",
+        "DNT": "1",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin",
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
+        "X-Requested-With": "XMLHttpRequest",
+        "sec-ch-ua": '"Chromium";v="113", "Not-A.Brand";v="24"',
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": '"macOS"',
     }
     BASE_URL = "https://www.courts.mo.gov"
     CASE_NO_SEARCH_URL = (
@@ -46,6 +58,7 @@ class ScraperMOCourt(ScraperBase):
                 initial_url="https://www.courts.mo.gov/cnet/logon.do",
                 payload=payload,
             )
+            # TODO: #13 Should login at the beginning !
             retries = Retry(total=0, backoff_factor=5)
 
             self._GLOBAL_SESSION.mount(
@@ -107,9 +120,13 @@ class ScraperMOCourt(ScraperBase):
 
     def get_case_dockets_details(self, case_details):
         def get_doc_dict(doc):
-            if doc.get("document") is not None:
+            if doc.get("document") is not None and doc.get("document", []):
                 docket_desc = {"docketDesc": doc.get("docketDesc")}
-                doc_dict = doc.get("document")
+                if len(doc.get("document")) > 1:
+                    console.log(
+                        f"More than one document found for docket {doc.get('docketDesc')}"
+                    )
+                doc_dict = doc.get("document").pop()
                 doc_dict.update(docket_desc)
                 return doc_dict
             else:
@@ -223,6 +240,9 @@ class ScraperMOCourt(ScraperBase):
 
         # Get the documents from the docker files
         documents = self.get_case_dockets_details(case_detail)
+
+        if not documents:
+            raise Exception("No documents found")
 
         # Download the docket files
         parsed_ticket = {}
@@ -429,10 +449,13 @@ class ScraperMOCourt(ScraperBase):
                         f"..."
                     )
                 except Exception as e:
+                    # Console log with traceback for debugging
                     console.log(
                         f"[bold red]Failed to scrape case "
                         f"{case.get('caseNumber')} - error {e}"
                     )
+                    console.log(traceback.format_exc())
+
                     return None
                 return output
 
