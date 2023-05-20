@@ -44,7 +44,6 @@ def send_message(case_id, sms_button, sms_message, phone, media_enabled):
     State("memory", "data"),
     State("lead-single-message-modal", "value"),
     State("lead-media-enabled-modal", "value"),
-    background=True,
     running=[
         (Output("send-all-cases", "disabled"), True, False),
         (Output("send-all-cases-cancel", "disabled"), False, True),
