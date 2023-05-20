@@ -19,6 +19,8 @@ def send_message(case_id, sms_message, phone, media_enabled=False):
     # Send message
     client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
 
+    sms_message = sms_message.replace("\\n", "\n")
+
     if media_enabled:
         case = cases.get_single_case(case_id)
         media_url = bucket.get_blob(case.ticket_img).generate_signed_url(
