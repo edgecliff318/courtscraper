@@ -23,9 +23,8 @@ settings = get_settings()
     Input("monitoring-status-selector", "value"),
 )
 def render_status_msg(court_code_list, start_date, end_date, status):
-
-    ## TODO: Read from DB from firebase and display in the grid
-    ## NOTE: This is a dummy data
+    # TODO: Read from DB from firebase and display in the grid
+    # NOTE: This is a dummy data
     grid = "Empty"
     status = None
     leads_list = leads.get_leads(court_code_list, start_date, end_date, status)
