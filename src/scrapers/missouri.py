@@ -22,11 +22,11 @@ console = Console()
 class ScraperMOCourt(ScraperBase):
     """MO Court scraper"""
 
+    BASE_URL = "https://www.courts.mo.gov"
     HEADERS = {
         "Accept": "application/json, text/javascript, */*; q=0.01",
         "Accept-Language": "en-US,en;q=0.9",
         "Connection": "keep-alive",
-        "Cookie": "JSESSIONID=0001avpJJT87Y2zM8Nybi-F4szS:-100BK0M; UJID=540e1b6b-483b-40a1-8029-0d1d2bb6387f; visitorid=20230506105547481548; UJIA=-1807176160; crowd.token_key=ISkmqUMm2RJX2rzGAmGriw00; UJIA=-1807178708; UJID=540e1b6b-483b-40a1-8029-0d1d2bb6387f; crowd.token_key=ISkmqUMm2RJX2rzGAmGriw00",
         "DNT": "1",
         "Sec-Fetch-Dest": "empty",
         "Sec-Fetch-Mode": "cors",
@@ -37,7 +37,6 @@ class ScraperMOCourt(ScraperBase):
         "sec-ch-ua-mobile": "?0",
         "sec-ch-ua-platform": '"macOS"',
     }
-    BASE_URL = "https://www.courts.mo.gov"
     CASE_NO_SEARCH_URL = (
         "https://www.courts.mo.gov/cnet/cases/newHeaderData.do"
     )
@@ -53,10 +52,38 @@ class ScraperMOCourt(ScraperBase):
                 f"username={self.username}"
                 f"&password={self.password}&logon=logon"
             )
-            self._GLOBAL_SESSION = InitializedSession(
-                headers=self.HEADERS,
-                initial_url="https://www.courts.mo.gov/cnet/logon.do",
-                payload=payload,
+            url = "https://www.courts.mo.gov/cnet/login"
+
+            payload = f"backUrl=%2Fwelcome.do&username={self.username}&password={self.password}&logon=logon"
+            url = "https://www.courts.mo.gov/cnet/login"
+
+            payload = "backUrl=%2Fwelcome.do&username=smeyer4040&password=MASdorm1993!MAS&logon=logon"
+            headers = {
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+                "Accept-Language": "en-US,en;q=0.9",
+                "Cache-Control": "max-age=0",
+                "Connection": "keep-alive",
+                "Content-Type": "application/x-www-form-urlencoded",
+                "Cookie": "JSESSIONID=0001a0QfuVBVrJDGc1eZumLA4In:TPUEUV338; UJID=540e1b6b-483b-40a1-8029-0d1d2bb6387f; visitorid=20230506105547481548; UJIA=-1807178272; UJIA=-1807178272; UJID=540e1b6b-483b-40a1-8029-0d1d2bb6387f; crowd.token_key=6XO1aoasNZ5WnxwBkmKrtg00",
+                "DNT": "1",
+                "Origin": "https://www.courts.mo.gov",
+                "Referer": "https://www.courts.mo.gov/cnet/logon.do?backUrl=/welcome.do",
+                "Sec-Fetch-Dest": "document",
+                "Sec-Fetch-Mode": "navigate",
+                "Sec-Fetch-Site": "same-origin",
+                "Sec-Fetch-User": "?1",
+                "Upgrade-Insecure-Requests": "1",
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
+                "sec-ch-ua": '"Chromium";v="113", "Not-A.Brand";v="24"',
+                "sec-ch-ua-mobile": "?0",
+                "sec-ch-ua-platform": '"macOS"',
+            }
+
+            self._GLOBAL_SESSION = InitializedSession()
+            response = self._GLOBAL_SESSION.post(
+                url,
+                data=payload,
+                headers=headers,
             )
             # TODO: #13 Should login at the beginning !
             retries = Retry(total=0, backoff_factor=5)
@@ -242,6 +269,8 @@ class ScraperMOCourt(ScraperBase):
         documents = self.get_case_dockets_details(case_detail)
 
         if not documents:
+            logger.error(f"No documents found for {case_number}")
+            console.print(f"No documents found for {case_number}")
             raise Exception("No documents found")
 
         # Download the docket files

@@ -43,8 +43,9 @@ def retrieve_cases():
         password=case_net_account.password,
     )
 
-    for day in range(-settings.start_date - 1, -settings.end_date):
+    for day in range(-settings.end_date, -settings.start_date - 1, -1):
         date = str((datetime.datetime.now(tz) + Day(day)).date())
+        console.log(f"Processing date {date}")
         for court in courts:
             cases_retrieved = []
             while True:
@@ -56,9 +57,7 @@ def retrieve_cases():
                 end_date = datetime.datetime.strptime(date, "%Y-%m-%d")
                 end_date = end_date.replace(hour=23, minute=59, second=59)
 
-                cases_ignore = cases_service.get_cases(
-                    court_code_list=court.code, start_date=start_date
-                )
+                cases_ignore = []
                 cases_imported = case_net.get_cases(
                     court=court,
                     case_type=case_type,
@@ -96,7 +95,11 @@ def retrieve_cases():
                         console.log(f"Failed to parse case {case} - {e}")
                     try:
                         lead_parsed = leads_model.Lead.parse_obj(case)
-                        leads_service.insert_lead(lead_parsed)
+                        lead_loaded = leads_service.get_single_lead(
+                            lead_parsed.case_id
+                        )
+                        if lead_loaded is None:
+                            leads_service.insert_lead(lead_parsed)
                     except Exception as e:
                         console.log(f"Failed to parse lead {case} - {e}")
 
