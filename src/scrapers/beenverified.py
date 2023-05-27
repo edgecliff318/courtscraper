@@ -109,21 +109,28 @@ class BeenVerifiedScrapper:
         # 7 | open the search screen
         self.driver.get(link)
         # 8 | waitForElementPresent | css=.recent-reports__report | 30000
-        WebDriverWait(self.driver, 30).until(
-            expected_conditions.presence_of_element_located(
-                (By.CSS_SELECTOR, ".person-search-result-card")
+        try:
+            WebDriverWait(self.driver, 30).until(
+                expected_conditions.presence_of_element_located(
+                    (By.CSS_SELECTOR, ".person-search-result-card")
+                ),
+                "No results found",
             )
-        )
+        except selenium.common.exceptions.TimeoutException:
+            logger.error(f"No results found for {link}")
+            output["exact_match"] = False
+            return output
+
         # Check the results:
         try:
             results_count = self.driver.find_element(
                 By.CSS_SELECTOR, ".results-count"
             ).text
-        except selenium.common.exceptions.NoSuchElementException as e:
+        except selenium.common.exceptions.NoSuchElementException:
             logger.error(f"No results found for {link}")
             results_count = "Error"
 
-        if "no exact match" in results_count:
+        if "no exact match" in results_count.lower():
             output["exact_match"] = False
 
         # Go through the results:
@@ -145,8 +152,19 @@ class BeenVerifiedScrapper:
             By.CSS_SELECTOR, f"#{attribute_id} .btn"
         ).click()
 
+        # Check if blocked here by the captcha
+        try:
+            # Find the element that has the captcha warning with class whoops-body-sub-title
+            WebDriverWait(self.driver, 5).until(
+                expected_conditions.presence_of_element_located(
+                    (By.CSS_SELECTOR, ".whoops-body-sub-title")
+                )
+            )
+            logger.error("Blocked by captcha")
+        except selenium.common.exceptions.TimeoutException:
+            pass
+
         # Close the previous tabs
-        sleep(5)
         for w in window_handles:
             self.driver.switch_to.window(w)
             self.driver.close()
@@ -202,8 +220,8 @@ class BeenVerifiedScrapper:
             url += f"fname={first_name}&"
         if last_name is not None:
             url += f"ln={last_name}&"
-        # if middle_name is not None:
-        #    url += f"mn={middle_name}&"
+        if middle_name is not None:
+            url += f"mn={middle_name}&"
         if state is not None:
             url += f"state={state}&"
         if year is not None:

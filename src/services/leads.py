@@ -35,6 +35,8 @@ def get_leads(
 
 def get_single_lead(case_id):
     lead = db.collection("leads").document(case_id).get()
+    if not lead.exists:
+        return None
     return leads.Lead(**lead.to_dict())
 
 
