@@ -60,7 +60,7 @@ def add_text_to_image(image_url, text):
     draw.text(position, text, (0, 0, 255), font=font)
 
     # Add disclaimer text
-    font = ImageFont.truetype("Arial.ttf", 18)
+    font = ImageFont.truetype(font_file_path, 18)
     position = (
         5,
         image.height - 200,
