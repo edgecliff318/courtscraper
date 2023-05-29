@@ -23,6 +23,7 @@ pdf2image>=1.16.0
 docxtpl>=0.15.2ù
 unidecode>=1.3.4
 twilio
+pillow
 
 firebase-admin
 

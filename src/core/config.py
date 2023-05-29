@@ -117,9 +117,14 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str = os.getenv(
         "OPENAI_API_KEY", "sk-2c2b2-2c2b2-2c2b2-2c2b2-2c2b2"
     )
-    
+
     STORAGE_BUCKET: str = os.getenv("STORAGE_BUCKET", "fubloo-data")
 
+    # Ticket Configuration
+    TICKET_DISCLAIMER_TEXT: str = os.getenv(
+        "TICKET_DISCLAIMER_TEXT",
+        "This citation was obtained through the Missouri Case Database. Disregard this solicitation if you have already engaged a lawyer in connection with the legal matter referred to in this solicitation. You may wish to consult your lawyer or another lawyer instead of us. The exact nature of your legal situation will depend on many facts not known to us at this time. You should understand that the advice and information in this solicitation is general and that your own situation may vary. This statement is required by rule of the Supreme Court of Missouri.",
+    )
 
     class Config:
         env_file = ".env"
