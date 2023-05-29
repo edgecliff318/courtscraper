@@ -25,6 +25,8 @@ def add_text_to_image(image_url, text):
 
     # Download the media
     filepath = settings.DATA_PATH.joinpath(media.name)
+    # Ensure the directory exists
+    filepath.parent.mkdir(parents=True, exist_ok=True)
     media.download_to_filename(filepath)
 
     # Add the text to the image
