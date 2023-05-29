@@ -126,6 +126,14 @@ class Settings(BaseSettings):
         "This citation was obtained through the Missouri Case Database. Disregard this solicitation if you have already engaged a lawyer in connection with the legal matter referred to in this solicitation. You may wish to consult your lawyer or another lawyer instead of us. The exact nature of your legal situation will depend on many facts not known to us at this time. You should understand that the advice and information in this solicitation is general and that your own situation may vary. This statement is required by rule of the Supreme Court of Missouri.",
     )
 
+    # Beenverified Configuration
+    BEEN_VERIFIED_EMAIL: str = os.getenv(
+        "BEEN_VERIFIED_EMAIL", "ttdwoman@gmail.com"
+    )
+    BEEN_VERIFIED_PASSWORD: str = os.getenv(
+        "BEEN_VERIFIED_PASSWORD", "0TTD2023!"
+    )
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

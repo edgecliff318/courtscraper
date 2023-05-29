@@ -12,9 +12,12 @@ import pandas as pd
 import requests
 from rich.console import Console
 
+from src.core.config import get_settings
 from src.core.storage import Storage
 
 console = Console()
+
+settings = get_settings()
 
 
 def compound_exp(r):
@@ -114,8 +117,10 @@ class SensorEmail:
 
     def __init__(self) -> None:
         # TODO: add the email and password to the env file
-        self.user = "fublooman@gmail.com"  # Input your gmail address here
-        self.password = "pauzlxwtzkwjyqyr"
+        self.user = (
+            settings.BEEN_VERIFIED_EMAIL
+        )  # Input your gmail address here
+        self.password = settings.BEEN_VERIFIED_PASSWORD
         self.imap_url = "imap.gmail.com"
         # self.threshold_time =  (datetime.datetime.now() - datetime.timedelta(days=1)).strftime('%d-%b-%Y')
         self.threshold_time = (
