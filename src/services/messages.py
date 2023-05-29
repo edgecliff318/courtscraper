@@ -44,8 +44,11 @@ def add_text_to_image(image_url, text):
     font_size = min(int(image.width / 30), 40)
 
     # Deal with cannot open resource error
+    font_file_path = settings.ROOT_PATH.joinpath(
+        "src/core/fonts/outfit.ttf"
+    ).as_posix()
 
-    font = ImageFont.truetype("Arial.ttf", font_size)
+    font = ImageFont.truetype(font_file_path, font_size)
 
     # Draw on top of the image center aligned
     text_width, text_height = draw.textsize(text, font=font)
