@@ -60,6 +60,11 @@ def send_many_message(*args, **kwargs):
         for case in df:
             # Dict keys to lower and replace spaces with underscores
             case = {k.lower().replace(" ", "_"): v for k, v in case.items()}
+
+            # first_name and last_name should be capitalized
+            case["first_name"] = case["first_name"].capitalize()
+            case["last_name"] = case["last_name"].capitalize()
+
             case_id = case["case_index"]
             phone = case["phone"]
             try:
