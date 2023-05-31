@@ -1,17 +1,24 @@
+import datetime
 import logging
 import random
 import time
 
 import typer
 from rich.console import Console
+from rich.progress import track
+from twilio.rest import Client
 
+from src.core.config import get_settings
 from src.models import leads as leads_model
+from src.models import messages as messages_model
 from src.scrapers.beenverified import BeenVerifiedScrapper
 from src.services import leads as leads_service
+from src.services import messages as messages_service
 
 console = Console()
 
 logger = logging.getLogger()
+settings = get_settings()
 
 
 def filter_leads(lead: leads_model.Lead):
@@ -33,8 +40,6 @@ def filter_leads(lead: leads_model.Lead):
 
 
 def retrieve_leads():
-    # Wait 2 hours before starting the process
-    logger.info("Waiting 2 hours before starting the process")
     scrapper = BeenVerifiedScrapper(cache=False)
     console.print("Logged to BeenVerified")
 
@@ -69,6 +74,16 @@ def retrieve_leads():
                 year=lead.year_of_birth,
             )
             data = scrapper.retrieve_information(link)
+            if data is None:
+                console.log(
+                    f"Error processing lead {lead.case_id} on BeenVerified"
+                )
+                waiting_time = random.randint(500, 1000)
+                console.log(f"Waiting {waiting_time} seconds before next lead")
+                lead_data["status"] = "processing_error"
+                leads_service.insert_lead(leads_model.Lead(**lead_data))
+                time.sleep(waiting_time)
+                continue
             if data.get("exact_match") is False:
                 console.log(f"Lead {lead.case_id} not found in BeenVerified")
                 waiting_time = random.randint(30, 150)
@@ -103,6 +118,105 @@ def retrieve_leads():
             if error_count > 20:
                 console.log("Too many consecutive errors, exiting")
                 return
+
+
+def sync_twilio(from_date: str = None, to_date: str = None):
+    client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+
+    if from_date is None:
+        # Today
+        from_date = (
+            datetime.datetime.now() - datetime.timedelta(days=1)
+        ).strftime("%Y-%m-%d")
+
+    if to_date is None:
+        # Tomorrow
+        to_date = (
+            datetime.datetime.now() + datetime.timedelta(days=1)
+        ).strftime("%Y-%m-%d")
+
+    # Get messages from Twilio
+    messages_twilio = client.messages.list(
+        date_sent_after=from_date, date_sent_before=to_date
+    )
+
+    for message in track(messages_twilio):
+        # If Inbound message:
+        #   - Get the lead
+        #   - Update the lead with the message
+        #   - Update the lead status to contacted
+        if message.direction == "xxx":
+            lead = leads_service.get_lead_by_phone(message._from)
+            if lead is None:
+                console.log(f"Lead not found with phone {message._from}")
+                continue
+            # Add interaction
+            interaction = messages_model.Interaction(
+                case_id=lead.case_id,
+                message=message.body,
+                type="sms",
+                status="inbound",
+            )
+            messages_service.insert_interaction(interaction)
+
+            if "stop" in message.body.lower():
+                leads_service.update_lead_status(lead.case_id, "stop")
+                continue
+
+            leads_service.update_lead_status(lead.case_id, "responded")
+
+        if "outbound" in str(message.direction).lower():
+            # Check the status of the message
+            # If delivered, update the status of the interaction to delivered
+            # If failed, update the status of the interaction to failed
+            lead = leads_service.get_lead_by_phone(message.to)
+
+            if lead is None:
+                console.log(f"Lead not found with phone {message.to}")
+                continue
+
+            if message.status != "delivered" and message.status != "sent":
+                leads_service.update_lead_status(lead.case_id, "failed")
+            elif lead.status == "not_contacted":
+                leads_service.update_lead_status(lead.case_id, "contacted")
+
+
+def analyze_leads():
+    console.log("Loading leads")
+    leads = leads_service.get_leads(status="contacted")
+    console.log("Initializing twilio")
+    client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+
+    for lead in track(leads):
+        # Use Twilio Lookup to get the carrier
+        # If land line or voip, update the lead status to not_prioritized
+        if lead.phone is None:
+            continue
+
+        if "no phone" in lead.phone.lower():
+            leads_service.update_lead_status(lead.case_id, "not_found")
+            continue
+
+        if lead.carrier is not None:
+            continue
+
+        phone = client.lookups.phone_numbers(lead.phone).fetch(type="carrier")
+
+        if phone is None:
+            console.log(f"Phone {lead.phone} not found in Twilio")
+            leads_service.update_lead_status(lead.case_id, "not_prioritized")
+            continue
+        if phone.carrier is not None:
+            if (
+                phone.carrier["type"] == "landline"
+                or phone.carrier["type"] == "voip"
+            ):
+                lead.status = "not_prioritized"
+            lead.carrier = phone.carrier["type"]
+        if phone.caller_name is not None:
+            continue
+        lead.phone = phone.phone_number
+        leads_service.update_lead(lead)
 
 
 if __name__ == "__main__":

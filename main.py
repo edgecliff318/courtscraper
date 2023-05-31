@@ -5,7 +5,9 @@ from rich.console import Console
 from rich.logging import RichHandler
 
 from src.commands.cases import retrieve_cases as retrieve_cases_fct
+from src.commands.leads import analyze_leads as analyze_leads_fct
 from src.commands.leads import retrieve_leads as retrieve_leads_fct
+from src.commands.leads import sync_twilio as sync_twilio_fct
 from src.core.config import get_settings
 
 settings = get_settings()
@@ -39,7 +41,9 @@ retrieve_cases = app.command(help="Scrap the casenet website")(
 retrieve_leads = app.command(help="Retrieve leads information")(
     retrieve_leads_fct
 )
+sync_twilio = app.command(help="Sync twilio interactions")(sync_twilio_fct)
 
+analyze_leads = app.command(help="Analyze leads")(analyze_leads_fct)
 
 if __name__ == "__main__":
     app()

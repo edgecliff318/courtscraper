@@ -40,6 +40,15 @@ def get_single_lead(case_id):
     return leads.Lead(**lead.to_dict())
 
 
+def get_lead_by_phone(phone):
+    leads_list = db.collection("leads").where("phone", "==", phone).stream()
+    leads_list = [leads.Lead(**m.to_dict()) for m in leads_list]
+    if leads_list:
+        return leads_list[0]
+    else:
+        return None
+
+
 def get_last_lead(
     court_code_list=None, start_date=None, end_date=None, status=None
 ):
@@ -82,3 +91,7 @@ def insert_lead(lead: leads.Lead):
 
 def update_lead_status(case_id, status):
     db.collection("leads").document(case_id).update({"status": status})
+
+
+def update_lead(lead: leads.Lead):
+    db.collection("leads").document(lead.case_id).update(lead.dict())

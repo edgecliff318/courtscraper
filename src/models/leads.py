@@ -27,6 +27,7 @@ class Lead(BaseModel):
     source: Optional[str] = None
     charges_description: Optional[str] = None
     disposed: Optional[bool] = False
+    carrier: Optional[str] = None
 
     @validator("last_updated", pre=True, always=True)
     def set_last_updated_date_now(cls, v):

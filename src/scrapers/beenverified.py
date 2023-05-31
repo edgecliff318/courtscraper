@@ -117,9 +117,12 @@ class BeenVerifiedScrapper:
                 "No results found",
             )
         except selenium.common.exceptions.TimeoutException:
-            logger.error(f"No results found for {link}")
-            output["exact_match"] = False
-            return output
+            logger.error(f"An issue happened for {link}")
+            # Take screenshot
+            self.driver.save_screenshot(
+                f"beenverified-{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.png"
+            )
+            return None
 
         # Check the results:
         try:
@@ -192,8 +195,7 @@ class BeenVerifiedScrapper:
 
         except selenium.common.exceptions.NoSuchElementException:
             logger.error(f"No informations found for {link}")
-
-            return output
+            return None
 
         try:
             summary = self.driver.find_element(

@@ -144,6 +144,10 @@ def send_message(case_id, sms_message, phone, media_enabled=False):
     return twilio_message.status
 
 
+def insert_interaction(interaction):
+    db.collection("interactions").add(interaction.dict())
+
+
 def get_interactions(case_id=None) -> t.List[messages.Interaction]:
     if case_id is None:
         interactions = db.collection("interactions").stream()
