@@ -41,6 +41,7 @@ def filter_leads(lead: leads_model.Lead):
 
 def retrieve_leads():
     scrapper = BeenVerifiedScrapper(cache=False)
+    client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
     console.print("Logged to BeenVerified")
 
     error_count = 0
@@ -92,10 +93,36 @@ def retrieve_leads():
                 leads_service.insert_lead(leads_model.Lead(**lead_data))
                 time.sleep(waiting_time)
                 continue
+
             lead_data["phone"] = data.get("phone")
             lead_data["details"] = data.get("details")
             lead_data["email"] = data.get("email")
             lead_data["status"] = "not_contacted"
+
+            if (
+                lead_data["phone"] is not None
+                and "no phone" in lead_data["phone"].lower()
+            ):
+                lead_data["status"] = "not_found"
+            else:
+                phone = client.lookups.phone_numbers(lead_data["phone"]).fetch(
+                    type="carrier"
+                )
+                if phone is None:
+                    console.log(
+                        f"Phone {lead_data['phone']} not found in Twilio"
+                    )
+                    lead_data["status"] = "not_prioritized"
+                if phone.carrier is not None:
+                    if (
+                        phone.carrier["type"] == "landline"
+                        or phone.carrier["type"] == "voip"
+                    ):
+                        lead_data["status"] = "not_prioritized"
+                    lead_data["carrier"] = phone.carrier["type"]
+                else:
+                    lead_data["phone"] = phone.phone_number
+
             leads_service.insert_lead(leads_model.Lead(**lead_data))
             console.log(f"Lead {lead.case_id} retrieved")
             # Wait a random time between 30 seconds and 5 minutes
@@ -183,7 +210,7 @@ def sync_twilio(from_date: str = None, to_date: str = None):
 
 def analyze_leads():
     console.log("Loading leads")
-    leads = leads_service.get_leads(status="contacted")
+    leads = leads_service.get_leads(status="not_contacted")
     console.log("Initializing twilio")
     client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
 
