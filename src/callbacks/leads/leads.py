@@ -57,6 +57,7 @@ def render_leads(court_code_list, start_date, end_date, status):
             "age",
             "charges_description",
             "disposed",
+            "year_of_birth",
         ]
     ].set_index("case_id")
 
@@ -179,6 +180,12 @@ def render_leads(court_code_list, start_date, end_date, status):
             "resizable": True,
             "flex": 1,
             "cellRenderer": "badgeRenderer",
+        },
+        {
+            # Hidden year of birth column
+            "headerName": "year_of_birth",
+            "field": "year_of_birth",
+            "hide": True,
         },
     ]
     grid = dag.AgGrid(

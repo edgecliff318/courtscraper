@@ -79,7 +79,7 @@ def retrieve_leads():
                 console.log(
                     f"Error processing lead {lead.case_id} on BeenVerified"
                 )
-                waiting_time = random.randint(500, 1000)
+                waiting_time = random.randint(30, 300)
                 console.log(f"Waiting {waiting_time} seconds before next lead")
                 lead_data["status"] = "processing_error"
                 leads_service.insert_lead(leads_model.Lead(**lead_data))
@@ -112,16 +112,16 @@ def retrieve_leads():
                     console.log(
                         f"Phone {lead_data['phone']} not found in Twilio"
                     )
-                    lead_data["status"] = "not_prioritized"
+                    lead_data["status"] = "not_valid"
                 if phone.carrier is not None:
+                    lead_data["carrier"] = phone.carrier["type"]
                     if (
                         phone.carrier["type"] == "landline"
                         or phone.carrier["type"] == "voip"
                     ):
-                        lead_data["status"] = "not_prioritized"
-                    lead_data["carrier"] = phone.carrier["type"]
-                else:
-                    lead_data["phone"] = phone.phone_number
+                        lead_data["status"] = "not_valid"
+                    else:
+                        lead_data["phone"] = phone.phone_number
 
             leads_service.insert_lead(leads_model.Lead(**lead_data))
             console.log(f"Lead {lead.case_id} retrieved")
