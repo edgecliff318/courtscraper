@@ -58,6 +58,7 @@ leads_controls = dbc.Row(
                     {"label": "Contacted", "value": "contacted"},
                     {"label": "Failed", "value": "failed"},
                     {"label": "Stop", "value": "stop"},
+                    {"label": "Yes", "value": "yes"},
                     {"label": "Responded", "value": "responded"},
                     {"label": "Processing", "value": "processing"},
                     {"label": "Paid", "value": "paid"},
