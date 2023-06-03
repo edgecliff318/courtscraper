@@ -5,6 +5,7 @@ import dash_bootstrap_components as dbc
 from dash import dcc, html
 
 from src.components.inputs import generate_form_group
+from src.models import leads as leads_model
 
 logger = logging.Logger(__name__)
 
@@ -56,7 +57,7 @@ def layout(case_id):
                         [
                             generate_form_group(
                                 label="Phone Number",
-                                id="lead-single-been-verified-phone",
+                                id="lead-single-phone",
                                 placeholder="Set the phone number",
                                 type="Input",
                                 persistence_type="session",
@@ -103,6 +104,95 @@ def layout(case_id):
                 ),
             ]
         )
+
+    # Lead status and internal notes
+    lead_admin_module = html.Div(
+        [
+            dbc.Row(
+                [
+                    dbc.Col("Status", width=4),
+                    dbc.Col(
+                        generate_form_group(
+                            label="Status",
+                            id="lead-single-status",
+                            placeholder="Set the status",
+                            type="Dropdown",
+                            options=[
+                                o
+                                for o in leads_model.leads_statuses
+                                if o["value"] != "all"
+                            ],
+                            persistence_type="session",
+                            persistence=True,
+                        ),
+                        width=8,
+                    ),
+                ],
+                className="mb-1",
+            ),
+            dbc.Row(
+                [
+                    dbc.Col("Internal Notes", width=4),
+                    dbc.Col(
+                        generate_form_group(
+                            label="Internal Notes",
+                            id="lead-single-notes",
+                            placeholder="Type in internal notes",
+                            type="Textarea",
+                            style={"height": 370},
+                        ),
+                        width=8,
+                    ),
+                ]
+            ),
+            dbc.Row([dbc.Col(id="lead-single-admin-status")]),
+        ]
+    )
+    lead_admin_card = dbc.Card(
+        dbc.CardBody(
+            [
+                dbc.Row(
+                    [
+                        dbc.Col(
+                            html.H3(
+                                "Lead",
+                                className="card-title",
+                            ),
+                            width=4,
+                        ),
+                        dbc.Col(
+                            [
+                                dbc.Button(
+                                    "Save",
+                                    color="primary",
+                                    className="mb-2 mr-1",
+                                    id="lead-single-save-button",
+                                )
+                            ],
+                            width=2,
+                        ),
+                        dbc.Col(
+                            [
+                                dbc.Button(
+                                    "Refresh",
+                                    color="primary",
+                                    className="mb-2 mr-1",
+                                    id="lead-single-delete-button",
+                                )
+                            ],
+                            width=2,
+                        ),
+                        dbc.Col(
+                            [html.Div(id="lead-single-save-status")],
+                            width=4,
+                        ),
+                    ]
+                ),
+                html.Div(lead_admin_module),
+            ]
+        ),
+    )
+
     return [
         dbc.Row(
             [
@@ -134,7 +224,7 @@ def layout(case_id):
                                     [
                                         dbc.Col(
                                             html.H3(
-                                                "Lead Status",
+                                                "Messaging",
                                                 className="card-title",
                                             ),
                                             width=4,
@@ -146,13 +236,7 @@ def layout(case_id):
                                                     color="primary",
                                                     className="mb-2 mr-1",
                                                     id="lead-single-send-sms-button",
-                                                ),
-                                                dbc.Button(
-                                                    "Flag",
-                                                    color="primary",
-                                                    className="mb-2 ml-2",
-                                                    id="lead-single-flag",
-                                                ),
+                                                )
                                             ],
                                             width=8,
                                         ),
@@ -165,6 +249,7 @@ def layout(case_id):
                     class_name="mb-2",
                     width=6,
                 ),
+                dbc.Col(lead_admin_card, width=6, class_name="mb-2"),
                 dbc.Col(id="lead-single-been-verified", width=6),
                 dbc.Col(id="lead-single-interactions", width=12),
             ]

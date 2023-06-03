@@ -35,6 +35,8 @@ def get_cases(
 
 def get_single_case(case_id) -> cases.Case:
     case = db.collection("cases").document(case_id).get()
+    if not case.exists:
+        return None
     return cases.Case(**case.to_dict())
 
 

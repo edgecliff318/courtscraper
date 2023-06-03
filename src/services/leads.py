@@ -95,3 +95,7 @@ def update_lead_status(case_id, status):
 
 def update_lead(lead: leads.Lead):
     db.collection("leads").document(lead.case_id).update(lead.dict())
+
+
+def patch_lead(case_id, **kwargs):
+    db.collection("leads").document(case_id).update(kwargs)

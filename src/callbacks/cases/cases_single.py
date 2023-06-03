@@ -7,7 +7,7 @@ import dash.html as html
 import dash_ag_grid as dag
 import dash_bootstrap_components as dbc
 import pandas as pd
-from dash import Input, Output, callback
+from dash import Input, Output, State, callback
 
 from src.core.config import get_settings
 from src.db import bucket
@@ -19,12 +19,32 @@ logger = logging.Logger(__name__)
 settings = get_settings()
 
 
+def build_toast(
+    message: str, title: str = "Message Sent", color: str = "success"
+):
+    return dbc.Toast(
+        message,
+        id="lead-single-save-toast",
+        header=title,
+        is_open=True,
+        dismissable=True,
+        icon=color,
+        duration=4000,
+        style={
+            "position": "fixed",
+            "top": 66,
+            "right": 10,
+            "width": 350,
+        },
+    )
+
+
 @callback(
     Output("lead-single-message-status", "children"),
     Input("case-id", "children"),
     Input("lead-single-send-sms-button", "n_clicks"),
     Input("lead-single-message", "value"),
-    Input("lead-single-been-verified-phone", "value"),
+    Input("lead-single-phone", "value"),
     Input("lead-media-enabled", "value"),
 )
 def send_message(case_id, sms_button, sms_message, phone, media_enabled):
@@ -40,17 +60,25 @@ def send_message(case_id, sms_button, sms_message, phone, media_enabled):
         except Exception:
             message = "Case ID must be a number"
             error = True
+            message = build_toast(message, "Error", "danger")
 
+        toast = None
         if not error:
             try:
                 message = messages.send_message(
                     case_id, sms_message, phone, media_enabled=media_enabled
                 )
+                toast = build_toast(
+                    f"Message sent succesfully {message}",
+                    "Message Sent",
+                    "success",
+                )
             except Exception as e:
                 message = f"An error occurred while sending the message. {e}"
                 error = True
+                toast = build_toast(message, "Error", "danger")
 
-        return message
+        return toast
 
 
 def get_interactions_data(
@@ -90,7 +118,9 @@ def get_interactions_data(
     Output("lead-single", "children"),
     Output("lead-single-been-verified-trigger", "children"),
     Output("lead-single-case-details", "data"),
-    Output("lead-single-been-verified-phone", "value"),
+    Output("lead-single-phone", "value"),
+    Output("lead-single-status", "value"),
+    Output("lead-single-notes", "value"),
     Input("case-id", "children"),
 )
 def render_case_details(case_id):
@@ -145,12 +175,44 @@ def render_case_details(case_id):
     else:
         case_details = cases.get_single_case(case_id)
         lead_details = leads.get_single_lead(case_id)
-        year_of_birth = lead_details.year_of_birth
-        age = lead_details.age
 
-        charges = lead_details.charges_description
+        if lead_details is None:
+            year_of_birth = None
+            age = None
+            charges = None
+            phone = None
+            status = None
+            notes = None
+            lead_details_dict = {}
+        else:
+            year_of_birth = lead_details.year_of_birth
+            age = lead_details.age
+            charges = lead_details.charges_description
+            phone = lead_details.phone
+            status = lead_details.status
+            notes = lead_details.notes
+            lead_details_dict = lead_details.dict()
 
-        parties = pd.DataFrame(case_details.parties)
+        if case_details is None:
+            parties = pd.DataFrame(
+                columns=[
+                    "desc",
+                    "formatted_partyname",
+                    "formatted_telephone",
+                    "formatted_partyaddress",
+                ]
+            )
+            documents = pd.DataFrame(
+                columns=["docket_desc", "file_path", "document_extension"]
+            )
+            filing_date = None
+            case_type = None
+        else:
+            parties = pd.DataFrame(case_details.parties)
+            documents = pd.DataFrame(case_details.documents)
+            filing_date = case_details.filing_date
+            case_type = case_details.case_type
+
         columns = [
             "desc",
             "formatted_partyname",
@@ -179,7 +241,6 @@ def render_case_details(case_id):
         )
 
         # Documents
-        documents = pd.DataFrame(case_details.documents)
         columns = ["docket_desc", "file_path", "document_extension"]
         documents = documents[columns].rename(
             columns={
@@ -228,7 +289,6 @@ def render_case_details(case_id):
             style={"height": 200},
         )
 
-        filing_date = case_details.filing_date
         if filing_date is not None:
             filing_date = filing_date.strftime("%m/%d/%Y")
 
@@ -252,7 +312,7 @@ def render_case_details(case_id):
                     html.Tr(
                         [
                             html.Td("Case Type", className="font-weight-bold"),
-                            html.Td(case_details.case_type),
+                            html.Td(case_type),
                         ]
                     ),
                     html.Tr(
@@ -260,7 +320,7 @@ def render_case_details(case_id):
                             html.Td(
                                 "Case Status", className="font-weight-bold"
                             ),
-                            html.Td(lead_details.status),
+                            html.Td(status),
                         ]
                     ),
                     html.Tr(
@@ -286,7 +346,7 @@ def render_case_details(case_id):
                     html.Tr(
                         [
                             html.Td("Phone", className="font-weight-bold"),
-                            html.Td(lead_details.phone),
+                            html.Td(phone),
                         ]
                     ),
                 ]
@@ -339,8 +399,10 @@ def render_case_details(case_id):
                 ),
             ],
             "",
-            lead_details.dict(),
-            lead_details.phone,
+            lead_details_dict,
+            phone,
+            status,
+            notes,
         )
 
 
@@ -373,3 +435,27 @@ def render_case_interactions(case_id, status):
         interactions = messages.get_interactions(case_id)
         output = get_interactions_data("Interactions", interactions)
         return output
+
+
+# Update the lead details when save button is clicked
+@callback(
+    Output("lead-single-save-status", "children"),
+    Input("lead-single-save-button", "n_clicks"),
+    State("case-id", "children"),
+    State("lead-single-phone", "value"),
+    State("lead-single-status", "value"),
+    State("lead-single-notes", "value"),
+)
+def update_lead_details(btn, case_id, phone, status, notes):
+    ctx = dash.callback_context
+    trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
+    if trigger_id == "lead-single-save-button":
+        lead_details = {}
+        lead_details["phone"] = phone
+        lead_details["status"] = status
+        lead_details["notes"] = notes
+        leads.patch_lead(case_id, **lead_details)
+        toast = build_toast(
+            "Your modification was saved ✅", "Lead details updated"
+        )
+        return toast

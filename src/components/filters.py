@@ -2,6 +2,7 @@ import dash_bootstrap_components as dbc
 from dash import html
 
 from src.components.inputs import generate_form_group
+from src.models import leads as leads_model
 
 leads_controls = dbc.Row(
     [
@@ -46,26 +47,7 @@ leads_controls = dbc.Row(
                 persistence_type="session",
                 persistence=True,
                 value="not_contacted",
-                options=[
-                    {"label": "All", "value": "all"},
-                    {"label": "New", "value": "new"},
-                    {
-                        "label": "Not Contacted",
-                        "value": "not_contacted",
-                    },
-                    {"label": "Not Found", "value": "not_found"},
-                    {"label": "Not Prioritized", "value": "not_prioritized"},
-                    {"label": "Contacted", "value": "contacted"},
-                    {"label": "Failed", "value": "failed"},
-                    {"label": "Stop", "value": "stop"},
-                    {"label": "Yes", "value": "yes"},
-                    {"label": "Responded", "value": "responded"},
-                    {"label": "Processing", "value": "processing"},
-                    {"label": "Paid", "value": "paid"},
-                    {"label": "Converted", "value": "converted"},
-                    {"label": "Request for Representation", "value": "rpr"},
-                    {"label": "Closed", "value": "closed"},
-                ],
+                options=leads_model.leads_statuses,
             ),
             width=2,
             xs=12,

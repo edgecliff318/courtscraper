@@ -172,25 +172,29 @@ def sync_twilio(from_date: str = None, to_date: str = None):
         #   - Get the lead
         #   - Update the lead with the message
         #   - Update the lead status to contacted
-        if message.direction == "xxx":
+        if message.direction == "inbound":
             lead = leads_service.get_lead_by_phone(message._from)
             if lead is None:
                 console.log(f"Lead not found with phone {message._from}")
                 continue
             # Add interaction
+
             interaction = messages_model.Interaction(
                 case_id=lead.case_id,
                 message=message.body,
                 type="sms",
                 status="inbound",
+                id=message.sid,
+                creation_date=message.date_sent,
             )
             messages_service.insert_interaction(interaction)
 
-            if "stop" in message.body.lower():
+            if message.body is not None and "yes" in message.body.lower():
+                leads_service.update_lead_status(lead.case_id, "yes")
+            elif "stop" in message.body.lower():
                 leads_service.update_lead_status(lead.case_id, "stop")
-                continue
-
-            leads_service.update_lead_status(lead.case_id, "responded")
+            else:
+                leads_service.update_lead_status(lead.case_id, "responded")
 
         if "outbound" in str(message.direction).lower():
             # Check the status of the message
@@ -203,14 +207,15 @@ def sync_twilio(from_date: str = None, to_date: str = None):
                 continue
 
             if message.status != "delivered" and message.status != "sent":
-                leads_service.update_lead_status(lead.case_id, "failed")
+                if lead.status == "not_contacted":
+                    leads_service.update_lead_status(lead.case_id, "failed")
             elif lead.status == "not_contacted":
                 leads_service.update_lead_status(lead.case_id, "contacted")
 
 
 def analyze_leads():
     console.log("Loading leads")
-    leads = leads_service.get_leads(status="not_contacted")
+    leads = leads_service.get_leads(status="contacted")
     console.log("Initializing twilio")
     client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
 
@@ -224,7 +229,7 @@ def analyze_leads():
             leads_service.update_lead_status(lead.case_id, "not_found")
             continue
 
-        if lead.carrier is not None:
+        if lead.carrier is not None and "+" in lead.phone:
             continue
 
         phone = client.lookups.phone_numbers(lead.phone).fetch(type="carrier")

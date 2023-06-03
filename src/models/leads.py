@@ -4,6 +4,27 @@ from typing import Optional
 import pandas as pd
 from pydantic import BaseModel, validator
 
+leads_statuses = [
+    {"label": "All", "value": "all"},
+    {"label": "New", "value": "new"},
+    {
+        "label": "Not Contacted",
+        "value": "not_contacted",
+    },
+    {"label": "Not Found", "value": "not_found"},
+    {"label": "Not Prioritized", "value": "not_prioritized"},
+    {"label": "Contacted", "value": "contacted"},
+    {"label": "Failed", "value": "failed"},
+    {"label": "Stop", "value": "stop"},
+    {"label": "Yes", "value": "yes"},
+    {"label": "Responded", "value": "responded"},
+    {"label": "Processing", "value": "processing"},
+    {"label": "Paid", "value": "paid"},
+    {"label": "Converted", "value": "converted"},
+    {"label": "Request for Representation", "value": "rpr"},
+    {"label": "Closed", "value": "closed"},
+]
+
 
 class Lead(BaseModel):
     case_id: str
@@ -28,6 +49,7 @@ class Lead(BaseModel):
     charges_description: Optional[str] = None
     disposed: Optional[bool] = False
     carrier: Optional[str] = None
+    notes: Optional[str] = None
 
     @validator("last_updated", pre=True, always=True)
     def set_last_updated_date_now(cls, v):
