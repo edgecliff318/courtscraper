@@ -15,6 +15,7 @@ leads_statuses = [
     {"label": "Not Prioritized", "value": "not_prioritized"},
     {"label": "Contacted", "value": "contacted"},
     {"label": "Failed", "value": "failed"},
+    {"label": "Lost", "value": "lost"},
     {"label": "Stop", "value": "stop"},
     {"label": "Yes", "value": "yes"},
     {"label": "Responded", "value": "responded"},
