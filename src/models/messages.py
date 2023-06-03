@@ -24,6 +24,7 @@ class MessageTemplate(BaseModel):
 
 
 class Interaction(BaseModel):
+    id: Optional[str] = None
     case_id: str
     creation_date: Optional[datetime] = None
     message: Optional[str] = None

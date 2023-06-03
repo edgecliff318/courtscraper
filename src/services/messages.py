@@ -145,7 +145,12 @@ def send_message(case_id, sms_message, phone, media_enabled=False):
 
 
 def insert_interaction(interaction):
-    db.collection("interactions").add(interaction.dict())
+    if interaction.id is not None:
+        db.collection("interactions").document(interaction.id).set(
+            interaction.dict()
+        )
+    else:
+        db.collection("interactions").add(interaction.dict())
 
 
 def get_interactions(case_id=None) -> t.List[messages.Interaction]:
