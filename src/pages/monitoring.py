@@ -8,7 +8,7 @@ from src.components.filters import monitoring_controls
 
 logger = logging.Logger(__name__)
 
-dash.register_page(__name__, class_icon="ti chart-bar", order=3)
+dash.register_page(__name__, class_icon="ti ti-phone", order=3)
 
 
 def layout():
@@ -21,6 +21,7 @@ def layout():
                             dbc.CardBody(
                                 [
                                     monitoring_controls,
+                                    html.Div(id="monitoring-status"),
                                 ]
                             ),
                         ),
