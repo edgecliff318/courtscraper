@@ -9,6 +9,7 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 from dash import Input, Output, State, callback
 
+from src.components.toast import build_toast
 from src.core.config import get_settings
 from src.db import bucket
 from src.models import messages as messages_model
@@ -17,26 +18,6 @@ from src.services import cases, leads, messages
 logger = logging.Logger(__name__)
 
 settings = get_settings()
-
-
-def build_toast(
-    message: str, title: str = "Message Sent", color: str = "success"
-):
-    return dbc.Toast(
-        message,
-        id="lead-single-save-toast",
-        header=title,
-        is_open=True,
-        dismissable=True,
-        icon=color,
-        duration=4000,
-        style={
-            "position": "fixed",
-            "top": 66,
-            "right": 10,
-            "width": 350,
-        },
-    )
 
 
 @callback(
