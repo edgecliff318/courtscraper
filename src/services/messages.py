@@ -3,6 +3,7 @@ import textwrap
 import typing as t
 from datetime import timedelta
 
+import pandas as pd
 from PIL import Image, ImageDraw, ImageFont
 from twilio.rest import Client
 
@@ -112,38 +113,6 @@ def add_text_to_image(image_url, text):
     return media_url
 
 
-def send_message(case_id, sms_message, phone, media_enabled=False):
-    # Send message
-    client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
-
-    sms_message = sms_message.replace("\\n", "\n")
-
-    if media_enabled:
-        case = cases.get_single_case(case_id)
-        media_url = add_text_to_image(case.ticket_img, "ADVERTISEMENT")
-    else:
-        media_url = None
-
-    twilio_message = client.messages.create(
-        messaging_service_sid=settings.TWILIO_MESSAGE_SERVICE_SID,
-        body=sms_message,
-        media_url=media_url,
-        to=phone,
-    )
-
-    interaction = messages.Interaction(
-        case_id=case_id,
-        message=sms_message,
-        type="sms",
-        status=twilio_message.status,
-    )
-
-    # Save interaction
-    db.collection("interactions").add(interaction.dict())
-
-    return twilio_message.status
-
-
 def insert_interaction(interaction):
     if interaction.id is not None:
         db.collection("interactions").document(interaction.id).set(
@@ -151,6 +120,12 @@ def insert_interaction(interaction):
         )
     else:
         db.collection("interactions").add(interaction.dict())
+
+
+def update_interaction(interaction):
+    db.collection("interactions").document(interaction.id).update(
+        interaction.dict()
+    )
 
 
 def get_interactions(case_id=None) -> t.List[messages.Interaction]:
@@ -166,9 +141,38 @@ def get_interactions(case_id=None) -> t.List[messages.Interaction]:
     return [messages.Interaction(**i.to_dict()) for i in interactions]
 
 
+def get_interactions_filtered(
+    case_id=None, start_date=None, end_date=None, direction=None
+) -> t.List[messages.Interaction]:
+    interactions = db.collection("interactions")
+    if case_id is not None:
+        interactions = interactions.where("case_id", "==", case_id)
+    if start_date is not None:
+        if isinstance(start_date, str):
+            start_date = pd.to_datetime(start_date)
+        interactions = interactions.where("creation_date", ">=", start_date)
+
+    if end_date is not None:
+        if isinstance(end_date, str):
+            end_date = pd.to_datetime(end_date) + timedelta(
+                hours=23, minutes=59, seconds=59
+            )
+        interactions = interactions.where("creation_date", "<=", end_date)
+
+    if direction is not None:
+        interactions = interactions.where("direction", "==", direction)
+
+    interactions = interactions.stream()
+
+    return [messages.Interaction(**i.to_dict()) for i in interactions]
+
+
 def get_single_interaction(interaction_id) -> messages.Interaction:
     interaction = db.collection("interactions").document(interaction_id).get()
-    return messages.Interaction(**interaction.to_dict())
+    if interaction.exists:
+        return messages.Interaction(**interaction.to_dict())
+    else:
+        return None
 
 
 def get_messages_templates() -> t.List[messages.MessageTemplate]:
@@ -193,3 +197,41 @@ def save_message_status(message: t.Dict):
 def get_message_status(message_id):
     message = db.collection("messageStatus").get()
     return message.to_dict()
+
+
+def send_message(case_id, sms_message, phone, media_enabled=False):
+    # Send message
+    client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+
+    sms_message = sms_message.replace("\\n", "\n")
+
+    if media_enabled:
+        case = cases.get_single_case(case_id)
+        media_url = add_text_to_image(case.ticket_img, "ADVERTISEMENT")
+    else:
+        media_url = None
+
+    twilio_message = client.messages.create(
+        messaging_service_sid=settings.TWILIO_MESSAGE_SERVICE_SID,
+        body=sms_message,
+        media_url=media_url,
+        to=phone,
+    )
+    if twilio_message is None:
+        raise Exception("Message not sent")
+
+    interaction = messages.Interaction(
+        case_id=case_id,
+        message=sms_message,
+        type="sms",
+        status=twilio_message.status,
+        id=twilio_message.sid,
+        direction="outbound",
+        creation_date=twilio_message.date_sent,
+        phone=phone,
+    )
+
+    # Save interaction
+    insert_interaction(interaction)
+
+    return twilio_message.status
