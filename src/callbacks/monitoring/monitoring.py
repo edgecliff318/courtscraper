@@ -1,13 +1,15 @@
 import logging
 
-import dash.html as html
+import dash
 import dash_ag_grid as dag
 import dash_bootstrap_components as dbc
 import pandas as pd
 from dash import Input, Output, callback, html
 
+from src.commands import leads as leads_commands
+from src.components.toast import build_toast
 from src.core.config import get_settings
-from src.services import leads
+from src.services import messages as messages_service
 
 logger = logging.Logger(__name__)
 
@@ -16,25 +18,35 @@ settings = get_settings()
 
 @callback(
     Output("message-monitoring", "children"),
-    # Input("monitoring-button", "n_clicks"),
-    Input("court-selector", "value"),
-    Input("date-selector", "start_date"),
-    Input("date-selector", "end_date"),
+    Input("monitoring-date-selector", "start_date"),
+    Input("monitoring-date-selector", "end_date"),
     Input("monitoring-status-selector", "value"),
 )
-def render_status_msg(court_code_list, start_date, end_date, status):
+def render_status_msg(start_date, end_date, direction):
     # TODO: Read from DB from firebase and display in the grid
     # NOTE: This is a dummy data
     grid = "Empty"
-    status = None
-    leads_list = leads.get_leads(court_code_list, start_date, end_date, status)
-    df = pd.DataFrame([lead.dict() for lead in leads_list])
-    cols = ["case_id", "case_date", "first_name", "last_name", "phone"]
+    if direction == "all":
+        direction = None
+
+    interactions_list = messages_service.get_interactions_filtered(
+        start_date=start_date,
+        end_date=end_date,
+        direction=direction,
+    )
+    df = pd.DataFrame(
+        [interaction.dict() for interaction in interactions_list]
+    )
+    cols = [
+        "case_id",
+        "creation_date",
+        "phone",
+        "direction",
+        "status",
+        "id",
+        "message",
+    ]
     df = df[cols]
-    df["smg_status"] = "Pending"
-    df["sid"] = "mmfd33k4l3klkl32k4l324"
-    df["created_at"] = "2021-01-01"
-    df["retry_count"] = 0
 
     if df.empty:
         return [
@@ -51,25 +63,44 @@ def render_status_msg(court_code_list, start_date, end_date, status):
                 className="mb-2",
             )
         ]
-    df["case_date"] = df["case_date"].dt.strftime("%m/%d/%Y")
+
+    # Make the creation date tz naive
+    df["creation_date"] = pd.to_datetime(df["creation_date"], utc=True)
+
+    # Transform to local timezone of Central Time
+    df["creation_date"] = df["creation_date"].dt.tz_convert("US/Central")
+
+    df.sort_values(by=["creation_date"], inplace=True, ascending=False)
+    df["creation_date"] = df["creation_date"].dt.strftime(
+        "%m/%d/%Y - %H:%M:%S"
+    )
     df = df.set_index("case_id")
     df = df.rename(
         columns={
-            "first_name": "First Name",
-            "last_name": "Last Name",
+            "creation_date": "Sending At",
             "phone": "Phone",
-            "smg_status": "Status",
-            "sid": "SID",
-            "created_at": "Sending At",
-            "retry_count": "Retry Count",
-            "case_id": "Case ID",
-            "case_date": "Case Date",
+            "direction": "Direction",
+            "status": "Status",
+            "id": "SID",
+            "message": "Message",
         }
     )
     df.index.name = "Case ID"
     df.reset_index(inplace=True)
 
+    df["Case ID"] = df["Case ID"].map(lambda x: f"[{x}](/case/{x})")
+
     column_defs = [
+        {
+            "headerName": "Case ID",
+            "field": "Case ID",
+            "editable": False,
+            "filter": "agTextColumnFilter",
+            "sortable": True,
+            "resizable": True,
+            "flex": 1,
+            "cellRenderer": "markdown",
+        },
         {
             "headerName": "User Details",
             "children": [
@@ -82,7 +113,7 @@ def render_status_msg(court_code_list, start_date, end_date, status):
                     "resizable": True,
                     "flex": 1,
                 }
-                for col in ["Case ID", "First Name", "Last Name", "Phone"]
+                for col in ["Phone"]
             ],
         },
         {
@@ -97,7 +128,7 @@ def render_status_msg(court_code_list, start_date, end_date, status):
                     "resizable": True,
                     "flex": 1,
                 }
-                for col in ["Status", "Sending At", "Retry Count", "SID"]
+                for col in ["Direction", "Status", "SID", "Message"]
             ],
         },
     ]
@@ -151,3 +182,27 @@ def render_status_msg(court_code_list, start_date, end_date, status):
             className="mb-2",
         )
     ]
+
+
+@callback(
+    Output("monitoring-status", "children"),
+    Input("monitoring-refresh-button", "n_clicks"),
+    Input("monitoring-date-selector", "start_date"),
+    Input("monitoring-date-selector", "end_date"),
+)
+def refresh_messages(n_clicks, start_date, end_date):
+    ctx = dash.callback_context
+    button = ctx.triggered[0]["prop_id"].split(".")[0]
+    if button == "monitoring-refresh-button":
+        try:
+            leads_commands.sync_twilio()
+            return build_toast(
+                "Messages refreshed successfully",
+                "Messages refreshed",
+            )
+        except Exception as e:
+            logger.error(e)
+            return build_toast(
+                f"Messages refreshed failed with {e}",
+                "Messages refreshed",
+            )
