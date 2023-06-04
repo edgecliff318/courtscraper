@@ -30,6 +30,7 @@ class Interaction(BaseModel):
     message: Optional[str] = None
     type: Optional[str] = None
     phone: Optional[str] = None
+    direction: Optional[str] = None
     status: Optional[str] = None
 
     @validator("creation_date", pre=True)

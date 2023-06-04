@@ -183,10 +183,21 @@ def sync_twilio(from_date: str = None, to_date: str = None):
                 case_id=lead.case_id,
                 message=message.body,
                 type="sms",
-                status="inbound",
+                status=message.status,
                 id=message.sid,
                 creation_date=message.date_sent,
+                direction=message.direction,
+                phone=message._from,
             )
+
+            if (
+                messages_service.get_single_interaction(message.sid)
+                is not None
+            ):
+                console.log(f"Interaction {message.sid} already exists")
+                messages_service.update_interaction(interaction)
+                continue
+
             messages_service.insert_interaction(interaction)
 
             if message.body is not None and "yes" in message.body.lower():
@@ -196,7 +207,7 @@ def sync_twilio(from_date: str = None, to_date: str = None):
             else:
                 leads_service.update_lead_status(lead.case_id, "responded")
 
-        if "outbound" in str(message.direction).lower():
+        elif "outbound" in str(message.direction).lower():
             # Check the status of the message
             # If delivered, update the status of the interaction to delivered
             # If failed, update the status of the interaction to failed
