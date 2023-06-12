@@ -34,7 +34,9 @@ def generate_letter(case_id):
 
     writer_envelope.update_page_form_field_values(
         writer_envelope.pages[0],
-        {"address": case.formatted_party_address},
+        {
+            "address": f"{case.formatted_party_name}\n{case.formatted_party_address}"
+        },
     )
 
     if case.first_name is None:
