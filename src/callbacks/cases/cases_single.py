@@ -13,7 +13,7 @@ from src.components.toast import build_toast
 from src.core.config import get_settings
 from src.db import bucket
 from src.models import messages as messages_model
-from src.services import cases, leads, messages
+from src.services import cases, leads, letters, messages
 
 logger = logging.Logger(__name__)
 
@@ -440,3 +440,50 @@ def update_lead_details(btn, case_id, phone, status, notes):
             "Your modification was saved ✅", "Lead details updated"
         )
         return toast
+
+
+@callback(
+    Output("lead-single-letter-status", "children"),
+    Input("lead-generate-pdf-button", "n_clicks"),
+    State("case-id", "children"),
+)
+def generate_letter_pdf(btn, case_id):
+    ctx = dash.callback_context
+    trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
+    if trigger_id == "lead-generate-pdf-button":
+        try:
+            case_id = str(case_id)
+            envelope_url, letter_url = letters.generate_letter(case_id)
+
+            output = html.Div(
+                [
+                    html.H6(
+                        "The letter was generated : ", className="card-title"
+                    ),
+                    # Small button
+                    html.A(
+                        "Download Envelope",
+                        href=envelope_url,
+                        target="_blank",
+                        className="btn btn-primary m-1 btn-sm",
+                    ),
+                    html.A(
+                        "Download Letter",
+                        href=letter_url,
+                        target="_blank",
+                        className="btn btn-primary m-1 btn-sm",
+                    ),
+                    build_toast(
+                        "Letter generated ✅",
+                        "The letter was generated successfully",
+                    ),
+                ],
+            )
+            return output
+        except Exception:
+            toast = build_toast(
+                "An error occurred ❌",
+                "Letter could not be generated",
+                color="danger",
+            )
+            return toast

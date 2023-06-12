@@ -109,6 +109,9 @@ def layout(case_id):
     lead_admin_module = html.Div(
         [
             dbc.Row(
+                html.Div(id="lead-single-letter-status"),
+            ),
+            dbc.Row(
                 [
                     dbc.Col("Status", width=4),
                     dbc.Col(
@@ -183,8 +186,21 @@ def layout(case_id):
                             width=2,
                         ),
                         dbc.Col(
-                            [html.Div(id="lead-single-save-status")],
-                            width=4,
+                            [
+                                dbc.Button(
+                                    "Letter",
+                                    color="secondary",
+                                    className="mb-2 mr-1",
+                                    id="lead-generate-pdf-button",
+                                )
+                            ],
+                            width=2,
+                        ),
+                        dbc.Col(
+                            [
+                                html.Div(id="lead-single-save-status"),
+                            ],
+                            width=2,
                         ),
                     ]
                 ),
