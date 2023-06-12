@@ -93,6 +93,16 @@ def update_lead_status(case_id, status):
     db.collection("leads").document(case_id).update({"status": status})
 
 
+def update_multiple_leads_status(case_ids, status):
+    # Update multiple leads status in a single batch
+    batch = db.batch()
+    for case_id in case_ids:
+        ref = db.collection("leads").document(case_id)
+        batch.update(ref, {"status": status})
+
+    batch.commit()
+
+
 def update_lead(lead: leads.Lead):
     db.collection("leads").document(lead.case_id).update(lead.dict())
 

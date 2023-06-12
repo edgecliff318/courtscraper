@@ -40,5 +40,12 @@ def get_single_case(case_id) -> cases.Case:
     return cases.Case(**case.to_dict())
 
 
+def get_many_cases(case_ids: list) -> list:
+    cases_list = (
+        db.collection("cases").where("case_id", "in", case_ids).stream()
+    )
+    return [cases.Case(**m.to_dict()) for m in cases_list]
+
+
 def insert_case(case: cases.Case) -> None:
     db.collection("cases").document(case.case_id).set(case.dict())
