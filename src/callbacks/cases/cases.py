@@ -84,7 +84,7 @@ def send_many_message(*args, **kwargs):
                 logger.error(
                     f"An error occurred while sending the message. {e}"
                 )
-                return f"An error occurred while sending the message"
+                return f"An error occurred while sending the message {e}"
         return "Messages sent successfully"
 
     return ""

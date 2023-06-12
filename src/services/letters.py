@@ -48,7 +48,12 @@ def generate_letter(case_id):
     filename_letter = f"{case_id}_letter.pdf"
 
     filepath_envelope = settings.DATA_PATH.joinpath(filename_envelope)
+    # Ensure the directory exists
+    filepath_envelope.parent.mkdir(parents=True, exist_ok=True)
+
     filepath_letter = settings.DATA_PATH.joinpath(filename_letter)
+    # Ensure the directory exists
+    filepath_letter.parent.mkdir(parents=True, exist_ok=True)
 
     with open(filepath_envelope, "wb") as output_stream:
         writer_envelope.write(output_stream)
