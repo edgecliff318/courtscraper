@@ -195,7 +195,7 @@ def refresh_messages(n_clicks, start_date, end_date):
     button = ctx.triggered[0]["prop_id"].split(".")[0]
     if button == "monitoring-refresh-button":
         try:
-            leads_commands.sync_twilio()
+            leads_commands.sync_twilio(from_date=start_date, to_date=end_date)
             return build_toast(
                 "Messages refreshed successfully",
                 "Messages refreshed",
