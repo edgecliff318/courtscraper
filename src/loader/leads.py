@@ -66,6 +66,21 @@ class CaseNet:
             cases_ignore=cases_ignore,
         )
 
+    def refresh_case(self, case: dict):
+        scrapper = ScraperMOCourt(
+            url=self.url, username=self.username, password=self.password
+        )
+        case["case_number"] = case.get("case_id")
+        case_details = scrapper.get_case_info(case)
+        case_detail = scrapper.rename_keys(case_details)
+
+        case["charges_description"] = case_detail.get(
+            "charges", [{"charge_description": ""}]
+        )[0].get("charge_description", "")
+        case["case_date"] = case_detail.get("filing_date", "")
+        case.update(case_detail)
+        return case
+
 
 class LeadsLoader:
     def __init__(self, path: str):

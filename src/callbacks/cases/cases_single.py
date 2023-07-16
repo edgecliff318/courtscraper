@@ -12,8 +12,11 @@ from dash import Input, Output, State, callback
 from src.components.toast import build_toast
 from src.core.config import get_settings
 from src.db import bucket
+from src.loader.leads import CaseNet
+from src.models import cases as cases_model
 from src.models import messages as messages_model
 from src.services import cases, leads, letters, messages
+from src.services.settings import get_account
 
 logger = logging.Logger(__name__)
 
@@ -100,6 +103,7 @@ def get_interactions_data(
     Output("lead-single-been-verified-trigger", "children"),
     Output("lead-single-case-details", "data"),
     Output("lead-single-phone", "value"),
+    Output("lead-single-email", "value"),
     Output("lead-single-status", "value"),
     Output("lead-single-notes", "value"),
     Input("case-id", "children"),
@@ -123,6 +127,10 @@ def render_case_details(case_id):
                     className="mb-2",
                 )
             ],
+            None,
+            None,
+            None,
+            None,
             None,
             None,
         )
@@ -164,12 +172,14 @@ def render_case_details(case_id):
             phone = None
             status = None
             notes = None
+            email = None
             lead_details_dict = {}
         else:
             year_of_birth = lead_details.year_of_birth
             age = lead_details.age
             charges = lead_details.charges_description
             phone = lead_details.phone
+            email = lead_details.email
             status = lead_details.status
             notes = lead_details.notes
             lead_details_dict = lead_details.dict()
@@ -352,7 +362,8 @@ def render_case_details(case_id):
                         ),
                         class_name="mb-2",
                     ),
-                    width=6,
+                    lg=6,
+                    xs=12,
                 ),
                 dbc.Col(
                     dbc.Card(
@@ -364,7 +375,8 @@ def render_case_details(case_id):
                         ),
                         className="mb-2",
                     ),
-                    width=6,
+                    lg=6,
+                    xs=12,
                 ),
                 dbc.Col(
                     dbc.Card(
@@ -382,6 +394,7 @@ def render_case_details(case_id):
             "",
             lead_details_dict,
             phone,
+            email,
             status,
             notes,
         )
@@ -424,15 +437,17 @@ def render_case_interactions(case_id, status):
     Input("lead-single-save-button", "n_clicks"),
     State("case-id", "children"),
     State("lead-single-phone", "value"),
+    State("lead-single-email", "value"),
     State("lead-single-status", "value"),
     State("lead-single-notes", "value"),
 )
-def update_lead_details(btn, case_id, phone, status, notes):
+def update_lead_details(btn, case_id, phone, email, status, notes):
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
     if trigger_id == "lead-single-save-button":
         lead_details = {}
         lead_details["phone"] = phone
+        lead_details["email"] = email
         lead_details["status"] = status
         lead_details["notes"] = notes
         leads.patch_lead(case_id, **lead_details)
@@ -484,6 +499,43 @@ def generate_letter_pdf(btn, case_id):
             toast = build_toast(
                 "An error occurred ❌",
                 "Letter could not be generated",
+                color="danger",
+            )
+            return toast
+
+
+@callback(
+    Output("case-refresh-button-status", "children"),
+    Input("case-refresh-button", "n_clicks"),
+    State("case-id", "children"),
+)
+def refresh_case(btn, case_id):
+    ctx = dash.callback_context
+    trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
+    if trigger_id == "case-refresh-button":
+        try:
+            case_id = str(case_id)
+            case_details = cases.get_single_case(case_id)
+            case_net_account = get_account("case_net_missouri")
+            case_net = CaseNet(
+                url=case_net_account.url,
+                username=case_net_account.username,
+                password=case_net_account.password,
+            )
+            case_refreshed = case_net.refresh_case(case_details.dict())
+
+            case_refreshed_obj = cases_model.Case.parse_obj(case_refreshed)
+
+            cases.update_case(case_refreshed_obj)
+
+            toast = build_toast(
+                "The case was refreshed successfully" "Case refreshed ✅",
+            )
+            return toast
+        except Exception as e:
+            toast = build_toast(
+                f"The case could not be refreshed {e}",
+                "An error occurred ❌",
                 color="danger",
             )
             return toast

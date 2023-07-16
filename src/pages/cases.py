@@ -192,6 +192,12 @@ def layout(case_id):
                             ],
                             width=2,
                         ),
+                        dbc.Col(
+                            [
+                                html.Div(id="case-refresh-button-status"),
+                            ],
+                            width=2,
+                        ),
                     ]
                 ),
                 html.Div(lead_admin_module),

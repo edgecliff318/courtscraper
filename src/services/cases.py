@@ -49,3 +49,7 @@ def get_many_cases(case_ids: list) -> list:
 
 def insert_case(case: cases.Case) -> None:
     db.collection("cases").document(case.case_id).set(case.dict())
+
+
+def update_case(case: cases.Case) -> None:
+    db.collection("cases").document(case.case_id).update(case.dict())
