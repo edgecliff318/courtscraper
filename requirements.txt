@@ -2,12 +2,12 @@
 dash>=2.5.0
 dash[diskcache]
 dash-bootstrap-components>=1.1.0
-dash-ag-grid==2.0.0rc2
+dash-ag-grid==2.2.0
 gunicorn>=20.1.0
 werkzeug>=2.1.2
 PyJWT>=2.3.0
 authlib>=1.0
-pydantic[dotenv]>=1.10.4
+pydantic[dotenv]<2.0
 requests>=2.26.0
 flask_cors>=3.0.10
 # Runner
