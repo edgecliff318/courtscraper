@@ -60,8 +60,23 @@ def layout(case_id):
                                 id="lead-single-phone",
                                 placeholder="Set the phone number",
                                 type="Input",
-                                persistence_type="session",
-                                persistence=True,
+                            )
+                        ],
+                        width=8,
+                    ),
+                ],
+                className="mb-1",
+            ),
+            dbc.Row(
+                [
+                    dbc.Col("Email", width=4),
+                    dbc.Col(
+                        [
+                            generate_form_group(
+                                label="Email",
+                                id="lead-single-email",
+                                placeholder="Set the email",
+                                type="Input",
                             )
                         ],
                         width=8,
@@ -165,40 +180,15 @@ def layout(case_id):
                         ),
                         dbc.Col(
                             [
-                                dbc.Button(
-                                    "Save",
-                                    color="primary",
-                                    className="mb-2 mr-1",
-                                    id="lead-single-save-button",
-                                )
-                            ],
-                            width=2,
-                        ),
-                        dbc.Col(
-                            [
-                                dbc.Button(
-                                    "Refresh",
-                                    color="primary",
-                                    className="mb-2 mr-1",
-                                    id="lead-single-delete-button",
-                                )
-                            ],
-                            width=2,
-                        ),
-                        dbc.Col(
-                            [
-                                dbc.Button(
-                                    "Letter",
-                                    color="secondary",
-                                    className="mb-2 mr-1",
-                                    id="lead-generate-pdf-button",
-                                )
-                            ],
-                            width=2,
-                        ),
-                        dbc.Col(
-                            [
                                 html.Div(id="lead-single-save-status"),
+                            ],
+                            width=2,
+                        ),
+                        dbc.Col(
+                            [
+                                html.Div(
+                                    id="case-upload-to-mycase-button-status"
+                                ),
                             ],
                             width=2,
                         ),
@@ -209,29 +199,51 @@ def layout(case_id):
         ),
     )
 
+    # Top menu actions
+    case_actions = [
+        dbc.Button(
+            "Upload to MyCase",
+            color="primary",
+            className="m-1 p-2",
+            id="case-upload-to-mycase-button",
+        ),
+        dbc.Button(
+            "Letter",
+            color="dark",
+            className="p-2 m-1",
+            id="lead-generate-pdf-button",
+        ),
+        dbc.Button(
+            "Refresh",
+            color="primary",
+            className="m-1 p-2",
+            id="case-refresh-button",
+        ),
+        dbc.Button(
+            "Save",
+            color="primary",
+            className="m-1 p-2",
+            id="lead-single-save-button",
+        ),
+    ]
+
     return [
         dbc.Row(
             [
-                dbc.Col(
-                    dbc.Card(
-                        dbc.CardBody(
-                            html.H3(
-                                [
-                                    html.Div(
-                                        "Case Details: ", className="mr-1"
-                                    ),
-                                    html.Div(
-                                        case_id,
-                                        className="d-none",
-                                        id="case-id",
-                                    ),
-                                ]
-                            )
-                        )
-                    ),
-                    width=12,
-                    class_name="mb-2",
+                html.Div(
+                    case_id,
+                    className="d-none",
+                    id="case-id",
                 ),
+                dbc.Col(
+                    case_actions,
+                    width=12,
+                    class_name="mb-2 d-flex justify-content-end",
+                ),
+            ],
+        ),
+        dbc.Row(
+            [
                 dbc.Col(
                     dbc.Card(
                         dbc.CardBody(
@@ -263,10 +275,11 @@ def layout(case_id):
                         ),
                     ),
                     class_name="mb-2",
-                    width=6,
+                    lg=6,
+                    xs=12,
                 ),
-                dbc.Col(lead_admin_card, width=6, class_name="mb-2"),
-                dbc.Col(id="lead-single-been-verified", width=6),
+                dbc.Col(lead_admin_card, lg=6, xs=12, class_name="mb-2"),
+                dbc.Col(id="lead-single-been-verified", lg=6, xs=12),
                 dbc.Col(id="lead-single-interactions", width=12),
             ]
         ),

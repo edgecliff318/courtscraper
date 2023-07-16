@@ -1,4 +1,5 @@
 from . import cases  # noqa F401
+from . import cases_mycase  # noqa F401
 from . import cases_single  # noqa F401
 from . import download  # noqa F401
 from . import layout_cases  # noqa F401
