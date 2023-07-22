@@ -252,6 +252,11 @@ class ScraperMOCourt(ScraperBase):
             console.print(f"Retrieval of case parties failed {case_number}")
         self.sleep()
 
+        if not case_detail:
+            logger.error(f"No case details found for {case_number}")
+            console.print(f"No case details found for {case_number}")
+            raise Exception("No case details found")
+
         # Retrieve the defendant
         case_detail.update(self.get_defendant(case_detail))
 
@@ -490,6 +495,27 @@ class ScraperMOCourt(ScraperBase):
 
         results = [parse_case_wrapper(case) for case in cases_to_scrape]
         return [r for r in results if r is not None]
+
+    def parse_single_case(self, case, case_type, court, date):
+        with console.status(
+            f"[bold green]Scraping case {case.get('caseNumber')} ..."
+        ) as status:
+            try:
+                output = self.parse_case(case, case_type, court, date)
+                status.update(
+                    f"[bold green]Scraped case {case.get('caseNumber')} "
+                    f"..."
+                )
+                return output
+            except Exception as e:
+                # Console log with traceback for debugging
+                console.log(
+                    f"[bold red]Failed to scrape case "
+                    f"{case.get('caseNumber')} - error {e}"
+                )
+                console.log(traceback.format_exc())
+
+                raise e
 
 
 if __name__ == "__main__":

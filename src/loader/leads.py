@@ -81,6 +81,14 @@ class CaseNet:
         case.update(case_detail)
         return case
 
+    def get_single_case(self, case, court, date, case_type="Infraction"):
+        scrapper = ScraperMOCourt(
+            url=self.url, username=self.username, password=self.password
+        )
+        return scrapper.parse_single_case(
+            case=case, case_type=case_type, court=court, date=date
+        )
+
 
 class LeadsLoader:
     def __init__(self, path: str):

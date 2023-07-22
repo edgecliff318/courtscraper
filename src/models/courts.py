@@ -5,6 +5,7 @@ from pydantic import BaseModel, validator
 
 
 class Court(BaseModel):
+    id: Optional[str] = None
     code: str
     type: Optional[str] = None
     availability: Optional[str] = None
