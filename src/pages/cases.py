@@ -285,7 +285,7 @@ def layout(case_id):
                     xs=12,
                 ),
                 dbc.Col(lead_admin_card, lg=6, xs=12, class_name="mb-2"),
-                dbc.Col(id="lead-single-been-verified", lg=6, xs=12),
+                dbc.Col(id="lead-single-been-verified", lg=12, xs=12),
                 dbc.Col(id="lead-single-interactions", width=12),
             ]
         ),

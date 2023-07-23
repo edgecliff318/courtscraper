@@ -61,6 +61,23 @@ def render_leads(court_code_list, start_date, end_date, status):
         ]
     ].set_index("case_id")
 
+    def transform_phones(phones):
+        if isinstance(phones, dict):
+            return ", ".join([v.get("phone") for k, v in phones.items()])
+        else:
+            return phones
+
+    def transform_emails(emails):
+        if isinstance(emails, dict):
+            return ", ".join(
+                [v.get("address") for k, v in emails.items() if k == "0"]
+            )
+        else:
+            return emails
+
+    df["phone"] = df["phone"].map(transform_phones)
+    df["email"] = df["email"].map(transform_emails)
+
     df["case_index"] = df.index
 
     df = df.rename(

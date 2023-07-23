@@ -37,9 +37,9 @@ class Lead(BaseModel):
     court_code: Optional[str] = None
     age: Optional[int] = None
     year_of_birth: Optional[int] = None
-    email: Optional[str] = None
-    phone: Optional[str] = None
-    address: Optional[str] = None
+    email: Optional[str | dict] = None
+    phone: Optional[str | dict] = None
+    address: Optional[str | dict] = None
     city: Optional[str] = None
     state: Optional[str] = None
     zip_code: Optional[str] = None
@@ -53,6 +53,9 @@ class Lead(BaseModel):
     disposed: Optional[bool] = False
     carrier: Optional[str] = None
     notes: Optional[str] = None
+    # Json Report from BeenVerified
+    report: Optional[dict] = None
+    details: Optional[str] = None
 
     @validator("last_updated", pre=True, always=True)
     def set_last_updated_date_now(cls, v):

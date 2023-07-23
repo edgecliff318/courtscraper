@@ -101,6 +101,7 @@ def get_interactions_data(
 @callback(
     Output("lead-single", "children"),
     Output("lead-single-been-verified-trigger", "children"),
+    Output("lead-single-been-verified", "children"),
     Output("lead-single-case-details", "data"),
     Output("lead-single-phone", "value"),
     Output("lead-single-email", "value"),
@@ -127,6 +128,7 @@ def render_case_details(case_id):
                     className="mb-2",
                 )
             ],
+            None,
             None,
             None,
             None,
@@ -165,6 +167,9 @@ def render_case_details(case_id):
         case_details = cases.get_single_case(case_id)
         lead_details = leads.get_single_lead(case_id)
 
+        # Been Verified data
+        beenverified = {}
+
         if lead_details is None:
             year_of_birth = None
             age = None
@@ -179,7 +184,24 @@ def render_case_details(case_id):
             age = lead_details.age
             charges = lead_details.charges_description
             phone = lead_details.phone
+            if isinstance(phone, dict):
+                if len(phone) > 0:
+                    beenverified["phones"] = [
+                        p.get("phone") for p in phone.values()
+                    ]
+                    phone = phone.get("0", {}).get("phone")
+                else:
+                    phone = None
+            else:
+                beenverified["phones"] = [
+                    phone,
+                ]
             email = lead_details.email
+            if isinstance(email, dict):
+                if len(email) > 0:
+                    email = email.get("0", {}).get("address")
+                else:
+                    email = None
             status = lead_details.status
             notes = lead_details.notes
             lead_details_dict = lead_details.dict()
@@ -392,6 +414,24 @@ def render_case_details(case_id):
                 ),
             ],
             "",
+            dbc.Col(
+                dbc.Card(
+                    dbc.CardBody(
+                        [
+                            html.H3(
+                                "BeenVerified Details", className="card-title"
+                            ),
+                            html.H6("Details:"),
+                            html.P(beenverified.get("details")),
+                            html.H6("Phones:"),
+                            html.P(", ".join(beenverified.get("phones", []))),
+                        ]
+                    ),
+                    class_name="mb-2",
+                ),
+                lg=12,
+                xs=12,
+            ),
             lead_details_dict,
             phone,
             email,

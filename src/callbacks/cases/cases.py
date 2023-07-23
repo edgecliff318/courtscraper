@@ -68,19 +68,22 @@ def send_many_message(*args, **kwargs):
             case["last_name"] = case["last_name"].capitalize()
 
             case_id = case["case_index"]
-            phone = case["phone"]
             try:
                 # TODO: add a check validation of template sending SMS with the case data by Twilio
                 sms_message = template_msg.format(**case)
-                message_status = messages.send_message(
-                    case_id,
-                    sms_message,
-                    phone,
-                    media_enabled=include_case_copy,
-                )
+                for phone in case["phone"].split(", "):
+                    message_status = messages.send_message(
+                        case_id,
+                        sms_message,
+                        phone,
+                        media_enabled=include_case_copy,
+                    )
 
-                if message_status == "queued" or message_status == "accepted":
-                    leads.update_lead_status(case_id, "contacted")
+                    if (
+                        message_status == "queued"
+                        or message_status == "accepted"
+                    ):
+                        leads.update_lead_status(case_id, "contacted")
 
             except Exception as e:
                 logger.error(
