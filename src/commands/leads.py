@@ -1,4 +1,5 @@
 import datetime
+import json
 import logging
 import random
 import time
@@ -12,6 +13,7 @@ from src.core.config import get_settings
 from src.models import leads as leads_model
 from src.models import messages as messages_model
 from src.scrapers.beenverified import BeenVerifiedScrapper
+from src.services import cases as cases_service
 from src.services import leads as leads_service
 from src.services import messages as messages_service
 
@@ -59,12 +61,14 @@ def retrieve_leads():
             continue
 
         leads_service.update_lead_status(lead.case_id, "processing")
+        case = cases_service.get_single_case(lead.case_id)
 
         try:
             lead_data = lead.dict()
             first_name = lead.first_name
             last_name = lead.last_name
-            middle_name = None
+            middle_name = case.middle_name
+            city = case.address_city
             if last_name is not None and len(last_name.split(" ")) > 1:
                 middle_name = last_name.split(" ")[0]
                 last_name = last_name.split(" ")[1]
@@ -73,6 +77,7 @@ def retrieve_leads():
                 last_name=last_name,
                 middle_name=middle_name,
                 year=lead.year_of_birth,
+                city=city,
             )
             data = scrapper.retrieve_information(link)
             if data is None:
@@ -96,32 +101,60 @@ def retrieve_leads():
 
             lead_data["phone"] = data.get("phone")
             lead_data["details"] = data.get("details")
-            lead_data["email"] = data.get("email")
+            lead_data["email"] = json.loads(json.dumps(data.get("email")))
+            lead_data["address"] = json.loads(json.dumps(data.get("address")))
             lead_data["status"] = "not_contacted"
+            lead_data["report"] = json.loads(json.dumps(data.get("report")))
 
-            if (
-                lead_data["phone"] is not None
-                and "no phone" in lead_data["phone"].lower()
-            ):
+            if lead_data["phone"] is None or len(lead_data["phone"]) == 0:
+                phone_transformed = {}
                 lead_data["status"] = "not_found"
             else:
-                phone = client.lookups.phone_numbers(lead_data["phone"]).fetch(
-                    type="carrier"
-                )
-                if phone is None:
-                    console.log(
-                        f"Phone {lead_data['phone']} not found in Twilio"
-                    )
-                    lead_data["status"] = "not_valid"
-                if phone.carrier is not None:
-                    lead_data["carrier"] = phone.carrier["type"]
-                    if (
-                        phone.carrier["type"] == "landline"
-                        or phone.carrier["type"] == "voip"
-                    ):
-                        lead_data["status"] = "not_valid"
-                    else:
-                        lead_data["phone"] = phone.phone_number
+                phone_transformed = {}
+                for lead_phone_id, lead_phone in lead_data["phone"].items():
+                    if lead_phone.get("meta", {}).get("confidence", 0) < 70:
+                        continue
+                    phone = client.lookups.phone_numbers(
+                        lead_phone.get("number")
+                    ).fetch(type="carrier")
+                    phone_transformed[lead_phone_id] = lead_phone
+                    phone_transformed[lead_phone_id][
+                        "phone"
+                    ] = phone.phone_number
+                    if phone is None:
+                        console.log(
+                            f"Phone {lead_phone.get('number')} not found in Twilio"
+                        )
+                        phone_transformed[lead_phone_id][
+                            "status"
+                        ] = "not_valid"
+                    if phone.carrier is not None:
+                        phone_transformed[lead_phone_id][
+                            "carrier"
+                        ] = phone.carrier["type"]
+                        if (
+                            phone.carrier["type"] == "landline"
+                            or phone.carrier["type"] == "voip"
+                        ):
+                            phone_transformed[lead_phone_id][
+                                "status"
+                            ] = "not_valid"
+                        else:
+                            phone_transformed[lead_phone_id][
+                                "phone"
+                            ] = phone.phone_number
+                            phone_transformed[lead_phone_id][
+                                "status"
+                            ] = "valid"
+
+            # Check if all phone has not_valid status set the lead status to not_valid
+            if all(
+                phone.get("status") == "not_valid"
+                for phone in phone_transformed.values()
+            ):
+                lead_data["status"] = "not_valid"
+
+            lead_data["phone"] = json.loads(json.dumps(phone_transformed))
 
             leads_service.insert_lead(leads_model.Lead(**lead_data))
             console.log(f"Lead {lead.case_id} retrieved")

@@ -1,5 +1,6 @@
 import logging
 import os
+import urllib.parse
 from datetime import datetime
 from time import sleep
 
@@ -134,7 +135,7 @@ class BeenVerifiedScrapper:
             results_count = "Error"
 
         if "no exact match" in results_count.lower():
-            output["exact_match"] = False
+            output["exact_match"] = False  # TODO: return output
 
         # Go through the results:
         try:
@@ -181,21 +182,38 @@ class BeenVerifiedScrapper:
         )
         # 12 | click | css=.report_section__label_title |
 
-        try:
-            informations = [
-                i.text
-                for i in self.driver.find_elements(
-                    By.CSS_SELECTOR,
-                    ".report-overview__section-summary-content",
-                )
-            ]
-            output["address"] = informations[0]
-            output["phone"] = informations[1]
-            output["email"] = informations[2]
+        # Parse the url to get the permalink
+        parsed_url = urllib.parse.urlparse(self.driver.current_url)
 
-        except selenium.common.exceptions.NoSuchElementException:
-            logger.error(f"No informations found for {link}")
-            return None
+        # Get the permalink from the params of the url
+        permalink = urllib.parse.parse_qs(parsed_url.query)["permalink"][0]
+
+        # Get the report in Json format from the API endpoint
+        # e.g https://www.beenverified.com/api/v5/reports/40d4f669eb79ad6d46d79eca80c5699bcee9a34e7f5d4e3edddbc2
+        api_url = f"https://www.beenverified.com/api/v5/reports/{permalink}"
+
+        # Get the report using Selenium and parse it to Json
+        report = self.driver.execute_script(
+            f"return fetch('{api_url}').then(response => response.json());"
+        )
+
+        output["report"] = report
+
+        people = report.get("entities").get("people")
+
+        if people:
+            contact_details = people[0].get("contact", {})
+            mapping = {
+                "addresses": "address",
+                "emails": "email",
+                "phones": "phone",
+            }
+            for e in ("addresses", "emails", "phones"):
+                value = contact_details.get(e)
+                if value:
+                    # Transform the value list to a dict
+                    value = {i: v for i, v in enumerate(value)}
+                    output[mapping[e]] = value
 
         try:
             summary = self.driver.find_element(
@@ -215,6 +233,7 @@ class BeenVerifiedScrapper:
         middle_name=None,
         year=None,
         state="MO",
+        city=None,
     ):
         state = "MO"
         url = f"https://www.beenverified.com/app/search/person?"
@@ -226,6 +245,8 @@ class BeenVerifiedScrapper:
             url += f"mn={middle_name}&"
         if state is not None:
             url += f"state={state}&"
+        if city is not None:
+            url += f"city={city}&"
         if year is not None:
             try:
                 age = datetime.now().year - year
