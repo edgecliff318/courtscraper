@@ -75,11 +75,52 @@ def get_last_lead(
 
     leads_list = (
         leads_list.order_by("case_date", direction="DESCENDING")
-        .limit(1)
+        .limit(1000)
         .stream()
     )
     leads_list = [leads.Lead(**m.to_dict()) for m in leads_list]
+
     if leads_list:
+        alcohol_related = [
+            x for x in leads_list if "alcohol" in x.charges_description.lower()
+        ]
+        if alcohol_related:
+            return alcohol_related[0]
+
+        insurance_revoked = [
+            x
+            for x in leads_list
+            if x.charges_description is not None
+            and (
+                "insurance" in x.charges_description.lower()
+                or "license" in x.charges_description.lower()
+            )
+        ]
+        if insurance_revoked:
+            return insurance_revoked[0]
+
+        careless_imprudent = [
+            x
+            for x in leads_list
+            if x.charges_description is not None
+            and (
+                "careless" in x.charges_description.lower()
+                or "imprudent" in x.charges_description.lower()
+            )
+        ]
+        if careless_imprudent:
+            return careless_imprudent[0]
+
+        high_speeding = [
+            x
+            for x in leads_list
+            if x.charges_description is not None
+            and "20-25 mph over" in x.charges_description.lower()
+        ]
+
+        if high_speeding:
+            return high_speeding[0]
+
         return leads_list[0]
     else:
         return None

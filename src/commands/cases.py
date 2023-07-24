@@ -47,6 +47,8 @@ def retrieve_cases():
         date = str((datetime.datetime.now(tz) + Day(day)).date())
         console.log(f"Processing date {date}")
         for court in courts:
+            if court.code == "MEYER" or court.code == "TONI":
+                continue
             cases_retrieved = []
             while True:
                 console.log(f"Processing {court.name} ({court.code})")
