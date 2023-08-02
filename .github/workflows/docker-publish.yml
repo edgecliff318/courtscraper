@@ -87,5 +87,5 @@ jobs:
           key: ${{ secrets.KEY }}
           port: ${{ secrets.PORT }}
           script: |
-            cd  /home/ubuntu/devops
+            cd  /home/azureuser/devops
             make app
