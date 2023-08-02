@@ -76,6 +76,7 @@ class Case(BaseModel):
     plea_andpayind: Optional[str]
     ticket: Optional[Dict]
     ticket_img: Optional[str]
+    status: Optional[str]
 
     # Ignore parsing errors for now
     @validator("charges", pre=True, always=True)

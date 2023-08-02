@@ -1,3 +1,6 @@
+from google.cloud.firestore_v1.base_query import FieldFilter, Or
+from pydantic import ValidationError
+
 from src.db import db
 from src.models import cases
 
@@ -53,3 +56,26 @@ def insert_case(case: cases.Case) -> None:
 
 def update_case(case: cases.Case) -> None:
     db.collection("cases").document(case.case_id).update(case.dict())
+
+
+def search_cases(search_term: str) -> list:
+    filter_first_name = FieldFilter(
+        "first_name", "==", str(search_term).upper()
+    )
+    filter_last_name = FieldFilter("last_name", "==", str(search_term).upper())
+    filter_case_id = FieldFilter("case_id", "==", search_term)
+
+    or_filter = Or(
+        filters=[filter_first_name, filter_last_name, filter_case_id]
+    )
+
+    cases_list = db.collection("cases").where(filter=or_filter).stream()
+
+    def ignore_error(c):
+        try:
+            return cases.Case(**c.to_dict())
+        except ValidationError:
+            return None
+
+    outputs = [cases.Case(**m.to_dict()) for m in cases_list]
+    return [o for o in outputs if o is not None]
