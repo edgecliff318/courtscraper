@@ -35,3 +35,15 @@ def case_select_data(value):
         }
         for c in search_cases
     ], ""
+
+
+# When selecting value from case select, update the case id in the URL
+@callback(
+    Output("url", "pathname", allow_duplicate=True),
+    Input("case-select", "value"),
+    prevent_initial_call=True,
+)
+def goto_case(case_id):
+    if case_id is None:
+        return dash.no_update
+    return f"/manage/{case_id}"

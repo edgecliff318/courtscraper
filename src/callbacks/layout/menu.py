@@ -66,7 +66,6 @@ def generate_menu(navbar):
                         className="g-0",
                     ),
                     href="https://app.fubloo.com",
-                    
                     style={"textDecoration": "none"},
                 ),
                 dbc.NavbarToggler(id="navbar-toggler", n_clicks=0),
@@ -114,9 +113,10 @@ def toggle_navbar_collapse(n, is_open):
 
 
 @callback(
-    Output("url", "pathname"),
+    Output("url", "pathname", allow_duplicate=True),
     [Input("logout-button", "n_clicks")],
     [State("url", "pathname")],
+    prevent_initial_call=True,
 )
 def logout(n_clicks, href):
     if n_clicks:
