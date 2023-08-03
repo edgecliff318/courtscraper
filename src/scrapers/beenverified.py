@@ -21,6 +21,10 @@ logger = logging.Logger(__name__)
 console = Console()
 
 
+class CaptchaException(Exception):
+    pass
+
+
 class BeenVerifiedScrapper:
     def __init__(self, cache=False):
         self.options = Options()
@@ -165,6 +169,7 @@ class BeenVerifiedScrapper:
                 )
             )
             logger.error("Blocked by captcha")
+            raise CaptchaException("Blocked by captcha")
         except selenium.common.exceptions.TimeoutException:
             pass
 

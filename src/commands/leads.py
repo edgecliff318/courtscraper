@@ -12,7 +12,7 @@ from twilio.rest import Client
 from src.core.config import get_settings
 from src.models import leads as leads_model
 from src.models import messages as messages_model
-from src.scrapers.beenverified import BeenVerifiedScrapper
+from src.scrapers.beenverified import BeenVerifiedScrapper, CaptchaException
 from src.services import cases as cases_service
 from src.services import leads as leads_service
 from src.services import messages as messages_service
@@ -79,12 +79,15 @@ def retrieve_leads():
                 year=lead.year_of_birth,
                 city=city,
             )
-            data = scrapper.retrieve_information(link)
+            try:
+                data = scrapper.retrieve_information(link)
+            except CaptchaException:
+                continue
             if data is None:
                 console.log(
                     f"Error processing lead {lead.case_id} on BeenVerified"
                 )
-                waiting_time = random.randint(30, 300)
+                waiting_time = random.randint(30, 60)
                 console.log(f"Waiting {waiting_time} seconds before next lead")
                 lead_data["status"] = "processing_error"
                 leads_service.insert_lead(leads_model.Lead(**lead_data))
@@ -92,7 +95,7 @@ def retrieve_leads():
                 continue
             if data.get("exact_match") is False:
                 console.log(f"Lead {lead.case_id} not found in BeenVerified")
-                waiting_time = random.randint(30, 150)
+                waiting_time = random.randint(30, 60)
                 console.log(f"Waiting {waiting_time} seconds before next lead")
                 lead_data["status"] = "not_found"
                 leads_service.insert_lead(leads_model.Lead(**lead_data))
@@ -159,7 +162,7 @@ def retrieve_leads():
             leads_service.insert_lead(leads_model.Lead(**lead_data))
             console.log(f"Lead {lead.case_id} retrieved")
             # Wait a random time between 30 seconds and 5 minutes
-            waiting_time = random.randint(30, 300)
+            waiting_time = random.randint(30, 60)
             console.log(f"Waiting {waiting_time} seconds before next lead")
             time.sleep(waiting_time)
             error_count = 0
