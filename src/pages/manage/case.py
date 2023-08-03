@@ -8,6 +8,7 @@ from dash_iconify import DashIconify
 
 from src.components.inputs import generate_form_group
 from src.models.cases import Case
+from src.services import cases
 
 logger = logging.Logger(__name__)
 
@@ -309,138 +310,318 @@ def get_case_timeline(case: Case):
     return timeline
 
 
+case_statuses = {
+    "filed": {
+        "value": "filed",
+        "label": "Case Filed on casenet",
+        "color": "gray",
+    },
+    "paid": {
+        "value": "paid",
+        "label": "Client Paid",
+        "color": "green",
+    },
+    "eoa": {
+        "value": "eoa",
+        "label": "Entry of Appearance",
+        "color": "indigo",
+    },
+    "rev_int": {
+        "value": "rev_int",
+        "label": "Internal Review",
+        "color": "yellow",
+    },
+    "def_dev": {
+        "value": "def_dev",
+        "label": "Review with the client",
+        "color": "yellow",
+    },
+    "rec_rfr": {
+        "value": "rec_rfr",
+        "label": "RFR Filing",
+        "color": "orange",
+    },
+    "rec_rec": {
+        "value": "rec_rec",
+        "label": "Recommendation Received",
+        "color": "lime",
+    },
+    "rec_rej": {
+        "value": "rec_rej",
+        "label": "Recommendation Rejected",
+        "color": "red",
+    },
+    "rec_del": {
+        "value": "rec_del",
+        "label": "Recommendation Delayed",
+        "color": "pink",
+    },
+    "rec_rev": {
+        "value": "rec_rev",
+        "label": "Recommendation Review",
+        "color": "yellow",
+    },
+    "rec_prop": {
+        "value": "rec_prop",
+        "label": "Recommendation Proposed to Client",
+        "color": "green",
+    },
+    "rec_sig": {
+        "value": "rec_sig",
+        "label": "Recommendation pending signature",
+        "color": "orange",
+    },
+    "rec_sub": {
+        "value": "rec_sub",
+        "label": "Recommendation to submit to court",
+        "color": "orange",
+    },
+    "rec_sub_rev": {
+        "value": "rec_sub_rev",
+        "label": "Recommendation Submission under Review by the Court",
+        "color": "orange",
+    },
+    "app": {
+        "value": "app",
+        "label": "Court Appearance Required",
+        "color": "red",
+    },
+    "close": {
+        "value": "close",
+        "label": "Close Case on Portal",
+        "color": "lime",
+    },
+}
+
+
+def get_case_status_color(status: str | None):
+    if status is None:
+        return "gray"
+    return case_statuses[status]["color"]
+
+
+def create_group_item(label: str, value: str | None, icon: str):
+    return dmc.Group(
+        [
+            dmc.Group(
+                [
+                    DashIconify(icon=icon),
+                    dmc.Text(
+                        label,
+                        weight=500,
+                    ),
+                ],
+                spacing="sm",
+            ),
+            dmc.Text(
+                value if value is not None else "N/A",
+                size="sm",
+                color="dimmed",
+            ),
+        ],
+        position="apart",
+    )
+
+
+"""
+{
+  id:string
+  case_desc: string
+  case_id: string
+  case_type: string
+  charges: Charge[]
+  court_desc: string
+  criminal_case: boolean
+  disposed: boolean
+  dockets: Docket[]
+  parties: Party[]
+  filing_date: Timestamp
+  first_name: string
+  last_name: string
+  formatted_telephone: string
+  judge: Judge
+  plea_andpayind: string
+  status: string
+  fine: string
+  paid: boolean
+}
+"""
+
+
 def get_case_details(case: Case):
+    charges = []
+    if case.charges is not None:
+        charges = [
+            dmc.Text(
+                charge.get("charge_description", ""),
+                size="sm",
+            )
+            for charge in case.charges
+        ]
+
     return dmc.Paper(
         [
             dmc.Group(
                 [
-                    dmc.Text("Case#2222", weight=500),
-                    dmc.Badge("Paid", color="red", variant="light"),
+                    dmc.Text(f"Case#{case.case_id}", weight=500),
+                    dmc.Badge(
+                        case.status.capitalize()
+                        if case.status is not None
+                        else "Filed",
+                        color=get_case_status_color(case.status),
+                        variant="light",
+                    ),
                 ],
                 position="apart",
                 mt="md",
                 mb="xs",
             ),
+            dmc.Divider(variant="solid", className="mt-2"),
+            dmc.Title("→ Case Details", order=5, className="mt-1"),
+            create_group_item(
+                label="Filing Date",
+                value=f"{case.filing_date:%B %d, %Y}",
+                icon="radix-icons:calendar",
+            ),
+            # Court Description
+            create_group_item(
+                label="Court",
+                value=case.court_desc,
+                icon="mdi:gavel",
+            ),
+            create_group_item(
+                label="Fine",
+                value=f"$ {case.fine.get('total_amount', 'N/A') if case.fine is not None else 'N/A'}",
+                icon="mdi:cash",
+            ),
+            dmc.Divider(variant="solid", className="mt-2"),
+            dmc.Title("→ Charges", order=5, className="mt-1"),
+            html.Div(charges),
+            dmc.Divider(variant="solid", className="mt-2"),
+            dmc.Title("Defendant", order=5, className="mt-1"),
+            create_group_item(
+                label="Name",
+                value=case.formatted_party_name,
+                icon="material-symbols:supervised-user-circle-outline",
+            ),
+            create_group_item(
+                label="Date of Birth",
+                value=f"{case.birth_date}",
+                icon="ps:birthday",
+            ),
+            create_group_item(
+                label="Address",
+                value="",
+                icon="material-symbols:location-on-outline",
+                # Left align
+            ),
             dmc.Text(
-                "High speed",
+                case.formatted_party_address,
                 size="sm",
                 color="dimmed",
+                # Right align
+                style={"text-align": "right"},
             ),
+            create_group_item(
+                label="Phone",
+                value=case.formatted_telephone,
+                icon="material-symbols:phone-android-outline",
+            ),
+            dmc.Divider(variant="solid", className="mt-2"),
+            dmc.Title("→ Judge", order=5, className="mt-1"),
+            create_group_item(
+                label="Name",
+                value=case.judge.get("formatted_name", "")
+                if case.judge is not None
+                else "",
+                icon="fluent-emoji-high-contrast:man-judge",
+            ),
+            dmc.Divider(variant="solid", className="mt-2"),
+            dmc.Title("→ Parties", order=5, className="mt-1"),
+            html.Div(
+                [
+                    html.Div(
+                        [
+                            dmc.Title(party.get("desc", ""), order=6),
+                            create_group_item(
+                                label="Name",
+                                value=party.get("formatted_partyname", ""),
+                                icon="material-symbols:supervised-user-circle-outline",
+                            ),
+                            create_group_item(
+                                label="Phone",
+                                value=party.get("formatted_telephone", ""),
+                                icon="material-symbols:phone-android-outline",
+                            ),
+                            create_group_item(
+                                label="Address",
+                                value="",
+                                icon="material-symbols:location-on-outline",
+                            ),
+                            dmc.Text(
+                                party.get("formatted_partyaddress", ""),
+                                size="sm",
+                                color="dimmed",
+                                # Right align
+                                style={"text-align": "right"},
+                            ),
+                        ]
+                    )
+                    for party in case.parties
+                ]
+            )
+            if case.parties is not None
+            else "",
         ]
     )
+
+
+def get_case_search():
+    case_select = dmc.Select(
+        label="Select a Case",
+        style={"width": "100%"},
+        icon=DashIconify(icon="radix-icons:magnifying-glass"),
+        rightSection=DashIconify(icon="radix-icons:chevron-down"),
+        searchable=True,
+        id="case-select",
+    )
+    return [
+        html.Div(
+            id="case-search",
+        ),
+        html.Div(
+            id="case-select",
+            children=case_select,
+            className="m-1",
+        ),
+    ]
 
 
 def layout(case_id):
-    messaging_module = html.Div(
-        [
-            dbc.Row(
-                [
-                    dbc.Col("Sample Messages", width=4),
-                    dbc.Col(
-                        generate_form_group(
-                            label="Sample Message",
-                            id="lead-single-message-selector",
-                            placeholder="Select a Sample Message",
-                            type="Dropdown",
-                            options=[],
-                            persistence_type="session",
-                            persistence=True,
-                        ),
-                        width=8,
-                    ),
-                ],
-                className="mb-1",
-            ),
-            dbc.Row(
-                [
-                    dbc.Col("Include a Case Copy", width=4),
-                    dbc.Col(
-                        dbc.RadioButton(
-                            id="lead-media-enabled",
-                            persistence_type="session",
-                            persistence=True,
-                            value=False,
-                        ),
-                        width=8,
-                    ),
-                ],
-                className="mb-1",
-            ),
-            dbc.Row(
-                [
-                    dbc.Col("Phone Number", width=4),
-                    dbc.Col(
-                        [
-                            generate_form_group(
-                                label="Phone Number",
-                                id="lead-single-phone",
-                                placeholder="Set the phone number",
-                                type="Input",
-                            )
-                        ],
-                        width=8,
-                    ),
-                ],
-                className="mb-1",
-            ),
-            dbc.Row(
-                [
-                    dbc.Col("Email", width=4),
-                    dbc.Col(
-                        [
-                            generate_form_group(
-                                label="Email",
-                                id="lead-single-email",
-                                placeholder="Set the email",
-                                type="Input",
-                            )
-                        ],
-                        width=8,
-                    ),
-                ],
-                className="mb-1",
-            ),
-            dbc.Row(
-                [
-                    dbc.Col("Message", width=4),
-                    dbc.Col(
-                        generate_form_group(
-                            label="Message",
-                            id="lead-single-message",
-                            placeholder="Type in the message",
-                            type="Textarea",
-                            style={"height": 300},
-                        ),
-                        width=8,
-                    ),
-                ]
-            ),
-            dbc.Row([dbc.Col(id="lead-single-message-status")]),
-        ]
-    )
     if case_id is None or case_id == "#" or case_id == "none":
-        case_select = dmc.Select(
-            label="Select a Case",
-            style={"width": "100%"},
-            icon=DashIconify(icon="radix-icons:magnifying-glass"),
-            rightSection=DashIconify(icon="radix-icons:chevron-down"),
-            searchable=True,
-            id="case-select",
-        )
         return dbc.Row(
             [
                 dbc.Col(
                     dmc.Paper(
-                        [
-                            html.Div(
-                                id="case-search",
-                            ),
-                            html.Div(
-                                id="case-select",
-                                children=case_select,
-                                className="m-1",
-                            ),
-                        ],
+                        get_case_search(),
+                        shadow="xs",
+                        p="md",
+                        radius="md",
+                    ),
+                    width=12,
+                    class_name="mb-2",
+                )
+            ]
+        )
+
+    case = cases.get_single_case(case_id)
+
+    if case is None:
+        return dbc.Row(
+            [
+                dbc.Col(
+                    dmc.Paper(
+                        get_case_search(),
                         shadow="xs",
                         p="md",
                         radius="md",
@@ -450,51 +631,63 @@ def layout(case_id):
                 ),
                 dbc.Col(
                     dmc.Paper(
-                        [
-                            get_case_details(None),
+                        children=[
+                            dmc.Alert("Case not found", color="red"),
                         ],
                         shadow="xs",
                         p="md",
                         radius="md",
                     ),
-                    width=3,
-                    class_name="mb-2",
-                ),
-                dbc.Col(
-                    dmc.Paper(
-                        [get_case_tabs()],
-                        shadow="xs",
-                        p="md",
-                        radius="md",
-                    ),
-                    width=6,
-                    class_name="mb-2",
-                ),
-                dbc.Col(
-                    dmc.Paper(
-                        [
-                            get_case_timeline(None),
-                        ],
-                        shadow="xs",
-                        p="md",
-                        radius="md",
-                    ),
-                    width=3,
-                    class_name="mb-2",
+                    width=12,
                 ),
             ]
         )
 
-    return [
-        dbc.Row(
+    return dbc.Row(
+        [
             dbc.Col(
                 dmc.Paper(
-                    children=[],
+                    get_case_search(),
                     shadow="xs",
                     p="md",
                     radius="md",
                 ),
-                width=2,
-            )
-        )
-    ]
+                width=12,
+                class_name="mb-2",
+            ),
+            dbc.Col(
+                dmc.Paper(
+                    [
+                        get_case_details(case),
+                    ],
+                    shadow="xs",
+                    p="md",
+                    radius="md",
+                ),
+                width=3,
+                class_name="mb-2",
+            ),
+            dbc.Col(
+                dmc.Paper(
+                    [get_case_tabs()],
+                    shadow="xs",
+                    p="md",
+                    radius="md",
+                ),
+                width=6,
+                class_name="mb-2",
+            ),
+            dbc.Col(
+                dmc.Paper(
+                    [
+                        get_case_timeline(case),
+                    ],
+                    shadow="xs",
+                    p="md",
+                    radius="md",
+                ),
+                width=3,
+                class_name="mb-2",
+            ),
+        ]
+    )
