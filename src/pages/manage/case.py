@@ -18,6 +18,18 @@ dash.register_page(__name__, order=3, path_template="/manage/<case_id>")
 def get_court_section():
     stack = dmc.Stack(
         children=[
+            dmc.Modal(
+                title="Preview the Document",
+                id="modal-court-preview",
+                size="55%",
+                zIndex=10000,
+            ),
+            dmc.Modal(
+                title="Submit the Document",
+                id="modal-court-submit",
+                size="55%",
+                zIndex=10000,
+            ),
             dmc.Select(
                 data=[
                     "Entry of Appearance",
@@ -32,12 +44,14 @@ def get_court_section():
             dmc.Button(
                 "Preview",
                 leftIcon=DashIconify(icon="fluent:preview-link-20-filled"),
+                id="modal-court-preview-button",
             ),
             dmc.Button(
                 "Submit to Court",
                 leftIcon=DashIconify(
                     icon="fluent:database-plug-connected-20-filled"
                 ),
+                id="modal-court-submit-button",
             ),
         ],
         style={"maxWidth": "400px"},
@@ -49,6 +63,18 @@ def get_court_section():
 def get_prosecutor_section():
     stack = dmc.Stack(
         children=[
+            dmc.Modal(
+                title="Preview the Document",
+                id="modal-prosecutor-preview",
+                size="55%",
+                zIndex=10000,
+            ),
+            dmc.Modal(
+                title="Submit the Document",
+                id="modal-prosecutor-submit",
+                size="55%",
+                zIndex=10000,
+            ),
             dmc.Select(
                 data=[
                     "RFR Template#1 - Chat GPT",
@@ -63,12 +89,14 @@ def get_prosecutor_section():
             dmc.Button(
                 "Preview",
                 leftIcon=DashIconify(icon="fluent:preview-link-20-filled"),
+                id="modal-prosecutor-preview-button",
             ),
             dmc.Button(
                 "Submit to Prosecutor",
                 leftIcon=DashIconify(
                     icon="fluent:database-plug-connected-20-filled"
                 ),
+                id="modal-prosecutor-submit-button",
             ),
         ],
         style={"maxWidth": "400px"},
@@ -79,6 +107,18 @@ def get_prosecutor_section():
 def get_client_section():
     stack = dmc.Stack(
         children=[
+            dmc.Modal(
+                title="Preview the Communication",
+                id="modal-client-preview",
+                size="55%",
+                zIndex=10000,
+            ),
+            dmc.Modal(
+                title="Submit the Communication",
+                id="modal-client-submit",
+                size="55%",
+                zIndex=10000,
+            ),
             dmc.Select(
                 data=[
                     "RFR Reply#1 - Chat GPT",
@@ -93,12 +133,14 @@ def get_client_section():
             dmc.Button(
                 "Preview",
                 leftIcon=DashIconify(icon="fluent:preview-link-20-filled"),
+                id="modal-client-preview-button",
             ),
             dmc.Button(
                 "Submit to Client by Email & SMS",
                 leftIcon=DashIconify(
                     icon="fluent:database-plug-connected-20-filled"
                 ),
+                id="modal-client-submit-button",
             ),
         ],
         style={"maxWidth": "400px"},
@@ -420,32 +462,8 @@ def create_group_item(label: str, value: str | None, icon: str):
             ),
         ],
         position="apart",
+        className="mt-1",
     )
-
-
-"""
-{
-  id:string
-  case_desc: string
-  case_id: string
-  case_type: string
-  charges: Charge[]
-  court_desc: string
-  criminal_case: boolean
-  disposed: boolean
-  dockets: Docket[]
-  parties: Party[]
-  filing_date: Timestamp
-  first_name: string
-  last_name: string
-  formatted_telephone: string
-  judge: Judge
-  plea_andpayind: string
-  status: string
-  fine: string
-  paid: boolean
-}
-"""
 
 
 def get_case_details(case: Case):
@@ -477,7 +495,7 @@ def get_case_details(case: Case):
                 mb="xs",
             ),
             dmc.Divider(variant="solid", className="mt-2"),
-            dmc.Title("→ Case Details", order=5, className="mt-1"),
+            dmc.Title("→ Case Details", order=5, className="mt-3"),
             create_group_item(
                 label="Filing Date",
                 value=f"{case.filing_date:%B %d, %Y}",
@@ -495,10 +513,10 @@ def get_case_details(case: Case):
                 icon="mdi:cash",
             ),
             dmc.Divider(variant="solid", className="mt-2"),
-            dmc.Title("→ Charges", order=5, className="mt-1"),
+            dmc.Title("→ Charges", order=5, className="mt-3"),
             html.Div(charges),
             dmc.Divider(variant="solid", className="mt-2"),
-            dmc.Title("Defendant", order=5, className="mt-1"),
+            dmc.Title("→ Defendant", order=5, className="mt-3"),
             create_group_item(
                 label="Name",
                 value=case.formatted_party_name,
@@ -528,7 +546,7 @@ def get_case_details(case: Case):
                 icon="material-symbols:phone-android-outline",
             ),
             dmc.Divider(variant="solid", className="mt-2"),
-            dmc.Title("→ Judge", order=5, className="mt-1"),
+            dmc.Title("→ Judge", order=5, className="mt-3"),
             create_group_item(
                 label="Name",
                 value=case.judge.get("formatted_name", "")
@@ -537,7 +555,7 @@ def get_case_details(case: Case):
                 icon="fluent-emoji-high-contrast:man-judge",
             ),
             dmc.Divider(variant="solid", className="mt-2"),
-            dmc.Title("→ Parties", order=5, className="mt-1"),
+            dmc.Title("→ Parties", order=5, className="mt-3"),
             html.Div(
                 [
                     html.Div(

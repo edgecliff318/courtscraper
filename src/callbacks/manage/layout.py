@@ -1,11 +1,8 @@
 import logging
 
 import dash
-import dash.html as html
-from dash import Input, Output, State, callback, ctx
+from dash import Input, Output, State, callback
 
-from src.components.toast import build_toast
-from src.core.config import get_settings
 from src.services import cases
 
 logger = logging.Logger(__name__)
@@ -30,7 +27,8 @@ def case_select_data(value):
         ], "No cases found"
     return [
         {
-            "label": f"{c.case_id}# {c.first_name} {c.last_name} {c.court_code}",
+            "label": f"{c.case_id}# "
+            f"{c.first_name} {c.last_name} {c.court_code}",
             "value": c.case_id,
         }
         for c in search_cases
@@ -47,3 +45,23 @@ def goto_case(case_id):
     if case_id is None:
         return dash.no_update
     return f"/manage/{case_id}"
+
+
+def toggle_drawer(n_clicks, opened):
+    return not opened
+
+
+for modal in [
+    "modal-court-preview",
+    "modal-court-submit",
+    "modal-prosecutor-preview",
+    "modal-prosecutor-submit",
+    "modal-client-preview",
+    "modal-client-submit",
+]:
+    callback(
+        Output(modal, "opened"),
+        Input(f"{modal}-button", "n_clicks"),
+        State(modal, "opened"),
+        prevent_initial_call=True,
+    )(toggle_drawer)
