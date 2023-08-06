@@ -28,7 +28,7 @@ def get_cases(
         )
     if disposition is not None:
         cases_list = cases_list.where(
-            field_path="disposition", op_string="==", value=status
+            field_path="disposition", op_string="==", value=disposition
         )
 
     cases_list = cases_list.stream()

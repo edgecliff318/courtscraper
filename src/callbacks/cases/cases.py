@@ -101,7 +101,7 @@ def send_many_message(*args, **kwargs):
     Input("modal-content", "children"),
     State("memory", "data"),
 )
-def generate_many_latters(*args, **kwargs):
+def generate_many_letters(*args, **kwargs):
     if ctx.triggered_id == "generate-letters":
         df = ctx.states["memory.data"]["df"] or []
         case_ids = [c.get("case_index") for c in df]
