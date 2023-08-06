@@ -19,5 +19,8 @@
     "python.languageServer": "Pylance",
     "python.analysis.typeCheckingMode": "basic",
     "python.linting.flake8Enabled": true,
-    "python.linting.enabled": true
+    "python.linting.enabled": true,
+    "cSpell.words": [
+        "diskcache"
+    ]
 }

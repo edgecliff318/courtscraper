@@ -55,6 +55,39 @@
             ],
             "console": "integratedTerminal",
             "justMyCode": false
+        },
+        {
+            "name": "Sync Twilio",
+            "type": "python",
+            "request": "launch",
+            "program": "main.py",
+            "args": [
+                "sync-twilio",
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Analyze Leads",
+            "type": "python",
+            "request": "launch",
+            "program": "main.py",
+            "args": [
+                "analyze-leads",
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Analyze Leads 2",
+            "type": "python",
+            "request": "launch",
+            "program": "main.py",
+            "args": [
+                "analyze-leads",
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
         }
     ]
 }
