@@ -12,6 +12,8 @@ class Template(BaseModel):
     enabled: Optional[bool] = True
     category: Optional[str] = None
     creator: Optional[str] = None
+    type: Optional[str] = "file"  # file, html, text
+    text: Optional[str] = None
     filepath: Optional[str] = None
 
     @validator("creation_date", pre=True)

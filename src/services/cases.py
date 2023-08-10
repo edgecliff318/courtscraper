@@ -58,6 +58,10 @@ def update_case(case: cases.Case) -> None:
     db.collection("cases").document(case.case_id).update(case.dict())
 
 
+def patch_case(case_id: str, data: dict) -> None:
+    db.collection("cases").document(case_id).update(data)
+
+
 def search_cases(search_term: str) -> list:
     filter_first_name = FieldFilter(
         "first_name", "==", str(search_term).upper()

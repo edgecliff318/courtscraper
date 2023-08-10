@@ -38,7 +38,7 @@ def insert_template(template: templates.Template, filepath: str):
 
     # Upload the file to the bucket
     filepath_firebase = f"templates/{filename}"
-    blob = bucket.blob(filename)
+    blob = bucket.blob(filepath_firebase)
     blob.upload_from_filename(filepath)
 
     # Add the file path to the template
