@@ -77,6 +77,7 @@ class Case(BaseModel):
     ticket: Optional[Dict]
     ticket_img: Optional[str]
     status: Optional[str]
+    events: Optional[List[Dict]]
 
     # Ignore parsing errors for now
     @validator("charges", pre=True, always=True)
