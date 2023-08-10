@@ -144,8 +144,9 @@ devops
 .env*
 
 backup*
-temp*
-data*
+temp/*
+data/*
 .ssh
 
+templates/
 cases_to_review
