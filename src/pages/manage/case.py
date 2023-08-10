@@ -19,39 +19,86 @@ def get_court_section():
     stack = dmc.Stack(
         children=[
             dmc.Modal(
+                children=[
+                    dmc.Grid(
+                        children=[
+                            dmc.Col(
+                                html.Div(
+                                    dmc.Loader(
+                                        color="blue", size="md", variant="dots"
+                                    ),
+                                    id="modal-court-preview-content",
+                                ),
+                                span=6,
+                            ),
+                            dmc.Col(
+                                [
+                                    dmc.Stack(
+                                        [
+                                            dmc.Loader(
+                                                color="blue",
+                                                size="md",
+                                                variant="dots",
+                                            ),
+                                            dmc.TextInput(
+                                                label="Your data:",
+                                                error="Enter a valid value",
+                                                style={
+                                                    "width": 200,
+                                                    # Hidden by default
+                                                    "display": "none",
+                                                },
+                                                id={
+                                                    "type": "modal-court-pars",
+                                                    "index": 0,
+                                                },
+                                            ),
+                                        ],
+                                        id="modal-court-preview-parameters",
+                                    ),
+                                    dmc.Group(
+                                        [
+                                            dmc.Button(
+                                                "Update",
+                                                id="modal-court-preview-update",
+                                                className="m-2",
+                                                leftIcon=DashIconify(
+                                                    icon="fluent:database-plug-connected-20-filled"
+                                                ),
+                                            ),
+                                            dmc.Button(
+                                                "Submit",
+                                                id="modal-court-submit",
+                                                className="m-2",
+                                                leftIcon=DashIconify(
+                                                    icon="formkit:submit"
+                                                ),
+                                            ),
+                                        ]
+                                    ),
+                                ],
+                                span=6,
+                            ),
+                        ],
+                        gutter="xl",
+                        align="stretch",
+                    )
+                ],
                 title="Preview the Document",
                 id="modal-court-preview",
-                size="55%",
-                zIndex=10000,
-            ),
-            dmc.Modal(
-                title="Submit the Document",
-                id="modal-court-submit",
-                size="55%",
+                size="90%",
                 zIndex=10000,
             ),
             dmc.Select(
-                data=[
-                    "Entry of Appearance",
-                    "Motion to Continue",
-                    "Motion to Withdraw",
-                ],
-                value="Entry of Appearance",
                 label="Document Template",
                 icon=DashIconify(icon="radix-icons:magnifying-glass"),
                 rightSection=DashIconify(icon="radix-icons:chevron-down"),
+                id="section-court-select-template",
             ),
             dmc.Button(
-                "Preview",
+                "Preview & Submit to Court",
                 leftIcon=DashIconify(icon="fluent:preview-link-20-filled"),
                 id="modal-court-preview-button",
-            ),
-            dmc.Button(
-                "Submit to Court",
-                leftIcon=DashIconify(
-                    icon="fluent:database-plug-connected-20-filled"
-                ),
-                id="modal-court-submit-button",
             ),
         ],
         style={"maxWidth": "400px"},
@@ -76,15 +123,10 @@ def get_prosecutor_section():
                 zIndex=10000,
             ),
             dmc.Select(
-                data=[
-                    "RFR Template#1 - Chat GPT",
-                    "RFR Template#2 - Chat GPT",
-                    "RFR Template#3 - Fixed",
-                ],
-                value="RFR Template#1 - Chat GPT",
                 label="Email Template",
                 icon=DashIconify(icon="radix-icons:magnifying-glass"),
                 rightSection=DashIconify(icon="radix-icons:chevron-down"),
+                id="section-prosecutor-select-template",
             ),
             dmc.Button(
                 "Preview",
@@ -120,15 +162,10 @@ def get_client_section():
                 zIndex=10000,
             ),
             dmc.Select(
-                data=[
-                    "RFR Reply#1 - Chat GPT",
-                    "RFR Reply#2 - Chat GPT",
-                    "RFR Reply#3 - Template",
-                ],
-                value="RFR Reply#1 - Chat GPT",
                 label="Document Template",
                 icon=DashIconify(icon="radix-icons:magnifying-glass"),
                 rightSection=DashIconify(icon="radix-icons:chevron-down"),
+                id="section-client-select-template",
             ),
             dmc.Button(
                 "Preview",
@@ -482,6 +519,7 @@ def get_case_details(case: Case):
             dmc.Group(
                 [
                     dmc.Text(f"Case#{case.case_id}", weight=500),
+                    html.Div(hidden=True, children=case.case_id, id="case-id"),
                     dmc.Badge(
                         case.status.capitalize()
                         if case.status is not None

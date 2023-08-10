@@ -3,7 +3,7 @@ import logging
 import dash
 from dash import Input, Output, State, callback
 
-from src.services import cases
+from src.services import cases, templates
 
 logger = logging.Logger(__name__)
 
@@ -65,3 +65,37 @@ for modal in [
         State(modal, "opened"),
         prevent_initial_call=True,
     )(toggle_drawer)
+
+
+@callback(
+    Output("section-court-select-template", "data"),
+    Output("section-prosecutor-select-template", "data"),
+    Output("section-client-select-template", "data"),
+    Input("case-select", "value"),
+)
+def render_select_template_options(case_id):
+    templates_list = templates.get_templates()
+
+    court_template_options = [
+        {"label": t.name, "value": t.id}
+        for t in templates_list
+        if t.category == "court"
+    ]
+
+    prosecutor_template_options = [
+        {"label": t.name, "value": t.id}
+        for t in templates_list
+        if t.category == "prosecutor"
+    ]
+
+    client_template_options = [
+        {"label": t.name, "value": t.id}
+        for t in templates_list
+        if t.category == "client"
+    ]
+
+    return (
+        court_template_options,
+        prosecutor_template_options,
+        client_template_options,
+    )
