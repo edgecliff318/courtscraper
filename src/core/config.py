@@ -134,6 +134,9 @@ class Settings(BaseSettings):
         "BEEN_VERIFIED_PASSWORD", "0TTD2023!"
     )
 
+    # Gotenberg Configuration
+    GOTENBERG_URL: str = os.getenv("GOTENBERG_URL", "http://localhost:3001")
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
