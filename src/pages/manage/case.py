@@ -56,6 +56,15 @@ def get_court_section():
                                         ],
                                         id="modal-court-preview-parameters",
                                     ),
+                                    dmc.Stack(
+                                        [
+                                            html.Div(
+                                                children="Please review the document and click on the 'Submit to Court' button to submit the document to the court.",
+                                                id="modal-court-response",
+                                                className="mt-2",
+                                            ),
+                                        ]
+                                    ),
                                     dmc.Group(
                                         [
                                             dmc.Button(
@@ -67,12 +76,21 @@ def get_court_section():
                                                 ),
                                             ),
                                             dmc.Button(
-                                                "Submit",
+                                                "Submit to Court",
                                                 id="modal-court-submit",
                                                 className="m-2",
                                                 leftIcon=DashIconify(
                                                     icon="formkit:submit"
                                                 ),
+                                            ),
+                                            dmc.Button(
+                                                "Cancel Submission",
+                                                id="modal-court-cancel",
+                                                className="m-2",
+                                                leftIcon=DashIconify(
+                                                    icon="fluent:delete-20-filled"
+                                                ),
+                                                disabled=True,
                                             ),
                                         ]
                                     ),
@@ -292,7 +310,93 @@ def get_case_tabs():
     return tabs
 
 
+case_statuses = {
+    "filed": {
+        "value": "filed",
+        "label": "Case Filed on casenet",
+        "color": "gray",
+    },
+    "paid": {
+        "value": "paid",
+        "label": "Client Paid",
+        "color": "green",
+    },
+    "eoa": {
+        "value": "eoa",
+        "label": "Entry of Appearance",
+        "color": "orange",
+    },
+    "rev_int": {
+        "value": "rev_int",
+        "label": "Internal Review",
+        "color": "yellow",
+    },
+    "def_dev": {
+        "value": "def_dev",
+        "label": "Review with the client",
+        "color": "yellow",
+    },
+    "rec_rfr": {
+        "value": "rec_rfr",
+        "label": "RFR Filing",
+        "color": "orange",
+    },
+    "rec_rec": {
+        "value": "rec_rec",
+        "label": "Recommendation Received",
+        "color": "lime",
+    },
+    "rec_rej": {
+        "value": "rec_rej",
+        "label": "Recommendation Rejected",
+        "color": "red",
+    },
+    "rec_del": {
+        "value": "rec_del",
+        "label": "Recommendation Delayed",
+        "color": "pink",
+    },
+    "rec_rev": {
+        "value": "rec_rev",
+        "label": "Recommendation Review",
+        "color": "yellow",
+    },
+    "rec_prop": {
+        "value": "rec_prop",
+        "label": "Recommendation Proposed to Client",
+        "color": "green",
+    },
+    "rec_sig": {
+        "value": "rec_sig",
+        "label": "Recommendation pending signature",
+        "color": "orange",
+    },
+    "rec_sub": {
+        "value": "rec_sub",
+        "label": "Recommendation to submit to court",
+        "color": "orange",
+    },
+    "rec_sub_rev": {
+        "value": "rec_sub_rev",
+        "label": "Recommendation Submission under Review by the Court",
+        "color": "orange",
+    },
+    "app": {
+        "value": "app",
+        "label": "Court Appearance Required",
+        "color": "red",
+    },
+    "close": {
+        "value": "close",
+        "label": "Close Case on Portal",
+        "color": "lime",
+    },
+}
+
+
 def get_case_timeline(case: Case):
+    events = case.events
+
     timeline = dmc.Timeline(
         active=1,
         bulletSize=15,
@@ -387,90 +491,6 @@ def get_case_timeline(case: Case):
         ],
     )
     return timeline
-
-
-case_statuses = {
-    "filed": {
-        "value": "filed",
-        "label": "Case Filed on casenet",
-        "color": "gray",
-    },
-    "paid": {
-        "value": "paid",
-        "label": "Client Paid",
-        "color": "green",
-    },
-    "eoa": {
-        "value": "eoa",
-        "label": "Entry of Appearance",
-        "color": "indigo",
-    },
-    "rev_int": {
-        "value": "rev_int",
-        "label": "Internal Review",
-        "color": "yellow",
-    },
-    "def_dev": {
-        "value": "def_dev",
-        "label": "Review with the client",
-        "color": "yellow",
-    },
-    "rec_rfr": {
-        "value": "rec_rfr",
-        "label": "RFR Filing",
-        "color": "orange",
-    },
-    "rec_rec": {
-        "value": "rec_rec",
-        "label": "Recommendation Received",
-        "color": "lime",
-    },
-    "rec_rej": {
-        "value": "rec_rej",
-        "label": "Recommendation Rejected",
-        "color": "red",
-    },
-    "rec_del": {
-        "value": "rec_del",
-        "label": "Recommendation Delayed",
-        "color": "pink",
-    },
-    "rec_rev": {
-        "value": "rec_rev",
-        "label": "Recommendation Review",
-        "color": "yellow",
-    },
-    "rec_prop": {
-        "value": "rec_prop",
-        "label": "Recommendation Proposed to Client",
-        "color": "green",
-    },
-    "rec_sig": {
-        "value": "rec_sig",
-        "label": "Recommendation pending signature",
-        "color": "orange",
-    },
-    "rec_sub": {
-        "value": "rec_sub",
-        "label": "Recommendation to submit to court",
-        "color": "orange",
-    },
-    "rec_sub_rev": {
-        "value": "rec_sub_rev",
-        "label": "Recommendation Submission under Review by the Court",
-        "color": "orange",
-    },
-    "app": {
-        "value": "app",
-        "label": "Court Appearance Required",
-        "color": "red",
-    },
-    "close": {
-        "value": "close",
-        "label": "Close Case on Portal",
-        "color": "lime",
-    },
-}
 
 
 def get_case_status_color(status: str | None):
