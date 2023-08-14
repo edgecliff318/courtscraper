@@ -2,7 +2,7 @@
 dash>=2.5.0
 dash[diskcache]
 dash-bootstrap-components>=1.1.0
-dash-ag-grid==2.2.0
+dash-ag-grid>=2.2.0
 dash-iconify 
 dash-mantine-components
 gunicorn>=20.1.0
