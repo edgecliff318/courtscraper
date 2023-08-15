@@ -7,6 +7,7 @@ import pandas as pd
 from dash import Input, Output, callback, html
 
 from src.core.config import get_settings
+from src.core.format import humanize_phone
 from src.services import leads
 
 logger = logging.Logger(__name__)
@@ -63,7 +64,9 @@ def render_leads(court_code_list, start_date, end_date, status):
 
     def transform_phones(phones):
         if isinstance(phones, dict):
-            return ", ".join([v.get("phone") for k, v in phones.items()])
+            return ", ".join(
+                [humanize_phone(v.get("phone")) for k, v in phones.items()]
+            )
         else:
             return phones
 

@@ -248,8 +248,12 @@ def layout(case_id):
                 ),
             ],
         ),
+        dcc.Store(id="lead-single-case-details"),
+        dbc.Row(id="lead-single"),
+        html.Div(id="lead-single-been-verified-trigger"),
         dbc.Row(
             [
+                dbc.Col(id="lead-single-been-verified", lg=12, xs=12),
                 dbc.Col(
                     dbc.Card(
                         dbc.CardBody(
@@ -285,11 +289,7 @@ def layout(case_id):
                     xs=12,
                 ),
                 dbc.Col(lead_admin_card, lg=6, xs=12, class_name="mb-2"),
-                dbc.Col(id="lead-single-been-verified", lg=12, xs=12),
                 dbc.Col(id="lead-single-interactions", width=12),
             ]
         ),
-        dbc.Row(id="lead-single"),
-        html.Div(id="lead-single-been-verified-trigger"),
-        dcc.Store(id="lead-single-case-details"),
     ]
