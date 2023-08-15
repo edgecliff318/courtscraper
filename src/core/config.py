@@ -137,6 +137,11 @@ class Settings(BaseSettings):
     # Gotenberg Configuration
     GOTENBERG_URL: str = os.getenv("GOTENBERG_URL", "http://localhost:3001")
 
+    # Selenium Service
+    SELENIUM_STANDALONE_URL: str = os.getenv(
+        "SELENIUM_STANDALONE_URL", "http://localhost:4444/wd/hub"
+    )
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

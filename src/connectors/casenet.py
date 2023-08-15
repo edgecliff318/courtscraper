@@ -34,6 +34,9 @@ class CaseNetWebConnector:
         self.options.add_argument("enable-automation")
         self.options.add_argument("--disable-infobars")
         self.options.add_argument("--disable-dev-shm-usage")
+
+        # Use http://localhost:4444
+
         # self.options.add_argument("--window-size=1920,1080")
 
         # Selenium with
@@ -42,7 +45,10 @@ class CaseNetWebConnector:
         self.magic_link = None
         self.email_sensor = None
         if not cache:
-            self.driver = webdriver.Chrome(options=self.options)
+            self.driver = webdriver.Remote(
+                command_executor=settings.SELENIUM_STANDALONE_URL,
+                options=self.options,
+            )
             console.print("Chrome Driver started")
             self.login()
             console.print("Logged to casenet")
@@ -62,11 +68,11 @@ class CaseNetWebConnector:
         try:
             # 3 | type | name=username | smeyer4040
             self.driver.find_element(By.NAME, "username").send_keys(
-                "smeyer4040"
+                settings.CASE_NET_USERNAME
             )
             # 4 | type | name=password | MASdorm1993!MAS
             self.driver.find_element(By.NAME, "password").send_keys(
-                "MASdorm1993!MAS"
+                settings.CASE_NET_PASSWORD
             )
             # 5 | click | css=span > strong |
             self.driver.find_element(By.CSS_SELECTOR, "span > strong").click()
