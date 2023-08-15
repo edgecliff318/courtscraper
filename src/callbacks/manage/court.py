@@ -23,6 +23,9 @@ def init_document_generator(case_id, template):
         f"{case_id}_{template}.docx"
     )
 
+    # Ensure the folder exists
+    template_filepath.parent.mkdir(parents=True, exist_ok=True)
+
     templates.get_template_file(template, template_filepath)
 
     output_filepath = settings.DATA_PATH.joinpath(
