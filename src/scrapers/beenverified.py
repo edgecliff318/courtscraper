@@ -11,6 +11,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
+from twilio.rest import Client
 
 from src.core import tools
 from src.core.config import get_settings
@@ -169,6 +170,28 @@ class BeenVerifiedScrapper:
                 )
             )
             logger.error("Blocked by captcha")
+
+            # Send a message to me and Shawn to check
+            client = Client(
+                settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN
+            )
+
+            sms_message = f"Connect to solve the captcha for the BeenVerified Scraper {link}"
+
+            phone_ayoub = "+33674952271"
+            phone_shawn = "+1816518-8838"
+
+            client.messages.create(
+                messaging_service_sid=settings.TWILIO_MESSAGE_SERVICE_SID,
+                body=sms_message,
+                to=phone_ayoub,
+            )
+            client.messages.create(
+                messaging_service_sid=settings.TWILIO_MESSAGE_SERVICE_SID,
+                body=sms_message,
+                to=phone_shawn,
+            )
+
             raise CaptchaException("Blocked by captcha")
         except selenium.common.exceptions.TimeoutException:
             pass
