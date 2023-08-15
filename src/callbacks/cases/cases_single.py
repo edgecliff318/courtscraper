@@ -6,11 +6,14 @@ import dash
 import dash.html as html
 import dash_ag_grid as dag
 import dash_bootstrap_components as dbc
+import dash_mantine_components as dmc
 import pandas as pd
 from dash import Input, Output, State, callback
+from dash_iconify import DashIconify
 
 from src.components.toast import build_toast
 from src.core.config import get_settings
+from src.core.format import humanize_phone
 from src.db import bucket
 from src.loader.leads import CaseNet
 from src.models import cases as cases_model
@@ -171,7 +174,7 @@ def render_case_details(case_id):
         beenverified = {}
 
         if lead_details is None:
-            year_of_birth = None
+            birth_date = None
             age = None
             charges = None
             phone = None
@@ -179,11 +182,23 @@ def render_case_details(case_id):
             notes = None
             email = None
             lead_details_dict = {}
+            onabout_date = None
+            name = None
         else:
-            year_of_birth = lead_details.year_of_birth
+            middle_name = (
+                f", {case_details.middle_name},"
+                if case_details.middle_name is not None
+                else ","
+            )
+            name = f"{case_details.first_name}{middle_name}{case_details.last_name}"
+            birth_date = case_details.birth_date
             age = lead_details.age
             charges = lead_details.charges_description
             phone = lead_details.phone
+            if case_details.ticket is not None:
+                onabout_date = case_details.ticket.get("client-birthdate")
+            else:
+                onabout_date = None
             if isinstance(phone, dict):
                 if len(phone) > 0:
                     beenverified["phones"] = [
@@ -196,6 +211,9 @@ def render_case_details(case_id):
                 beenverified["phones"] = [
                     phone,
                 ]
+            beenverified["phones"] = [
+                humanize_phone(p) for p in beenverified["phones"]
+            ]
             email = lead_details.email
             if isinstance(email, dict):
                 if len(email) > 0:
@@ -220,11 +238,13 @@ def render_case_details(case_id):
             )
             filing_date = None
             case_type = None
+            location = None
         else:
             parties = pd.DataFrame(case_details.parties)
             documents = pd.DataFrame(case_details.documents)
             filing_date = case_details.filing_date
             case_type = case_details.case_type
+            location = case_details.location
 
         columns = [
             "desc",
@@ -265,10 +285,39 @@ def render_case_details(case_id):
         # Generate the link from Firebase bucket
         documents["File Path"] = documents["File Path"].apply(
             lambda x: (
-                f"[Download]"
-                f"({bucket.get_blob(x).generate_signed_url(expiration=timedelta(seconds=3600))})"
+                bucket.get_blob(x).generate_signed_url(
+                    expiration=timedelta(seconds=3600)
+                )
             )
         )
+
+        try:
+            media_url = documents[
+                documents["Description"] == "Information Filed by Citation"
+            ]["File Path"].values[0]
+        except IndexError:
+            media_url = None
+
+        documents["File Path"] = documents["File Path"].apply(
+            lambda x: (f"[Download]" f"({x})")
+        )
+
+        if media_url is not None:
+            document_preview = dmc.Card(
+                children=[
+                    html.Iframe(
+                        src=media_url,
+                        style={
+                            "width": "100%",
+                            "height": "50%",
+                            "min-height": "200px",
+                        },
+                    )
+                ],
+                shadow="sm",
+            )
+        else:
+            document_preview = None
 
         column_defs = [
             {
@@ -316,10 +365,37 @@ def render_case_details(case_id):
                     ),
                     html.Tr(
                         [
+                            html.Td("Full Name", className="font-weight-bold"),
+                            html.Td(name),
+                        ]
+                    ),
+                    html.Tr(
+                        [
                             html.Td(
                                 "Filing Date", className="font-weight-bold"
                             ),
                             html.Td(filing_date),
+                        ]
+                    ),
+                    html.Tr(
+                        [
+                            html.Td("Location", className="font-weight-bold"),
+                            html.Td(location),
+                        ]
+                    ),
+                    html.Tr(
+                        [
+                            html.Td("Type", className="font-weight-bold"),
+                            html.Td(case_type),
+                        ]
+                    ),
+                    html.Tr(
+                        [
+                            html.Td(
+                                "On or About Date (Beta)",
+                                className="font-weight-bold",
+                            ),
+                            html.Td(onabout_date),
                         ]
                     ),
                     html.Tr(
@@ -347,7 +423,7 @@ def render_case_details(case_id):
                             html.Td(
                                 "Date of Birth", className="font-weight-bold"
                             ),
-                            html.Td(year_of_birth),
+                            html.Td(birth_date),
                         ]
                     ),
                     html.Tr(
@@ -359,7 +435,7 @@ def render_case_details(case_id):
                     html.Tr(
                         [
                             html.Td("Phone", className="font-weight-bold"),
-                            html.Td(phone),
+                            html.Td(humanize_phone(phone)),
                         ]
                     ),
                 ]
@@ -388,14 +464,31 @@ def render_case_details(case_id):
                     xs=12,
                 ),
                 dbc.Col(
-                    dbc.Card(
-                        dbc.CardBody(
-                            [
-                                html.H3("Documents", className="card-title"),
-                                documents_ag_grid,
-                            ]
-                        ),
-                        className="mb-2",
+                    dbc.Row(
+                        [
+                            dbc.Card(
+                                dbc.CardBody(
+                                    [
+                                        html.H3(
+                                            "Documents", className="card-title"
+                                        ),
+                                        documents_ag_grid,
+                                    ]
+                                ),
+                                className="mb-2",
+                            ),
+                            dbc.Card(
+                                dbc.CardBody(
+                                    [
+                                        html.H3(
+                                            "Ticket", className="card-title"
+                                        ),
+                                        document_preview,
+                                    ]
+                                ),
+                                className="mb-2",
+                            ),
+                        ]
                     ),
                     lg=6,
                     xs=12,
