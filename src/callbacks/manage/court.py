@@ -1,4 +1,5 @@
 import logging
+from collections.abc import MutableMapping
 from datetime import datetime, timedelta
 
 import dash
@@ -11,6 +12,18 @@ from src.core.config import get_settings
 from src.core.document import DocumentGenerator, convert_doc_to_pdf
 from src.db import bucket
 from src.services import cases, templates
+
+
+def flatten(dictionary, parent_key="", separator="_"):
+    items = []
+    for key, value in dictionary.items():
+        new_key = parent_key + separator + key if parent_key else key
+        if isinstance(value, MutableMapping):
+            items.extend(flatten(value, new_key, separator=separator).items())
+        else:
+            items.append((new_key, value))
+    return dict(items)
+
 
 logger = logging.Logger(__name__)
 
@@ -53,8 +66,32 @@ def get_context_data(case_id, template):
     # Filling the data dictionary with cases data
     case_data = cases.get_single_case(case_id).dict()
 
+    case_data = flatten(case_data)
+
+    # Transform case location
+    if "municipal" in case_data.get("location", "").lower():
+        case_data["city"] = (
+            case_data.get("location", "")
+            .lower()
+            .replace("municipal", "")
+            .upper()
+        )
+        case_data["city"] += " CITY<"
+        case_data["location"] = "MUNICIPAL"
+    elif "circuit" in case_data.get("location", "").lower():
+        case_data["city"] = (
+            case_data.get("location", "")
+            .lower()
+            .replace("circuit", "")
+            .upper()
+        )
+        case_data["city"] += " COUNTY"
+        case_data["location"] = "CIRCUIT"
+
     data.update({f"case_{key}": value for key, value in case_data.items()})
-    data["current_date_short"] = datetime.now().strftime("%d/%m/%Y")
+
+    # Adding the current date short
+    data["current_date_short"] = datetime.now().strftime("%B %d, %Y").upper()
 
     # Get dash inputs and update the context
     context_data = {k: data.get(k) for k in context}
@@ -78,7 +115,7 @@ def generate_document(case_id, template, context_data):
     return media_url, output_filepath_pdf
 
 
-def upload_to_court(case_id, template, court_location):
+def upload_to_court(case_id, template, court_location, params=None):
     # Download the PDF from the bucket
     blob = bucket.blob(f"tmp/{case_id}_{template}_filled.pdf")
 
@@ -89,7 +126,7 @@ def upload_to_court(case_id, template, court_location):
     blob.download_to_filename(output_filepath_pdf)
 
     # By Court
-    connector = CaseNetWebConnector()
+    connector = CaseNetWebConnector(params=params)
 
     # Abs path of the PosixPath
     output_filepath_pdf = str(output_filepath_pdf)
@@ -213,7 +250,7 @@ def modal_court_preview(opened, update, template, pars, case_id):
     ],
     cancel=[Input("modal-court-cancel", "n_clicks")],
     prevent_initial_call=True,
-    background=True,
+    background=False,
 )
 def modal_court_submit(n_clicks, case_id, template):
     ctx = dash.callback_context
@@ -233,7 +270,6 @@ def modal_court_submit(n_clicks, case_id, template):
         # Upload the case to casenet
         if events is None:
             events = []
-        events = []
         # If the event is already in the list, raise an error$
         if event.get("template") in [
             e.get("template") for e in events if e.get("template") is not None
@@ -243,13 +279,27 @@ def modal_court_submit(n_clicks, case_id, template):
                     dmc.Alert(
                         "Document already uploaded to the court system",
                         color="red",
-                        title="Error",
+                        title="Information",
                     ),
                 ]
             )
 
+        template_details = templates.get_single_template(template)
+
+        if template_details.parameters is None:
+            params = {}
+        else:
+            params = template_details.parameters
+
+        params.setdefault("template_title", template_details.name)
+
         # Upload the document to the court
-        output = upload_to_court(case_id, template, court_location)
+        output = upload_to_court(
+            case_id,
+            template,
+            court_location,
+            params=template_details.parameters,
+        )
 
         # Submit the document
         firestore_filepath_pdf = submit_document(case_id, template)

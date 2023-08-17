@@ -15,6 +15,9 @@ class Template(BaseModel):
     type: Optional[str] = "file"  # file, html, text
     text: Optional[str] = None
     filepath: Optional[str] = None
+    parameters: Optional[dict] = None
+    state: Optional[str] = None
+    user: Optional[str] = None
 
     @validator("creation_date", pre=True)
     def set_creation_date_now(cls, v):

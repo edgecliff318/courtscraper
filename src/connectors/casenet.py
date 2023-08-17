@@ -26,7 +26,7 @@ class CaptchaException(Exception):
 
 
 class CaseNetWebConnector:
-    def __init__(self, cache=False):
+    def __init__(self, cache=False, params=None):
         self.options = Options()
         self.options.add_argument("--no-sandbox")
         # self.options.add_argument("--headless")
@@ -42,7 +42,11 @@ class CaseNetWebConnector:
         # Selenium with
         self.vars = {}
         self.cache = cache
-        self.magic_link = None
+        self.params = params
+        if params is None:
+            self.params = {}
+        else:
+            self.params = params
         self.email_sensor = None
         if not cache:
             self.driver = webdriver.Remote(
@@ -133,24 +137,24 @@ class CaseNetWebConnector:
 
         # 11 | select | id=filter | label=Filing - Other/Miscellaneous
         dropdown = self.driver.find_element(By.ID, "filter")
-        dropdown.find_element(
-            By.XPATH, "//option[. = 'Filing - Other/Miscellaneous']"
-        ).click()
+        category = self.params.get("category", "Filing - Other/Miscellaneous")
+        dropdown.find_element(By.XPATH, f"//option[. = '{category}']").click()
 
-        console.print("Selected Filing - Other/Miscellaneous")
+        console.print(f"Selected {category}")
 
         # Wait until the "type" dropdown is available
         sleep(3)
 
         dropdown = self.driver.find_element(By.ID, "type")
+        sub_category = self.params.get(
+            "sub_category", "Entry of Appear, Arrgnmnt Wavr & Not Guilty Plea"
+        )
         dropdown.find_element(
             By.XPATH,
-            "//option[. = 'Entry of Appear, Arrgnmnt Wavr & Not Guilty Plea']",
+            f"//option[. = '{sub_category}']",
         ).click()
 
-        console.print(
-            "Selected Entry of Appear, Arrgnmnt Wavr & Not Guilty Plea"
-        )
+        console.print(f"Selected {sub_category}")
 
         sleep(3)
         # 17 | click | id=documentData |
@@ -166,8 +170,12 @@ class CaseNetWebConnector:
         self.driver.find_element(By.ID, "documentTitle").click()
 
         # 20 | type | id=documentTitle | Entry of Appear, Arrgnmnt Wavr & Not Guilty Plea
+        document_title = self.params.get(
+            "template_title",
+            "Entry of Appear, Arrgnmnt Wavr & Not Guilty Plea",
+        )
         self.driver.find_element(By.ID, "documentTitle").send_keys(
-            "Entry of Appear, Arrgnmnt Wavr & Not Guilty Plea"
+            document_title
         )
 
         console.print("Added the document title")
@@ -187,6 +195,9 @@ class CaseNetWebConnector:
         ).click()
 
         console.print("Clicked redaction confirmation")
+
+        self.driver.find_element(By.ID, "continue").click()
+        console.print("Fully submitted the document")
 
         return {
             "case_number": case_number,
