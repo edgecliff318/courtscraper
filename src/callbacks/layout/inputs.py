@@ -8,7 +8,7 @@ logger = logging.Logger(__name__)
 
 
 @callback(
-    Output("court-selector", "options"),
+    Output("court-selector", "data"),
     Input("url", "pathname"),
 )
 def render_content_persona_details_selector(pathname):

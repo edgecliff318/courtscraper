@@ -22,7 +22,7 @@ settings = get_settings()
 
 
 @callback(
-    Output("court-selector-overview", "options"),
+    Output("court-selector-overview", "data"),
     Input("url", "pathname"),
 )
 def render_content_persona_details_selector(pathname):

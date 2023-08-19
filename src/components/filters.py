@@ -9,11 +9,8 @@ from src.models import leads as leads_model
 leads_controls = dbc.Row(
     [
         dbc.Col(
-            html.H3("Courts", className="align-middle"), width=1, xs=12, lg=1
-        ),
-        dbc.Col(
             generate_form_group(
-                label="Measure",
+                label="Courts",
                 id="court-selector",
                 placeholder="Select a Court",
                 type="Dropdown",
@@ -25,7 +22,7 @@ leads_controls = dbc.Row(
             ),
             width=5,
             xs=12,
-            lg=5,
+            lg=6,
         ),
         dbc.Col(
             generate_form_group(
@@ -35,6 +32,10 @@ leads_controls = dbc.Row(
                 type="DateRangePicker",
                 persistence_type="session",
                 persistence=True,
+                start_date=(datetime.now() - timedelta(days=1)).strftime(
+                    "%Y-%m-%d"
+                ),
+                end_date=datetime.now().strftime("%Y-%m-%d"),
             ),
             width=3,
             xs=12,

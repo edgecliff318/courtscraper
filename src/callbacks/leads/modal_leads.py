@@ -85,7 +85,7 @@ def messaging_template(df):
                             id="lead-single-message-modal",
                             placeholder="Type in the message",
                             type="Textarea",
-                            style={"height": 300},
+                            minRows=10,
                         ),
                         width=10,
                     ),

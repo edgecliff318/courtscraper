@@ -11,7 +11,7 @@ settings = get_settings()
 
 
 @callback(
-    Output("lead-single-message-selector", "options"),
+    Output("lead-single-message-selector", "data"),
     Input("case-id", "children"),
 )
 def render_message_selector(case_id):

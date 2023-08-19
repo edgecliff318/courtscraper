@@ -3,10 +3,10 @@ import logging
 import dash
 import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
-from dash import dcc, html
+from dash import html
 from dash_iconify import DashIconify
 
-from src.components.inputs import generate_form_group
+from src.components.groups import create_group_item
 from src.models.cases import Case
 from src.services import cases
 
@@ -497,30 +497,6 @@ def get_case_status_color(status: str | None):
     if status is None:
         return "gray"
     return case_statuses[status]["color"]
-
-
-def create_group_item(label: str, value: str | None, icon: str):
-    return dmc.Group(
-        [
-            dmc.Group(
-                [
-                    DashIconify(icon=icon),
-                    dmc.Text(
-                        label,
-                        weight=500,
-                    ),
-                ],
-                spacing="sm",
-            ),
-            dmc.Text(
-                value if value is not None else "N/A",
-                size="sm",
-                color="dimmed",
-            ),
-        ],
-        position="apart",
-        className="mt-1",
-    )
 
 
 def get_case_details(case: Case):

@@ -25,11 +25,11 @@ settings = get_settings()
     Output("stats-for-each-county", "children"),
     Input("leads-button", "n_clicks"),
     Input("court-selector", "value"),
-    Input("date-selector", "start_date"),
-    Input("date-selector", "end_date"),
+    Input("date-selector", "value"),
     Input("lead-status-selector", "value"),
 )
-def render_leads(search, court_code_list, start_date, end_date, status):
+def render_leads(search, court_code_list, dates, status):
+    (start_date, end_date) = dates
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
 

@@ -18,11 +18,11 @@ settings = get_settings()
 @callback(
     Output("leads-data", "children"),
     Input("court-selector", "value"),
-    Input("date-selector", "start_date"),
-    Input("date-selector", "end_date"),
+    Input("date-selector", "value"),
     Input("lead-status-selector", "value"),
 )
-def render_leads(court_code_list, start_date, end_date, status):
+def render_leads(court_code_list, dates, status):
+    (start_date, end_date) = dates
     grid = "Empty"
     if status == "all":
         status = None

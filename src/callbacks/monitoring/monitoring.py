@@ -18,11 +18,11 @@ settings = get_settings()
 
 @callback(
     Output("message-monitoring", "children"),
-    Input("monitoring-date-selector", "start_date"),
-    Input("monitoring-date-selector", "end_date"),
+    Input("monitoring-date-selector", "value"),
     Input("monitoring-status-selector", "value"),
 )
-def render_status_msg(start_date, end_date, direction):
+def render_status_msg(dates, direction):
+    (start_date, end_date) = dates
     # TODO: Read from DB from firebase and display in the grid
     # NOTE: This is a dummy data
     grid = "Empty"
@@ -187,10 +187,10 @@ def render_status_msg(start_date, end_date, direction):
 @callback(
     Output("monitoring-status", "children"),
     Input("monitoring-refresh-button", "n_clicks"),
-    Input("monitoring-date-selector", "start_date"),
-    Input("monitoring-date-selector", "end_date"),
+    Input("monitoring-date-selector", "value"),
 )
-def refresh_messages(n_clicks, start_date, end_date):
+def refresh_messages(n_clicks, dates):
+    (start_date, end_date) = dates
     ctx = dash.callback_context
     button = ctx.triggered[0]["prop_id"].split(".")[0]
     if button == "monitoring-refresh-button":

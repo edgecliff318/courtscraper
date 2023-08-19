@@ -11,7 +11,7 @@ settings = get_settings()
 
 
 @callback(
-    Output("lead-single-message-selector-modal", "options"),
+    Output("lead-single-message-selector-modal", "data"),
     Input("modal", "children"),
 )
 def render_message_selector(_):
