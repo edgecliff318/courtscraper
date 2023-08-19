@@ -65,7 +65,12 @@ def get_lead_by_phone(phone):
 
 
 def get_last_lead(
-    court_code_list=None, start_date=None, end_date=None, status=None
+    court_code_list=None,
+    start_date=None,
+    end_date=None,
+    status=None,
+    limit=1,
+    search_limit=1000,
 ):
     leads_list = db.collection("leads").select(
         [f for f in leads.Lead.__fields__.keys() if f != "report"]
@@ -92,17 +97,23 @@ def get_last_lead(
 
     leads_list = (
         leads_list.order_by("case_date", direction="DESCENDING")
-        .limit(1000)
+        .select([f for f in leads.Lead.__fields__.keys() if f != "report"])
+        .limit(search_limit)
         .stream()
     )
     leads_list = [leads.Lead(**m.to_dict()) for m in leads_list]
 
     if leads_list:
+        returned_list = []
         alcohol_related = [
             x for x in leads_list if "alcohol" in x.charges_description.lower()
         ]
         if alcohol_related:
-            return alcohol_related[0]
+            returned_list += alcohol_related
+            if limit == 1:
+                return returned_list[0]
+            if len(returned_list) >= limit:
+                return returned_list
 
         insurance_revoked = [
             x
@@ -114,7 +125,11 @@ def get_last_lead(
             )
         ]
         if insurance_revoked:
-            return insurance_revoked[0]
+            returned_list += insurance_revoked
+            if limit == 1:
+                return returned_list[0]
+            if len(returned_list) >= limit:
+                return returned_list
 
         careless_imprudent = [
             x
@@ -126,7 +141,11 @@ def get_last_lead(
             )
         ]
         if careless_imprudent:
-            return careless_imprudent[0]
+            returned_list += careless_imprudent
+            if limit == 1:
+                return returned_list[0]
+            if len(returned_list) >= limit:
+                return returned_list
 
         high_speeding = [
             x
@@ -136,9 +155,16 @@ def get_last_lead(
         ]
 
         if high_speeding:
-            return high_speeding[0]
+            returned_list += high_speeding
+            if limit == 1:
+                return returned_list[0]
+            if len(returned_list) >= limit:
+                return returned_list
 
-        return leads_list[0]
+        returned_list += leads_list
+        if limit == 1:
+            return returned_list[0]
+        return returned_list
     else:
         return None
 

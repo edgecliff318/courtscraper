@@ -31,11 +31,10 @@ class BeenVerifiedScrapper:
         self.options = Options()
         self.options.add_argument("--no-sandbox")
         # self.options.add_argument("--headless")
-        self.options.add_argument("--disable-gpu")
         self.options.add_argument("enable-automation")
         self.options.add_argument("--disable-infobars")
         self.options.add_argument("--disable-dev-shm-usage")
-        # self.options.add_argument("--window-size=1920,1080")
+        self.options.add_argument("--window-size=1920,1080")
 
         # Selenium with
         self.vars = {}
@@ -43,7 +42,11 @@ class BeenVerifiedScrapper:
         self.magic_link = None
         self.email_sensor = None
         if not cache:
-            self.driver = webdriver.Chrome(options=self.options)
+            # self.driver = webdriver.Chrome(options=self.options)
+            self.driver = webdriver.Remote(
+                command_executor=settings.SELENIUM_STANDALONE_URL,
+                options=self.options,
+            )
             self.login()
 
     def __hash__(self):
@@ -102,7 +105,11 @@ class BeenVerifiedScrapper:
 
     def retrieve_information(self, link):
         if self.cache:
-            self.driver = webdriver.Chrome(options=self.options)
+            # self.driver = webdriver.Chrome(options=self.options)
+            self.driver = webdriver.Remote(
+                command_executor=settings.SELENIUM_STANDALONE_URL,
+                options=self.options,
+            )
             self.login()
 
         output = {
