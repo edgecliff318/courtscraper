@@ -18,6 +18,8 @@ leads_statuses = [
     {"label": "Mailed", "value": "mailed"},
     {"label": "Failed", "value": "failed"},
     {"label": "Lost", "value": "lost"},
+    {"label": "Won", "value": "won"},
+    {"label": "Wait", "value": "wait"},
     {"label": "Stop", "value": "stop"},
     {"label": "Yes", "value": "yes"},
     {"label": "Responded", "value": "responded"},

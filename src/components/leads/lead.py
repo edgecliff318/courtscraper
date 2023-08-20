@@ -19,15 +19,16 @@ def get_lead_card(lead):
                     [
                         dmc.Chip(x, value=x, variant="filled", size="xs")
                         for x in [
-                            "Correct",
-                            "Wrong",
-                            "Voicemail",
+                            "correct",
+                            "wrong",
+                            "voicemail",
                         ]
                     ],
                     id={
                         "type": "lead-phone-status",
                         "index": f"{lead.case_id}-{key}",
                     },
+                    value=phone.get("state"),
                 ),
             ]
         )
@@ -115,13 +116,17 @@ def get_lead_card(lead):
                         },
                         leftIcon=DashIconify(icon="healthicons:yes"),
                         color="green",
-                        variant="outline",
+                        variant="filled"
+                        if lead.status == "won"
+                        else "outline",
                     ),
                     dmc.Button(
                         "Lost",
                         leftIcon=DashIconify(icon="healthicons:no"),
                         color="red",
-                        variant="outline",
+                        variant="filled"
+                        if lead.status == "lost"
+                        else "outline",
                         id={
                             "type": "lost-button",
                             "index": lead.case_id,
@@ -131,7 +136,9 @@ def get_lead_card(lead):
                         "Wait",
                         leftIcon=DashIconify(icon="solar:menu-dots-broken"),
                         color="yellow",
-                        variant="outline",
+                        variant="filled"
+                        if lead.status == "wait"
+                        else "outline",
                         id={
                             "type": "wait-button",
                             "index": lead.case_id,
