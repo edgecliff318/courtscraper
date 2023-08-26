@@ -6,6 +6,7 @@ import dash
 import dash_mantine_components as dmc
 from dash import ALL, Input, Output, State, callback, html
 from dash_iconify import DashIconify
+from google.cloud.storage.retry import DEFAULT_RETRY
 
 from src.connectors.casenet import CaseNetWebConnector
 from src.core.config import get_settings
@@ -130,7 +131,14 @@ def upload_to_court(case_id, template, court_location, params=None):
     output_filepath_pdf = settings.DATA_PATH.joinpath(
         f"{case_id}_{template}_filled.pdf"
     )
-    blob.download_to_filename(output_filepath_pdf)
+
+    modified_retry = DEFAULT_RETRY.with_delay(
+        initial=1.5, multiplier=1.2, maximum=45.0
+    )
+
+    blob.download_to_filename(
+        output_filepath_pdf, retry=modified_retry, timeout=20
+    )
 
     # By Court
     connector = CaseNetWebConnector(params=params)
@@ -160,7 +168,12 @@ def submit_document(case_id, template):
     firestore_filepath_pdf = f"cases/{case_id}/{template}.pdf"
     # Download the PDF from the bucket
     blob = bucket.blob(f"tmp/{case_id}_{template}_filled.pdf")
-    blob.download_to_filename(output_filepath_pdf)
+    modified_retry = DEFAULT_RETRY.with_delay(
+        initial=1.5, multiplier=1.2, maximum=45.0
+    )
+    blob.download_to_filename(
+        output_filepath_pdf, timeout=20, retry=modified_retry
+    )
 
     # Save the document to the official case folder
     blob = bucket.blob(firestore_filepath_pdf)

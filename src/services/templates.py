@@ -1,6 +1,8 @@
 import logging
 from datetime import timedelta
 
+from google.cloud.storage.retry import DEFAULT_RETRY
+
 from src.db import bucket, db
 from src.models import templates
 
@@ -77,7 +79,12 @@ def get_template_file(template_id: str, target_filepath=None):
 
     # Download the file to the local
     logger.info(f"Downloading the template file to {target_filepath}")
-    blob.download_to_filename(target_filepath)
+    modified_retry = DEFAULT_RETRY.with_delay(
+        initial=1.5, multiplier=1.2, maximum=45.0
+    )
+    blob.download_to_filename(
+        target_filepath, timeout=10, retry=modified_retry
+    )
 
     logger.info("Template file downloaded")
     # Return the file path

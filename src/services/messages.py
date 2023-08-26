@@ -4,6 +4,7 @@ import typing as t
 from datetime import timedelta
 
 import pandas as pd
+from google.cloud.storage.retry import DEFAULT_RETRY
 from PIL import Image, ImageDraw, ImageFont
 from twilio.rest import Client
 
@@ -28,7 +29,10 @@ def add_text_to_image(image_url, text):
     filepath = settings.DATA_PATH.joinpath(media.name)
     # Ensure the directory exists
     filepath.parent.mkdir(parents=True, exist_ok=True)
-    media.download_to_filename(filepath)
+    modified_retry = DEFAULT_RETRY.with_delay(
+        initial=1.5, multiplier=1.2, maximum=45.0
+    )
+    media.download_to_filename(filepath, retry=modified_retry, timeout=5)
 
     # Add the text to the image
     image_ticket = Image.open(filepath)
