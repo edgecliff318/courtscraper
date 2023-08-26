@@ -13,6 +13,9 @@ from src.core.document import DocumentGenerator, convert_doc_to_pdf
 from src.db import bucket
 from src.services import cases, templates
 
+logger = logging.getLogger(__name__)
+settings = get_settings()
+
 
 def flatten(dictionary, parent_key="", separator="_"):
     items = []
@@ -25,11 +28,6 @@ def flatten(dictionary, parent_key="", separator="_"):
     return dict(items)
 
 
-logger = logging.Logger(__name__)
-
-settings = get_settings()
-
-
 def init_document_generator(case_id, template):
     # Generate the document
     template_filepath = settings.DATA_PATH.joinpath(
@@ -37,6 +35,7 @@ def init_document_generator(case_id, template):
     )
 
     # Ensure the folder exists
+    logger.info(f"Creating the folder {template_filepath.parent}")
     template_filepath.parent.mkdir(parents=True, exist_ok=True)
 
     templates.get_template_file(template, template_filepath)
@@ -46,6 +45,7 @@ def init_document_generator(case_id, template):
     )
 
     # Generate the preview
+    logger.info(f"Initializing the document generator")
     document_generator = DocumentGenerator(
         input_file=template_filepath,
         output_file=output_filepath,
@@ -58,12 +58,14 @@ def get_context_data(case_id, template):
     document_generator = init_document_generator(case_id, template)
 
     # Add control buttons to validate or cancel
+    logger.info(f"Getting the context data for {template}")
     context = document_generator.get_context()
 
     # Creating the data dictionary
     data = {}
 
     # Filling the data dictionary with cases data
+    logger.info(f"Getting the case data for {case_id}")
     case_data = cases.get_single_case(case_id).dict()
 
     case_data = flatten(case_data)
@@ -96,18 +98,23 @@ def get_context_data(case_id, template):
     # Get dash inputs and update the context
     context_data = {k: data.get(k) for k in context}
 
+    logger.info("Finished building data")
+    logger.debug(context_data)
     return context_data
 
 
 def generate_document(case_id, template, context_data):
+    logger.info(f"Generating the document for {template}")
     document_generator = init_document_generator(case_id, template)
 
     document_generator.generate(context_data)
 
     # Convert the document to PDF
+    logger.info("Converting the document to PDF")
     output_filepath_pdf = convert_doc_to_pdf(document_generator.output_file)
 
     # Upload the PDF to the bucket
+    logger.info("Uploading the PDF to the bucket")
     blob = bucket.blob(f"tmp/{case_id}_{template}_filled.pdf")
     blob.upload_from_filename(output_filepath_pdf)
     media_url = blob.generate_signed_url(expiration=timedelta(seconds=3600))
@@ -179,6 +186,8 @@ def modal_court_preview(opened, update, template, pars, case_id):
 
     if template is None:
         return "Please select a template", dash.no_update
+
+    logger.info(f"Getting the context data for {template}")
 
     context_data = get_context_data(case_id, template)
 

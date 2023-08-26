@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "Fubloo"
 
     DEBUG: bool = os.getenv("DEBUG", "false").lower() == "true"
-    LOGGING_LEVEL: str = os.getenv("LOGGING_LEVEL", "DEBUG")
+    LOGGING_LEVEL: str = os.getenv("LOGGING_LEVEL", "INFO")
 
     # Pathname configuration
     PATHNAME_PARAMS = dict()

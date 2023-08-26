@@ -1,5 +1,6 @@
 import logging
 import os
+from logging.config import dictConfig
 
 import dash_bootstrap_components as dbc
 import diskcache
@@ -23,6 +24,48 @@ def set_logging(app, logging_level):
         for handler in app.logger.handlers:
             handler.setFormatter(formatter)
             handler.setLevel(logging_level)
+
+
+dictConfig(
+    {
+        "version": 1,
+        "formatters": {
+            "default": {
+                "format": "[%(asctime)s] %(levelname)s in %(module)s: %(message)s",
+            }
+        },
+        "handlers": {
+            "wsgi": {
+                "class": "logging.StreamHandler",
+                "stream": "ext://flask.logging.wsgi_errors_stream",
+                "formatter": "default",
+            },
+            "file": {
+                "class": "logging.FileHandler",
+                "filename": "app.log",
+                "formatter": "default",
+            },
+        },
+        "root": {"level": "INFO", "handlers": ["wsgi", "file"]},
+        "loggers": {
+            "werkzeug": {
+                "level": "INFO",
+                "handlers": ["wsgi", "file"],
+                "propagate": False,
+            },
+            "gunicorn": {
+                "level": "INFO",
+                "handlers": ["wsgi", "file"],
+                "propagate": False,
+            },
+            "src": {
+                "level": "INFO",
+                "handlers": ["wsgi", "file"],
+                "propagate": False,
+            },
+        },
+    }
+)
 
 
 def init_app():
@@ -70,10 +113,10 @@ def init_app():
     server = app.server
 
     # Set logging
-    filehandler = logging.FileHandler("app.log")
+    # filehandler = logging.FileHandler("app.log")
 
-    app.logger.addHandler(filehandler)
-    set_logging(app, settings.LOGGING_LEVEL)
+    # app.logger.addHandler(filehandler)
+    # set_logging(app, settings.LOGGING_LEVEL)
 
     # Authentication
     auth = AdvancedAuth(app)

@@ -1,7 +1,10 @@
+import logging
 from datetime import timedelta
 
 from src.db import bucket, db
 from src.models import templates
+
+logger = logging.getLogger(__name__)
 
 
 def get_templates(
@@ -59,6 +62,7 @@ def delete_template(template_id: str) -> None:
 
 
 def get_template_file(template_id: str, target_filepath=None):
+    logger.info(f"Getting the template file for {template_id}")
     template = get_single_template(template_id)
 
     if template.filepath is None:
@@ -72,7 +76,9 @@ def get_template_file(template_id: str, target_filepath=None):
         return url
 
     # Download the file to the local
+    logger.info(f"Downloading the template file to {target_filepath}")
     blob.download_to_filename(target_filepath)
 
+    logger.info("Template file downloaded")
     # Return the file path
     return target_filepath
