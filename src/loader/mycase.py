@@ -167,6 +167,8 @@ class MyCase:
                 if "initial" in docket.get("docket_desc", "").lower():
                     # Get the associated_docketscheduledinfo
                     schedule = docket.get("associated_docketscheduledinfo", {})
+                    if isinstance(schedule, list):
+                        schedule = schedule.pop()
                     court_date = schedule.get("associated_date", "")
                     court_time = schedule.get("associated_time", "")
                     break
