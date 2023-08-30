@@ -115,7 +115,7 @@ class Settings(BaseSettings):
 
     # llm
     OPENAI_API_KEY: str = os.getenv(
-        "OPENAI_API_KEY", "sk-2c2b2-2c2b2-2c2b2-2c2b2-2c2b2"
+        "OPENAI_API_KEY", "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"
     )
 
     STORAGE_BUCKET: str = os.getenv("STORAGE_BUCKET", "fubloo-data")
@@ -140,6 +140,17 @@ class Settings(BaseSettings):
     # Selenium Service
     SELENIUM_STANDALONE_URL: str = os.getenv(
         "SELENIUM_STANDALONE_URL", "http://localhost:4444/wd/hub"
+    )
+
+    # GOOGLE GMAIL API
+    GOOGLE_GMAIL_API_CLIENT_SECRET: str = os.getenv(
+        "GOOGLE_GMAIL_API_CLIENT_SECRET",
+        "configuration/client_secret_330426662227-qi4asjra43jl23obg4944d158t9khpeq.apps.googleusercontent.com.json",
+    )
+
+    GOOGLE_GMAIL_API_REDIRECT_URI: str = os.getenv(
+        "GOOGLE_GMAIL_API_REDIRECT_URI",
+        "http://localhost:3000/connectors/gmail",
     )
 
     class Config:
