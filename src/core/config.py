@@ -142,6 +142,12 @@ class Settings(BaseSettings):
         "SELENIUM_STANDALONE_URL", "http://localhost:4444/wd/hub"
     )
 
+    # Intercom Config
+    INTERCOM_API_KEY: str = os.getenv(
+        "INTERCOM_API_KEY",
+        "dG9rOjVkMzgxZDY2XzQxYjFfNDRmM19hZGE3XzAyODc4YzU4MzgxOToxOjA=",
+    )
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
