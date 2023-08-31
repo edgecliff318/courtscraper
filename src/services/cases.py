@@ -9,6 +9,7 @@ def get_cases(
     court_code_list=None, start_date=None, end_date=None, disposition=None
 ):
     cases_list = db.collection("cases")
+
     if court_code_list is not None and court_code_list:
         if not isinstance(court_code_list, list):
             court_code_list = [

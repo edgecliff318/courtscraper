@@ -44,7 +44,7 @@ def case_select_data(value):
 def goto_case(case_id):
     if case_id is None:
         return dash.no_update
-    return f"/manage/{case_id}"
+    return f"/manage/cases/{case_id}"
 
 
 def toggle_drawer(n_clicks, opened):

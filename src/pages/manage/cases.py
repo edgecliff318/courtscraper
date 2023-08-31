@@ -12,7 +12,7 @@ from src.services import cases
 
 logger = logging.Logger(__name__)
 
-dash.register_page(__name__, order=3, path_template="/manage/<case_id>")
+dash.register_page(__name__, order=3, path_template="/manage/cases/<case_id>")
 
 
 def get_court_section():
