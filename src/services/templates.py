@@ -1,5 +1,6 @@
 import logging
 from datetime import timedelta
+from typing import Optional
 
 from google.cloud.storage.retry import DEFAULT_RETRY
 
@@ -37,17 +38,20 @@ def get_many_templates(template_ids: list) -> list:
     return [templates.Template(**m.to_dict()) for m in templates_list]
 
 
-def insert_template(template: templates.Template, filepath: str):
+def insert_template(
+    template: templates.Template, filepath: Optional[str] = None
+):
     # Upload the file to the templates folder in Firebase Storage
-    filename = f"{template.id}.docx"
+    if filepath is not None:
+        filename = f"{template.id}.docx"
 
-    # Upload the file to the bucket
-    filepath_firebase = f"templates/{filename}"
-    blob = bucket.blob(filepath_firebase)
-    blob.upload_from_filename(filepath)
+        # Upload the file to the bucket
+        filepath_firebase = f"templates/{filename}"
+        blob = bucket.blob(filepath_firebase)
+        blob.upload_from_filename(filepath)
 
-    # Add the file path to the template
-    template.filepath = filepath_firebase
+        # Add the file path to the template
+        template.filepath = filepath_firebase
 
     # Add the template to the database
     db.collection("templates").document(template.id).set(template.dict())
