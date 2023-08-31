@@ -13,6 +13,7 @@ class Template(BaseModel):
     category: Optional[str] = None
     creator: Optional[str] = None
     type: Optional[str] = "file"  # file, html, text
+    subject: Optional[str] = None
     text: Optional[str] = None
     filepath: Optional[str] = None
     parameters: Optional[dict] = None

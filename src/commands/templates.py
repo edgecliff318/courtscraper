@@ -95,6 +95,8 @@ def upload_templates_json(input_file: str):
             type=template.get("type"),
             parameters=template.get("parameters"),
             state=template.get("state"),
+            text=template.get("text"),
+            subject=template.get("subject"),
         )
 
         templates_service.insert_template(

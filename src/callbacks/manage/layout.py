@@ -53,11 +53,8 @@ def toggle_drawer(n_clicks, opened):
 
 for modal in [
     "modal-court-preview",
-    "modal-court-submit",
     "modal-prosecutor-preview",
-    "modal-prosecutor-submit",
     "modal-client-preview",
-    "modal-client-submit",
 ]:
     callback(
         Output(modal, "opened"),
