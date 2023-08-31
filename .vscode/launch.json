@@ -79,12 +79,13 @@
             "justMyCode": false
         },
         {
-            "name": "Analyze Leads 2",
+            "name": "Upload Templates",
             "type": "python",
             "request": "launch",
             "program": "main.py",
             "args": [
-                "analyze-leads",
+                "upload-templates",
+                "templates.json"
             ],
             "console": "integratedTerminal",
             "justMyCode": false
