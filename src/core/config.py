@@ -142,6 +142,7 @@ class Settings(BaseSettings):
         "SELENIUM_STANDALONE_URL", "http://localhost:4444/wd/hub"
     )
 
+
     # GOOGLE GMAIL API
     GOOGLE_GMAIL_API_CLIENT_SECRET: str = os.getenv(
         "GOOGLE_GMAIL_API_CLIENT_SECRET",
@@ -151,6 +152,12 @@ class Settings(BaseSettings):
     GOOGLE_GMAIL_API_REDIRECT_URI: str = os.getenv(
         "GOOGLE_GMAIL_API_REDIRECT_URI",
         "http://localhost:3000/connectors/gmail",
+
+    # Intercom Config
+    INTERCOM_API_KEY: str = os.getenv(
+        "INTERCOM_API_KEY",
+        "dG9rOjVkMzgxZDY2XzQxYjFfNDRmM19hZGE3XzAyODc4YzU4MzgxOToxOjA=",
+
     )
 
     class Config:
