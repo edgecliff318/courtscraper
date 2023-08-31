@@ -8,6 +8,7 @@ from src.commands.cases import retrieve_cases as retrieve_cases_fct
 from src.commands.leads import analyze_leads as analyze_leads_fct
 from src.commands.leads import retrieve_leads as retrieve_leads_fct
 from src.commands.leads import sync_twilio as sync_twilio_fct
+from src.commands.templates import upload_templates as upload_templates_fct
 from src.core.config import get_settings
 
 settings = get_settings()
@@ -44,6 +45,8 @@ retrieve_leads = app.command(help="Retrieve leads information")(
 sync_twilio = app.command(help="Sync twilio interactions")(sync_twilio_fct)
 
 analyze_leads = app.command(help="Analyze leads")(analyze_leads_fct)
+
+upload_templates = app.command(help="Upload templates")(upload_templates_fct)
 
 if __name__ == "__main__":
     app()
