@@ -4,12 +4,12 @@ from pydantic import BaseModel, validator
 
 
 class Account(BaseModel):
-    username: Optional[str]
-    password: Optional[str]
-    url: Optional[str]
-    api_key: Optional[str]
+    username: Optional[str] = None
+    password: Optional[str] = None
+    url: Optional[str] = None
+    api_key: Optional[str] = None
     active: bool = True
-    system: Optional[str]
+    system: Optional[str] = None
 
 
 class Settings(BaseModel):
