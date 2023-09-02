@@ -57,7 +57,9 @@ def get_case_summary(case: Case):
             ),
             create_group_item(
                 label="Fine",
-                value=f"$ {case.fine.get('total_amount', 'N/A') if case.fine is not None else 'N/A'}",
+                value=(
+                    f"$ {case.fine.get('total_amount', 'N/A') if case.fine is not None else 'N/A'}"
+                ),
                 icon="mdi:cash",
             ),
             dmc.Divider(variant="solid", className="mt-2"),

@@ -1,3 +1,6 @@
+from datetime import datetime
+from typing import MutableMapping
+
 from google.cloud.firestore_v1.base_query import FieldFilter, Or
 from pydantic import ValidationError
 
@@ -84,3 +87,31 @@ def search_cases(search_term: str) -> list:
 
     outputs = [cases.Case(**m.to_dict()) for m in cases_list]
     return [o for o in outputs if o is not None]
+
+
+def flatten(dictionary, parent_key="", separator="_"):
+    items = []
+    for key, value in dictionary.items():
+        new_key = parent_key + separator + key if parent_key else key
+        if isinstance(value, MutableMapping):
+            items.extend(flatten(value, new_key, separator=separator).items())
+        else:
+            items.append((new_key, value))
+    return dict(items)
+
+
+def get_context_data(case_id):
+    case_data = get_single_case(case_id).dict()
+
+    case_data = flatten(case_data)
+    case_data = {f"case_{key}": value for key, value in case_data.items()}
+
+    if case_data.get("case_middle_name") is None:
+        case_data["case_middle_name"] = ""
+
+    # Adding the current date short
+    case_data["current_date_short"] = (
+        datetime.now().strftime("%B %d, %Y").upper()
+    )
+
+    return case_data

@@ -29,7 +29,9 @@ def get_case_tabs(case):
                 [
                     dmc.Tab(
                         "Case Workflow",
-                        rightSection=DashIconify(icon="tabler:alert-circle", width=16),
+                        rightSection=DashIconify(
+                            icon="tabler:alert-circle", width=16
+                        ),
                         value="workflow",
                     ),
                     dmc.Tab(
@@ -49,7 +51,9 @@ def get_case_tabs(case):
                     ),
                     dmc.Tab(
                         "Documents",
-                        rightSection=DashIconify(icon="et:documents", width=16),
+                        rightSection=DashIconify(
+                            icon="et:documents", width=16
+                        ),
                         value="documents",
                     ),
                     dmc.Tab(

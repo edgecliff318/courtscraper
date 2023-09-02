@@ -1,13 +1,12 @@
 import base64
 import logging
-from collections.abc import MutableMapping
 from datetime import datetime, timedelta
 
 import dash
 import dash_mantine_components as dmc
 from dash import ALL, Input, Output, State, callback, dcc, html
-from dash_iconify import DashIconify
 
+from src.connectors.intercom import IntercomConnector
 from src.core.config import get_settings
 from src.db import bucket
 from src.services import cases, templates
@@ -15,21 +14,30 @@ from src.services import cases, templates
 logger = logging.getLogger(__name__)
 settings = get_settings()
 
-def upload_to_prosecutor():
-    pass 
 
+def upload_to_client(email, subject, message):
+    intercom = IntercomConnector(settings.INTERCOM_API_KEY)
+
+    contact = intercom.search_contact(email="shawn@tickettakedown.com")
+    admins = intercom.get_admins()
+
+    output = intercom.send_message(
+        sender=admins[0], contact=contact, message=message
+    )
+
+    return output
 
 
 @callback(
-    Output("modal-prosecutor-preview-parameters", "children"),
-    Input("modal-prosecutor-preview", "opened"),
-    Input("modal-prosecutor-preview-generate", "n_clicks"),
-    Input("section-prosecutor-select-template", "value"),
-    State({"type": "modal-prosecutor-pars", "index": ALL}, "value"),
+    Output("modal-client-preview-parameters", "children"),
+    Input("modal-client-preview", "opened"),
+    Input("modal-client-preview-generate", "n_clicks"),
+    Input("section-client-select-template", "value"),
+    State({"type": "modal-client-pars", "index": ALL}, "value"),
     State("case-id", "children"),
     prevent_initial_call=True,
 )
-def modal_prosecutor_pars(opened, update, template, pars, case_id):
+def modal_client_pars(opened, update, template, pars, case_id):
     ctx = dash.callback_context
     if opened is False or opened is None:
         return dash.no_update
@@ -42,10 +50,7 @@ def modal_prosecutor_pars(opened, update, template, pars, case_id):
     logger.info(f"Getting the context data for {template}")
 
     # Generate the email using Open AI
-    if (
-        ctx.triggered[0]["prop_id"] 
-        == "modal-prosecutor-preview-generate.n_clicks"
-    ):
+    if ctx.triggered[0]["prop_id"] == "modal-client-preview-generate.n_clicks":
         pass
 
     documents = bucket.list_blobs(prefix=f"cases/{case_id}/", delimiter="/")
@@ -59,10 +64,10 @@ def modal_prosecutor_pars(opened, update, template, pars, case_id):
                     {"label": doc.name, "value": doc.name} for doc in documents
                 ],
                 value=[],
-                id={"type": "modal-prosecutor-pars", "index": "attachments"},
+                id={"type": "modal-client-pars", "index": "attachments"},
             ),
             dcc.Upload(
-                id={"type": "modal-prosecutor-pars", "index": "upload"},
+                id={"type": "modal-client-pars", "index": "upload"},
                 children=html.Div(
                     ["Drag and Drop or ", html.A("Select Files")]
                 ),
@@ -103,18 +108,18 @@ def modal_prosecutor_pars(opened, update, template, pars, case_id):
             dmc.TextInput(
                 label="Email",
                 placeholder="Enter the email",
-                id={"type": "modal-prosecutor-pars", "index": "email"},
+                id={"type": "modal-client-pars", "index": "email"},
             ),
             dmc.TextInput(
                 label="Subject",
                 placeholder="Enter the subject",
-                id={"type": "modal-prosecutor-pars", "index": "subject"},
+                id={"type": "modal-client-pars", "index": "subject"},
                 value=subject_filled,
             ),
             dmc.Textarea(
                 label="Body",
                 placeholder="Enter the body",
-                id={"type": "modal-prosecutor-pars", "index": "body"},
+                id={"type": "modal-client-pars", "index": "body"},
                 value=body_filled,
                 minRows=20,
             ),
@@ -126,17 +131,17 @@ def modal_prosecutor_pars(opened, update, template, pars, case_id):
 
 
 @callback(
-    Output("modal-prosecutor-preview-content", "children"),
-    Input("modal-prosecutor-preview", "opened"),
-    Input({"type": "modal-prosecutor-pars", "index": ALL}, "value"),
-    Input({"type": "modal-prosecutor-pars", "index": "upload"}, "contents"),
-    Input({"type": "modal-prosecutor-pars", "index": ALL}, "n_clicks"),
-    Input("section-prosecutor-select-template", "value"),
-    State({"type": "modal-prosecutor-pars", "index": "upload"}, "filename"),
+    Output("modal-client-preview-content", "children"),
+    Input("modal-client-preview", "opened"),
+    Input({"type": "modal-client-pars", "index": ALL}, "value"),
+    Input({"type": "modal-client-pars", "index": "upload"}, "contents"),
+    Input({"type": "modal-client-pars", "index": ALL}, "n_clicks"),
+    Input("section-client-select-template", "value"),
+    State({"type": "modal-client-pars", "index": "upload"}, "filename"),
     State("case-id", "children"),
     prevent_initial_call=True,
 )
-def modal_prosecutor_preview(
+def modal_client_preview(
     opened, pars, file_content, clicks, template, filename, case_id
 ):
     ctx = dash.callback_context
@@ -164,7 +169,7 @@ def modal_prosecutor_preview(
 
     # Generate the HTML preview
     attachments = ctx.inputs.get(
-        '{"index":"attachments","type":"modal-prosecutor-pars"}.value', []
+        '{"index":"attachments","type":"modal-client-pars"}.value', []
     )
 
     if attachments:
@@ -176,7 +181,7 @@ def modal_prosecutor_preview(
                         dmc.Button(
                             "Preview",
                             id={
-                                "type": "modal-prosecutor-pars",
+                                "type": "modal-client-pars",
                                 "index": f"preview-{a}",
                             },
                         ),
@@ -213,9 +218,7 @@ def modal_prosecutor_preview(
 
     else:
         preview = html.Div(
-            ctx.inputs.get(
-                '{"index":"body","type":"modal-prosecutor-pars"}.value'
-            )
+            ctx.inputs.get('{"index":"body","type":"modal-client-pars"}.value')
         )
 
     document_preview = dmc.Card(
@@ -236,45 +239,57 @@ def modal_prosecutor_preview(
 
 
 @callback(
-    output=Output("modal-prosecutor-response", "children"),
+    output=Output("modal-client-response", "children"),
     inputs=[
-        Input("modal-prosecutor-submit", "n_clicks"),
-        State({"type": "modal-prosecutor-pars", "index": ALL}, "value"),
+        Input("modal-client-submit", "n_clicks"),
+        State({"type": "modal-client-pars", "index": ALL}, "value"),
         State("case-id", "children"),
-        State("section-prosecutor-select-template", "value"),
+        State("section-client-select-template", "value"),
     ],
     running=[
-        (Output("modal-prosecutor-submit", "disabled"), True, False),
-        (Output("modal-prosecutor-cancel", "disabled"), False, True),
+        (Output("modal-client-submit", "disabled"), True, False),
+        (Output("modal-client-cancel", "disabled"), False, True),
         (
-            Output("modal-prosecutor-response", "style"),
+            Output("modal-client-response", "style"),
             {"visibility": "hidden"},
             {"visibility": "visible"},
         ),
         (
-            Output("modal-prosecutor-submit", "loading"),
+            Output("modal-client-submit", "loading"),
             True,
             False,
         ),
     ],
-    cancel=[Input("modal-prosecutor-cancel", "n_clicks")],
+    cancel=[Input("modal-client-cancel", "n_clicks")],
     prevent_initial_call=True,
     background=False,
 )
-def modal_prosecutor_submit(n_clicks, pars, case_id, template):
+def modal_client_submit(n_clicks, pars, case_id, template):
     ctx = dash.callback_context
-    if ctx.triggered[0]["prop_id"] == "modal-prosecutor-submit.n_clicks":
+    if ctx.triggered[0]["prop_id"] == "modal-client-submit.n_clicks":
         # Check the event on the case events
+        email = ctx.states.get(
+            '{"index":"email","type":"modal-client-pars"}.value'
+        )
+
+        subject = ctx.states.get(
+            '{"index":"subject","type":"modal-client-pars"}.value'
+        )
+
+        body = ctx.states.get(
+            '{"index":"body","type":"modal-client-pars"}.value'
+        )
         event = {
             "case_id": case_id,
             "template": template,
-            "document": f"cases/{case_id}/{template}.docx",
             "date": datetime.now(),
+            "subject": subject,
+            "body": body,
+            "email": email,
         }
 
         case_data = cases.get_single_case(case_id)
         events = case_data.events
-        prosecutor_location = case_data.locn_code
 
         # Upload the case to casenet
         if events is None:
@@ -286,7 +301,7 @@ def modal_prosecutor_submit(n_clicks, pars, case_id, template):
             return html.Div(
                 [
                     dmc.Alert(
-                        "Document already uploaded to the prosecutor system",
+                        "Document already uploaded to the client system",
                         color="red",
                         title="Information",
                     ),
@@ -302,18 +317,8 @@ def modal_prosecutor_submit(n_clicks, pars, case_id, template):
 
         params.setdefault("template_title", template_details.name)
 
-        # Upload the document to the prosecutor
-        output = upload_to_prosecutor(
-            case_id,
-            template,
-            prosecutor_location,
-            params=template_details.parameters,
-        )
-
-        # Submit the document
-        firestore_filepath_pdf = submit_document(case_id, template)
-
-        event["document"] = firestore_filepath_pdf
+        # Upload the document to the client
+        output = upload_to_client(email=email, subject=subject, message=body)
 
         # Add the event to the list
         events.append(event)
@@ -327,7 +332,7 @@ def modal_prosecutor_submit(n_clicks, pars, case_id, template):
         return html.Div(
             [
                 dmc.Alert(
-                    "Document successfully uploaded to the prosecutor system",
+                    "Message successfully sent to the client through Intercom",
                     color="teal",
                     title="Success",
                 )
