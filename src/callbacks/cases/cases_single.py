@@ -222,7 +222,7 @@ def render_case_details(case_id):
                     email = None
             status = lead_details.status
             notes = lead_details.notes
-            lead_details_dict = lead_details.dict()
+            lead_details_dict = lead_details.model_dump()
 
         if case_details is None:
             parties = pd.DataFrame(
@@ -655,7 +655,7 @@ def refresh_case(btn, case_id):
                 username=case_net_account.username,
                 password=case_net_account.password,
             )
-            case_refreshed = case_net.refresh_case(case_details.dict())
+            case_refreshed = case_net.refresh_case(case_details.model_dump())
 
             case_refreshed_obj = cases_model.Case.parse_obj(case_refreshed)
 

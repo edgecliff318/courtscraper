@@ -3,7 +3,10 @@ from pydantic import BaseModel
 
 
 class Participant(BaseModel):
-    name: Optional[str] = None
+    id: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    middle_name: Optional[str] = None
     role: Optional[str] = None
     phone: Optional[str] = None
     email: Optional[str] = None

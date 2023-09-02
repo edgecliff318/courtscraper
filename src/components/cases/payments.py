@@ -1,2 +1,2 @@
-def get_case_payments():
+def get_case_payments(case):
     return

@@ -43,7 +43,7 @@ for message_dict in track(config_dict.get("messages")):
         template_text=message_dict.get("value"),
         template_language=message_dict.get("language", "en"),
     )
-    messages_collection.document(message.template_id).set(message.dict())
+    messages_collection.document(message.template_id).set(message.model_dump())
 
 courts_collection = db.collection("courts")
 
@@ -60,7 +60,7 @@ for court_dict in track(config_dict.get("courts")):
         enabled=court_dict.get("enabled"),
         state=court_dict.get("state", "MO"),
     )
-    courts_collection.document(court.code).set(court.dict())
+    courts_collection.document(court.code).set(court.model_dump())
 
 
 batch = db.batch()
@@ -136,7 +136,7 @@ for case_id, lead in track(leads_list.items()):
                 case.image = image
 
         # Adding the case to the database
-        cases_collection.document(case_id).set(case.dict())
+        cases_collection.document(case_id).set(case.model_dump())
 
         # Lead status
         lead_status = lead.get("status", "not_contacted")
@@ -159,7 +159,7 @@ for case_id, lead in track(leads_list.items()):
                     status=interaction_dict.get("status"),
                 )
                 last_updated = interaction_dict.get("date")
-                interactions_collection.add(interaction.dict())
+                interactions_collection.add(interaction.model_dump())
 
         if str(case_id) in cases_contacted["case_id"].values:
             lead_status = "converted"
@@ -186,7 +186,7 @@ for case_id, lead in track(leads_list.items()):
             disposition=case.disposition,
         )
 
-        leads_collection.document(case_id).set(lead.dict())
+        leads_collection.document(case_id).set(lead.model_dump())
     except Exception as e:
         console.print(f"Failed to add case : {case_id} - {e}")
         logger.error(f"Failed to add case : {case_id} - {e}")
@@ -223,7 +223,7 @@ for case_id in cases_not_contacted["case_id"].values:
             disposition=None,
         )
 
-        leads_collection.document(case_id).set(lead.dict())
+        leads_collection.document(case_id).set(lead.model_dump())
     except Exception as e:
         console.print(f"Failed to add case : {case_id} - {e}")
         logger.error(f"Failed to add case : {case_id} - {e}")

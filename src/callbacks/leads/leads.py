@@ -27,7 +27,7 @@ def render_leads(court_code_list, dates, status):
     if status == "all":
         status = None
     leads_list = leads.get_leads(court_code_list, start_date, end_date, status)
-    df = pd.DataFrame([lead.dict() for lead in leads_list])
+    df = pd.DataFrame([lead.model_dump() for lead in leads_list])
     if df.empty:
         return [
             dbc.Col(

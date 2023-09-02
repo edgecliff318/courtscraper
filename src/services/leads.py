@@ -170,7 +170,7 @@ def get_last_lead(
 
 
 def insert_lead(lead: leads.Lead):
-    db.collection("leads").document(lead.case_id).set(lead.dict())
+    db.collection("leads").document(lead.case_id).set(lead.model_dump())
 
 
 def update_lead_status(case_id, status):
@@ -188,7 +188,7 @@ def update_multiple_leads_status(case_ids, status):
 
 
 def update_lead(lead: leads.Lead):
-    db.collection("leads").document(lead.case_id).update(lead.dict())
+    db.collection("leads").document(lead.case_id).update(lead.model_dump())
 
 
 def patch_lead(case_id, **kwargs):

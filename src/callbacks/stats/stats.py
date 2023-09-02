@@ -39,7 +39,7 @@ def render_leads(search, court_code_list, dates, status):
         leads_list = leads.get_leads(
             court_code_list, start_date, end_date, status
         )
-        data = pd.DataFrame([lead.dict() for lead in leads_list])
+        data = pd.DataFrame([lead.model_dump() for lead in leads_list])
 
         if data.empty:
             return (
@@ -80,7 +80,7 @@ def render_leads(search, court_code_list, dates, status):
 
         interactions = messages.get_interactions()
         interactions_df = pd.DataFrame(
-            [interaction.dict() for interaction in interactions]
+            [interaction.model_dump() for interaction in interactions]
         )
 
         data = data.join(

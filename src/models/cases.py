@@ -8,6 +8,8 @@ from pydantic import BaseModel, validator
 class Case(BaseModel):
     case_id: str
     court_id: str
+    participants: Optional[List] = None
+    related_cases: Optional[List] = None
     protection_order: Optional[bool] = None
     parties: Optional[List[Dict]] = None
     disposed: Optional[bool] = None

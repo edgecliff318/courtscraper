@@ -72,11 +72,11 @@ def get_case_tabs(case):
                     ),
                 ]
             ),
-            dmc.TabsPanel(get_case_workflow(), value="workflow"),
+            dmc.TabsPanel(get_case_workflow(case), value="workflow"),
             dmc.TabsPanel(get_case_events(case), value="events"),
-            dmc.TabsPanel(get_case_documents(), value="documents"),
-            dmc.TabsPanel(get_case_payments(), value="payments"),
-            dmc.TabsPanel(get_case_details(), value="details"),
+            dmc.TabsPanel(get_case_documents(case), value="documents"),
+            dmc.TabsPanel(get_case_payments(case), value="payments"),
+            dmc.TabsPanel(get_case_details(case), value="details"),
         ],
         value="workflow",
     )

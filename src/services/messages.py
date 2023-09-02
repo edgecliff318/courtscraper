@@ -120,15 +120,15 @@ def add_text_to_image(image_url, text):
 def insert_interaction(interaction):
     if interaction.id is not None:
         db.collection("interactions").document(interaction.id).set(
-            interaction.dict()
+            interaction.model_dump()
         )
     else:
-        db.collection("interactions").add(interaction.dict())
+        db.collection("interactions").add(interaction.model_dump())
 
 
 def update_interaction(interaction):
     db.collection("interactions").document(interaction.id).update(
-        interaction.dict()
+        interaction.model_dump()
     )
 
 

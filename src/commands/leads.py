@@ -72,7 +72,7 @@ def retrieve_leads():
         case = cases_service.get_single_case(lead.case_id)
 
         try:
-            lead_data = lead.dict()
+            lead_data = lead.model_dump()
             first_name = lead.first_name
             last_name = lead.last_name
             middle_name = case.middle_name

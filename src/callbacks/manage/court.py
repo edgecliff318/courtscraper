@@ -67,7 +67,7 @@ def get_context_data(case_id, template):
 
     # Filling the data dictionary with cases data
     logger.info(f"Getting the case data for {case_id}")
-    case_data = cases.get_single_case(case_id).dict()
+    case_data = cases.get_single_case(case_id).model_dump()
 
     case_data = flatten(case_data)
 

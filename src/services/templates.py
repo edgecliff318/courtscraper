@@ -54,13 +54,15 @@ def insert_template(
         template.filepath = filepath_firebase
 
     # Add the template to the database
-    db.collection("templates").document(template.id).set(template.dict())
+    db.collection("templates").document(template.id).set(template.model_dump())
 
     return template
 
 
 def update_template(template: templates.Template, filepath=None) -> None:
-    db.collection("templates").document(template.id).update(template.dict())
+    db.collection("templates").document(template.id).update(
+        template.model_dump()
+    )
 
 
 def delete_template(template_id: str) -> None:

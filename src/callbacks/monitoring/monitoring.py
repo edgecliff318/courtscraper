@@ -35,7 +35,7 @@ def render_status_msg(dates, direction):
         direction=direction,
     )
     df = pd.DataFrame(
-        [interaction.dict() for interaction in interactions_list]
+        [interaction.model_dump() for interaction in interactions_list]
     )
     cols = [
         "case_id",

@@ -10,7 +10,7 @@ from src.components.cases.workflow.prosecutor import get_prosecutor_section
 logger = logging.Logger(__name__)
 
 
-def get_case_workflow():
+def get_case_workflow(case):
     return dmc.Accordion(
         children=[
             dmc.AccordionItem(

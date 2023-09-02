@@ -28,10 +28,12 @@ class BaseService:
         return item.to_dict()
 
     def create_item(self, item):
-        db.collection(self.collection).add(item.dict())
+        db.collection(self.collection).add(item.model_dump())
 
     def update_item(self, item_id, item):
-        db.collection(self.collection).document(item_id).update(item.dict())
+        db.collection(self.collection).document(item_id).update(
+            **item.model_dump()
+        )
 
     def delete_item(self, item_id):
         db.collection(self.collection).document(item_id).delete()

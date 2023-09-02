@@ -55,11 +55,11 @@ def get_many_cases(case_ids: list) -> list:
 
 
 def insert_case(case: cases.Case) -> None:
-    db.collection("cases").document(case.case_id).set(case.dict())
+    db.collection("cases").document(case.case_id).set(case.model_dump())
 
 
 def update_case(case: cases.Case) -> None:
-    db.collection("cases").document(case.case_id).update(case.dict())
+    db.collection("cases").document(case.case_id).update(case.model_dump())
 
 
 def patch_case(case_id: str, data: dict) -> None:
@@ -101,7 +101,7 @@ def flatten(dictionary, parent_key="", separator="_"):
 
 
 def get_context_data(case_id):
-    case_data = get_single_case(case_id).dict()
+    case_data = get_single_case(case_id).model_dump()
 
     case_data = flatten(case_data)
     case_data = {f"case_{key}": value for key, value in case_data.items()}
