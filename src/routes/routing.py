@@ -37,13 +37,10 @@ def add_routes(server):
             settings.DATA_PATH, image, as_attachment=False
         )
 
-
-
     UPLOAD_DATA_FOLDER = settings.DATA_PATH
 
     @server.route("/upload", methods=["POST"])
     def upload_file():
-
         api_key = request.args.get("api_key")
         if api_key != settings.API_KEY:
             return "API Key Not Correct"
@@ -61,7 +58,6 @@ def add_routes(server):
                 return redirect(request.url)
             filename = secure_filename(file.filename)
             file.save(os.path.join(UPLOAD_DATA_FOLDER, filename))
-
 
     @server.route("/update", methods=["POST"])
     def update_data():

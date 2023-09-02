@@ -230,7 +230,6 @@ class ScraperAZMaricopaSuperior(ScraperBase):
         if test:
             soup = test
         else:
-
             first_name = NameNormalizer(first_name).normalized()
             last_name = NameNormalizer(last_name).normalized()
             if len(first_name) < 1 or len(last_name) < 1:

@@ -15,9 +15,9 @@ from src.services import cases, templates
 logger = logging.getLogger(__name__)
 settings = get_settings()
 
-def upload_to_prosecutor():
-    pass 
 
+def upload_to_prosecutor():
+    pass
 
 
 @callback(
@@ -43,7 +43,7 @@ def modal_prosecutor_pars(opened, update, template, pars, case_id):
 
     # Generate the email using Open AI
     if (
-        ctx.triggered[0]["prop_id"] 
+        ctx.triggered[0]["prop_id"]
         == "modal-prosecutor-preview-generate.n_clicks"
     ):
         pass

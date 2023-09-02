@@ -16,7 +16,9 @@ def get_prosecutor_section():
                         children=[
                             dmc.Col(
                                 html.Div(
-                                    dmc.Loader(color="blue", size="md", variant="dots"),
+                                    dmc.Loader(
+                                        color="blue", size="md", variant="dots"
+                                    ),
                                     id="modal-prosecutor-preview-content",
                                 ),
                                 span=6,

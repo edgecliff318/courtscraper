@@ -6,7 +6,9 @@ setttings = get_settings()
 
 stripe.api_key = setttings.STRIPE_SECRET_KEY
 
-CUSTOMERS = [{"stripe_id": "cus_123456789", "email": "jenny.rosen@example.com"}]
+CUSTOMERS = [
+    {"stripe_id": "cus_123456789", "email": "jenny.rosen@example.com"}
+]
 PRICES = {"basic": "price_123456789", "professional": "price_987654321"}
 
 

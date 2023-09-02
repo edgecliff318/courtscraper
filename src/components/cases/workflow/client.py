@@ -17,7 +17,9 @@ def get_client_section():
                         children=[
                             dmc.Col(
                                 html.Div(
-                                    dmc.Loader(color="blue", size="md", variant="dots"),
+                                    dmc.Loader(
+                                        color="blue", size="md", variant="dots"
+                                    ),
                                     id="modal-client-preview-content",
                                 ),
                                 span=6,

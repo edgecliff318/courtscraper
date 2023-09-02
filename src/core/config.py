@@ -28,7 +28,9 @@ class Settings(BaseSettings):
 
     # Configuration
     CONFIG_FILENAME: str = os.getenv("CONFIG_FILENAME", "config.json")
-    CONFIG_TEST_FILENAME: str = os.getenv("CONFIG_TEST_FILENAME", "config_test.json")
+    CONFIG_TEST_FILENAME: str = os.getenv(
+        "CONFIG_TEST_FILENAME", "config_test.json"
+    )
 
     # Root Path
     ROOT_PATH: pathlib.Path = pathlib.Path(__file__).parent.parent.parent
@@ -41,7 +43,9 @@ class Settings(BaseSettings):
     TEMPLATE: str = os.getenv("TEMPLATE", "plotly")
 
     # Case Net
-    CASE_NET_URL: str = os.getenv("CASE_NET_URL", "https://www.courts.mo.gov/cnet")
+    CASE_NET_URL: str = os.getenv(
+        "CASE_NET_URL", "https://www.courts.mo.gov/cnet"
+    )
     CASE_NET_USERNAME: str = os.getenv("CASE_NET_USERNAME", "smeyer4040")
     CASE_NET_PASSWORD: str = os.getenv("CASE_NET_PASSWORD", "MASdorm1993!MAS")
 
@@ -67,7 +71,9 @@ class Settings(BaseSettings):
 
     # AUTH0 Configuration
     AUTH0_DOMAIN: str = os.getenv("AUTH0_DOMAIN", "fubloo.us.auth0.com")
-    AUTH0_AUDIENCE: str = os.getenv("AUTH0_AUDIENCE", "https://fubloo.us.auth0.com")
+    AUTH0_AUDIENCE: str = os.getenv(
+        "AUTH0_AUDIENCE", "https://fubloo.us.auth0.com"
+    )
     AUTH0_CLIENT_ID: str = os.getenv("AUTH0_CLIENT_ID", "")
     AUTH0_CLIENT_SECRET: str = os.getenv("AUTH0_CLIENT_SECRET", "")
     AUTH0_CALLBACK_URL: str = os.getenv(
@@ -89,7 +95,9 @@ class Settings(BaseSettings):
     LOGIN_URL: str = os.getenv("LOGIN_URL", "/login")
     LOGOUT_URL: str = os.getenv("LOGOUT_URL", "/logout")
     CALLBACK_URL: str = os.getenv("CALLBACK_URL", "/callback")
-    REDIRECT_URI: str = os.getenv("REDIRECT_URI", "http://localhost:8000/callback")
+    REDIRECT_URI: str = os.getenv(
+        "REDIRECT_URI", "http://localhost:8000/callback"
+    )
 
     # keys session
     JWT_PAYLOAD: str = os.getenv("JWT_PAYLOAD", "jwt_payload")
@@ -115,8 +123,12 @@ class Settings(BaseSettings):
     )
 
     # Beenverified Configuration
-    BEEN_VERIFIED_EMAIL: str = os.getenv("BEEN_VERIFIED_EMAIL", "ttdwoman@gmail.com")
-    BEEN_VERIFIED_PASSWORD: str = os.getenv("BEEN_VERIFIED_PASSWORD", "0TTD2023!")
+    BEEN_VERIFIED_EMAIL: str = os.getenv(
+        "BEEN_VERIFIED_EMAIL", "ttdwoman@gmail.com"
+    )
+    BEEN_VERIFIED_PASSWORD: str = os.getenv(
+        "BEEN_VERIFIED_PASSWORD", "0TTD2023!"
+    )
 
     # Gotenberg Configuration
     GOTENBERG_URL: str = os.getenv("GOTENBERG_URL", "http://localhost:3001")
