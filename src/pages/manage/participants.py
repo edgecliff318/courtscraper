@@ -47,10 +47,16 @@ def layout(participant_id):
         [
             dbc.Col(
                 dmc.Paper(
+                    dmc.Select(
+                        label="Participants",
+                        placeholder="Select participants",
+                        searchable=True,
+                        description="You can select the case participants here. ",
+                        id="participants-list",
+                    ),
                     shadow="xs",
                     p="md",
                     radius="md",
-                    id="participants-list",
                 ),
                 width=12,
                 class_name="mb-2",
