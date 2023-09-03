@@ -4,7 +4,7 @@ import typing as t
 
 from src.core.config import get_settings
 from src.db import db
-from google.cloud.firestore_v1.base_query import FieldFilter, Or
+from google.cloud.firestore_v1.base_query import FieldFilter, Or, And
 from google.cloud.firestore_v1.field_path import FieldPath
 from pydantic import BaseModel
 
@@ -24,7 +24,7 @@ class BaseService:
     def collection(self) -> str:
         return self.collection_name or str(self.__class__.__name__)
 
-    def parse_filters(self, **kwargs):
+    def parse_filters(self, kwargs):
         filters = []
         for key, value in kwargs.items():
             if value is not None:
@@ -45,26 +45,48 @@ class BaseService:
                     filters.append(FieldFilter(key, "<=", value))
                 else:
                     filters.append(FieldFilter(key, "==", value))
-        return kwargs
+
+        filters = And(filters=filters)
+        return filters
+
+    def get_dict(self, item):
+        output = item.to_dict()
+        try:
+            output.pop("id")
+        except KeyError:
+            pass
+        return output
 
     def get_items(self, **kwargs) -> t.List[serializer]:
         if not kwargs:
             items = db.collection(self.collection).stream()
-            return [self.serializer(**item.to_dict()) for item in items]
+            return [
+                self.serializer(**self.get_dict(item), id=item.id)
+                for item in items
+            ]
 
-        items = db.collection(self.collection).where(filters=kwargs).stream()
-        return [item.to_dict() for item in items]
+        items = (
+            db.collection(self.collection)
+            .where(filter=self.parse_filters(kwargs))
+            .stream()
+        )
+        return [
+            self.serializer(**self.get_dict(item), id=item.id)
+            for item in items
+        ]
 
     def get_single_item(self, item_id) -> serializer:
         item = db.collection(self.collection).document(item_id).get()
 
         if not item.exists:
             return None
-        return self.serializer(**item.to_dict())
+        return self.serializer(**self.get_dict(item), id=item.id)
 
     def create_item(self, item):
-        new_item = db.collection(self.collection).add(item.model_dump())
-        return new_item
+        creation_date, reference = db.collection(self.collection).add(
+            item.model_dump()
+        )
+        return reference
 
     def update_item(self, item_id, item):
         db.collection(self.collection).document(item_id).update(
@@ -88,4 +110,7 @@ class BaseService:
             db.collection(self.collection).where(filters=or_filter).stream()
         )
 
-        return [self.serializer(**item.to_dict()) for item in items]
+        return [
+            self.serializer(**self.get_dict(item), id=item.id)
+            for item in items
+        ]

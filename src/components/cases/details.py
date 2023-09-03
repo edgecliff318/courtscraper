@@ -3,7 +3,7 @@ from src.components.edits import render_edit_component
 from src.models.cases import Case
 from src.services.participants import ParticipantsService
 from dash_iconify import DashIconify
-from dash import html
+from dash import dcc, html
 
 
 def get_participants_section(case):
@@ -22,6 +22,9 @@ def get_participants_section(case):
         label="Participants",
         placeholder="Select participants",
         value=participants,
+        searchable=True,
+        description="You can select the case participants here. ",
+        id="case-manage-participants",
     )
 
     # Selected participants using badges
@@ -29,15 +32,20 @@ def get_participants_section(case):
     participants_selected = []
     if participants is not None:
         participants_selected = [
-            dmc.Badge(
-                f"{p.role} - {p.first_name} {p.last_name}",
-                color="blue",
-                variant="filled",
-                sx={"margin": "0.25rem"},
+            dcc.Link(
+                dmc.Button(
+                    f"{p.role.capitalize()} - {p.first_name} {p.last_name}",
+                    color="blue",
+                    variant="light",
+                    size="xs",
+                    rightIcon=DashIconify(icon="carbon:view"),
+                ),
+                href=f"/manage/participants/{p.id}",
             )
             for p in participants_all
             if p.id in participants
         ]
+    participants_selected = dmc.Group(participants_selected)
 
     return participants_select, participants_selected
 
@@ -89,8 +97,8 @@ def get_case_details(case: Case):
                 ],
                 position="right",
             ),
-            html.Div(id="case-manage-save-output"),
-            html.Div(id="case-manage-insert-participants-output"),
+            dcc.Store("case-details-id", data=case.case_id),
+            html.Div(id="case-details-output"),
             dmc.Divider(),
             participants_select,
             participants_selected,
