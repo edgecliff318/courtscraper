@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional
 
 import pandas as pd
 from pydantic import BaseModel, validator
@@ -80,6 +80,9 @@ class Case(BaseModel):
     ticket_img: Optional[str] = None
     status: Optional[str] = None
     events: Optional[List[Dict]] = None
+    court_date: Optional[datetime] = None
+    court_time: Optional[str] = None
+    court_link: Optional[str] = None
 
     # Ignore parsing errors for now
     @validator("charges", pre=True, always=True)
