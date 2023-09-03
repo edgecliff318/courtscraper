@@ -31,11 +31,22 @@ class BaseService:
                 if key == "id":
                     if isinstance(value, str):
                         filters.append(
-                            FieldFilter(FieldPath.document_id(), "==", value)
+                            FieldFilter(
+                                FieldPath.document_id(),
+                                "==",
+                                db.document(f"{self.collection_name}/{value}"),
+                            )
                         )
                     else:
                         filters.append(
-                            FieldFilter(FieldPath.document_id(), "in", value)
+                            FieldFilter(
+                                FieldPath.document_id(),
+                                "in",
+                                [
+                                    db.document(f"{self.collection_name}/{v}")
+                                    for v in value
+                                ],
+                            )
                         )
                 elif isinstance(value, list):
                     filters.append(FieldFilter(key, "in", value))

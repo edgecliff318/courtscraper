@@ -10,7 +10,7 @@ from dash_iconify import DashIconify
 
 from src.core.config import get_settings
 from src.db import bucket
-from src.services import cases, templates
+from src.services import cases, templates, participants
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -96,6 +96,24 @@ def modal_prosecutor_pars(opened, update, template, pars, case_id):
 
     body_filled = body.format(**case_data)
 
+    emails_list = []
+
+    # Params should be subject, body (texarea), attachments
+    if (
+        case_data.get("case_participants") is not None
+        and len(case_data.get("case_participants", [])) > 0
+    ):
+        participants_list = participants.ParticipantsService().get_items(
+            id=case_data.get("case_participants", []), role="prosecutor"
+        )
+
+        emails_list = [
+            p.email
+            for p in participants_list
+            if p.email is not None
+            for p in participants_list
+        ]
+
     # Params should be subject, body (texarea), attachments
 
     params = dmc.Stack(
@@ -104,6 +122,7 @@ def modal_prosecutor_pars(opened, update, template, pars, case_id):
                 label="Email",
                 placeholder="Enter the email",
                 id={"type": "modal-prosecutor-pars", "index": "email"},
+                value=", ".join(emails_list),
             ),
             dmc.TextInput(
                 label="Subject",
