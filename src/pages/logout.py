@@ -24,7 +24,7 @@ def layout():
                                 color="primary",
                                 className="mr-1",
                             ),
-                            dcc.Location(id="url"),
+                            dcc.Location(id="url", refresh="callback-nav"),
                         ]
                     )
                 )

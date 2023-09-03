@@ -85,7 +85,7 @@ class Layout:
         content_backdrop = html.Div(className="content-backdrop fade")
         content_wrapper = html.Div(
             [
-                dcc.Location(id="url"),
+                dcc.Location(id="url", refresh="callback-nav"),
                 html.Div(id="navbar-menu"),
                 content,
                 self.build_footer(),
