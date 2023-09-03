@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import dash
 import dash_mantine_components as dmc
 from dash import ALL, Input, Output, State, callback, dcc, html
+import openai
 
 from src.connectors.intercom import IntercomConnector
 from src.core.config import get_settings
@@ -102,6 +103,33 @@ def modal_client_pars(opened, update, template, pars, case_id):
         body = ""
 
     body_filled = body.format(**case_data)
+
+    # Generate the email using Open AI
+    if (
+        ctx.triggered[0]["prop_id"]
+        == "modal-prosecutor-preview-generate.n_clicks"
+    ):
+        logger.info("Generating the email using OpenAI")
+        openai.api_key = settings.OPENAI_API_KEY
+
+        system_intel = "You are an attorney and you are writing an email to the prosecutor"
+
+        system_intel += "\n\n"
+
+        prompt = ctx.states.get(
+            '{"index":"email","type":"modal-prosecutor-pars"}.value', ""
+        )
+
+        prompt = prompt
+        result = openai.ChatCompletion.create(
+            model="gpt-4-0613",
+            messages=[
+                {"role": "system", "content": system_intel},
+                {"role": "user", "content": prompt},
+            ],
+        )
+
+        body_filled = result["choices"][0]["message"]["content"]
 
     emails_list = []
 
