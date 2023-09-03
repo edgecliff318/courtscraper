@@ -9,7 +9,7 @@ from dash import ALL, Input, Output, State, callback, dcc, html
 from src.connectors.intercom import IntercomConnector
 from src.core.config import get_settings
 from src.db import bucket
-from src.services import cases, templates
+from src.services import cases, templates, participants
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -22,7 +22,9 @@ def upload_to_client(email, subject, message):
     admins = intercom.get_admins()
 
     output = intercom.send_message(
-        sender=admins[0], contact=contact, message=message
+        sender=admins[0],
+        contact=contact,
+        message=message,
     )
 
     return output
@@ -101,7 +103,23 @@ def modal_client_pars(opened, update, template, pars, case_id):
 
     body_filled = body.format(**case_data)
 
+    emails_list = []
+
     # Params should be subject, body (texarea), attachments
+    if (
+        case_data.get("case_participants") is not None
+        and len(case_data.get("case_participants", [])) > 0
+    ):
+        participants_list = participants.ParticipantsService().get_items(
+            id=case_data.get("case_participants", []), role="defendant"
+        )
+
+        emails_list = [
+            p.email
+            for p in participants_list
+            if p.email is not None
+            for p in participants_list
+        ]
 
     params = dmc.Stack(
         [
@@ -109,6 +127,7 @@ def modal_client_pars(opened, update, template, pars, case_id):
                 label="Email",
                 placeholder="Enter the email",
                 id={"type": "modal-client-pars", "index": "email"},
+                value=", ".join(emails_list),
             ),
             dmc.TextInput(
                 label="Subject",
@@ -301,7 +320,7 @@ def modal_client_submit(n_clicks, pars, case_id, template):
             return html.Div(
                 [
                     dmc.Alert(
-                        "Document already uploaded to the client system",
+                        "Email already sent to the client",
                         color="red",
                         title="Information",
                     ),
