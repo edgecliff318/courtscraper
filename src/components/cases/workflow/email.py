@@ -185,7 +185,7 @@ def get_preview(
                         dmc.Button(
                             "Preview",
                             id={
-                                "type": "modal-{role}-pars",
+                                "type": f"modal-{role}-pars",
                                 "index": f"preview-{a}",
                             },
                         ),
