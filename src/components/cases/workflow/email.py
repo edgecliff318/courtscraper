@@ -2,12 +2,10 @@ import base64
 import logging
 from datetime import datetime, timedelta
 
-import dash
 import dash_mantine_components as dmc
-from dash import ALL, Input, Output, State, callback, dcc, html
+from dash import dcc, html
 import openai
 
-from src.connectors.intercom import IntercomConnector
 from src.core.config import get_settings
 from src.db import bucket
 from src.services import cases, templates, participants
@@ -243,7 +241,14 @@ def get_preview(
 
 
 def send_email(
-    template, trigger, case_id, states, inputs, send_function, role="client"
+    template,
+    trigger,
+    case_id,
+    states,
+    inputs,
+    attachments,
+    send_function,
+    role="client",
 ):
     # Check the event on the case events
     email = states.get(f'{{"index":"email","type":"modal-{role}-pars"}}.value')
@@ -270,7 +275,9 @@ def send_email(
         events = []
     # If the event is already in the list, raise an error$
     if event.get("template") in [
-        e.get("template") for e in events if e.get("template") is not None
+        e.get("template")
+        for e in events
+        if e.get("template") is not None and e.get("template") != "custom"
     ]:
         return html.Div(
             [
@@ -292,7 +299,11 @@ def send_email(
     params.setdefault("template_title", template_details.name)
 
     # Upload the document to the client
-    output = send_function(email=email, subject=subject, message=body)
+    output = send_function(
+        email=email, subject=subject, message=body, attachments=attachments
+    )
+
+    event["details"] = output
 
     # Add the event to the list
     events.append(event)

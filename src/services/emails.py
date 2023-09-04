@@ -2,8 +2,11 @@ import base64
 import html.parser
 import logging
 from datetime import datetime
+import mimetypes
 
 from bs4 import BeautifulSoup
+from email.message import EmailMessage
+
 from googleapiclient.discovery import build
 
 from src.services.emails_auth import get_credentials
@@ -133,6 +136,55 @@ class GmailConnector(object):
             logger.error(
                 f"An error occurred while retrieving {email_id}: {error}"
             )
+
+    def send_email(self, subject, message, to, attachments=None):
+        try:
+            logger.info(f"Sending email with subject {subject} to {to}")
+            mime_message = EmailMessage()
+
+            # headers
+            mime_message["To"] = to
+            mime_message["From"] = "me"
+            mime_message["Subject"] = subject
+
+            # text
+            mime_message.set_content(
+                message,
+            )
+
+            # attachment
+            if attachments is None:
+                attachments = []
+
+            for attachment_filename in attachments:
+                # guessing the MIME type
+                type_subtype, _ = mimetypes.guess_type(attachment_filename)
+                maintype, subtype = type_subtype.split("/")
+
+                filename = attachment_filename.name
+
+                with open(attachment_filename, "rb") as fp:
+                    attachment_data = fp.read()
+                mime_message.add_attachment(
+                    attachment_data, maintype, subtype, filename=filename
+                )
+
+            encoded_message = base64.urlsafe_b64encode(
+                mime_message.as_bytes()
+            ).decode()
+
+            create_message = {"raw": encoded_message}
+            send_message = (
+                self.service.users()
+                .messages()
+                .send(userId="me", body=create_message)
+                .execute()
+            )
+            return send_message
+
+        except Exception as error:
+            logger.error(f"An error occurred: {error}")
+            raise error
 
     @staticmethod
     def get_email_html_body(email):

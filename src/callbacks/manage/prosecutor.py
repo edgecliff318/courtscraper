@@ -1,8 +1,11 @@
 import logging
+from sqlite3 import Blob
 
 import dash
 
 from dash import ALL, Input, Output, State, callback
+from flask import session
+from google.cloud.storage.retry import DEFAULT_RETRY
 from src.components.cases.workflow.email import (
     get_email_params,
     get_preview,
@@ -10,13 +13,49 @@ from src.components.cases.workflow.email import (
 )
 
 from src.core.config import get_settings
+from src.services.emails import GmailConnector
+from src.db import bucket
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
 
 
 def send_to_prosecutor(email, subject, message, attachments):
-    pass
+    user_id = session.get("profile", {}).get("name", None)
+
+    if user_id is None:
+        # Redirect to login page
+        return dash.no_update
+
+    gmail_connector = GmailConnector(user_id=user_id)
+
+    # Download attachments from the blob storage
+    local_attachments = []
+    for attachment in attachments:
+        # Download the file locally
+        blob = bucket.get_blob(attachment)
+        if blob is None:
+            logger.error(f"Blob {attachment} not found")
+            continue
+        # PDF File:
+        output_filepath_pdf = settings.DATA_PATH.joinpath("tmp", blob.name)
+        output_filepath_pdf.parent.mkdir(parents=True, exist_ok=True)
+
+        modified_retry = DEFAULT_RETRY.with_delay(
+            initial=1.5, multiplier=1.2, maximum=45.0
+        )
+
+        blob.download_to_filename(
+            output_filepath_pdf, retry=modified_retry, timeout=20
+        )
+        local_attachments.append(output_filepath_pdf)
+
+    return gmail_connector.send_email(
+        subject=subject,
+        message=message,
+        to=email,
+        attachments=local_attachments,
+    )
 
 
 @callback(
@@ -117,12 +156,17 @@ def modal_prosecutor_preview(
 def modal_prosecutor_submit(n_clicks, pars, case_id, template):
     ctx = dash.callback_context
     if ctx.triggered[0]["prop_id"] == "modal-prosecutor-submit.n_clicks":
+        attachments = ctx.states.get(
+            f'{{"index":"attachments","type":"modal-prosecutor-pars"}}.value',
+            [],
+        )
         return send_email(
-            template,
-            "modal-client-submit",
-            case_id,
-            ctx.states,
-            ctx.inputs,
-            send_to_prosecutor,
+            template=template,
+            trigger="modal-client-submit",
+            case_id=case_id,
+            states=ctx.states,
+            inputs=ctx.inputs,
+            send_function=send_to_prosecutor,
+            attachments=attachments,
             role="prosecutor",
         )

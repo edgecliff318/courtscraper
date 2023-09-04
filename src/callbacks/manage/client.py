@@ -125,11 +125,17 @@ def modal_client_preview(
 def modal_client_submit(n_clicks, pars, case_id, template):
     ctx = dash.callback_context
     if ctx.triggered[0]["prop_id"] == "modal-client-submit.n_clicks":
+        attachments = ctx.states.get(
+            f'{{"index":"attachments","type":"modal-client-pars"}}.value',
+            [],
+        )
         return send_email(
-            template,
-            "modal-client-submit",
-            case_id,
-            ctx.states,
-            ctx.inputs,
-            send_to_client,
+            template=template,
+            trigger="modal-client-submit",
+            case_id=case_id,
+            states=ctx.states,
+            inputs=ctx.inputs,
+            attachments=attachments,
+            send_function=send_to_client,
+            role="client",
         )
