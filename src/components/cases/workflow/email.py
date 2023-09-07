@@ -3,12 +3,12 @@ import logging
 from datetime import datetime, timedelta
 
 import dash_mantine_components as dmc
-from dash import dcc, html
 import openai
+from dash import dcc, html
 
 from src.core.config import get_settings
 from src.db import bucket
-from src.services import cases, templates, participants
+from src.services import cases, participants, templates
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -273,6 +273,8 @@ def send_email(
     # Upload the case to casenet
     if events is None:
         events = []
+    # TODO: Remove afterwards
+    # events = []
     # If the event is already in the list, raise an error$
     if event.get("template") in [
         e.get("template")

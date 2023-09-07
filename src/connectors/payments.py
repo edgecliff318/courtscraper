@@ -6,57 +6,73 @@ setttings = get_settings()
 
 stripe.api_key = setttings.STRIPE_SECRET_KEY
 
-CUSTOMERS = [
-    {"stripe_id": "cus_123456789", "email": "jenny.rosen@example.com"}
-]
-PRICES = {"basic": "price_123456789", "professional": "price_987654321"}
 
+class PaymentService:
+    def __init__(self) -> None:
+        pass
 
-def send_invoice(email, products):
-    # Look up a customer in your database
-    customers = [c for c in CUSTOMERS if c["email"] == email]
+    def get_products(self):
+        products = stripe.Product.list()
+        return products.data
 
-    # Get the products list from Stripe
+    def create_product(self, name, description):
+        product = stripe.Product.create(
+            name=name,
+            description=description,
+        )
+        return product
 
-    products_list = stripe.Product.list()
+    def create_price(self, product_id, amount, currency):
+        price = stripe.Price.create(
+            product=product_id,
+            unit_amount=amount,
+            currency=currency,
+        )
+        return price
 
-    # If the products list is empty, create the products
-    if not products:
-        for product in products_list:
-            stripe.Product.create(
-                name=product["name"],
-                description=product["description"],
+    def get_or_customer(self, email):
+        # If email exists get it else create it
+        customer = stripe.Customer.list(email=email)
+
+        if len(customer) == 0:
+            customer = stripe.Customer.create(
+                email=email,
+                name=email,
             )
 
-    if customers:
-        customer_id = customers[0]["stripe_id"]
-    else:
-        # Create a new Customer
-        customer = stripe.Customer.create(
-            email=email,  # Use your email address for testing purposes
-            description="Customer to invoice",
+        if len(customer) >= 2:
+            raise Exception("More than one customer found")
+
+        return customer.data[0]
+
+    def get_prices(self, product_id):
+        prices = stripe.Price.list(product=product_id)
+        return prices.data
+
+    def send_invoice(self, customer_id, product_id, price_id):
+        # Create an Invoice
+        invoice = stripe.Invoice.create(
+            customer=customer_id,
+            collection_method="send_invoice",
+            days_until_due=30,
         )
-        # Store the customer ID in your database for future purchases
-        CUSTOMERS.append({"stripe_id": customer.id, "email": email})
-        # Read the Customer ID from your database
-        customer_id = customer.id
 
-    # Create an Invoice
-    invoice = stripe.Invoice.create(
-        customer=customer_id,
-        collection_method="send_invoice",
-        days_until_due=30,
-    )
+        # Add the product to the invoice
+        stripe.InvoiceItem.create(
+            customer=customer_id,
+            price=price_id,
+            quantity=1,
+            invoice=invoice.id,
+        )
+        # Send the Invoice
+        invoice = stripe.Invoice.send_invoice(invoice.id)
+        return invoice
 
-    # Create an Invoice Item with the Price and Customer you want to charge
-    stripe.InvoiceItem.create(
-        customer=customer_id, price=PRICES["basic"], invoice=invoice.id
-    )
+    def get_payment_history(self, customer_id):
+        # Get payment history from Stripe
+        payments = stripe.PaymentIntent.list(customer=customer_id)
+        return payments.data
 
-    # Send the Invoice
-    stripe.Invoice.send_invoice(invoice.id)
-    return
-
-
-if __name__ == "__main__":
-    send_invoice("ayo.enn@gmail.com")
+    def get_invoice_history(self, customer_id):
+        invoice_history = stripe.Invoice.list(customer=customer_id)
+        return invoice_history
