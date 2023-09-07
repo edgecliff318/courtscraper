@@ -1,4 +1,5 @@
 import logging
+
 import dash
 from dash import ALL, Input, Output, State, callback
 
@@ -7,7 +8,6 @@ from src.components.cases.workflow.email import (
     get_preview,
     send_email,
 )
-
 from src.connectors.intercom import IntercomConnector
 from src.core.config import get_settings
 
@@ -20,9 +20,14 @@ def send_to_client(email, subject, message, attachments):
 
     contact = intercom.search_contact(email=email)
     admins = intercom.get_admins()
+    sender = None
+    for admin in admins:
+        if admin.get("email") == settings.INTERCOM_SENDER_ID:
+            sender = admin
+            break
 
     output = intercom.send_message(
-        sender=admins[0],
+        sender=sender,
         contact=contact,
         message=message,
     )

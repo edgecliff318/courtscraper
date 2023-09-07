@@ -160,6 +160,11 @@ class Settings(BaseSettings):
         "sk_test_51N4NCnDIQFEv26lp5VKLRnKZF44qvYYeQfcflNJHd6qPowZWW5QQHcvBWraNoPtp5JQsjDrGm7yzbWisCKlUlwZ100LpOEoBD1",
     )
 
+    # Intercom Sender
+    INTERCOM_SENDER_ID: str = os.getenv(
+        "INTERCOM_SENDER_ID", "samama@tickettakedown.com"
+    )
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 
