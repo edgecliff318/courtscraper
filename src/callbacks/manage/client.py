@@ -18,7 +18,7 @@ settings = get_settings()
 def send_to_client(email, subject, message, attachments):
     intercom = IntercomConnector(settings.INTERCOM_API_KEY)
 
-    contact = intercom.search_contact(email="shawn@tickettakedown.com")
+    contact = intercom.search_contact(email=email)
     admins = intercom.get_admins()
 
     output = intercom.send_message(
