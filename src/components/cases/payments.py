@@ -1,12 +1,12 @@
 from datetime import datetime
 
-from src.connectors import payments as payments_connector
 import dash_mantine_components as dmc
+from dash import dcc, html
+from dash_iconify import DashIconify
 
+from src.connectors import payments as payments_connector
 from src.models.cases import Case
 from src.services.participants import ParticipantsService
-from dash_iconify import DashIconify
-from dash import html, dcc
 
 
 def format_table_row(row, column):
@@ -123,6 +123,17 @@ def get_case_payments(case: Case):
     )
 
     if participant.stripe_id is None:
+        if participant.email is None:
+            return dmc.Alert(
+                (
+                    "Please update the participant in the case/details "
+                    "section in order "
+                    "to retrieve the data from Stripe on the payments"
+                    " and send invoices."
+                ),
+                color="red",
+                title="No email found",
+            )
         customer = payments_service.get_or_customer(participant.email)
         participant.stripe_id = customer.id
         participants_service.patch_item(
