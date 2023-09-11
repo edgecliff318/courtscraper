@@ -276,10 +276,9 @@ def send_email(
     # TODO: Remove afterwards
     # events = []
     # If the event is already in the list, raise an error$
-    if event.get("template") in [
-        e.get("template")
-        for e in events
-        if e.get("template") is not None and e.get("template") != "custom"
+    template_details = templates.get_single_template(template)
+    if not template_details.repeat and event.get("template") in [
+        e.get("template") for e in events if e.get("template") is not None
     ]:
         return html.Div(
             [
@@ -291,8 +290,6 @@ def send_email(
             ]
         )
 
-    template_details = templates.get_single_template(template)
-
     if template_details.parameters is None:
         params = {}
     else:
@@ -301,9 +298,21 @@ def send_email(
     params.setdefault("template_title", template_details.name)
 
     # Upload the document to the client
-    output = send_function(
-        email=email, subject=subject, message=body, attachments=attachments
-    )
+    try:
+        output = send_function(
+            email=email, subject=subject, message=body, attachments=attachments
+        )
+    except Exception as e:
+        logger.error(f"Error sending the email: {e}")
+        return html.Div(
+            [
+                dmc.Alert(
+                    f"Error sending the email: {e}",
+                    color="red",
+                    title="Error",
+                ),
+            ]
+        )
 
     event["details"] = output
 
