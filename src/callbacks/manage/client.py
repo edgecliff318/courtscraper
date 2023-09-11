@@ -19,6 +19,12 @@ def send_to_client(email, subject, message, attachments):
     intercom = IntercomConnector(settings.INTERCOM_API_KEY)
 
     contact = intercom.search_contact(email=email)
+
+    if contact is None:
+        raise Exception(
+            f"Contact {email} not found on Intercom. "
+            f"Please check the used email or add it to Intercom."
+        )
     admins = intercom.get_admins()
     sender = None
     for admin in admins:
