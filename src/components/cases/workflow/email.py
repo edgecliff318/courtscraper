@@ -63,13 +63,13 @@ def get_email_params(
     subject = template_details.subject
     if subject is None:
         subject = ""
-    subject_filled = subject.format(**case_data)
+    subject_filled = subject.format_map(case_data)
 
     body = template_details.text
     if body is None:
         body = ""
 
-    body_filled = body.format(**case_data)
+    body_filled = body.format_map(case_data)
 
     # Generate the email using Open AI
     if trigger == f"modal-{role}-preview-generate.n_clicks":

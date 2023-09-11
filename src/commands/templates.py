@@ -97,6 +97,8 @@ def upload_templates_json(input_file: str):
             state=template.get("state"),
             text=template.get("text"),
             subject=template.get("subject"),
+            trigger=template.get("trigger"),
+            repeat=template.get("repeat", False),
         )
 
         templates_service.insert_template(

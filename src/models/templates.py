@@ -19,6 +19,8 @@ class Template(BaseModel):
     parameters: Optional[dict] = None
     state: Optional[str] = None
     user: Optional[str] = None
+    trigger: Optional[str] = None
+    repeat: Optional[bool] = False
 
     @validator("creation_date", pre=True)
     def set_creation_date_now(cls, v):

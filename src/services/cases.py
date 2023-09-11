@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import datetime
 from typing import MutableMapping
 
@@ -100,7 +101,7 @@ def flatten(dictionary, parent_key="", separator="_"):
     return dict(items)
 
 
-def get_context_data(case_id):
+def get_context_data(case_id) -> defaultdict:
     case_data = get_single_case(case_id).model_dump()
 
     case_data = flatten(case_data)
@@ -113,5 +114,8 @@ def get_context_data(case_id):
     case_data["current_date_short"] = (
         datetime.now().strftime("%B %d, %Y").upper()
     )
+
+    # Transform to defaultdict
+    case_data = defaultdict(lambda: "!!!TO_FILL!!!", case_data)
 
     return case_data
