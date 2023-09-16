@@ -10,6 +10,7 @@ from rich.console import Console
 from src.loader.leads import CaseNet
 from src.models import cases as cases_model
 from src.models import leads as leads_model
+from src.scrapers.mo_mshp import MOHighwayPatrol
 from src.services import cases as cases_service
 from src.services import leads as leads_service
 from src.services.courts import get_courts
@@ -20,11 +21,7 @@ console = Console()
 logger = logging.getLogger()
 
 
-def retrieve_cases():
-    """
-    Scrap the casenet website
-    """
-
+def retrieve_cases_mo_casenet():
     courts = get_courts()
     settings = get_settings("main")
     case_net_account = get_account("case_net_missouri")
@@ -104,6 +101,23 @@ def retrieve_cases():
                             leads_service.insert_lead(lead_parsed)
                     except Exception as e:
                         console.log(f"Failed to parse lead {case} - {e}")
+
+
+def retrieve_cases_mo_mshp():
+    scraper = MOHighwayPatrol()
+    return scraper.get_latest_reports()
+
+
+def retrieve_cases(source="mo_case_net"):
+    """
+    Scrap the casenet website
+    """
+
+    if source == "mo_case_net":
+        retrieve_cases_mo_casenet()
+
+    elif source == "mo_mshp":
+        retrieve_cases_mo_mshp()
 
 
 if __name__ == "__main__":
