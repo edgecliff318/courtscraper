@@ -3,8 +3,8 @@ import logging
 import dash
 import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
-
 from dash_iconify import DashIconify
+
 from src.components.cases.details import get_case_details
 from src.components.cases.documents import get_case_documents
 from src.components.cases.events import get_case_events
@@ -13,7 +13,6 @@ from src.components.cases.search import get_case_search
 from src.components.cases.summary import get_case_summary
 from src.components.cases.timeline import get_case_timeline
 from src.components.cases.workflow.workflow import get_case_workflow
-
 from src.services import cases
 
 logger = logging.Logger(__name__)
@@ -79,6 +78,8 @@ def get_case_tabs(case):
             dmc.TabsPanel(get_case_details(case), value="details"),
         ],
         value="workflow",
+        persistence=True,
+        persistenceType="session",
     )
     return tabs
 

@@ -9,7 +9,6 @@ import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
 import pandas as pd
 from dash import Input, Output, State, callback
-from dash_iconify import DashIconify
 
 from src.components.toast import build_toast
 from src.core.config import get_settings

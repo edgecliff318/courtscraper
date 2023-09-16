@@ -7,3 +7,4 @@ from . import edits  # noqa F401
 from . import details  # noqa F401
 from . import participants  # noqa F401
 from . import payments  # noqa F401
+from . import documents  # noqa F401
