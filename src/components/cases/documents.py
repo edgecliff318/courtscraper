@@ -1,17 +1,14 @@
-import base64
 import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 import dash_ag_grid as dag
 import dash_mantine_components as dmc
-import openai
 import pandas as pd
 from dash import dcc, html
 
 from src.core.config import get_settings
 from src.db import bucket
 from src.models.cases import Case
-from src.services import cases, participants, templates
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
