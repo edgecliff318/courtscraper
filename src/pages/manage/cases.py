@@ -79,7 +79,7 @@ def get_case_tabs(case):
         ],
         value="workflow",
         persistence=True,
-        persistenceType="session",
+        persistence_type="session",
     )
     return tabs
 
