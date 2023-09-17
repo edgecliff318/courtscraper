@@ -10,7 +10,11 @@ from src.models import cases
 
 
 def get_cases(
-    court_code_list=None, start_date=None, end_date=None, disposition=None
+    court_code_list=None,
+    start_date=None,
+    end_date=None,
+    disposition=None,
+    source=None,
 ):
     cases_list = db.collection("cases")
 
@@ -34,6 +38,11 @@ def get_cases(
     if disposition is not None:
         cases_list = cases_list.where(
             field_path="disposition", op_string="==", value=disposition
+        )
+
+    if source is not None:
+        cases_list = cases_list.where(
+            field_path="source", op_string="==", value=source
         )
 
     cases_list = cases_list.stream()

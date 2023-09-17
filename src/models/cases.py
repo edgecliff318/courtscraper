@@ -83,11 +83,17 @@ class Case(BaseModel):
     court_date: Optional[datetime] = None
     court_time: Optional[str] = None
     court_link: Optional[str] = None
+    arrest_date: Optional[datetime] = None
+    arrest_time: Optional[str] = None
+    where_held: Optional[str] = None
+    gender: Optional[str] = None
+    release_info: Optional[str] = None
+    source: Optional[str] = None
 
     # Ignore parsing errors for now
     @validator("charges", pre=True, always=True)
     def set_charges(cls, v):
-        return v or {}
+        return v or []
 
     @validator("case_date", pre=True)
     def set_case_date(cls, v):
@@ -100,6 +106,15 @@ class Case(BaseModel):
 
     @validator("filing_date", pre=True)
     def set_filing_date(cls, v):
+        try:
+            v = pd.to_datetime(v)
+            # convert to datetime
+            return v.to_pydatetime()
+        except Exception:
+            return None
+
+    @validator("arrest_date", pre=True)
+    def set_arrest_date(cls, v):
         try:
             v = pd.to_datetime(v)
             # convert to datetime

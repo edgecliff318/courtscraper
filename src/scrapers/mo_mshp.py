@@ -1,9 +1,15 @@
+import logging
 from time import sleep
 from urllib.parse import urljoin
 
 import requests
 from bs4 import BeautifulSoup
+from rich.console import Console
 from rich.progress import track
+
+console = Console()
+
+logger = logging.getLogger(__name__)
 
 
 class MOHighwayPatrol(object):
@@ -59,7 +65,7 @@ class MOHighwayPatrol(object):
 
         return reports
 
-    def get_latest_reports(self):
+    def get_latest_reports(self, cases_filter=None):
         response = requests.get(self.url)
 
         soup = BeautifulSoup(response.text, "html.parser")
@@ -68,13 +74,69 @@ class MOHighwayPatrol(object):
 
         reports = self.extract_table(table, get_link=True)
 
+        reports = reports[:2]
+
         for report in track(reports):
+            report["case_id"] = self.generate_case_id(report)
+            if cases_filter and report["case_id"] not in [
+                c.get("case_id") for c in cases_filter
+            ]:
+                continue
             data = self.get_single_report(report["link"])
-            sleep(2)
+            sleep(1)
             persona_information = data["person_information"][0]
             report.update(persona_information)
 
         return reports
+
+    def generate_case_id(self, report):
+        output = f"{report['name']}_{report['age']}_{report['arrest_date']}"
+        # Remove the whitespace and replace with _
+        output = output.replace(" ", "_").replace(",", "_").replace("/", "_")
+        return output
+
+    def get_cases(self, cases_filter=None):
+        reports = self.get_latest_reports(cases_filter=cases_filter)
+        cases = []
+        for report in reports:
+            case_id = report["case_id"]
+            name = report["name"]
+            # Split to get the first and last name
+            first_name, last_name = name.split(", ", 1)
+            try:
+                city, state = report.get("person_city/state", ",").split(",")
+            except Exception:
+                city = report.get("person_city/state")
+                state = "MO"
+                logger.error(
+                    f"Failed to split city and state for case {case_id} - {report.get('person_city/state')}"
+                )
+
+            # Getting the case info
+            case_info = {
+                "case_id": case_id,
+                "case_type": "mo_mshp",
+                "court_id": "temp",  # TODO: Check with Shawn
+                "court_code": "temp",
+                "case_date": report.get("arrest_date"),
+                "source": "mo_mshp",
+                "formatted_party_name": name,
+                "first_name": first_name,
+                "last_name": last_name,
+                "age": report.get("age"),
+                "charges_description": report.get("charge"),
+                "arrest_time": report.get("arrest_time"),
+                "arrest_date": report.get("arrest_date"),
+                "gender": report.get("person_gender"),
+                "where_held": report.get("where_held"),
+                "release_info": report.get("release_info"),
+                "address_city": city,
+                "address_state_code": state,
+            }
+            logger.info(f"Succeeded to get details for case " f"{case_id}")
+            console.print(f"Succeeded to get details for case " f"{case_id}")
+            cases.append(case_info)
+        return cases
 
 
 if __name__ == "__main__":

@@ -81,7 +81,7 @@ def retrieve_cases_mo_casenet():
                     # https://stackoverflow.com/questions/3768895/how-to-make-a-class-json-serializable
 
                     try:
-                        case_parsed = cases_model.Case.parse_obj(case)
+                        case_parsed = cases_model.Case.model_validate(case)
                         cases_service.insert_case(case_parsed)
                     except Exception as e:
                         # Save the case in a file for a manual review
@@ -93,7 +93,7 @@ def retrieve_cases_mo_casenet():
                             json.dump(case, f, default=str)
                         console.log(f"Failed to parse case {case} - {e}")
                     try:
-                        lead_parsed = leads_model.Lead.parse_obj(case)
+                        lead_parsed = leads_model.Lead.model_validate(case)
                         lead_loaded = leads_service.get_single_lead(
                             lead_parsed.case_id
                         )
@@ -104,8 +104,47 @@ def retrieve_cases_mo_casenet():
 
 
 def retrieve_cases_mo_mshp():
+    # Start date
+    end_date = datetime.datetime.now() + datetime.timedelta(days=1)
+
+    # End date = start - 15 days
+    start_date = end_date - datetime.timedelta(days=15)
+
+    cases_imported = cases_service.get_cases(
+        start_date=start_date, end_date=end_date, source="mo_mshp"
+    )
+
     scraper = MOHighwayPatrol()
-    return scraper.get_latest_reports()
+    cases_imported = scraper.get_cases(cases_filter=cases_imported)
+
+    for case in cases_imported:
+        # Insert the case in the cases table
+        try:
+            case_parsed = cases_model.Case.model_validate(case)
+            cases_service.insert_case(case_parsed)
+            console.log(f"Succeeded to insert case {case.get('case_id')}")
+        except Exception as e:
+            # Save the case in a file for a manual review
+            with open(
+                f"cases_to_review/{case.get('case_id')}.json",
+                "w",
+            ) as f:
+                # Transform PosixPath to path in the dict case
+                json.dump(case, f, default=str)
+
+            console.log(f"Failed to parse case {case} - {e}")
+
+        # Insert the lead in the leads table:
+        try:
+            lead_parsed = leads_model.Lead.model_validate(case)
+            lead_loaded = leads_service.get_single_lead(lead_parsed.case_id)
+            if lead_loaded is None:
+                leads_service.insert_lead(lead_parsed)
+                console.log(
+                    f"Succeeded to insert lead for {case.get('case_id')}"
+                )
+        except Exception as e:
+            console.log(f"Failed to parse lead {case} - {e}")
 
 
 def retrieve_cases(source="mo_case_net"):
