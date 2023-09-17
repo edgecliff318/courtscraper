@@ -74,8 +74,6 @@ class MOHighwayPatrol(object):
 
         reports = self.extract_table(table, get_link=True)
 
-        reports = reports[:2]
-
         for report in track(reports):
             report["case_id"] = self.generate_case_id(report)
             if cases_filter and report["case_id"] not in [
