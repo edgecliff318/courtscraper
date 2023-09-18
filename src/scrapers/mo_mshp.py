@@ -73,6 +73,7 @@ class MOHighwayPatrol(object):
         table = soup.find("table", {"class": "accidentOutput"})
 
         reports = self.extract_table(table, get_link=True)
+        reports_output = []
 
         for report in track(reports):
             report["case_id"] = self.generate_case_id(report)
@@ -84,8 +85,9 @@ class MOHighwayPatrol(object):
             sleep(1)
             persona_information = data["person_information"][0]
             report.update(persona_information)
+            reports_output.append(report)
 
-        return reports
+        return reports_output
 
     def generate_case_id(self, report):
         output = f"{report['name']}_{report['age']}_{report['arrest_date']}"
