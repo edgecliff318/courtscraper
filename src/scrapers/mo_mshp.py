@@ -77,7 +77,7 @@ class MOHighwayPatrol(object):
         for report in track(reports):
             report["case_id"] = self.generate_case_id(report)
             if cases_filter and report["case_id"] not in [
-                c.get("case_id") for c in cases_filter
+                c.case_id for c in cases_filter
             ]:
                 continue
             data = self.get_single_report(report["link"])

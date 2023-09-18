@@ -251,6 +251,8 @@ def render_case_details(case_id):
             "formatted_telephone",
             "formatted_partyaddress",
         ]
+        if parties.empty:
+            parties = pd.DataFrame(columns=columns)
         parties = parties[columns].rename(
             columns={
                 "desc": "Party Type",
@@ -274,6 +276,8 @@ def render_case_details(case_id):
 
         # Documents
         columns = ["docket_desc", "file_path", "document_extension"]
+        if documents.empty:
+            documents = pd.DataFrame(columns=columns)
         documents = documents[columns].rename(
             columns={
                 "docket_desc": "Description",
@@ -445,6 +449,11 @@ def render_case_details(case_id):
             bordered=True,
         )
 
+        try:
+            phones = ", ".join(beenverified.get("phones", []))
+        except Exception:
+            phones = beenverified.get("phones", [])
+
         return (
             [
                 dbc.Col(
@@ -516,7 +525,7 @@ def render_case_details(case_id):
                             html.H6("Details:"),
                             html.P(beenverified.get("details")),
                             html.H6("Phones:"),
-                            html.P(", ".join(beenverified.get("phones", []))),
+                            html.P(phones),
                         ]
                     ),
                     class_name="mb-2",
