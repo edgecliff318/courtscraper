@@ -1,3 +1,4 @@
+import datetime
 import logging
 import textwrap
 import typing as t
@@ -12,6 +13,7 @@ from src.core.config import get_settings
 from src.db import bucket, db
 from src.models import messages
 from src.services import cases
+from src.services.emails import GmailConnector
 
 logger = logging.Logger(__name__)
 
@@ -110,11 +112,11 @@ def add_text_to_image(image_url, text):
     blob.upload_from_filename(filepath)
 
     # Delete the file from local
-    filepath.unlink()
+    # filepath.unlink()
 
     # Get the signed url
     media_url = blob.generate_signed_url(expiration=timedelta(seconds=3600))
-    return media_url
+    return media_url, filepath
 
 
 def insert_interaction(interaction):
@@ -203,35 +205,88 @@ def get_message_status(message_id):
     return message.to_dict()
 
 
-def send_message(case_id, sms_message, phone, media_enabled=False):
-    # Send message
-    client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+def get_email_from_phone(phone, carrier):
+    if carrier == "att":
+        return f"{phone}@txt.att.net"
+    elif carrier == "tmobile":
+        return f"{phone}@tmomail.net"
+    elif carrier == "verizon":
+        return f"{phone}@vtext.com"
+    elif carrier == "sprint":
+        return f"{phone}@messaging.sprintpcs.com"
+    else:
+        return None
 
+
+def send_message(
+    case_id,
+    sms_message,
+    phone,
+    media_enabled=False,
+    method="twilio",
+    carrier=None,
+):
     sms_message = sms_message.replace("\\n", "\n")
 
     if media_enabled:
         case = cases.get_single_case(case_id)
-        media_url = add_text_to_image(case.ticket_img, "ADVERTISEMENT")
+        media_url, filepath = add_text_to_image(
+            case.ticket_img, "ADVERTISEMENT"
+        )
     else:
         media_url = None
+        filepath = None
 
-    twilio_message = client.messages.create(
-        messaging_service_sid=settings.TWILIO_MESSAGE_SERVICE_SID,
-        body=sms_message,
-        media_url=media_url,
-        to=phone,
-    )
-    if twilio_message is None:
-        raise Exception("Message not sent")
+    # Send message
+    if method == "twilio":
+        client = Client(
+            settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN
+        )
+
+        twilio_message = client.messages.create(
+            messaging_service_sid=settings.TWILIO_MESSAGE_SERVICE_SID,
+            body=sms_message,
+            media_url=media_url,
+            to=phone,
+        )
+        if twilio_message is None:
+            raise Exception("Message not sent")
+        status = twilio_message.status
+        message_id = twilio_message.sid
+        creation_date = twilio_message.date_sent
+
+    elif method == "gmail":
+        user_id = settings.SMS_EMAIL_SENDER_ID
+        gmail_connector = GmailConnector(user_id=user_id)
+        email = get_email_from_phone(phone, carrier)
+        # Subject for the SMS message
+        subject = f"SMS Message for case {case_id}"
+
+        gmail_connector.send_email(
+            subject=subject,
+            message=sms_message,
+            to=email,
+            attachments=[
+                filepath,
+            ]
+            if filepath is not None
+            else None,
+        )
+        status = "sent"
+        message_id = "not available"
+        creation_date = datetime.datetime.now()
+
+    else:
+        raise Exception("Invalid method")
 
     interaction = messages.Interaction(
         case_id=case_id,
         message=sms_message,
         type="sms",
-        status=twilio_message.status,
-        id=twilio_message.sid,
+        status=status,
+        id=message_id,
         direction="outbound",
-        creation_date=twilio_message.date_sent,
+        creation_date=creation_date,
         phone=phone,
     )
 
