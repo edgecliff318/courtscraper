@@ -85,6 +85,9 @@ def send_many_message(*args, **kwargs):
                     ):
                         leads.update_lead_status(case_id, "contacted")
 
+                    # Send to the first phone number only for now
+                    break
+
             except Exception as e:
                 logger.error(
                     f"An error occurred while sending the message. {e}"
