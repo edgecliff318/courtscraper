@@ -63,7 +63,7 @@ class Settings(BaseSettings):
         "TWILIO_AUTH_TOKEN", "095c5fb2a0eea27b7c4e46c1fd12cf45"
     )
     TWILIO_MESSAGE_SERVICE_SID: str = os.getenv(
-        "TWILIO_MESSAGE_SERVICE_SID", "MG3beed289e59b0417fc8d1c63894aa27e"
+        "TWILIO_MESSAGE_SERVICE_SID", "MG2b12454f63e7ee70aaac25dd4b333898"
     )
 
     # API_KEY
@@ -163,6 +163,11 @@ class Settings(BaseSettings):
     # Intercom Sender
     INTERCOM_SENDER_ID: str = os.getenv(
         "INTERCOM_SENDER_ID", "samama@tickettakedown.com"
+    )
+
+    # SMS Email Sender
+    SMS_EMAIL_SENDER_ID: str = os.getenv(
+        "SMS_EMAIL_SENDER_ID", "ttdwoman@gmail.com"
     )
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
