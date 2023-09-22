@@ -136,6 +136,16 @@ def get_email_params(
                 value=body_filled,
                 minRows=20,
             ),
+            dmc.Text(
+                "Use <strong> text </strong> to bold the text", size="xs"
+            ),
+            html.A(
+                dmc.Text(
+                    "See all the possible formatting options here", size="xs"
+                ),
+                href="https://www.w3schools.com/html/html_formatting.asp",
+                target="_blank",
+            ),
             attachments,
         ]
     )
@@ -274,7 +284,7 @@ def send_email(
     if events is None:
         events = []
     # TODO: Remove afterwards
-    # events = []
+    events = []
     # If the event is already in the list, raise an error$
     template_details = templates.get_single_template(template)
     if not template_details.repeat and event.get("template") in [

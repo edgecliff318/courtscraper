@@ -1,12 +1,11 @@
 import base64
 import html.parser
 import logging
-from datetime import datetime
 import mimetypes
-
-from bs4 import BeautifulSoup
+from datetime import datetime
 from email.message import EmailMessage
 
+from bs4 import BeautifulSoup
 from googleapiclient.discovery import build
 
 from src.services.emails_auth import get_credentials
@@ -137,9 +136,14 @@ class GmailConnector(object):
                 f"An error occurred while retrieving {email_id}: {error}"
             )
 
+    def text_to_html(self, text):
+        return text.replace("\n", "<br>")
+
     def send_email(self, subject, message, to, attachments=None):
         try:
             logger.info(f"Sending email with subject {subject} to {to}")
+            # Use the HTML MIME type
+
             mime_message = EmailMessage()
 
             # headers
@@ -147,9 +151,13 @@ class GmailConnector(object):
             mime_message["From"] = "me"
             mime_message["Subject"] = subject
 
+            # Replace
+            message = self.text_to_html(message)
+
             # text
             mime_message.set_content(
                 message,
+                subtype="html",
             )
 
             # attachment
