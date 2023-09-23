@@ -83,8 +83,13 @@ casenet:
 	@echo "Running Casenet Scrapper for Missouri"
 	@python3 main.py retrieve-cases 
 
+package:
+	rm -rf dist
+	$(CMD) setup.py develop
+	$(CMD) setup.py bdist_wheel
+
 beenverified:
 	@echo "Running BeenVerified Scrapper for Missouri"
 	@python3 main.py retrieve-leads
 
-.PHONY: all test coverage help install venv clean build lint re chrome casenet
+.PHONY: all test coverage help install venv clean build lint re chrome casenet package
