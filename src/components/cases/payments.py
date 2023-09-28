@@ -39,7 +39,7 @@ def get_case_payments(case: Case):
     # Get the list of participants
     participants_service = ParticipantsService()
 
-    if case.participants is None:
+    if case.participants is None or len(case.participants) == 0:
         return dmc.Alert(
             "No participants found ! Please add participants to the case",
             color="red",
