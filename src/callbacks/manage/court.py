@@ -12,6 +12,7 @@ from src.connectors.casenet import CaseNetWebConnector
 from src.core.config import get_settings
 from src.core.document import DocumentGenerator, convert_doc_to_pdf
 from src.db import bucket
+from src.models.cases import Case
 from src.services import cases, templates
 
 logger = logging.getLogger(__name__)
@@ -55,6 +56,98 @@ def init_document_generator(case_id, template):
     return document_generator
 
 
+class CaseDynamicFields:
+    def __init__(self) -> None:
+        pass
+
+    def update_court_date(self, case: Case, case_data: dict):
+        court_date = None
+        court_time = None
+
+        if case.dockets is not None:
+            for docket in case.dockets:
+                if "initial" in docket.get("docket_desc", "").lower():
+                    # Get the associated_docketscheduledinfo
+                    schedule = docket.get("associated_docketscheduledinfo", {})
+                    if isinstance(schedule, list) and len(schedule) > 0:
+                        schedule = schedule.pop()
+                    else:
+                        schedule = {}
+                    court_date = schedule.get("associated_date", "")
+                    court_time = schedule.get("associated_time", "")
+                    break
+
+        case_data["court_date"] = court_date
+        case_data["court_time"] = court_time
+        return case_data
+
+    def update_judge(self, case: Case, case_data: dict):
+        judge = None
+
+        if case.judge is not None:
+            middle_name = case.judge.get("middle_name", None)
+            if middle_name is None:
+                judge = f"{case.judge.get('first_name', '')} {case.judge.get('last_name', '')}"
+            else:
+                judge = f"{case.judge.get('first_name', '')} {middle_name} {case.judge.get('last_name', '')}"
+
+        case_data["judge"] = judge
+        return case_data
+
+    def update_charges(self, case: Case, case_data: dict):
+        # Adding charges
+        charges = case_data.get("charges", [{"charge_description": ""}])
+        if charges:
+            case_data["charges_description"] = charges[0].get(
+                "charge_description", ""
+            )
+        else:
+            case_data["charges_description"] = ""
+
+        return case_data
+
+    def update_current_date(self, case: Case, case_data: dict):
+        case_data["current_date_short"] = (
+            datetime.now().strftime("%B %d, %Y").upper()
+        )
+        return case_data
+
+    def update_location(self, case: Case, case_data: dict):
+        # Transform case location
+        location = case.location
+        if location is None:
+            location = ""
+
+        court_desc = case.court_desc
+        if court_desc is None:
+            court_desc = ""
+
+        if (
+            "municipal" in court_desc.lower()
+            or "municipal" in location.lower()
+        ):
+            case_data["city"] = (
+                location.lower().replace("municipal", "").upper()
+            )
+            case_data["location"] = "MUNICIPAL"
+        elif "circuit" in court_desc.lower() or "circuit" in location.lower():
+            case_data["city"] = location.lower().replace("circuit", "").upper()
+            if "county" not in case_data["city"].lower():
+                case_data["city"] += " COUNTY"
+            case_data["location"] = "CIRCUIT"
+
+        case_data["city"] = case_data.get("city", "").replace("COURT", "")
+        return case_data
+
+    def update(self, case: Case, case_data: dict):
+        case_data = self.update_court_date(case, case_data)
+        case_data = self.update_judge(case, case_data)
+        case_data = self.update_charges(case, case_data)
+        case_data = self.update_current_date(case, case_data)
+        case_data = self.update_location(case, case_data)
+        return case_data
+
+
 def get_context_data(case_id, template):
     document_generator = init_document_generator(case_id, template)
 
@@ -67,29 +160,13 @@ def get_context_data(case_id, template):
 
     # Filling the data dictionary with cases data
     logger.info(f"Getting the case data for {case_id}")
-    case_data = cases.get_single_case(case_id).model_dump()
+    case = cases.get_single_case(case_id)
+    case_data = case.model_dump()
 
     case_data = flatten(case_data)
 
-    # Transform case location
-    if "municipal" in case_data.get("location", "").lower():
-        case_data["city"] = (
-            case_data.get("location", "")
-            .lower()
-            .replace("municipal", "")
-            .upper()
-        )
-        case_data["city"] += " CITY<"
-        case_data["location"] = "MUNICIPAL"
-    elif "circuit" in case_data.get("location", "").lower():
-        case_data["city"] = (
-            case_data.get("location", "")
-            .lower()
-            .replace("circuit", "")
-            .upper()
-        )
-        case_data["city"] += " COUNTY"
-        case_data["location"] = "CIRCUIT"
+    # Adding the dynamic fields
+    case_data = CaseDynamicFields().update(case, case_data)
 
     data.update({f"case_{key}": value for key, value in case_data.items()})
 
