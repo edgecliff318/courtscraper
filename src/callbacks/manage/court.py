@@ -170,6 +170,13 @@ def get_context_data(case_id, template):
 
     data.update({f"case_{key}": value for key, value in case_data.items()})
 
+    # Update the custom data
+    custom_dict = case.custom
+    if custom_dict is None:
+        custom_dict = {}
+
+    data.update(custom_dict)
+
     # Adding the current date short
     data["current_date_short"] = datetime.now().strftime("%B %d, %Y").upper()
 
@@ -178,7 +185,7 @@ def get_context_data(case_id, template):
 
     logger.info("Finished building data")
     logger.debug(context_data)
-    return context_data
+    return context_data, custom_dict
 
 
 def generate_document(case_id, template, context_data):
@@ -279,11 +286,18 @@ def modal_court_preview(opened, update, template, pars, case_id):
 
     logger.info(f"Getting the context data for {template}")
 
-    context_data = get_context_data(case_id, template)
+    context_data, custom_dict = get_context_data(case_id, template)
 
     if ctx.triggered[0]["prop_id"] == "modal-court-preview-update.n_clicks":
+        update_custom = False
         for k, v in zip(context_data.keys(), pars):
+            if context_data[k] != v:
+                update_custom = True
+                custom_dict[k] = v
             context_data[k] = v
+
+        if update_custom:
+            cases.patch_case(case_id, {"custom": custom_dict})
 
     media_url, output_filepath_pdf = generate_document(
         case_id, template, context_data
