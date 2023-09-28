@@ -69,7 +69,11 @@ def get_email_params(
     if body is None:
         body = ""
 
-    body_filled = body.format_map(case_data)
+    try:
+        body_filled = body.format_map(case_data)
+    except Exception as e:
+        logger.error(f"Error filling in the template: {e}")
+        body_filled = body
 
     # Generate the email using Open AI
     if trigger == f"modal-{role}-preview-generate.n_clicks":
@@ -105,7 +109,8 @@ def get_email_params(
         and len(case_data.get("case_participants", [])) > 0
     ):
         participants_list = participants.ParticipantsService().get_items(
-            id=case_data.get("case_participants", []), role="defendant"
+            id=case_data.get("case_participants", []),
+            role="defendant" if role == "client" else role,
         )
 
         emails_list = [
