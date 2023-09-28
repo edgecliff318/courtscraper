@@ -89,6 +89,7 @@ class Case(BaseModel):
     gender: Optional[str] = None
     release_info: Optional[str] = None
     source: Optional[str] = None
+    custom: Optional[Dict] = None
 
     # Ignore parsing errors for now
     @validator("charges", pre=True, always=True)
