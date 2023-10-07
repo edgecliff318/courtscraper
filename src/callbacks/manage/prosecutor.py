@@ -2,19 +2,18 @@ import logging
 from sqlite3 import Blob
 
 import dash
-
 from dash import ALL, Input, Output, State, callback
 from flask import session
 from google.cloud.storage.retry import DEFAULT_RETRY
+
 from src.components.cases.workflow.email import (
     get_email_params,
     get_preview,
     send_email,
 )
-
 from src.core.config import get_settings
-from src.services.emails import GmailConnector
 from src.db import bucket
+from src.services.emails import GmailConnector
 
 logger = logging.getLogger(__name__)
 settings = get_settings()

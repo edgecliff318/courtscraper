@@ -1,3 +1,5 @@
+import logging
+
 import stripe
 
 from src.core.config import get_settings
@@ -5,6 +7,8 @@ from src.core.config import get_settings
 setttings = get_settings()
 
 stripe.api_key = setttings.STRIPE_SECRET_KEY
+
+logger = logging.getLogger(__name__)
 
 
 class PaymentService:
@@ -41,6 +45,7 @@ class PaymentService:
             )
 
         if len(customer) >= 2:
+            logger.error("More than one customer found")
             raise Exception("More than one customer found")
 
         return customer.data[0]
