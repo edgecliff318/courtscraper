@@ -191,90 +191,16 @@ def retrieve_leads():
                 return
 
 
-# def sync_twilio(from_date: str = None, to_date: str = None):
-#     client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
-
-#     if from_date is None:
-#         # Today
-#         from_date = (
-#             datetime.datetime.now() - datetime.timedelta(days=1)
-#         ).strftime("%Y-%m-%d")
-
-#     if to_date is None:
-#         # Tomorrow
-#         to_date = (
-#             datetime.datetime.now() + datetime.timedelta(days=1)
-#         ).strftime("%Y-%m-%d")
-
-#     # Get messages from Twilio
-#     messages_twilio = client.messages.list(
-#         date_sent_after=from_date, date_sent_before=to_date
-#     )
-
-#     for message in track(messages_twilio):
-#         # If Inbound message:
-#         #   - Get the lead
-#         #   - Update the lead with the message
-#         #   - Update the lead status to contacted
-#         if not hasattr(message, "from_"):
-#             console.log(f"Message {message.sid} has no _from attribute")
-#             continue
-#         if message.direction == "inbound":
-#             lead = leads_service.get_lead_by_phone(message.from_)
-#             if lead is None:
-#                 console.log(f"Lead not found with phone {message.from_}")
-#                 continue
-#             # Add interaction
-
-#             interaction = messages_model.Interaction(
-#                 case_id=lead.case_id,
-#                 message=message.body,
-#                 type="sms",
-#                 status=message.status,
-#                 id=message.sid,
-#                 creation_date=message.date_sent,
-#                 direction=message.direction,
-#                 phone=message.from_,
-#             )
-
-#             if (
-#                 messages_service.get_single_interaction(message.sid)
-#                 is not None
-#             ):
-#                 console.log(f"Interaction {message.sid} already exists")
-#                 messages_service.update_interaction(interaction)
-#                 continue
-
-#             messages_service.insert_interaction(interaction)
-
-#             if message.body is not None and "yes" in message.body.lower():
-#                 leads_service.update_lead_status(lead.case_id, "yes")
-#             elif "stop" in message.body.lower():
-#                 leads_service.update_lead_status(lead.case_id, "stop")
-#             else:
-#                 leads_service.update_lead_status(lead.case_id, "responded")
-
-#         elif "outbound" in str(message.direction).lower():
-#             # Check the status of the message
-#             # If delivered, update the status of the interaction to delivered
-#             # If failed, update the status of the interaction to failed
-#             lead = leads_service.get_lead_by_phone(message.to)
-
-#             if lead is None:
-#                 console.log(f"Lead not found with phone {message.to}")
-#                 continue
-
-#             if message.status != "delivered" and message.status != "sent":
-#                 if lead.status == "not_contacted":
-#                     leads_service.update_lead_status(lead.case_id, "failed")
-#             elif lead.status == "not_contacted":
-#                 leads_service.update_lead_status(lead.case_id, "contacted")
-
 def get_default_dates():
     """Get default from_date and to_date values."""
-    from_date = (datetime.datetime.now() - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
-    to_date = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+    from_date = (
+        datetime.datetime.now() - datetime.timedelta(days=1)
+    ).strftime("%Y-%m-%d")
+    to_date = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime(
+        "%Y-%m-%d"
+    )
     return from_date, to_date
+
 
 def process_inbound_message(message):
     """Process inbound Twilio messages."""
@@ -282,7 +208,7 @@ def process_inbound_message(message):
     if not lead:
         console.log(f"Lead not found with phone {message.from_}")
         return
-    
+
     # Check if interaction exists
     if messages_service.get_single_interaction(message.sid):
         console.log(f"Interaction {message.sid} already exists")
@@ -301,7 +227,7 @@ def process_inbound_message(message):
     )
 
     messages_service.insert_interaction(interaction)
-    
+
     # Update lead status based on message content
     if "yes" in message.body.lower():
         leads_service.update_lead_status(lead.case_id, "yes")
@@ -309,6 +235,7 @@ def process_inbound_message(message):
         leads_service.update_lead_status(lead.case_id, "stop")
     else:
         leads_service.update_lead_status(lead.case_id, "responded")
+
 
 def process_outbound_message(message):
     """Process outbound Twilio messages."""
@@ -323,6 +250,7 @@ def process_outbound_message(message):
     elif lead.status == "not_contacted":
         leads_service.update_lead_status(lead.case_id, "contacted")
 
+
 def sync_twilio(from_date: str = None, to_date: str = None):
     """Sync messages from Twilio."""
     client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
@@ -330,7 +258,9 @@ def sync_twilio(from_date: str = None, to_date: str = None):
     if not from_date or not to_date:
         from_date, to_date = get_default_dates()
 
-    messages_twilio = client.messages.list(date_sent_after=from_date, date_sent_before=to_date)
+    messages_twilio = client.messages.list(
+        date_sent_after=from_date, date_sent_before=to_date
+    )
 
     for message in track(messages_twilio):
         if not hasattr(message, "from_"):
@@ -341,7 +271,6 @@ def sync_twilio(from_date: str = None, to_date: str = None):
             process_inbound_message(message)
         elif "outbound" in str(message.direction).lower():
             process_outbound_message(message)
-
 
 
 def analyze_leads():
