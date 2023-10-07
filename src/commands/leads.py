@@ -216,13 +216,13 @@ def sync_twilio(from_date: str = None, to_date: str = None):
         #   - Get the lead
         #   - Update the lead with the message
         #   - Update the lead status to contacted
-        if not hasattr(message, "_from"):
+        if not hasattr(message, "from_"):
             console.log(f"Message {message.sid} has no _from attribute")
             continue
         if message.direction == "inbound":
-            lead = leads_service.get_lead_by_phone(message._from)
+            lead = leads_service.get_lead_by_phone(message.from_)
             if lead is None:
-                console.log(f"Lead not found with phone {message._from}")
+                console.log(f"Lead not found with phone {message.from_}")
                 continue
             # Add interaction
 
@@ -234,7 +234,7 @@ def sync_twilio(from_date: str = None, to_date: str = None):
                 id=message.sid,
                 creation_date=message.date_sent,
                 direction=message.direction,
-                phone=message._from,
+                phone=message.from_,
             )
 
             if (
