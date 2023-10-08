@@ -33,7 +33,7 @@ INSTALL_REQUIRES = [
     "werkzeug>=2.1.2",
     "PyJWT>=2.3.0",
     "authlib>=1.0",
-    "pydantic>=2.0",
+    "pydantic",
     "pydantic_settings",
     "requests>=2.26.0",
     "flask_cors>=3.0.10",

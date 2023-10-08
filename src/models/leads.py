@@ -41,6 +41,7 @@ class Lead(BaseModel):
     year_of_birth: Optional[int] = None
     email: Optional[str | dict] = None
     phone: Optional[str | dict] = None
+    phones: Optional[list] = None
     address: Optional[str | dict] = None
     city: Optional[str] = None
     state: Optional[str] = None

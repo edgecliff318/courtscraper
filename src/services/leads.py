@@ -1,7 +1,11 @@
+import logging
+
 import pandas as pd
 
 from src.db import db
 from src.models import leads
+
+logger = logging.getLogger(__name__)
 
 
 def get_leads(
@@ -51,17 +55,27 @@ def get_single_lead(case_id):
 
 
 def get_lead_by_phone(phone):
-    leads_list = (
+    selected_fields = [
+        f for f in leads.Lead.__fields__.keys() if f != "report"
+    ]
+    queried_leads_in_list = list(
         db.collection("leads")
-        .select([f for f in leads.Lead.__fields__.keys() if f != "report"])
-        .where("phone", "==", phone)
+        .select(selected_fields)
+        .where("phones", "array_contains", phone)
         .stream()
     )
-    leads_list = [leads.Lead(**m.to_dict()) for m in leads_list]
-    if leads_list:
-        return leads_list[0]
-    else:
-        return None
+
+    lead_objects = [
+        leads.Lead(**doc.to_dict()) for doc in queried_leads_in_list
+    ]
+
+    if len(lead_objects) > 1:
+        logger.warning(
+            f"Found multiple leads with phone number {phone}."
+            "Returning the first one."
+        )
+
+    return lead_objects[0] if lead_objects else None
 
 
 def get_last_lead(
