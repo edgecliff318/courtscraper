@@ -14,7 +14,8 @@ from src.layout.horizontal import Layout
 from src.routes.routing import add_routes
 
 settings = get_settings()
-print(f"settings.ROOT_PATH: {settings.ROOT_PATH}")
+# Use current folder
+root_path = os.path.dirname(os.path.abspath(__file__))
 
 
 def set_logging(app, logging_level):
@@ -70,11 +71,8 @@ dictConfig(
 
 
 def init_app():
-    pages_folder = os.path.join(settings.ROOT_PATH, "src/pages")
-    assets_folder = os.path.join(settings.ROOT_PATH, "src/assets")
-    print(f"settings.ROOT_PATH: {settings.ROOT_PATH}")
-
-    print(f"pages_folder: {pages_folder}")
+    pages_folder = os.path.join(root_path, "src/pages")
+    assets_folder = os.path.join(root_path, "src/assets")
 
     background_callback_manager = DiskcacheManager(diskcache.Cache("./.cache"))
 
