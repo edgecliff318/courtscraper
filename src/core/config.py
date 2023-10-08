@@ -34,10 +34,13 @@ class Settings(BaseSettings):
 
     # Root Path
     ROOT_PATH: pathlib.Path = pathlib.Path(__file__).parent.parent.parent
+    print(pathlib.Path(__file__))
+    print(f"ROOT_PATH: {ROOT_PATH}")
     DATA_PATH: pathlib.Path = ROOT_PATH.joinpath("./data").resolve()
     CONFIG_PATH: pathlib.Path = ROOT_PATH.joinpath("./configuration").resolve()
     UPLOAD_PATH: pathlib.Path = ROOT_PATH.joinpath("./data/upload").resolve()
     OUTPUT_PATH: pathlib.Path = ROOT_PATH.joinpath("./data/output").resolve()
+    print(f"ROOT_PATH: {ROOT_PATH}")
 
     # Template
     TEMPLATE: str = os.getenv("TEMPLATE", "plotly")
