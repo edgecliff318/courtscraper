@@ -95,7 +95,7 @@ def retrieve_leads():
                 console.log(
                     f"Error processing lead {lead.case_id} on BeenVerified"
                 )
-                waiting_time = random.randint(60, 300)
+                waiting_time = random.randint(15, 30)
                 console.log(f"Waiting {waiting_time} seconds before next lead")
                 lead_data["status"] = "processing_error"
                 leads_service.insert_lead(leads_model.Lead(**lead_data))
@@ -103,7 +103,7 @@ def retrieve_leads():
                 continue
             if data.get("exact_match") is False:
                 console.log(f"Lead {lead.case_id} not found in BeenVerified")
-                waiting_time = random.randint(60, 300)
+                waiting_time = random.randint(15, 30)
                 console.log(f"Waiting {waiting_time} seconds before next lead")
                 lead_data["status"] = "not_found"
                 leads_service.insert_lead(leads_model.Lead(**lead_data))
@@ -143,6 +143,8 @@ def retrieve_leads():
                         phone_transformed[lead_phone_id][
                             "carrier"
                         ] = phone.carrier["type"]
+
+                        phone_transformed[lead_phone_id].update(phone.carrier)
                         if (
                             phone.carrier["type"] == "landline"
                             or phone.carrier["type"] == "voip"
@@ -170,7 +172,7 @@ def retrieve_leads():
             leads_service.insert_lead(leads_model.Lead(**lead_data))
             console.log(f"Lead {lead.case_id} retrieved")
             # Wait a random time between 30 seconds and 5 minutes
-            waiting_time = random.randint(60, 300)
+            waiting_time = random.randint(15, 30)
             console.log(f"Waiting {waiting_time} seconds before next lead")
             time.sleep(waiting_time)
             error_count = 0

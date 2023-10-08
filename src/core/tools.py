@@ -124,8 +124,9 @@ class SensorEmail:
         self.imap_url = "imap.gmail.com"
         # self.threshold_time =  (datetime.datetime.now() - datetime.timedelta(days=1)).strftime('%d-%b-%Y')
         self.threshold_time = (
-            datetime.datetime.now() - datetime.timedelta(minutes=5)
+            datetime.datetime.utcnow() - datetime.timedelta(minutes=5)
         ).strftime("%d-%b-%Y")
+        # Convert to UTC format
 
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         link = self.get_magic_link()

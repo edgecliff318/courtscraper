@@ -1,14 +1,18 @@
+import json
 import logging
 import os
 import urllib.parse
 from datetime import datetime
 from time import sleep
+from urllib.parse import parse_qs, urlparse
 
 import selenium.common.exceptions
 from rich.console import Console
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+
+#  from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 from twilio.rest import Client
@@ -30,6 +34,7 @@ class BeenVerifiedScrapper:
     def __init__(self, cache=False):
         self.options = Options()
         self.options.add_argument("--no-sandbox")
+
         # self.options.add_argument("--headless")
         self.options.add_argument("enable-automation")
         self.options.add_argument("--disable-infobars")
@@ -42,6 +47,7 @@ class BeenVerifiedScrapper:
         self.magic_link = None
         self.email_sensor = None
         if not cache:
+            self.driver = webdriver.Firefox(options=self.options)
             self.driver = webdriver.Chrome(options=self.options)
             # self.driver = webdriver.Remote(
             #     command_executor=settings.SELENIUM_STANDALONE_URL,
@@ -81,7 +87,7 @@ class BeenVerifiedScrapper:
                 By.CSS_SELECTOR, "#send-magic-link-form > .btn"
             ).click()
             console.log("Waiting 60 seconds")
-            sleep(60)
+            sleep(5)
 
             # get the magic link
             sns = tools.SensorEmail()
@@ -92,7 +98,7 @@ class BeenVerifiedScrapper:
             self.magic_link = magic_link
             self.email_sensor = sns
             self.driver.get(magic_link)
-            sleep(30)
+            sleep(60)
         except Exception as e:
             self.driver.save_screenshot(
                 f"beenverified-{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.png"
@@ -202,6 +208,8 @@ class BeenVerifiedScrapper:
             raise CaptchaException("Blocked by captcha")
         except selenium.common.exceptions.TimeoutException:
             pass
+
+        sleep(5)
 
         # Close the previous tabs
         for w in window_handles:

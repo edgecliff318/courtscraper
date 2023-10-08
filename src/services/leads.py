@@ -103,10 +103,17 @@ def get_last_lead(
     )
     leads_list = [leads.Lead(**m.to_dict()) for m in leads_list]
 
+    leads_list = [l for l in leads_list if l.charges_description is not None]
+
     if leads_list:
         returned_list = []
         alcohol_related = [
-            x for x in leads_list if "alcohol" in x.charges_description.lower()
+            x
+            for x in leads_list
+            if "alcohol" in x.charges_description.lower()
+            or "dui" in x.charges_description.lower()
+            or "intoxicated" in x.charges_description.lower()
+            or "dwi" in x.charges_description.lower()
         ]
         if alcohol_related:
             returned_list += alcohol_related

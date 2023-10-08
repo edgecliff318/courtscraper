@@ -44,7 +44,11 @@ def retrieve_cases_mo_casenet():
         date = str((datetime.datetime.now(tz) + Day(day)).date())
         console.log(f"Processing date {date}")
         for court in courts:
-            if court.code == "MEYER" or court.code == "TONI":
+            if (
+                court.code == "MEYER"
+                or court.code == "TONI"
+                or court.code == "temp"
+            ):
                 continue
             cases_retrieved = []
             while True:

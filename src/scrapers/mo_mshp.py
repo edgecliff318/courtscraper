@@ -1,3 +1,4 @@
+import datetime
 import logging
 from time import sleep
 from urllib.parse import urljoin
@@ -80,7 +81,7 @@ class MOHighwayPatrol(object):
             if cases_filter and report["case_id"] not in [
                 c.case_id for c in cases_filter
             ]:
-                continue
+                pass
             data = self.get_single_report(report["link"])
             sleep(1)
             persona_information = data["person_information"][0]
@@ -102,7 +103,15 @@ class MOHighwayPatrol(object):
             case_id = report["case_id"]
             name = report["name"]
             # Split to get the first and last name
-            first_name, last_name = name.split(", ", 1)
+            last_name, first_name_raw = name.split(", ", 1)
+
+            # Split the first name
+            first_name = first_name_raw.split(" ")[0]
+
+            try:
+                middle_name = first_name_raw.split(" ")[1]
+            except Exception:
+                middle_name = None
             try:
                 city, state = report.get("person_city/state", ",").split(",")
             except Exception:
@@ -110,6 +119,14 @@ class MOHighwayPatrol(object):
                 state = "MO"
                 logger.error(
                     f"Failed to split city and state for case {case_id} - {report.get('person_city/state')}"
+                )
+
+            try:
+                age = int(report.get("age"))
+            except Exception:
+                age = 25
+                logger.error(
+                    f"Failed to convert age to int for case {case_id} - {report.get('age')}"
                 )
 
             # Getting the case info
@@ -122,6 +139,7 @@ class MOHighwayPatrol(object):
                 "source": "mo_mshp",
                 "formatted_party_name": name,
                 "first_name": first_name,
+                "middle_name": middle_name,
                 "last_name": last_name,
                 "age": report.get("age"),
                 "charges_description": report.get("charge"),
@@ -132,6 +150,7 @@ class MOHighwayPatrol(object):
                 "release_info": report.get("release_info"),
                 "address_city": city,
                 "address_state_code": state,
+                "year_of_birth": str(datetime.datetime.now().year - age),
             }
             logger.info(f"Succeeded to get details for case " f"{case_id}")
             console.print(f"Succeeded to get details for case " f"{case_id}")
