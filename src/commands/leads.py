@@ -166,6 +166,9 @@ def retrieve_leads():
                 lead_data["status"] = "not_valid"
 
             lead_data["phone"] = json.loads(json.dumps(phone_transformed))
+            lead_data["phones"] = [
+                p["phone"] for p in lead_data["phone"].values()
+            ]
 
             leads_service.insert_lead(leads_model.Lead(**lead_data))
             console.log(f"Lead {lead.case_id} retrieved")
