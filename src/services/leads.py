@@ -51,16 +51,27 @@ def get_single_lead(case_id):
 
 
 def get_lead_by_phone(phone):
-    
-    selected_fields = [f for f in leads.Lead.__fields__.keys() if f != "report"]
-    queried_leads_exact = list(db.collection("leads").select(selected_fields).where("phone", "==", phone).stream())
-    queried_leads_in_list = list(db.collection("leads").select(selected_fields).where("phone", "array_contains", phone).stream())
+    selected_fields = [
+        f for f in leads.Lead.__fields__.keys() if f != "report"
+    ]
+    queried_leads_exact = list(
+        db.collection("leads")
+        .select(selected_fields)
+        .where("phone", "==", phone)
+        .stream()
+    )
+    queried_leads_in_list = list(
+        db.collection("leads")
+        .select(selected_fields)
+        .where("phone", "array_contains", phone)
+        .stream()
+    )
 
-    lead_objects = [leads.Lead(**doc.to_dict()) for doc in queried_leads_exact] + \
-                   [leads.Lead(**doc.to_dict()) for doc in queried_leads_in_list]
+    lead_objects = [
+        leads.Lead(**doc.to_dict()) for doc in queried_leads_exact
+    ] + [leads.Lead(**doc.to_dict()) for doc in queried_leads_in_list]
 
     return lead_objects[0] if lead_objects else None
-
 
 
 def get_last_lead(
