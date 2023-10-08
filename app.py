@@ -14,6 +14,7 @@ from src.layout.horizontal import Layout
 from src.routes.routing import add_routes
 
 settings = get_settings()
+print(f"settings.ROOT_PATH: {settings.ROOT_PATH}")
 
 
 def set_logging(app, logging_level):
@@ -71,6 +72,7 @@ dictConfig(
 def init_app():
     pages_folder = os.path.join(settings.ROOT_PATH, "src/pages")
     assets_folder = os.path.join(settings.ROOT_PATH, "src/assets")
+    print(f"settings.ROOT_PATH: {settings.ROOT_PATH}")
 
     print(f"pages_folder: {pages_folder}")
 
