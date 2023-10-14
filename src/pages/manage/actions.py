@@ -38,32 +38,15 @@ def layout():
             
     dmc.Grid(
         children=[
-            dmc.Col(
-        dmc.Navbar(
-            p="md",
-            children=[
-                html.H4("Pending", style={"marginTop": '4px', "textAlign": 'center'}),
-                dmc.Divider(size="sm", style={"marginBottom": "10px"}),
-                html.Div(  
-                         id="case_card_col_1",
-                    # [create_case_card(case) for case in cases],
-                    style={
-                        "overflowY": "auto"
-                    }
-                )
-            ],
-        ),
-        xl=4, lg=4, md=12, sm=12, xs=12
-    ),
-            dmc.Col(
+            
+             dmc.Col(
         dmc.Navbar(
             p="md",
             children=[
                 html.H4( "To-do", style={"marginTop": '4px', "textAlign": 'center'}),
                 dmc.Divider(size="sm", style={"marginBottom": "10px"}),
                 html.Div(  
-                    # [create_case_card(case) for case in cases],
-                         id="case_card_col_2",
+                         id="case_card_col_1",
                     
                     style={
                         "overflowY": "auto"
@@ -73,6 +56,24 @@ def layout():
         ),
         xl=4, lg=4, md=12, sm=12, xs=12
     ),
+             
+            dmc.Col(
+        dmc.Navbar(
+            p="md",
+            children=[
+                html.H4("Pending", style={"marginTop": '4px', "textAlign": 'center'}),
+                dmc.Divider(size="sm", style={"marginBottom": "10px"}),
+                html.Div(  
+                         id="case_card_col_2",
+                    style={
+                        "overflowY": "auto"
+                    }
+                )
+            ],
+        ),
+        xl=4, lg=4, md=12, sm=12, xs=12
+    ),
+           
             dmc.Col(
         dmc.Navbar(
             p="md",
@@ -80,7 +81,6 @@ def layout():
                 html.H4("Closed Recently", style={"marginTop": '4px', "textAlign": 'center'}),
                 dmc.Divider(size="sm", style={"marginBottom": "10px"}),
                 html.Div(  
-                    # [create_case_card(case) for case in cases],
                          id="case_card_col_3",
                     
                     style={

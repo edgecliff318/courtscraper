@@ -115,6 +115,30 @@ def create_case_column(cases, title):
         ),
         xl=4, lg=4, md=12, sm=12, xs=12
     )
+
+def filter_cases_by_status(cases_list):
+    cases_by_status = {
+        'todo': [],
+        'pending': [],
+        'closed': []
+    }
+
+    for case in cases_list:
+        case_dic = case.model_dump()
+        status = 'filed' if not case_dic.get('status') else case_dic['status']
+        section = 'todo' if not case_statuses[status].get("section") else case_statuses[status]["section"]              
+        
+        if section in cases_by_status:
+            cases_by_status[section].append(case_dic)
+    
+    return cases_by_status
+
+def create_case_div(cases):
+    return html.Div(
+        [create_case_card(case) for case in cases],
+        style={"overflowY": "auto"}
+    )
+
 @callback(
     Output("case_card_col_1", "children"),
     Output("case_card_col_2", "children"),
@@ -123,40 +147,13 @@ def create_case_column(cases, title):
     Input("date-selector", "value"),
 )
 def render_actions(court_code_list, dates):
-    (start_date, end_date) = dates
-    status = None
+    start_date, end_date = dates
     start_date = convert_date_format(start_date)
     end_date = convert_date_format(end_date)
     
-    cases_todo = []
-    cases_pending = []
-    cases_closed = []
-    cases_list = cases.get_cases(court_code_list, None, None, status)
-    # cases_row = [case.model_dump() for case in cases_list]
-    for case in cases_list:
-        case_dic =   case.model_dump() 
-        status = case_dic.get('status')
-        if case_statuses[status]["section"] == 'todo':
-            cases_todo.append(case_dic)
-        elif case_statuses[status]["section"]  == 'pending':
-            cases_pending.append(case_dic)
-        elif case_statuses[status]["section"] == 'closed':
-            cases_closed.append(case_dic)   
+    cases_list = cases.get_cases(court_code_list, None, None, None)
+    cases_by_status = filter_cases_by_status(cases_list)
     
-    
-    return html.Div(  
-                    [create_case_card(case) for case in cases_todo],
-                    style={
-                        "overflowY": "auto"
-                    }
-                ) , html.Div(  
-                    [create_case_card(case) for case in cases_pending],
-                    style={
-                        "overflowY": "auto"
-                    }
-                ) , html.Div(  
-                    [create_case_card(case) for case in cases_closed],
-                    style={
-                        "overflowY": "auto"
-                    }
-                )
+    return (create_case_div(cases_by_status['todo']),
+            create_case_div(cases_by_status['pending']),
+            create_case_div(cases_by_status['closed']))
