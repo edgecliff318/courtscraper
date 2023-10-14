@@ -10,7 +10,7 @@ from dash import Input, Output, callback, html
 from src.core.config import get_settings
 from src.core.format import humanize_phone
 from src.services import cases
-from src.components.cases.status import get_case_status_color
+from src.components.cases.status import get_case_status_color , case_statuses
 
 import dash
 import dash_bootstrap_components as dbc
@@ -128,21 +128,34 @@ def render_actions(court_code_list, dates):
     start_date = convert_date_format(start_date)
     end_date = convert_date_format(end_date)
     
+    cases_todo = []
+    cases_pending = []
+    cases_closed = []
     cases_list = cases.get_cases(court_code_list, None, None, status)
-    cases_row = [case.model_dump() for case in cases_list]
+    # cases_row = [case.model_dump() for case in cases_list]
+    for case in cases_list:
+        case_dic =   case.model_dump() 
+        status = case_dic.get('status')
+        if case_statuses[status]["section"] == 'todo':
+            cases_todo.append(case_dic)
+        elif case_statuses[status]["section"]  == 'pending':
+            cases_pending.append(case_dic)
+        elif case_statuses[status]["section"] == 'closed':
+            cases_closed.append(case_dic)   
+    
     
     return html.Div(  
-                    [create_case_card(case) for case in cases_row[:3]],
+                    [create_case_card(case) for case in cases_todo],
                     style={
                         "overflowY": "auto"
                     }
                 ) , html.Div(  
-                    [create_case_card(case) for case in cases_row[:3]],
+                    [create_case_card(case) for case in cases_pending],
                     style={
                         "overflowY": "auto"
                     }
                 ) , html.Div(  
-                    [create_case_card(case) for case in cases_row[:3]],
+                    [create_case_card(case) for case in cases_closed],
                     style={
                         "overflowY": "auto"
                     }
