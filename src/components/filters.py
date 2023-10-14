@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from core import cases
 
 import dash_bootstrap_components as dbc
 from dash import html
@@ -118,3 +119,41 @@ monitoring_controls = dbc.Row(
         ),
     ]
 )
+
+
+def generate_col(content, **kwargs):
+    """Generate a column with specified width configurations."""
+    width_config = {
+        "width": 4,
+        "xs": 12,
+        "lg": kwargs.get("lg", 4), 
+    }
+    return dbc.Col(content, **width_config)
+
+court_selector = generate_form_group(
+    label="Courts",
+    id="court-selector",
+    placeholder="Select a Court",
+    type="Dropdown",
+    options=[],
+    value=None,
+    multi=True,
+    persistence_type="session",
+    persistence=True,
+)
+
+date_selector = generate_form_group(
+    label="Date",
+    id="date-selector",
+    placeholder="Select a Date",
+    type="DateRangePicker",
+    persistence_type="session",
+    persistence=True,
+    start_date=(datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d"),
+    end_date=datetime.now().strftime("%Y-%m-%d"),
+)
+
+cases_controls = dbc.Row([
+    generate_col(court_selector, lg=5),
+    generate_col(date_selector)
+])
