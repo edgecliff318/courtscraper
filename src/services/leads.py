@@ -13,7 +13,7 @@ def get_leads(
 ):
     # Exclude the field "report" from the collection schema
     leads_list = db.collection("leads").select(
-        [f for f in leads.Lead.__fields__.keys() if f != "report"]
+        [f for f in leads.Lead.model_fields.keys() if f != "report"]
     )
     if court_code_list is not None and court_code_list:
         if not isinstance(court_code_list, list):

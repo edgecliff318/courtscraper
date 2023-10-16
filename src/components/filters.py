@@ -1,8 +1,6 @@
 from datetime import datetime, timedelta
-from core import cases
 
 import dash_bootstrap_components as dbc
-from dash import html
 
 from src.components.inputs import generate_form_group
 from src.models import leads as leads_model
@@ -126,9 +124,10 @@ def generate_col(content, **kwargs):
     width_config = {
         "width": 4,
         "xs": 12,
-        "lg": kwargs.get("lg", 4), 
+        "lg": kwargs.get("lg", 4),
     }
     return dbc.Col(content, **width_config)
+
 
 court_selector = generate_form_group(
     label="Courts",
@@ -153,7 +152,6 @@ date_selector = generate_form_group(
     end_date=datetime.now().strftime("%Y-%m-%d"),
 )
 
-cases_controls = dbc.Row([
-    generate_col(court_selector, lg=5),
-    generate_col(date_selector)
-])
+cases_controls = dbc.Row(
+    [generate_col(court_selector, lg=5), generate_col(date_selector)]
+)
