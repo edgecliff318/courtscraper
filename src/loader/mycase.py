@@ -22,7 +22,7 @@ class MyCase:
         # Refresh the headers
         url = "https://auth.mycase.com/login_sessions?client_id=tCEM8hNY7GaC2c8P&response_type=code"
         # TODO: #17 Move the login details to Firebase
-        payload = "utf8=%E2%9C%93&login_session%5Bemail%5D=shawn%40tickettakedown.com&login_session%5Bpassword%5D=MASdorm1993!"
+        payload = "utf8=%E2%9C%93&login_session%5Bemail%5D=shawn%40tickettakedown.com&login_session%5Bpassword%5D=MASdorm2023!!"
         headers = {
             "authority": "auth.mycase.com",
             "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
