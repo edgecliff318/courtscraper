@@ -165,6 +165,10 @@ def get_context_data(case_id, template):
 
     case_data = flatten(case_data)
 
+    # TODO: Better default management and use the services from the cases
+    if case_data["middle_name"] is None:
+        case_data["middle_name"] = ""
+
     # Adding the dynamic fields
     case_data = CaseDynamicFields().update(case, case_data)
 

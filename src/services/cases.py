@@ -110,7 +110,7 @@ def flatten(dictionary, parent_key="", separator="_"):
     return dict(items)
 
 
-def get_context_data(case_id) -> defaultdict:
+def get_context_data(case_id, default_value="!!!TO_FILL!!!") -> defaultdict:
     case_data = get_single_case(case_id).model_dump()
 
     case_data = flatten(case_data)
@@ -125,6 +125,6 @@ def get_context_data(case_id) -> defaultdict:
     )
 
     # Transform to defaultdict
-    case_data = defaultdict(lambda: "!!!TO_FILL!!!", case_data)
+    case_data = defaultdict(lambda: default_value, case_data)
 
     return case_data
