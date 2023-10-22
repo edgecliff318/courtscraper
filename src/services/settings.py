@@ -1,3 +1,4 @@
+from src.core.base import BaseService
 from src.db import db
 from src.models import settings
 
@@ -14,3 +15,8 @@ def get_account(account_name: str):
         db.collection("accounts").document(account_name).get().to_dict()
     )
     return settings.Account(**account_single)
+
+
+class UserSettings(BaseService):
+    collection_name = "userSettings"
+    serializer = settings.UserSettings

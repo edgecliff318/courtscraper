@@ -25,3 +25,8 @@ class Settings(BaseModel):
     @validator("end_date")
     def set_end_date(cls, v):
         return v or 0
+
+
+class UserSettings(BaseModel):
+    email: Optional[str] = None
+    signature: Optional[str] = None
