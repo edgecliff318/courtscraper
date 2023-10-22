@@ -62,6 +62,7 @@ def get_email_params(
     case_data = cases.get_context_data(case_id)
 
     # Params should be subject, body (texarea), attachments
+    emails_list = []
     if (
         case_data.get("case_participants") is not None
         and len(case_data.get("case_participants", [])) > 0
@@ -87,8 +88,13 @@ def get_email_params(
         )
 
     # Get the signature from the settings
-    settings_account_name = session.get("profile", {}).get("name", None)
-    # settings_data = settings_service.get_settings(settings_account_name)
+    user_email = session.get("profile", {}).get("name", None)
+    user_settings = settings_service.UserSettingsService().get_single_item(
+        user_email
+    )
+
+    if user_settings is not None:
+        case_data["signature"] = user_settings.signature
 
     # Jinja2 template fill in
     subject = template_details.subject
@@ -102,6 +108,8 @@ def get_email_params(
 
     try:
         body_filled = body.format_map(case_data)
+        # Replace \\n with \n
+        body_filled = body_filled.replace("\\n", "\n")
     except Exception as e:
         logger.error(f"Error filling in the template: {e}")
         body_filled = body
@@ -131,8 +139,6 @@ def get_email_params(
         )
 
         body_filled = result["choices"][0]["message"]["content"]
-
-    emails_list = []
 
     params = dmc.Stack(
         [

@@ -17,6 +17,6 @@ def get_account(account_name: str):
     return settings.Account(**account_single)
 
 
-class UserSettings(BaseService):
+class UserSettingsService(BaseService):
     collection_name = "userSettings"
     serializer = settings.UserSettings
