@@ -5,10 +5,12 @@ from datetime import datetime, timedelta
 import dash_mantine_components as dmc
 import openai
 from dash import dcc, html
+from flask import session
 
 from src.core.config import get_settings
 from src.db import bucket
 from src.services import cases, participants, templates
+from src.services import settings as settings_service
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -59,6 +61,35 @@ def get_email_params(
 
     case_data = cases.get_context_data(case_id)
 
+    # Params should be subject, body (texarea), attachments
+    if (
+        case_data.get("case_participants") is not None
+        and len(case_data.get("case_participants", [])) > 0
+    ):
+        participants_list = participants.ParticipantsService().get_items(
+            id=case_data.get("case_participants", []),
+            role="defendant" if role == "client" else role,
+        )
+
+        emails_list = [
+            p.email
+            for p in participants_list
+            if p.email is not None
+            for p in participants_list
+        ]
+
+        participant_names = [
+            p.first_name for p in participants_list if p.first_name is not None
+        ]
+        # Add the participants and capitalise the first letter
+        case_data["participant_name"] = ", ".join(
+            [p.capitalize() for p in participant_names]
+        )
+
+    # Get the signature from the settings
+    settings_account_name = session.get("profile", {}).get("name", None)
+    # settings_data = settings_service.get_settings(settings_account_name)
+
     # Jinja2 template fill in
     subject = template_details.subject
     if subject is None:
@@ -102,23 +133,6 @@ def get_email_params(
         body_filled = result["choices"][0]["message"]["content"]
 
     emails_list = []
-
-    # Params should be subject, body (texarea), attachments
-    if (
-        case_data.get("case_participants") is not None
-        and len(case_data.get("case_participants", [])) > 0
-    ):
-        participants_list = participants.ParticipantsService().get_items(
-            id=case_data.get("case_participants", []),
-            role="defendant" if role == "client" else role,
-        )
-
-        emails_list = [
-            p.email
-            for p in participants_list
-            if p.email is not None
-            for p in participants_list
-        ]
 
     params = dmc.Stack(
         [

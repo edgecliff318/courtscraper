@@ -191,20 +191,6 @@ def get_single_message_template(message_id) -> messages.MessageTemplate:
     return messages.MessageTemplate(**message.to_dict())
 
 
-def save_message_status(message: t.Dict):
-    try:
-        db.collection("messageStatus").add(message)
-    except Exception as e:
-        logger.error(e)
-        return False
-    return True
-
-
-def get_message_status(message_id):
-    message = db.collection("messageStatus").get()
-    return message.to_dict()
-
-
 def get_email_from_phone(phone, carrier):
     if carrier == "att":
         return f"{phone}@txt.att.net"
