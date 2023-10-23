@@ -105,14 +105,13 @@ def modal_prosecutor_preview(
 
     if template is None:
         return "Please select a template", dash.no_update
-
-    trigger = ctx.triggered[0]["prop_id"]
+    triggered_id = ctx.triggered_id
     states = ctx.states
     inputs = ctx.inputs
 
     document_preview = get_preview(
         template,
-        trigger,
+        triggered_id,
         case_id,
         states,
         inputs,

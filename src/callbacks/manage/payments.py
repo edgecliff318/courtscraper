@@ -1,16 +1,10 @@
 import logging
+
 import dash
+import dash_mantine_components as dmc
 from dash import ALL, Input, Output, State, callback
 
 from src.connectors import payments as payments_connector
-from src.components.cases.workflow.email import (
-    get_email_params,
-    get_preview,
-    send_email,
-)
-import dash_mantine_components as dmc
-
-from src.connectors.intercom import IntercomConnector
 from src.core.config import get_settings
 
 logger = logging.getLogger(__name__)

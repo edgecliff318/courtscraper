@@ -87,13 +87,13 @@ def modal_client_preview(
     if template is None:
         return "Please select a template", dash.no_update
 
-    trigger = ctx.triggered[0]["prop_id"]
+    trigger_id = ctx.triggered_id
     states = ctx.states
     inputs = ctx.inputs
 
     document_preview = get_preview(
         template,
-        trigger,
+        trigger_id,
         case_id,
         states,
         inputs,

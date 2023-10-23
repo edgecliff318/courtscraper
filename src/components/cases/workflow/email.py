@@ -231,10 +231,10 @@ def get_preview(
         attachment_stack = dmc.Text("No attachments")
 
     # If click on preview-{attachment}, then preview the attachment
-    if trigger.startswith('{"index":"preview-'):
-        attachment = trigger.split("-")[1]
-        attachment = attachment.split('"')[0]
-        attachment = attachment.split("/")[-1]
+    if isinstance(trigger, dict) and trigger.get("index", "").startswith(
+        "preview-"
+    ):
+        attachment = trigger.get("index", "").split("/")[-1]
 
         media_url = bucket.blob(
             f"cases/{case_id}/{attachment}"
