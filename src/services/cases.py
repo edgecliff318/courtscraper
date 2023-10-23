@@ -2,7 +2,7 @@ from collections import defaultdict
 from datetime import datetime
 from typing import MutableMapping
 
-from google.cloud.firestore_v1.base_query import FieldFilter, Or
+from google.cloud.firestore_v1.base_query import And, FieldFilter, Or
 from pydantic import ValidationError
 
 from src.db import db
@@ -77,15 +77,40 @@ def patch_case(case_id: str, data: dict) -> None:
 
 
 def search_cases(search_term: str) -> list:
-    filter_first_name = FieldFilter(
-        "first_name", "==", str(search_term).upper()
-    )
-    filter_last_name = FieldFilter("last_name", "==", str(search_term).upper())
-    filter_case_id = FieldFilter("case_id", "==", search_term)
+    composed = search_term.split(" ")
+    if len(composed) == 1 or composed[1] == "":
+        filter_first_name = FieldFilter(
+            "first_name", "==", str(search_term).upper()
+        )
+        filter_last_name = FieldFilter(
+            "last_name", "==", str(search_term).upper()
+        )
+        filter_case_id = FieldFilter("case_id", "==", search_term)
 
-    or_filter = Or(
-        filters=[filter_first_name, filter_last_name, filter_case_id]
-    )
+        or_filter = Or(
+            filters=[filter_first_name, filter_last_name, filter_case_id]
+        )
+    else:
+        filter_first_name = FieldFilter(
+            "first_name", "==", str(composed[0]).upper()
+        )
+        filter_last_name = FieldFilter(
+            "last_name", ">=", str(composed[1]).upper()
+        )
+
+        and_filter = And(filters=[filter_first_name, filter_last_name])
+
+        filter_first_name_inv = FieldFilter(
+            "first_name", "==", str(composed[1]).upper()
+        )
+        filter_last_name_inv = FieldFilter(
+            "last_name", ">=", str(composed[0]).upper()
+        )
+        and_filter_inv = And(
+            filters=[filter_first_name_inv, filter_last_name_inv]
+        )
+
+        or_filter = Or(filters=[and_filter, and_filter_inv])
 
     cases_list = db.collection("cases").where(filter=or_filter).stream()
 
