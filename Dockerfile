@@ -9,6 +9,7 @@ RUN wget -qO- https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key ad
 RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
 RUN apt-get update
 RUN apt-get install google-chrome-stable -y
+RUN apt-get install poppler-utils -y
 RUN apt-get clean
 # # install chromedriver
 RUN apt-get install unzip jq -yqq
