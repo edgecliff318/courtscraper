@@ -220,7 +220,6 @@ def insert_lead_from_case(case):
     # Insert the lead in the leads table:
     try:
         lead_parsed = leads.Lead.model_validate(case)
-        insert_lead(lead_parsed)
         lead_loaded = get_single_lead(lead_parsed.case_id)
         if lead_loaded is None:
             insert_lead(lead_parsed)
