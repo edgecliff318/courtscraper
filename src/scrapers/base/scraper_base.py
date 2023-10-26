@@ -8,6 +8,7 @@ from pdf2image.pdf2image import convert_from_path
 from rich.console import Console
 
 from src.core.config import get_settings
+from src.core.storage import ensure_folder
 from src.db import bucket
 from src.loader.tickets import TicketParser
 
@@ -88,6 +89,7 @@ class ScraperBase:
 
     def download(self, link, filetype="pdf"):
         """Download the pdf file from the given link."""
+        ensure_folder(settings.DATA_PATH)
         filepath = settings.DATA_PATH.joinpath(
             link.split("/")[-1] + "." + filetype.lower()
         )
