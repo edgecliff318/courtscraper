@@ -663,11 +663,27 @@ def refresh_case(btn, case_id):
                 username=case_net_account.username,
                 password=case_net_account.password,
             )
-            case_refreshed = case_net.refresh_case(case_details.model_dump())
+            if case_details is None:
+                case_details = {
+                    "case_id": case_id,
+                }
+                create = True
+            else:
+                case_details = case_details.model_dump()
+                case_details["court_code"] = case_details.get("court_id")
+                create = False
 
-            case_refreshed_obj = cases_model.Case.parse_obj(case_refreshed)
+            case_refreshed = case_net.refresh_case(case_details)
 
-            cases.update_case(case_refreshed_obj)
+            case_refreshed_obj = cases_model.Case.model_validate(
+                case_refreshed
+            )
+
+            if create is False:
+                cases.update_case(case_refreshed_obj)
+            else:
+                cases.insert_case(case_refreshed_obj)
+                leads.insert_lead_from_case(case_refreshed)
 
             toast = build_toast(
                 "The case was refreshed successfully" "Case refreshed ✅",

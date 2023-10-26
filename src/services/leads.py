@@ -214,3 +214,16 @@ def update_lead(lead: leads.Lead):
 
 def patch_lead(case_id, **kwargs):
     db.collection("leads").document(case_id).update(kwargs)
+
+
+def insert_lead_from_case(case):
+    # Insert the lead in the leads table:
+    try:
+        lead_parsed = leads.Lead.model_validate(case)
+        insert_lead(lead_parsed)
+        lead_loaded = get_single_lead(lead_parsed.case_id)
+        if lead_loaded is None:
+            insert_lead(lead_parsed)
+            logger.info(f"Succeeded to insert lead for {case.get('case_id')}")
+    except Exception as e:
+        logger.error(f"Failed to parse lead {case} - {e}")
