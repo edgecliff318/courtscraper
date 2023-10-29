@@ -1,6 +1,7 @@
 import os
 import pathlib
 from functools import lru_cache
+from typing import ClassVar
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -33,14 +34,14 @@ class Settings(BaseSettings):
     )
 
     # Root Path
-    ROOT_PATH: pathlib.Path = pathlib.Path(__file__).parent.parent.parent
-    print(pathlib.Path(__file__))
-    print(f"ROOT_PATH: {ROOT_PATH}")
-    DATA_PATH: pathlib.Path = ROOT_PATH.joinpath("./data").resolve()
-    CONFIG_PATH: pathlib.Path = ROOT_PATH.joinpath("./configuration").resolve()
-    UPLOAD_PATH: pathlib.Path = ROOT_PATH.joinpath("./data/upload").resolve()
-    OUTPUT_PATH: pathlib.Path = ROOT_PATH.joinpath("./data/output").resolve()
-    print(f"ROOT_PATH: {ROOT_PATH}")
+    # ROOT_PATH: pathlib.Path = pathlib.Path(__file__).parent.parent.parent
+    ROOT_PATH: ClassVar[pathlib.Path] = pathlib.Path(os.getenv("ROOT_PATH", pathlib.Path(__file__).parent.parent.parent))
+
+    DATA_PATH: pathlib.Path = pathlib.Path(os.getenv("DATA_PATH", ROOT_PATH.joinpath("data"))).resolve()
+    CONFIG_PATH: pathlib.Path = pathlib.Path(os.getenv("CONFIG_PATH", ROOT_PATH.joinpath("configuration"))).resolve()
+    UPLOAD_PATH: pathlib.Path = pathlib.Path(os.getenv("UPLOAD_PATH", ROOT_PATH.joinpath("data", "upload"))).resolve()
+    OUTPUT_PATH: pathlib.Path = pathlib.Path(os.getenv("OUTPUT_PATH", ROOT_PATH.joinpath("data", "output"))).resolve()
+
 
     # Template
     TEMPLATE: str = os.getenv("TEMPLATE", "plotly")
