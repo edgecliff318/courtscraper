@@ -98,7 +98,7 @@ class ScraperMOCourt(ScraperBase):
         return self._GLOBAL_SESSION
 
     def search_case(self, case_id):
-        payload = f"courtType=&countyCode=&cortCode=SW&caseNumber={704195410}"
+        payload = f"courtType=&countyCode=&cortCode=SW&caseNumber={case_id}"
         cookies = self.GLOBAL_SESSION.cookies.get_dict()
         cookie_str = "; ".join([f"{k}={v}" for k, v in cookies.items()])
 
