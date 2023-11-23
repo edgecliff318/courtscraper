@@ -213,13 +213,25 @@ class MyCase:
             else:
                 charges = charges_candidate.pop().get("option_value")
 
+        first_name = (
+            lead.first_name.capitalize() if lead.first_name is not None else ""
+        )
+        middle_name = (
+            f"{lead.middle_name.capitalize()[:1]}."
+            if lead.middle_name is not None and len(lead.middle_name) > 0
+            else ""
+        )
+        last_name = (
+            lead.last_name.capitalize() if lead.last_name is not None else ""
+        )
+
         payload_dict = {
             "has_new_company": False,
             "has_existing_company": False,
             "court_case": {
                 "name": (
-                    f"{lead.last_name} {lead.middle_name}"
-                    f" {lead.first_name}  - {case.location}"
+                    f"TTD23 {first_name} {middle_name}"
+                    f" {last_name}  - {case.location}"
                     f" - {case.case_id}"
                 ),
                 "case_number": case.case_id,
