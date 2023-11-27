@@ -173,6 +173,14 @@ class Settings(BaseSettings):
         "SMS_EMAIL_SENDER_ID", "ttdwoman@gmail.com"
     )
 
+    # CloudTalk Config
+    CLOUDTALK_API_KEY: str = os.getenv(
+        "CLOUDTALK_API_KEY", "QAPAMJXG6CYT2SLOVRWQW5B"
+    )
+    CLOUDTALK_API_SECRET: str = os.getenv(
+        "CLOUDTALK_API_SECRET", "ebsKYEo,Lt9GjAMIp3hx0miUZCuS8nBygNcqXkT1F24_R"
+    )
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 
