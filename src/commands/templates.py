@@ -12,12 +12,6 @@ from src.models import templates as templates_model
 from src.services import templates as templates_service
 
 console = Console()
-console.print(
-    ":rocket: [bold]Welcome to the Template Uploader[/bold] :rocket:"
-)
-
-
-console = Console()
 
 logger = logging.getLogger()
 settings = get_settings()
@@ -110,6 +104,9 @@ def upload_templates_json(input_file: str):
 
 
 def upload_templates(input_file: str):
+    console.print(
+        ":rocket: [bold]Welcome to the Template Uploader[/bold] :rocket:"
+    )
     # If Json file
     if input_file.endswith(".csv"):
         upload_templates_csv(input_file)

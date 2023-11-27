@@ -8,6 +8,7 @@ from src.commands.cases import retrieve_cases as retrieve_cases_fct
 from src.commands.leads import analyze_leads as analyze_leads_fct
 from src.commands.leads import retrieve_leads as retrieve_leads_fct
 from src.commands.leads import sync_twilio as sync_twilio_fct
+from src.commands.offtherecord import retrieve_quotes as retrieve_quotes_fct
 from src.commands.templates import upload_templates as upload_templates_fct
 from src.core.config import get_settings
 
@@ -32,9 +33,7 @@ logger.addHandler(rich_handler)
 app = typer.Typer()
 
 console = Console()
-console.print(
-    ":rocket: [bold]Welcome to the BeenVerified Scraper[/bold] :rocket:"
-)
+console.print(":rocket: [bold]TTD Utilities[/bold] :rocket:")
 
 retrieve_cases = app.command(help="Scrap the casenet website")(
     retrieve_cases_fct
@@ -47,6 +46,8 @@ sync_twilio = app.command(help="Sync twilio interactions")(sync_twilio_fct)
 analyze_leads = app.command(help="Analyze leads")(analyze_leads_fct)
 
 upload_templates = app.command(help="Upload templates")(upload_templates_fct)
+
+retrieve_quotes = app.command(help="Retrieve quotes")(retrieve_quotes_fct)
 
 if __name__ == "__main__":
     app()
