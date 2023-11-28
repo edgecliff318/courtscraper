@@ -1,6 +1,7 @@
 import asyncio
 import json
 import os
+from email import header
 
 import aiohttp
 from rich.console import Console
@@ -226,7 +227,11 @@ class OffTheRecord:
         url = f"https://otr-backend-service-us-prod.offtherecord.com/api/v1/cases/{case_code}/customer/cost?version=wjd6plzfdnf"
         payload = {}
         quote_cost = await fetch_with_retry(
-            url, session, self.retry_strategy, data=payload
+            url,
+            session,
+            self.retry_strategy,
+            data=payload,
+            headers=self.headers,
         )
         return quote_cost
 
@@ -236,7 +241,11 @@ class OffTheRecord:
         url = f"https://otr-backend-service-us-prod.offtherecord.com/api/v1/cases/{case_code}/refund/eligibility?version=2bkl60ywyh8"
         payload = {}
         quote_eligibility = await fetch_with_retry(
-            url, session, self.retry_strategy, data=payload
+            url,
+            session,
+            self.retry_strategy,
+            data=payload,
+            headers=self.headers,
         )
         return quote_eligibility
 
@@ -245,7 +254,7 @@ class OffTheRecord:
         url = f"https://otr-backend-service-us-prod.offtherecord.com/api/v1/violations?audience=client&state={state}"
         # async with session.get(url, headers=self.headers) as response:
         raw_violations = await fetch_with_retry(
-            url, session, self.retry_strategy
+            url, session, self.retry_strategy, headers=self.headers
         )
         violation_types = raw_violations["violationTypes"]
         console.log(f"Got {len(violation_types)} violations for {state}")
@@ -256,7 +265,11 @@ class OffTheRecord:
         url = f"https://otr-backend-service-us-prod.offtherecord.com/api/v2/courts/traffic?state={state}"
         payload = {}
         courts_list = await fetch_with_retry(
-            url, session, self.retry_strategy, data=payload
+            url,
+            session,
+            self.retry_strategy,
+            data=payload,
+            headers=self.headers,
         )
         courts_list = courts_list.get("courts", [])
 
@@ -433,7 +446,7 @@ class OffTheRecord:
                     ]
                     results += await asyncio.gather(*tasks)
 
-                    if counter % 20 == 0:
+                    if counter % 100 == 0:
                         # Save every 100 requests
                         output_file = (
                             f"{state}_{self.cdl}_{self.accident}_temp.json"
