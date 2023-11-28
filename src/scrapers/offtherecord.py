@@ -12,10 +12,16 @@ console = Console()
 async def fetch_with_retry(
     url, session, retry_intervals, request_type="get", **kwargs
 ):
+    #  curl -x dc.pr.oxylabs.io:10000 -U "customer-samatix:mi2YWzNb8dMrnBS" https://ip.oxylabs.io
+    proxy = "http://dc.pr.oxylabs.io:10000"
+    proxy_auth = aiohttp.BasicAuth("customer-samatix", "mi2YWzNb8dMrnBS")
+    # curl 'https://ip.oxylabs.io' -U 'customer-samatixr-cc-US:JLN5CF8YwPUpeGw' -x 'pr.oxylabs.io:7777'
+    # proxy = "http://pr.oxylabs.io:7777"
+    # proxy_auth = aiohttp.BasicAuth("customer-samatixr", "JLN5CF8YwPUpeGw")
     for i, delay in enumerate(retry_intervals):
         try:
             async with session.request(
-                request_type, url, **kwargs
+                request_type, url, **kwargs, proxy=proxy, proxy_auth=proxy_auth
             ) as response:
                 # Check for a successful response and return the result
                 if response.status == 204:
@@ -363,8 +369,15 @@ class OffTheRecord:
                     f'{r.get("state")}_{r.get("court_id")}_{r.get("violation_id")}'
                     for r in results
                 ]
+
+                console.log(f"Excluded {len(excluded_parse)}")
+
                 violation_types = await self.get_violations(session, state)
                 courts_list = await self.get_courts(session, state)
+
+                console.log(
+                    f"Got {len(violation_types) * len(courts_list)} to parse"
+                )
 
                 # Get the run plan
                 parameters = [
@@ -385,7 +398,11 @@ class OffTheRecord:
                     and (violation.get("enabledForCustomers", False))
                 ]
 
-                parallelism = 1
+                console.log(
+                    f"After excluding {len(excluded_parse)} : {len(parameters)}"
+                )
+
+                parallelism = 40
 
                 # Generate citation codes for the 40 concurrent requests
                 citation_codes = [
@@ -415,17 +432,23 @@ class OffTheRecord:
                         )
                     ]
                     results += await asyncio.gather(*tasks)
-                    await asyncio.sleep(2)
-                    if counter % 100 == 0:
+
+                    if counter % 20 == 0:
                         # Save every 100 requests
                         output_file = (
                             f"{state}_{self.cdl}_{self.accident}_temp.json"
                         )
                         await self.save(results, output_file)
 
+                output_file = f"{state}_{self.cdl}_{self.accident}_temp.json"
+                await self.save(results, output_file)
         return results
 
     async def save(self, results, output_file):
         with open(output_file, "w") as f:
             json.dump(results, f, indent=2)
         console.log(f"Saved results to {output_file}")
+
+
+# samatix : mi2YWzNb8dMrnBS
+# python main.py retrieve-quotes --headers-file=headers/1374833.json --states=PA,FL,MO,OH,NJ,LA,GA,NY,TX
