@@ -1,0 +1,20 @@
+{
+    "authority": "otr-backend-service-us-prod.offtherecord.com",
+    "accept": "application/json, text/plain, */*",
+    "accept-language": "en-US,en;q=0.9",
+    "api-token": "vKWrNZN8UMwxcqPxyRqbJo9x6OABtoqMA7scyCkpkSy82UcA",
+    "cache-control": "no-cache",
+    "cookie": "mp_971aeee0e6b3795a30de20c2cc8585b4_mixpanel=%7B%22distinct_id%22%3A%20%22%24device%3A18c073c5cb4847-0a714b41f6413d-16525634-1d73c0-18c073c5cb4847%22%2C%22%24device_id%22%3A%20%2218c073c5cb4847-0a714b41f6413d-16525634-1d73c0-18c073c5cb4847%22%2C%22%24initial_referrer%22%3A%20%22%24direct%22%2C%22%24initial_referring_domain%22%3A%20%22%24direct%22%7D; _gcl_au=1.1.1318236890.1700928446; _uetsid=b9f295e08bac11ee98a7a755bd561407; _uetvid=b9f2bc608bac11eeb90ffdf458826b1f; _vwo_uuid_v2=D660D1DA67760C105163A76A5E8D5B323|ec88765f5289fe7e130a9b6ff7f2b7bf; otr-referrer=%22https%3A%2F%2Fofftherecord.com%2F%22; _rdt_uuid=1700928446633.81abcc48-3436-4462-a4a8-5b3c6086e94b; _ga=GA1.2.1244225859.1700928446; _gid=GA1.2.1474256112.1700928447; _fbp=fb.1.1700928446675.40856321; _vis_opt_s=1%7C; _vis_opt_test_cookie=1; _vwo_uuid=D660D1DA67760C105163A76A5E8D5B323; _vwo_ds=3%241700928446%3A29.87177512%3A%3A; _vis_opt_exp_28_combi=2; __stripe_mid=8af2126e-1329-4f91-9750-a8512de61ff1cd1268; __stripe_sid=e6c78200-2458-491a-996d-3210189b1b5e4e0aec; __hstc=77102922.5ff136152ea84d6c65f01792a08e7835.1700928448690.1700928448690.1700928448690.1; hubspotutk=5ff136152ea84d6c65f01792a08e7835; __hssrc=1; __hssc=77102922.1.1700928448690; afUserId=2c16493a-f61e-459c-9bf3-4ff1f2329df8-p; AF_SYNC=1700928449026; _fw_crm_v=568fe285-f334-4ab7-ca63-94d7b5318a6f; _vwo_sn=0%3A4; _gat=1; _ga_TMGSMNG8YY=GS1.1.1700928446.1.1.1700928513.60.0.0; OTR_REMEMBER_ME_COOKIE=dmRxQkEvZWFsS3pyZTJCL0R4N1dhQT09OlM4YXhtVkgxQWdvUEJFOFh2a01iZEE9PQ",
+    "dnt": "1",
+    "origin": "https://offtherecord.com",
+    "pragma": "no-cache",
+    "referer": "https://offtherecord.com/",
+    "sec-ch-ua": "\"Chromium\";v=\"119\", \"Not?A_Brand\";v=\"24\"",
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": "\"macOS\"",
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "same-site",
+    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+    "x-feature": "STATE_PAGE"
+}

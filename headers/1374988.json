@@ -1,0 +1,21 @@
+{
+    "authority": "otr-backend-service-us-prod.offtherecord.com",
+    "accept": "application/json, text/plain, */*",
+    "accept-language": "en-US,en;q=0.9",
+    "api-token": "vKWrNZN8UMwxcqPxyRqbJo9x6OABtoqMA7scyCkpkSy82UcA",
+    "cache-control": "no-cache",
+    "content-type": "application/json;charset=UTF-8",
+    "cookie": "mp_971aeee0e6b3795a30de20c2cc8585b4_mixpanel=%7B%22distinct_id%22%3A%20%22%24device%3A18c0846a222916-0223dd44fafdb3-16525634-1fa400-18c0846a222916%22%2C%22%24device_id%22%3A%20%2218c0846a222916-0223dd44fafdb3-16525634-1fa400-18c0846a222916%22%2C%22%24initial_referrer%22%3A%20%22%24direct%22%2C%22%24initial_referring_domain%22%3A%20%22%24direct%22%7D; _gcl_au=1.1.1551521605.1700945897; otr-referrer=%22https%3A%2F%2Fofftherecord.com%2F%22; _uetsid=5b36c4308bd511eebf04cf9eb2241abe; _uetvid=5b36b7008bd511eea11085f80ee722fc; _fbp=fb.1.1700945896970.1895976981; _vwo_uuid_v2=DBF700610EF8E2EAD6E8250E81FFD0309|b6723a2471402e58c576d4a45905a10e; _rdt_uuid=1700945897013.94ac1bfa-e210-4d24-8191-1ce259c502cd; _ga=GA1.2.528825740.1700945897; _gid=GA1.2.173977315.1700945897; _gat_gtag_UA_69140841_1=1; __stripe_mid=9be88dfc-8514-4e09-82f2-888d0693faf7b2c956; __stripe_sid=2bac22fb-4ea9-4484-930f-5f004c002053fa7629; _vis_opt_s=1%7C; _vis_opt_test_cookie=1; _vwo_uuid=DBF700610EF8E2EAD6E8250E81FFD0309; _vwo_ds=3%241700945897%3A73.18560063%3A%3A; _vis_opt_exp_28_combi=2; __hstc=77102922.c649dc5650a58db56e18b4a9521fe99c.1700945898852.1700945898852.1700945898852.1; hubspotutk=c649dc5650a58db56e18b4a9521fe99c; __hssrc=1; __hssc=77102922.1.1700945898852; afUserId=4d8291fc-f130-43cb-a724-076fec717d58-p; AF_SYNC=1700945899392; _fw_crm_v=54a0e2ac-95e6-4bc0-d4ef-d0b9b5418a70; _vwo_sn=0%3A2; _gat=1; _ga_TMGSMNG8YY=GS1.1.1700945896.1.1.1700945917.39.0.0; OTR_REMEMBER_ME_COOKIE=dmRxQkEvZWFsS3pyZTJCL0R4N1dhQT09OlM4YXhtVkgxQWdvUEJFOFh2a01iZEE9PQ",
+    "dnt": "1",
+    "origin": "https://offtherecord.com",
+    "pragma": "no-cache",
+    "referer": "https://offtherecord.com/",
+    "sec-ch-ua": "\"Chromium\";v=\"119\", \"Not?A_Brand\";v=\"24\"",
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": "\"macOS\"",
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "same-site",
+    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+    "x-feature": "STATE_PAGE"
+}

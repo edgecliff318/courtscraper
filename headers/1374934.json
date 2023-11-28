@@ -1,0 +1,21 @@
+{
+    "authority": "otr-backend-service-us-prod.offtherecord.com",
+    "accept": "application/json, text/plain, */*",
+    "accept-language": "en-US,en;q=0.9",
+    "api-token": "vKWrNZN8UMwxcqPxyRqbJo9x6OABtoqMA7scyCkpkSy82UcA",
+    "cache-control": "no-cache",
+    "content-type": "application/json;charset=UTF-8",
+    "cookie": "mp_971aeee0e6b3795a30de20c2cc8585b4_mixpanel=%7B%22distinct_id%22%3A%20%22%24device%3A18c08032b558b8-06de502bd7e288-16525634-1fa400-18c08032b558b8%22%2C%22%24device_id%22%3A%20%2218c08032b558b8-06de502bd7e288-16525634-1fa400-18c08032b558b8%22%2C%22%24initial_referrer%22%3A%20%22%24direct%22%2C%22%24initial_referring_domain%22%3A%20%22%24direct%22%7D; _gcl_au=1.1.489752961.1700941475; otr-referrer=%22https%3A%2F%2Fofftherecord.com%2F%22; _uetsid=0febde608bcb11ee8711074b56359b86; _uetvid=0febf2208bcb11ee8e320ded65e57c58; _rdt_uuid=1700941475691.72a64432-715d-49bf-95c5-5f5cdc647d21; _vwo_uuid_v2=DBE5498F90C2955E6D21567313E6BCB4A|12d77c33faaa4f2008da8b6d830d29a9; _ga=GA1.2.1916734835.1700941476; _gid=GA1.2.805165669.1700941476; _fbp=fb.1.1700941475754.406329467; _gat_gtag_UA_69140841_1=1; __stripe_mid=dd172af1-2e7a-4215-b1bb-f127881d50cecc9a2c; __stripe_sid=0de0b622-95c3-4c13-ae18-c1214a86da9b9cbce9; _vis_opt_s=1%7C; _vis_opt_test_cookie=1; _vwo_uuid=DBE5498F90C2955E6D21567313E6BCB4A; _vwo_ds=3%241700941475%3A34.6820443%3A%3A; _vis_opt_exp_28_combi=2; __hstc=77102922.e92be68044ee6ab1b350d6facb56bd68.1700941477477.1700941477477.1700941477477.1; hubspotutk=e92be68044ee6ab1b350d6facb56bd68; __hssrc=1; __hssc=77102922.1.1700941477477; afUserId=4837f193-465f-4d8e-a3ba-09725af32dc9-p; _fw_crm_v=412b1bf4-70cd-4f3b-f3e5-07fbe1e3e88b; AF_SYNC=1700941478060; _vwo_sn=0%3A2; _gat=1; _ga_TMGSMNG8YY=GS1.1.1700941475.1.1.1700941481.54.0.0; OTR_REMEMBER_ME_COOKIE=dmRxQkEvZWFsS3pyZTJCL0R4N1dhQT09OlM4YXhtVkgxQWdvUEJFOFh2a01iZEE9PQ",
+    "dnt": "1",
+    "origin": "https://offtherecord.com",
+    "pragma": "no-cache",
+    "referer": "https://offtherecord.com/",
+    "sec-ch-ua": "\"Chromium\";v=\"119\", \"Not?A_Brand\";v=\"24\"",
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": "\"macOS\"",
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "same-site",
+    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+    "x-feature": "STATE_PAGE"
+}
