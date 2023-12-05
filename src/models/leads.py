@@ -56,9 +56,13 @@ class Lead(BaseModel):
     disposed: Optional[bool] = False
     carrier: Optional[str] = None
     notes: Optional[str] = None
+
     # Json Report from BeenVerified
     report: Optional[dict] = None
     details: Optional[str] = None
+
+    # CloudTalk
+    cloudtalk_upload: Optional[bool] = False
 
     @validator("last_updated", pre=True, always=True)
     def set_last_updated_date_now(cls, v):
