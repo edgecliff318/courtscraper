@@ -155,20 +155,21 @@ def retrieve_cases_mo_mshp():
             console.log(f"Failed to parse lead {case} - {e}")
             
             
-def retrieve_cases_il_cook():
+def retrieve_cases_il_cook(email: str | None = None, password: str | None = None, url: str | None = None, start_date: str | None = None, end_date: str | None = None, search_location: str | None = None, search_hearing_type: str | None = None, search_by: str | None = None, search_judicial_officer: str | None = None) -> None:
 # (start_date : str, end_date: str , email: str, password: str, search_by: str, search_judicial_officer: str):
     """
     Scrap the casenet website
     """
-    email = "smahmudlaw@gmail.com"
-    password = "Shawn1993!"
-    url = "https://cccportal.cookcountyclerkofcourt.org/CCCPortal/"
-    
-    
     scraper = IlCook(
         email=email,
         password=password,
         url=url,
+        start_date=start_date,
+        end_date=end_date,
+        search_location=search_location,
+        search_hearing_type=search_hearing_type,
+        search_by=search_by,
+        search_judicial_officer=search_judicial_officer,
     )
     cases_imported = asyncio.run(scraper.main())
     for case in cases_imported:
@@ -206,8 +207,6 @@ def retrieve_cases(source="mo_case_net"):
     """
     Scrap the casenet website
     """
-    print("source", source)
-
     if source == "mo_case_net":
         retrieve_cases_mo_casenet()
 
@@ -215,7 +214,6 @@ def retrieve_cases(source="mo_case_net"):
         retrieve_cases_mo_mshp()
     elif source == "il_cook":
         retrieve_cases_il_cook()
-
 
 if __name__ == "__main__":
     typer.run(retrieve_cases)
