@@ -91,8 +91,6 @@ class IlCook(ScraperBase):
 
 
     async def _login(self, page):
-        await page.screenshot(path="cases-befor-login.png", full_page=True)
-
         await page.goto(self.url, timeout=120000)
         await page.click("[id='dropdownMenu1']")
         sign_in_link = await page.query_selector(
@@ -114,7 +112,6 @@ class IlCook(ScraperBase):
 
         await page.wait_for_timeout(2000)
         await page.wait_for_load_state()
-        await page.screenshot(path="cases-finish-login.png", full_page=True)
 
     async def _go_to_table(self, page):
         await page.locator("#portlet-26").click()
@@ -131,10 +128,8 @@ class IlCook(ScraperBase):
         )
         await page.fill('input[id="SearchCriteria_DateFrom"]', "08/01/2023")
         await page.fill('input[id="SearchCriteria_DateTo"]', "12/11/2023")
-        await page.screenshot(path="select.png")
         await page.locator("#btnHSSubmit").click()
         await page.wait_for_timeout(7000)
-        await page.screenshot(path="cases-table.png", full_page=True)
 
     def _get_id(self, url_path):
         query_params = parse_qs(urlparse(url_path).query)
