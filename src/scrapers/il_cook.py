@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from urllib.parse import urlparse, parse_qs
 import os.path
 import sys
+from rich.console import Console
 
 
 from src.scrapers.base import  ScraperBase
@@ -18,6 +19,7 @@ sys.path.append(
     os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
 )
 
+console = Console()
 
 class IlCook(ScraperBase):
         
@@ -26,10 +28,10 @@ class IlCook(ScraperBase):
         "https://cccportal.cookcountyclerkofcourt.org/app/RegisterOfActionsService/"
     )
     
-    def __init__(self, email: str, password: str, url: str):
-        self.email = email
-        self.password = password
-        self.url = url
+    def __init__(self, email: str | None = None, password: str | None = None, url: str | None = None, start_date: str | None = None, end_date: str | None = None, search_location: str | None = None, search_hearing_type: str | None = None, search_by: str | None = None, search_judicial_officer: str | None = None) -> None:
+        self.email = email or os.getenv("EMAIL")
+        self.password = password or os.getenv("PASSWORD")
+        self.url = url or os.getenv("URL")
         self.events = [
             "CombinedEvents",
             "PartyNames",
@@ -39,13 +41,12 @@ class IlCook(ScraperBase):
             "CaseSummariesSlim",
         ]
         #TODO change the values
-        self.start_date = "08/01/2021"
-        self.end_date = "12/11/2021"
-        self.search_location = "Traffic"
-        self.search_hearing_type = "All Traffic Hearing Types"
-        self.search_by = "Judicial Officer"
-        self.search_judicial_officer = "Aguilar, Carmen Kathleen"
-
+        self.start_date =  start_date or "08/01/2021"
+        self.end_date = end_date or  "12/11/2021"
+        self.search_location =  search_location or "Traffic"
+        self.search_hearing_type = search_hearing_type or "All Traffic Hearing Types"
+        self.search_by = search_by or  "Judicial Officer"
+        self.search_judicial_officer =   search_judicial_officer or  "Aguilar, Carmen Kathleen"
 
     def _get_id(self, url_path):
         query_params = parse_qs(urlparse(url_path).query)
@@ -64,27 +65,25 @@ class IlCook(ScraperBase):
     async def main(self):
         
         async with async_playwright() as pw:
-            print("Connecting...")
+            console.log("Connecting...")
             browser = await pw.chromium.launch(headless=True)
             context = await browser.new_context()
             page = await context.new_page()
 
             await self._login(page)
-            print("Login successful")
+            console.log("Login successful")
             await self._go_to_table(page)
-            print("Table loaded")
+            console.log("Table loaded")
             cases_list = await self.get_cases(page)
-            print("List of cases downloaded")
+            console.log("List of cases downloaded")
             response = []
             count = 0
             for case in cases_list:
                 count += 1
                 case_details = await self.get_case_details(page, case.get("CaseLoadUrl"))
                 response.append(case_details)
-                if count == 8:
-                    break
                 
-            print('response', response)
+            console.log('response', response)
             await browser.close()
             return response
                   
@@ -100,7 +99,7 @@ class IlCook(ScraperBase):
         if sign_in_link:
             await sign_in_link.click()
         else:
-            print("Sign In link not found")
+            console.log("Sign In link not found")
 
         await page.fill('input[name="UserName"]', self.email)
         await page.fill('input[name="Password"]', self.password)
@@ -108,14 +107,13 @@ class IlCook(ScraperBase):
         if login_button:
             await login_button.click()
         else:
-            print("Login button not found")
+            console.log("Login button not found")
 
         await page.wait_for_timeout(2000)
         await page.wait_for_load_state()
 
     async def _go_to_table(self, page):
         await page.locator("#portlet-26").click()
-
         await page.wait_for_timeout(1000)
         await page.wait_for_selector("#cboHSLocationGroup")
         await page.locator("#cboHSLocationGroup").select_option(label="Traffic")
@@ -154,9 +152,9 @@ class IlCook(ScraperBase):
             content = await response.body()
             with open("image.tif", "wb") as file:
                 file.write(content)
-            print(f"Data saved to {'image.tif'}")
+            console.log(f"Data saved to {'image.tif'}")
         else:
-            print("Failed to fetch data")
+            console.log("Failed to fetch data")
 
     async def event_to_json(self, page, event, id):
         URL = f"https://cccportal.cookcountyclerkofcourt.org/app/RegisterOfActionsService/{event}('{id}')?mode=portalembed"
@@ -164,7 +162,7 @@ class IlCook(ScraperBase):
             URL = f"https://cccportal.cookcountyclerkofcourt.org/app/RegisterOfActionsService/{event}?key={id}"
         response = await page.request.get(URL)
         data_json = await response.json()
-        print(data_json)
+        console.log(data_json)
         return data_json
 
     async def get_cases(self, page):
@@ -344,13 +342,10 @@ class IlCook(ScraperBase):
 
 if __name__ == "__main__":
     load_dotenv()
-    email = "smahmudlaw@gmail.com"
-    passsword = "Shawn1993!"
-    url = "https://cccportal.cookcountyclerkofcourt.org/CCCPortal/"
     scraper = IlCook(
-        email=email,
-        password=passsword,
-        url=url,
+        email=os.getenv("EMAIL"),
+        password=os.getenv("PASSWORD"),
+        url=os.getenv("URL"),
     )
     asyncio.run(scraper.main())
-    print("Done running", __file__, ".")
+    console.log("Done running", __file__, ".")
