@@ -3,14 +3,11 @@ import os
 from playwright.async_api import async_playwright
 from dotenv import load_dotenv
 from urllib.parse import urlparse, parse_qs
-import json
 import os.path
 import sys
 
-import requests
-from bs4 import BeautifulSoup
 
-from src.scrapers.base import InitializedSession, NameNormalizer, ScraperBase
+from src.scrapers.base import  ScraperBase
 
 sys.path.append(
     os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
@@ -23,7 +20,7 @@ sys.path.append(
 
 
 class IlCook(ScraperBase):
-    
+        
     BASE_URL = "https://cccportal.cookcountyclerkofcourt.org/CCCPortal/"
     SEARCH_RESULT_URL = (
         "https://cccportal.cookcountyclerkofcourt.org/app/RegisterOfActionsService/"
@@ -61,11 +58,11 @@ class IlCook(ScraperBase):
             data_json = await self.event_to_json(page, event, id)
             response[event] = data_json
         case_details =  await self.parse_case_detail(response)
-        print(case_details)
         return case_details    
         
 
     async def main(self):
+        
         async with async_playwright() as pw:
             print("Connecting...")
             browser = await pw.chromium.launch(headless=True)
@@ -78,9 +75,18 @@ class IlCook(ScraperBase):
             print("Table loaded")
             cases_list = await self.get_cases(page)
             print("List of cases downloaded")
-            
+            response = []
+            count = 0
             for case in cases_list:
-                await self.get_case_details(page, case.get("CaseLoadUrl"))
+                count += 1
+                case_details = await self.get_case_details(page, case.get("CaseLoadUrl"))
+                response.append(case_details)
+                if count == 8:
+                    break
+                
+            print('response', response)
+            await browser.close()
+            return response
                   
 
 
@@ -322,8 +328,8 @@ class IlCook(ScraperBase):
                     events.append(event_data)
 
         return {
-            "case_id": case_id,
-            "court_id": court_id,
+            "case_id": str(case_id),
+            "court_id": str(court_id),
             "court_type": court_type,
             "judge": judge,
             "filed_on": filed_on,
@@ -343,10 +349,13 @@ class IlCook(ScraperBase):
 
 if __name__ == "__main__":
     load_dotenv()
+    email = "smahmudlaw@gmail.com"
+    passsword = "Shawn1993!"
+    url = "https://cccportal.cookcountyclerkofcourt.org/CCCPortal/"
     scraper = IlCook(
-        email=os.getenv("EMAIL"),
-        password=os.getenv("PASSWORD"),
-        url=os.getenv("URL"),
+        email=email,
+        password=passsword,
+        url=url,
     )
     asyncio.run(scraper.main())
     print("Done running", __file__, ".")

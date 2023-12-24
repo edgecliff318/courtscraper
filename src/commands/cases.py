@@ -1,6 +1,8 @@
 import datetime
 import json
 import logging
+import asyncio
+
 
 import pytz
 import typer
@@ -11,6 +13,8 @@ from src.loader.leads import CaseNet
 from src.models import cases as cases_model
 from src.models import leads as leads_model
 from src.scrapers.mo_mshp import MOHighwayPatrol
+from src.scrapers.il_cook import IlCook
+
 from src.services import cases as cases_service
 from src.services import leads as leads_service
 from src.services.courts import get_courts
@@ -149,18 +153,68 @@ def retrieve_cases_mo_mshp():
                 )
         except Exception as e:
             console.log(f"Failed to parse lead {case} - {e}")
+            
+            
+def retrieve_cases_il_cook():
+# (start_date : str, end_date: str , email: str, password: str, search_by: str, search_judicial_officer: str):
+    """
+    Scrap the casenet website
+    """
+    email = "smahmudlaw@gmail.com"
+    password = "Shawn1993!"
+    url = "https://cccportal.cookcountyclerkofcourt.org/CCCPortal/"
+    
+    
+    scraper = IlCook(
+        email=email,
+        password=password,
+        url=url,
+    )
+    cases_imported = asyncio.run(scraper.main())
+    for case in cases_imported:
+        # Insert the case in the cases table
+        try:
+            case_parsed = cases_model.Case.model_validate(case)
+            cases_service.insert_case(case_parsed)
+            console.log(f"Succeeded to insert case {case.get('case_id')}")
+        except Exception as e:
+            # Save the case in a file for a manual review
+            with open(
+                f"cases_to_review/{case.get('case_id')}.json",
+                "w",
+            ) as f:
+                # Transform PosixPath to path in the dict case
+                json.dump(case, f, default=str)
+
+            console.log(f"Failed to parse case {case} - {e}")
+
+        # Insert the lead in the leads table:
+        try:
+            lead_parsed = leads_model.Lead.model_validate(case)
+            lead_loaded = leads_service.get_single_lead(lead_parsed.case_id)
+            if lead_loaded is None:
+                leads_service.insert_lead(lead_parsed)
+            console.log(
+                    f"Succeeded to insert lead for {case.get('case_id')}"
+                )
+        except Exception as e:
+            console.log(f"Failed to parse lead {case} - {e}")
+    
 
 
 def retrieve_cases(source="mo_case_net"):
     """
     Scrap the casenet website
     """
+    print("source", source)
 
     if source == "mo_case_net":
         retrieve_cases_mo_casenet()
 
     elif source == "mo_mshp":
         retrieve_cases_mo_mshp()
+    elif source == "il_cook":
+        retrieve_cases_il_cook()
 
 
 if __name__ == "__main__":

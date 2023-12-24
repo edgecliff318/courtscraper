@@ -1,8 +1,8 @@
 SHELL 			:= /bin/bash
-CMD 			:= python3
-VENV 			:= test -d venv || python3 -m venv venv
+CMD 			:= python3.11
+VENV 			:= test -d venv || python3.11 -m venv venv
 ACTIVATE 		:= . venv/bin/activate
-INSTALL  		:= pip install
+INSTALL  		:= python3.11 -m pip install
 IMAGE_NAME		:= webapp
 
 # Check if the .env exists otherwise create it
