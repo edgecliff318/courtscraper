@@ -37,7 +37,7 @@ messages_collection = db.collection("messages")
 # Multiple documents can be added at once
 for message_dict in track(config_dict.get("messages")):
     message = messages.MessageTemplate(
-        template_id=message_dict.get("label"),
+        template_id=message_dict.get("id", message_dict.get("label")),
         template_name=message_dict.get("label"),
         template_type=message_dict.get("type"),
         template_text=message_dict.get("value"),
