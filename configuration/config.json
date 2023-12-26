@@ -1088,16 +1088,44 @@
   ],
   "messages": [
     {
-      "label": "Fubloo",
-      "value": "Hey! This is Sammie from Fubloo. We connect drivers that have received traffic tickets to attorneys who practice traffic law where the ticket was received. If you would like, we can send you a free quote and the likely outcome of hiring an attorney to fight your ticket. Answer 5 (yes or no), questions and we'll text you a quote. \n\nQuestion 1/5 (Yes/No): Would you like a free quote?"
+      "id": "marketing_sms_v1",
+      "label": "Initial marketing SMS v1",
+      "value": "Hola {first_name}! 👋,\nIt's Shawn from TicketTakedown.com. We're an innovative startup from KC and St. Louis, using cutting-edge tech to simplify the traffic ticket process for Missourians like you and I.\nSpotted your ticket on the Missouri Courts site? Let's handle it efficiently! 🚀 Check us out or call 816.226.0351.\nNot your ticket? Reply “WRONG”. Just not into these texts? Reply \"STOP\" anytime."
     },
     {
-      "label": "Friendly (Pierre)",
-      "value": "Got your DUI on a delayed dismissal and the speeding tickets dismissed altogether. Call or text if you need anything else, Pierre. Let's try to be a little safer on the road buddy!\nShawn-Anthony Meyer\nAttorney at Law #72934\n816.518.8838\nmasLawHouse.com"
+      "id": "marketing_sms_v2",
+      "label": "Initial marketing SMS v2",
+      "value": "Hola {first_name}! 👋,\nIt's Shawn from TicketTakedown.com. We're an innovative startup from KC and St. Louis, using cutting-edge tech to simplify the traffic ticket process for fellow Missourians like us. Noticed your ticket on the Missouri Courts site? Let's handle it efficiently! 🚀\nWould you like a free consultation to learn about your options? Reply with \"YES\" and we'll give you a call. \nAlternatively, you can check us out online or call us directly at 816.226.0351.\nNot your ticket? Reply “WRONG”. Just not into these texts? Reply \"STOP\" anytime."
     },
     {
-      "label": "Courtesy",
-      "value": "ADVERTISEMENT\nCourtesy copy of your traffic citation from provided by Fubloo, a non-government organization.\nClick the below link for more information. https://www.fubloo.com"
+      "id": "marketing_sms_v3",
+      "label": "Initial marketing SMS v3",
+      "value": "Hola {first_name}! 👋,\nIt's Shawn from TicketTakedown.com. We're an innovative startup from KC and St. Louis, using cutting-edge tech to simplify the traffic ticket process for fellow Missourians like us. Noticed your ticket on the Missouri Courts site? Let's handle it efficiently! 🚀\nIn addition to helping with your ticket, we've got some great hacks and tips to navigate the traffic ticket world. Would you like a free consultation to learn about your options and these insights? Reply with \"YES\" and we'll give you a call. \nAlternatively, you can check us out or call us directly at 816.226.0351. \nNot your ticket? Reply “WRONG”. Just not into these texts? Reply \"STOP\" anytime."
+    },
+    {
+      "id": "marketing_sms_reply_yes",
+      "label": "Reply to “YES” response to initial marketing SMS",
+      "value": "Thank you for your response, {first_name}! 🌟\nWe're thrilled to assist you. A representative from TicketTakedown.com will be reaching out to you shortly for your free consultation. In the meantime, if you have any immediate questions or concerns, feel free to call us at 816.226.0351.\nThanks for trusting us with your traffic ticket needs. Talk to you soon!"
+    },
+    {
+      "id": "marketing_sms_reply_stop",
+      "label": "Reply to “YES” response to initial marketing SMS",
+      "value": "We apologize for any inconvenience, {first_name}.\nYou've been successfully unsubscribed from our messaging service. If you have any further concerns or change your mind in the future, feel free to reach out to us at 816.226.0351 or online at TicketTakedown.com. Take care!"
+    },
+    {
+      "id": "marketing_sms_reply_wrong",
+      "label": "Reply to “not me/wrong person/eat dicks/etc” response to initial marketing SMS",
+      "value": "We sincerely apologize for the oversight, and thank you for bringing it to our attention. We'll ensure you don't receive further messages related to this matter. If you have any other concerns or questions, please don't hesitate to contact us at 816.226.0351. Again, our apologies for the inconvenience."
+    },
+    {
+      "id": "marketing_sms_reply_number",
+      "label": "Reply to “how did you get this number” response to initial marketing SMS",
+      "value": "We apologize for any concern caused, {first_name}. We access public records from the Missouri Courts site to assist drivers with their traffic tickets. Your privacy is important to us, and we strive to maintain the highest standards of confidentiality. If you'd prefer not to receive further communications, please reply with \"STOP\". If you have any other questions or concerns, feel free to contact us at 816.226.0351 or online at TicketTakedown.com"
+    },
+    {
+      "id": "marketing_sms_v0",
+      "label": "Initial marketing SMS v0",
+      "value": "Hello! This is Toni Skelton from Attorney Shawn Meyer's office. I hope you're having a great day. I wanted to see if you still wanted to discuss keeping your traffic ticket off your record with one of our attorneys. Please feel free to call me back at your earliest convenience at 816.226.0351. Looking forward to helping you on this!\n\nToni Skelton\nParalegal\nTicketTakedown.com"
     }
   ]
 }
