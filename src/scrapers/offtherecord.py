@@ -17,8 +17,8 @@ async def fetch_with_retry(
     proxy = "http://dc.pr.oxylabs.io:10000"
     proxy_auth = aiohttp.BasicAuth("customer-samatix", "mi2YWzNb8dMrnBS")
     # curl 'https://ip.oxylabs.io' -U 'customer-samatixr-cc-US:JLN5CF8YwPUpeGw' -x 'pr.oxylabs.io:7777'
-    # proxy = "http://pr.oxylabs.io:7777"
-    # proxy_auth = aiohttp.BasicAuth("customer-samatixr", "JLN5CF8YwPUpeGw")
+    proxy = "http://pr.oxylabs.io:7777"
+    proxy_auth = aiohttp.BasicAuth("customer-samatixr", "JLN5CF8YwPUpeGw")
     for i, delay in enumerate(retry_intervals):
         try:
             async with session.request(
@@ -415,7 +415,7 @@ class OffTheRecord:
                     f"After excluding {len(excluded_parse)} : {len(parameters)}"
                 )
 
-                parallelism = 40
+                parallelism = 1
 
                 # Generate citation codes for the 40 concurrent requests
                 citation_codes = [
@@ -464,4 +464,4 @@ class OffTheRecord:
 
 
 # samatix : mi2YWzNb8dMrnBS
-# python main.py retrieve-quotes --headers-file=headers/1374833.json --states=PA,FL,MO,OH,NJ,LA,GA,NY,TX
+# python main.py retrieve-quotes --headers-file=headers/1374833.json --states=MO,OH,NJ,LA,GA,NY,TX
