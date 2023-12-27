@@ -79,6 +79,7 @@ class Case(BaseModel):
     ticket: Optional[Dict] = None
     ticket_img: Optional[str] = None
     status: Optional[str] = None
+    case_status: Optional[str] = None
     events: Optional[List[Dict]] = None
     court_date: Optional[datetime] = None
     court_time: Optional[str] = None
@@ -90,6 +91,7 @@ class Case(BaseModel):
     release_info: Optional[str] = None
     source: Optional[str] = None
     custom: Optional[Dict] = None
+    raw: Optional[Dict] = None
 
     # Ignore parsing errors for now
     @validator("charges", pre=True, always=True)
