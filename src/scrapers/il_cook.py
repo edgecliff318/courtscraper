@@ -1,14 +1,16 @@
 import asyncio
 import os
-from playwright.async_api import async_playwright
-from dotenv import load_dotenv
-from urllib.parse import urlparse, parse_qs
 import os.path
 import sys
+from datetime import date
+from re import search
+from urllib.parse import parse_qs, urlparse
+
+from dotenv import load_dotenv
+from playwright.async_api import async_playwright
 from rich.console import Console
 
-
-from src.scrapers.base import  ScraperBase
+from src.scrapers.base import ScraperBase
 
 sys.path.append(
     os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
@@ -21,17 +23,24 @@ sys.path.append(
 
 console = Console()
 
+
 class IlCook(ScraperBase):
-        
     BASE_URL = "https://cccportal.cookcountyclerkofcourt.org/CCCPortal/"
-    SEARCH_RESULT_URL = (
-        "https://cccportal.cookcountyclerkofcourt.org/app/RegisterOfActionsService/"
-    )
-    
-    def __init__(self, email: str | None = None, password: str | None = None, url: str | None = None, start_date: str | None = None, end_date: str | None = None, search_location: str | None = None, search_hearing_type: str | None = None, search_by: str | None = None, search_judicial_officer: str | None = None) -> None:
-        self.email = email or os.getenv("EMAIL")
-        self.password = password or os.getenv("PASSWORD")
-        self.url = url or os.getenv("URL")
+    SEARCH_RESULT_URL = "https://cccportal.cookcountyclerkofcourt.org/app/RegisterOfActionsService/"
+
+    def __init__(
+        self,
+        email: str | None = None,
+        password: str | None = None,
+        start_date: str | None = None,
+        end_date: str | None = None,
+        search_location: str | None = None,
+        search_hearing_type: str | None = None,
+        search_by: str | None = None,
+        search_filter: list[str] | None = None,
+    ) -> None:
+        self.email = email
+        self.password = password
         self.events = [
             "CombinedEvents",
             "PartyNames",
@@ -40,57 +49,86 @@ class IlCook(ScraperBase):
             "Charges",
             "CaseSummariesSlim",
         ]
-        #TODO change the values
-        self.start_date =  start_date or "08/01/2021"
-        self.end_date = end_date or  "12/11/2021"
-        self.search_location =  search_location or "Traffic"
-        self.search_hearing_type = search_hearing_type or "All Traffic Hearing Types"
-        self.search_by = search_by or  "Judicial Officer"
-        self.search_judicial_officer =   search_judicial_officer or  "Aguilar, Carmen Kathleen"
+        # TODO change the values
+        self.start_date = start_date or "20/12/2023"
+        self.end_date = end_date or "26/12/2023"
+        self.search_location = search_location or "Traffic"
+        self.search_hearing_type = (
+            search_hearing_type or "All Traffic Hearing Types"
+        )
+        self.search_by = search_by or "Courtroom"
+        self.search_filter = search_filter or None
 
     def _get_id(self, url_path):
         query_params = parse_qs(urlparse(url_path).query)
         return query_params.get("id", [None])[0]
-    
-    async def get_case_details(self, page, url:str)-> dict:
+
+    async def get_case_details(self, page, url: str) -> dict:
         id = self._get_id(url)
         response = {}
         for event in self.events:
+            console.log(f"Getting {event}...")
             data_json = await self.event_to_json(page, event, id)
             response[event] = data_json
-        case_details =  await self.parse_case_detail(response)
-        return case_details    
-        
+        case_details = await self.parse_case_detail(response)
+        return case_details
 
     async def main(self):
-        
         async with async_playwright() as pw:
             console.log("Connecting...")
-            browser = await pw.chromium.launch(headless=True)
+            browser = await pw.chromium.launch(headless=False)
             context = await browser.new_context()
             page = await context.new_page()
 
             await self._login(page)
             console.log("Login successful")
-            await self._go_to_table(page)
-            console.log("Table loaded")
-            cases_list = await self.get_cases(page)
-            console.log("List of cases downloaded")
-            response = []
-            count = 0
-            for case in cases_list:
-                count += 1
-                case_details = await self.get_case_details(page, case.get("CaseLoadUrl"))
-                response.append(case_details)
-                
-            console.log('response', response)
-            await browser.close()
-            return response
-                  
 
+            options = await self._get_options(page)
+
+            # Getting cases for each court room
+            for k, v in options.items():
+                # Get the cases from the search
+                console.log(f"Getting cases for {k}: {v}")
+                if v == "":
+                    console.log("No value for this key, skipping...")
+                    continue
+                await self._go_to_table(page, value=v)
+                console.log("Table loaded")
+
+                console.log("Downloading list of cases...")
+                cases_list = await self.get_cases(page)
+                console.log(f"List of cases downloaded ({len(cases_list)})")
+
+                count = 0
+                for case in cases_list:
+                    count += 1
+                    if self.check_if_exists(case.get("CaseNumber")):
+                        console.log(
+                            f"Case {case.get('CaseNumber')} already exists. Skipping ..."
+                        )
+                        continue
+                    case_details = await self.get_case_details(
+                        page, case.get("CaseLoadUrl")
+                    )
+                    extra_data = await self.get_extra_data(
+                        page, case_details.get("case_id")
+                    )
+                    case_details.update(extra_data)
+                    self.insert_case(case_details)
+                    console.log(
+                        f"Inserted case {case_details.get('case_id')} ({count}/{len(cases_list)})"
+                    )
+
+                    self.insert_lead(case_details)
+                    console.log(
+                        f"Inserted lead for {case_details.get('case_id')} ({count}/{len(cases_list)})"
+                    )
+
+            await browser.close()
 
     async def _login(self, page):
-        await page.goto(self.url, timeout=120000)
+        url = "https://cccportal.cookcountyclerkofcourt.org/CCCPortal/"
+        await page.goto(url, timeout=120000)
         await page.click("[id='dropdownMenu1']")
         sign_in_link = await page.query_selector(
             "a[href='/CCCPortal/Account/Login']:has-text('Sign In')"
@@ -103,7 +141,9 @@ class IlCook(ScraperBase):
 
         await page.fill('input[name="UserName"]', self.email)
         await page.fill('input[name="Password"]', self.password)
-        login_button = await page.query_selector("button[class='btn btn-primary']")
+        login_button = await page.query_selector(
+            "button[class='btn btn-primary']"
+        )
         if login_button:
             await login_button.click()
         else:
@@ -112,20 +152,49 @@ class IlCook(ScraperBase):
         await page.wait_for_timeout(2000)
         await page.wait_for_load_state()
 
-    async def _go_to_table(self, page):
-        await page.locator("#portlet-26").click()
-        await page.wait_for_timeout(1000)
+    async def _get_options(self, page):
+        url = "https://cccportal.cookcountyclerkofcourt.org/CCCPortal/Home/Dashboard/26"
+        await page.goto(url, timeout=120000)
+        await page.locator("#cboHSSearchBy").select_option(
+            label=self.search_by
+        )
+
+        # Get all options:
+        # Select the element and retrieve options
+        options = await page.query_selector_all("#selHSCourtroom option")
+
+        # Extracting the texts or values of the options
+        option_values = [
+            await option.get_attribute("value") for option in options
+        ]
+        option_texts = [await option.inner_text() for option in options]
+
+        return {k: label for k, label in zip(option_values, option_texts)}
+
+    async def _go_to_table(self, page, value):
+        url = "https://cccportal.cookcountyclerkofcourt.org/CCCPortal/Home/Dashboard/26"
+        await page.goto(url, timeout=120000)
         await page.wait_for_selector("#cboHSLocationGroup")
-        await page.locator("#cboHSLocationGroup").select_option(label="Traffic")
+        await page.locator("#cboHSLocationGroup").select_option(
+            label="Traffic"
+        )
         await page.locator("#cboHSHearingTypeGroup").select_option(
             label="All Traffic Hearing Types"
         )
-        await page.locator("#cboHSSearchBy").select_option(label="Judicial Officer")
-        await page.locator("#selHSJudicialOfficer").select_option(
-            label="Aguilar, Carmen Kathleen"
+        await page.locator("#cboHSSearchBy").select_option(
+            label=self.search_by
         )
-        await page.fill('input[id="SearchCriteria_DateFrom"]', "08/01/2023")
-        await page.fill('input[id="SearchCriteria_DateTo"]', "12/11/2023")
+
+        correspondance_dict = {
+            "Courtroom": "#selHSCourtroom",
+            "Judge": "#selHSJudge",
+        }
+
+        await page.locator(correspondance_dict[self.search_by]).select_option(
+            label=value
+        )
+        await page.fill('input[id="SearchCriteria_DateFrom"]', self.start_date)
+        await page.fill('input[id="SearchCriteria_DateTo"]', self.end_date)
         await page.locator("#btnHSSubmit").click()
         await page.wait_for_timeout(7000)
 
@@ -135,7 +204,7 @@ class IlCook(ScraperBase):
         return id_value
 
     async def download_case(self, page):
-        #TODO change the values 
+        # TODO change the values
         document_id = 65756057
         case_num = "YK00073039"
         location_id = 950
@@ -157,12 +226,11 @@ class IlCook(ScraperBase):
             console.log("Failed to fetch data")
 
     async def event_to_json(self, page, event, id):
-        URL = f"https://cccportal.cookcountyclerkofcourt.org/app/RegisterOfActionsService/{event}('{id}')?mode=portalembed"
+        url = f"https://cccportal.cookcountyclerkofcourt.org/app/RegisterOfActionsService/{event}('{id}')?mode=portalembed"
         if event == "CaseSummariesSlim":
-            URL = f"https://cccportal.cookcountyclerkofcourt.org/app/RegisterOfActionsService/{event}?key={id}"
-        response = await page.request.get(URL)
+            url = f"https://cccportal.cookcountyclerkofcourt.org/app/RegisterOfActionsService/{event}?key={id}"
+        response = await page.request.get(url)
         data_json = await response.json()
-        console.log(data_json)
         return data_json
 
     async def get_cases(self, page):
@@ -177,10 +245,58 @@ class IlCook(ScraperBase):
         data_json = await response.json()
         return data_json.get("Data")
 
+    async def get_extra_data(self, page, case_id):
+        url = "https://cccportal.cookcountyclerkofcourt.org/CCCPortal/Home/Dashboard/29"
+        await page.goto(url, timeout=120000)
+        await page.locator("#caseCriteria_SearchCriteria").fill(case_id)
+        await page.get_by_role("button", name="Submit").click()
+
+        await page.wait_for_timeout(2000)
+
+        # Rows
+        rows = await page.query_selector_all(
+            "table.kgrid-card-table tbody tr.k-master-row"
+        )
+
+        # Iterate through each row
+        for row in rows:
+            # Extracting data from each cell
+            cells = await row.query_selector_all("td")
+
+            # Creating a dictionary for each row
+            row_data = {
+                "filing_date": await cells[3].inner_text(),
+                "type": await cells[4].inner_text(),
+                "case_status": await cells[5].inner_text(),
+                "birth_date": await cells[8].inner_text(),
+                "state": "IL",
+                "court_code": "IL_COOK",
+                "source": "il_cook",
+                "city": "Chicago",
+                "state": "IL",
+                "zip_code": "60602",
+                "county": "Cook",
+            }
+
+            if "/" in row_data["birth_date"]:
+                row_data["year_of_birth"] = row_data["birth_date"].split("/")[
+                    -1
+                ]
+                row_data["age"] = date.today().year - int(
+                    row_data["year_of_birth"]
+                )
+
+            return row_data
+
+        return {}
+
     async def parse_case_detail(self, content: dict) -> dict:
-        
         # CaseSummariesSlim
-        case_id = content.get("CaseSummariesSlim", {}).get("CaseId")
+        case_id = (
+            content.get("CaseSummariesSlim", {})
+            .get("CaseSummaryHeader", {})
+            .get("CaseNumber")
+        )
         court_id = (
             content.get("CaseSummariesSlim", {})
             .get("CaseSummaryHeader", {})
@@ -219,7 +335,7 @@ class IlCook(ScraperBase):
         )
 
         # Parties
-        parties = parties = [
+        parties = [
             {
                 "party_id": party.get("PartyId"),
                 "formatted_name": party.get("FormattedName"),
@@ -245,11 +361,21 @@ class IlCook(ScraperBase):
             for party in content.get("Parties", {}).get("Parties", [])
         ]
         # PartyNames
-        first_name = content.get("PartyNames", {}).get("Names", [])[0].get("NameFirst")
-        formatted_party_name = (
-            content.get("PartyNames", {}).get("Names", [])[0].get("FormattedName")
+        first_name = (
+            content.get("PartyNames", {}).get("Names", [])[0].get("NameFirst")
         )
-        last_name = content.get("PartyNames", {}).get("Names", [])[0].get("NameLast")
+        formatted_party_name = (
+            content.get("PartyNames", {})
+            .get("Names", [])[0]
+            .get("FormattedName")
+        )
+        last_name = (
+            content.get("PartyNames", {}).get("Names", [])[0].get("NameLast")
+        )
+
+        middle_name = (
+            content.get("PartyNames", {}).get("Names", [])[0].get("NameMid")
+        )
 
         # Charges
         charges = [
@@ -263,17 +389,30 @@ class IlCook(ScraperBase):
                 "filed_date": charge.get("FiledDate"),
                 "amended_date": charge.get("AmendedDate"),
                 "charge_offense": {
-                    "jurisdiction": charge.get("ChargeOffense", {}).get("Jurisdiction"),
+                    "jurisdiction": charge.get("ChargeOffense", {}).get(
+                        "Jurisdiction"
+                    ),
                     "description": charge.get("ChargeOffense", {}).get(
                         "ChargeOffenseDescription"
                     ),
                     "statute": charge.get("ChargeOffense", {}).get("Statute"),
-                    "degree": charge.get("ChargeOffense", {}).get("DegreeDescription"),
+                    "degree": charge.get("ChargeOffense", {}).get(
+                        "DegreeDescription"
+                    ),
                 },
-                "filing_agency_description": charge.get("FilingAgencyDescription"),
+                "filing_agency_description": charge.get(
+                    "FilingAgencyDescription"
+                ),
             }
             for charge in content.get("Charges", {}).get("Charges", [])
         ]
+
+        charges_description = " \n".join(
+            [
+                c.get("charge_offense", {}).get("description", {})
+                for c in charges
+            ]
+        )
 
         # CombinedEvents
         events = []
@@ -283,7 +422,9 @@ class IlCook(ScraperBase):
                 if event_detail:
                     judge_id_data = event_detail.get("JudgeId", {})
                     judge_id = (
-                        judge_id_data.get("Description") if judge_id_data else None
+                        judge_id_data.get("Description")
+                        if judge_id_data
+                        else None
                     )
 
                     event_data = {
@@ -295,7 +436,9 @@ class IlCook(ScraperBase):
                         "criminal_dispositions": [],
                     }
 
-                    criminal_dispositions = event_detail.get("CriminalDispositions", [])
+                    criminal_dispositions = event_detail.get(
+                        "CriminalDispositions", []
+                    )
                     for disposition in criminal_dispositions:
                         charge = disposition.get("Charge", {})
                         charge_offense = charge.get("ChargeOffense", {})
@@ -312,12 +455,14 @@ class IlCook(ScraperBase):
                                 "description": charge_offense.get(
                                     "ChargeOffenseDescription"
                                 ),
-                                "degree": charge_offense.get("DegreeId", {}).get(
-                                    "Description"
-                                ),
+                                "degree": charge_offense.get(
+                                    "DegreeId", {}
+                                ).get("Description"),
                             },
                         }
-                        event_data["criminal_dispositions"].append(disposition_data)
+                        event_data["criminal_dispositions"].append(
+                            disposition_data
+                        )
                     events.append(event_data)
 
         return {
@@ -326,18 +471,19 @@ class IlCook(ScraperBase):
             "court_type": court_type,
             "judge": judge,
             "filed_on": filed_on,
+            "case_date": filed_on,
             "case_number": case_number,
             "case_type": case_type,
             "formatted_party_name": formatted_party_name,
             "parties": parties,
             "first_name": first_name,
+            "middle_name": middle_name,
             "last_name": last_name,
             "charges": charges,
             "events": events,
+            "raw": content,
+            "charges_description": charges_description,
         }
-
-
-   
 
 
 if __name__ == "__main__":
@@ -345,7 +491,6 @@ if __name__ == "__main__":
     scraper = IlCook(
         email=os.getenv("EMAIL"),
         password=os.getenv("PASSWORD"),
-        url=os.getenv("URL"),
     )
     asyncio.run(scraper.main())
     console.log("Done running", __file__, ".")
