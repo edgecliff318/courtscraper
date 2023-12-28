@@ -1,8 +1,7 @@
+import asyncio
 import datetime
 import json
 import logging
-import asyncio
-
 
 import pytz
 import typer
@@ -12,9 +11,8 @@ from rich.console import Console
 from src.loader.leads import CaseNet
 from src.models import cases as cases_model
 from src.models import leads as leads_model
-from src.scrapers.mo_mshp import MOHighwayPatrol
 from src.scrapers.il_cook import IlCook
-
+from src.scrapers.mo_mshp import MOHighwayPatrol
 from src.services import cases as cases_service
 from src.services import leads as leads_service
 from src.services.courts import get_courts
@@ -153,54 +151,29 @@ def retrieve_cases_mo_mshp():
                 )
         except Exception as e:
             console.log(f"Failed to parse lead {case} - {e}")
-            
-            
-def retrieve_cases_il_cook(email: str | None = None, password: str | None = None, url: str | None = None, start_date: str | None = None, end_date: str | None = None, search_location: str | None = None, search_hearing_type: str | None = None, search_by: str | None = None, search_judicial_officer: str | None = None) -> None:
-# (start_date : str, end_date: str , email: str, password: str, search_by: str, search_judicial_officer: str):
+
+
+def retrieve_cases_il_cook(refresh_courts=None) -> None:
+    # (start_date : str, end_date: str , email: str, password: str, search_by: str, search_judicial_officer: str):
     """
     Scrap the casenet website
     """
+    # Get the configuration from Firebase
+    email = "smahmudlaw@gmail.com"
+    password = "Shawn1993!"
+    start_date = "02/01/2024"
+    end_date = "02/01/2024"
+
+    # Initiate the scrapper
     scraper = IlCook(
         email=email,
         password=password,
-        url=url,
         start_date=start_date,
         end_date=end_date,
-        search_location=search_location,
-        search_hearing_type=search_hearing_type,
-        search_by=search_by,
-        search_judicial_officer=search_judicial_officer,
     )
-    cases_imported = asyncio.run(scraper.main())
-    for case in cases_imported:
-        # Insert the case in the cases table
-        try:
-            case_parsed = cases_model.Case.model_validate(case)
-            cases_service.insert_case(case_parsed)
-            console.log(f"Succeeded to insert case {case.get('case_id')}")
-        except Exception as e:
-            # Save the case in a file for a manual review
-            with open(
-                f"cases_to_review/{case.get('case_id')}.json",
-                "w",
-            ) as f:
-                # Transform PosixPath to path in the dict case
-                json.dump(case, f, default=str)
 
-            console.log(f"Failed to parse case {case} - {e}")
-
-        # Insert the lead in the leads table:
-        try:
-            lead_parsed = leads_model.Lead.model_validate(case)
-            lead_loaded = leads_service.get_single_lead(lead_parsed.case_id)
-            if lead_loaded is None:
-                leads_service.insert_lead(lead_parsed)
-            console.log(
-                    f"Succeeded to insert lead for {case.get('case_id')}"
-                )
-        except Exception as e:
-            console.log(f"Failed to parse lead {case} - {e}")
-    
+    # Get the cases
+    asyncio.run(scraper.main())
 
 
 def retrieve_cases(source="mo_case_net"):
@@ -209,11 +182,11 @@ def retrieve_cases(source="mo_case_net"):
     """
     if source == "mo_case_net":
         retrieve_cases_mo_casenet()
-
     elif source == "mo_mshp":
         retrieve_cases_mo_mshp()
     elif source == "il_cook":
         retrieve_cases_il_cook()
+
 
 if __name__ == "__main__":
     typer.run(retrieve_cases)
