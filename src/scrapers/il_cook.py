@@ -3,7 +3,6 @@ import os
 import os.path
 import sys
 from datetime import date
-from re import search
 from urllib.parse import parse_qs, urlparse
 
 from dotenv import load_dotenv
@@ -241,7 +240,7 @@ class IlCook(ScraperBase):
             "filter": "",  # Update as needed
             "portletId": 27,
         }
-        response = await page.request.post(url, data=payload)
+        response = await page.request.post(url, data=payload, timeout=120000)
         data_json = await response.json()
         return data_json.get("Data")
 
