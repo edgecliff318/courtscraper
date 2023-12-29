@@ -60,7 +60,12 @@ def get_leads(
 
     leads_list = leads_list.stream()
 
-    return [leads.Lead(id=lead.id, **lead.to_dict()) for lead in leads_list]
+    def get_lead_dict(lead):
+        lead_dict = lead.to_dict()
+        lead_dict["id"] = lead.id
+        return lead_dict
+
+    return [leads.Lead(**get_lead_dict(lead)) for lead in leads_list]
 
 
 def get_single_lead(case_id):
