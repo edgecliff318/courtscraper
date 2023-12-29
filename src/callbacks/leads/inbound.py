@@ -197,9 +197,11 @@ def render_inbound_table(data: pd.DataFrame):
                 color="green",
             )
             # Click to open user
+
+            url = "https://dashboard.clerk.com/apps/app_2ZdvAxwBHjl6An4cHq9vA6RFjTG/instances/ins_2ZdvJ8q3S8eoqpO6Kr93wY3LJ5A/users/"
             user_icon = html.A(
                 user_icon,
-                href=f"/users/{row.user_id}",
+                href=f"{url}{row.user_id}",
                 target="_blank",
             )
 

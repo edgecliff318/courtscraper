@@ -1,5 +1,5 @@
 import logging
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 import dash
 import dash_mantine_components as dmc
@@ -30,7 +30,7 @@ def layout():
                             label="Select a date range",
                             minDate=date(2023, 12, 20),
                             value=[
-                                datetime.now().date(),
+                                datetime.now().date() - timedelta(days=1),
                                 datetime.now().date(),
                             ],
                             dropdownPosition="bottom",
