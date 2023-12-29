@@ -75,7 +75,7 @@ class IlCook(ScraperBase):
     async def main(self):
         async with async_playwright() as pw:
             console.log("Connecting...")
-            browser = await pw.chromium.launch(headless=False)
+            browser = await pw.chromium.launch(headless=True)
             context = await browser.new_context()
             page = await context.new_page()
 
@@ -100,12 +100,32 @@ class IlCook(ScraperBase):
 
                 count = 0
                 for case in cases_list:
+                    hearing_type = (
+                        case.get("HearingTypeId", {})
+                        .get("Description")
+                        .lower()
+                    )
+
                     count += 1
+
+                    if (
+                        "initial" not in hearing_type
+                        and "zoom" not in hearing_type
+                    ):
+                        console.log(
+                            f"Case {case.get('CaseNumber')} with Hearing Type: {hearing_type} is not an initial hearing or . Skipping ..."
+                        )
+                        continue
+
                     if self.check_if_exists(case.get("CaseNumber")):
                         console.log(
                             f"Case {case.get('CaseNumber')} already exists. Skipping ..."
                         )
                         continue
+
+                    console.log(
+                        f"Downloading case details for {case.get('CaseNumber')}"
+                    )
                     case_details = await self.get_case_details(
                         page, case.get("CaseLoadUrl")
                     )
@@ -240,7 +260,7 @@ class IlCook(ScraperBase):
             "filter": "",  # Update as needed
             "portletId": 27,
         }
-        response = await page.request.post(url, data=payload, timeout=120000)
+        response = await page.request.post(url, data=payload, timeout=1200000)
         data_json = await response.json()
         return data_json.get("Data")
 
