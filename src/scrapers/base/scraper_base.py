@@ -11,6 +11,10 @@ from rich.console import Console
 from src.core.config import get_settings
 from src.db import bucket
 from src.loader.tickets import TicketParser
+from src.models import cases as cases_model
+from src.models import leads as leads_model
+from src.services import cases as cases_service
+from src.services import leads as leads_service
 
 settings = get_settings()
 console = Console()
@@ -132,3 +136,40 @@ class ScraperBase:
             else b
             for a, b in d.items()
         }
+
+    def check_if_exists(self, case_id):
+        """Check if the case already exists in the database."""
+        if cases_service.get_single_case(case_id) is not None:
+            return True
+        return False
+
+    def insert_case(self, case, force_insert=False):
+        """Insert the case into the database."""
+        try:
+            case_parsed = cases_model.Case.model_validate(case)
+            if self.check_if_exists(case_parsed.case_id) and not force_insert:
+                console.log(f"Case {case_parsed.case_id} already exists")
+                return
+            cases_service.insert_case(case_parsed)
+            console.log(f"Succeeded to insert case {case.get('case_id')}")
+        except Exception as e:
+            # Save the case in a file for a manual review
+            with open(
+                f"cases_to_review/{case.get('case_id')}.json",
+                "w",
+            ) as f:
+                # Transform PosixPath to path in the dict case
+                json.dump(case, f, default=str)
+
+            console.log(f"Failed to parse case {case} - {e}")
+
+    def insert_lead(self, case):
+        """Insert the lead into the database."""
+        try:
+            lead_parsed = leads_model.Lead.model_validate(case)
+            lead_loaded = leads_service.get_single_lead(lead_parsed.case_id)
+            if lead_loaded is None:
+                leads_service.insert_lead(lead_parsed)
+            console.log(f"Succeeded to insert lead for {case.get('case_id')}")
+        except Exception as e:
+            console.log(f"Failed to parse lead {case} - {e}")

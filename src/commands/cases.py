@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import json
 import logging
@@ -10,6 +11,7 @@ from rich.console import Console
 from src.loader.leads import CaseNet
 from src.models import cases as cases_model
 from src.models import leads as leads_model
+from src.scrapers.il_cook import IlCook
 from src.scrapers.mo_mshp import MOHighwayPatrol
 from src.services import cases as cases_service
 from src.services import leads as leads_service
@@ -151,16 +153,56 @@ def retrieve_cases_mo_mshp():
             console.log(f"Failed to parse lead {case} - {e}")
 
 
+def retrieve_cases_il_cook(refresh_courts=None) -> None:
+    # (start_date : str, end_date: str , email: str, password: str, search_by: str, search_judicial_officer: str):
+    """
+    Scrap the casenet website
+    """
+    # Get the configuration from Firebase
+    console.log("Retrieving the configuration from Firebase")
+    account = get_account("il_cook_tyler")
+
+    if account.start_date is None:
+        account.start_date = 0
+
+    if account.end_date is None:
+        account.end_date = 1
+
+    # Initiate the scrapper
+    for shift_days in range(account.start_date, account.end_date):
+        console.log(f"Processing date {shift_days}")
+        target_date = datetime.datetime.now() + datetime.timedelta(
+            days=shift_days
+        )
+
+        # If not business day or a holiday, skip
+        if target_date.weekday() > 4:
+            continue
+
+        scraper = IlCook(
+            email=account.email,
+            password=account.password,
+            start_date=target_date.strftime("%m/%d/%Y"),
+            end_date=target_date.strftime("%m/%d/%Y"),
+        )
+
+        # Get the cases
+        asyncio.run(scraper.main())
+
+
 def retrieve_cases(source="mo_case_net"):
     """
     Scrap the casenet website
     """
-
     if source == "mo_case_net":
+        console.log("MO Case Net Scraper")
         retrieve_cases_mo_casenet()
-
     elif source == "mo_mshp":
+        console.log("MO Highway Patrol Scraper")
         retrieve_cases_mo_mshp()
+    elif source == "il_cook":
+        console.log("Cook County, IL Scraper")
+        retrieve_cases_il_cook()
 
 
 if __name__ == "__main__":
