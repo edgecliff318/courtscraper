@@ -10,6 +10,7 @@ import pandas as pd
 from dash import ALL, MATCH, Input, Output, callback, html
 from dash_iconify import DashIconify
 
+from src.connectors.cloudtalk import add_website_lead
 from src.core.config import get_settings
 from src.core.format import humanize_phone
 from src.services import leads
@@ -19,10 +20,34 @@ logger = logging.Logger(__name__)
 settings = get_settings()
 
 
+def process_lead(lead):
+    if lead.get("court", None) is not None:
+        lead["court_id"] = lead.get("court", {}).get("court_id")
+        lead["court"] = lead.get("court", {}).get("court_name")
+    if lead.get("violation", None) is not None:
+        lead["violation_id"] = lead.get("violation", {}).get("violation_id")
+        lead["violation"] = lead.get("violation", {}).get("violation_name")
+
+    lead["user"] = lead.get("user_id") is not None
+
+    # Creation date from ms timestamp
+    try:
+        creation_date = pd.to_datetime(lead.get("creation_date"), unit="ms")
+    except Exception as e:
+        logger.error(f"Error parsing creation_date: {e}")
+        creation_date = pd.to_datetime(lead.get("creation_date"))
+
+    # UTC to Central time
+    creation_date = creation_date.tz_convert("America/Chicago")
+    creation_date = creation_date.strftime("%Y-%m-%d %H:%M:%S")
+
+    lead["creation_date"] = creation_date
+
+    return lead
+
+
 def render_stats_card(kpi_name, kpi_value_formatted, kpi_unit):
     return dmc.Card(
-        withBorder=True,
-        style={"border": "2px solid"},
         children=dmc.Stack(
             [
                 dmc.Text(
@@ -190,12 +215,7 @@ def render_inbound_table(data: pd.DataFrame):
         else:
             violation = dmc.Text("No violation", size="sm", color="gray")
 
-        # Creation date from ms timestamp
-        creation_date = pd.to_datetime(row.creation_date, unit="ms")
-
-        # UTC to Central time
-        creation_date = creation_date.tz_convert("America/Chicago")
-        creation_date = creation_date.strftime("%Y-%m-%d %H:%M:%S")
+        creation_date = dmc.Text(row.creation_date, size="sm")
 
         accident_checkbox = dmc.Checkbox(
             checked=row.accidentCheckbox, disabled=True, size="xs"
@@ -338,20 +358,6 @@ def render_inbound_leads(dates, status, n_clicks):
         "creation_date",
     }
 
-    def process_lead(lead):
-        if lead.get("court", None) is not None:
-            lead["court_id"] = lead.get("court", {}).get("court_id")
-            lead["court"] = lead.get("court", {}).get("court_name")
-        if lead.get("violation", None) is not None:
-            lead["violation_id"] = lead.get("violation", {}).get(
-                "violation_id"
-            )
-            lead["violation"] = lead.get("violation", {}).get("violation_name")
-
-        lead["user"] = lead.get("user_id") is not None
-
-        return lead
-
     leads_list = [
         process_lead(lead.model_dump(include=fields)) for lead in leads_list
     ]
@@ -382,8 +388,12 @@ def render_inbound_leads(dates, status, n_clicks):
     Output({"type": "leads-inbound-row", "index": MATCH}, "className"),
     Input({"type": "leads-inbound-remove", "index": MATCH}, "n_clicks"),
     Input({"type": "leads-inbound-cloudtalk", "index": MATCH}, "n_clicks"),
+    Input(
+        {"type": "leads-inbound-status", "index": MATCH},
+        "value",
+    ),
 )
-def remove_lead(n_clicks_remove, n_clicks_cloudtalk):
+def remove_lead(n_clicks_remove, n_clicks_cloudtalk, status):
     ctx = dash.callback_context
     if not ctx.triggered:
         raise dash.exceptions.PreventUpdate
@@ -394,7 +404,7 @@ def remove_lead(n_clicks_remove, n_clicks_cloudtalk):
         button_type = button_id.get("type")
         lead_id = button_id.get("index")
         if button_type == "leads-inbound-remove":
-            # leads.delete_lead(lead_id)
+            leads.delete_lead(lead_id)
             return (
                 dmc.Notification(
                     message="Lead deleted",
@@ -410,8 +420,86 @@ def remove_lead(n_clicks_remove, n_clicks_cloudtalk):
                 ),
                 "d-none",
             )
+        elif button_type == "leads-inbound-status":
+            leads.patch_lead(lead_id, status=status)
+            return (
+                dmc.Notification(
+                    message="Lead status updated",
+                    title="Success",
+                    action="show",
+                    id="leads-inbound-alert",
+                    className="m-0",
+                    icon=DashIconify(
+                        icon="mdi:trash-can-outline",
+                        width=20,
+                        color="white",
+                    ),
+                    autoClose=1500,
+                ),
+                dash.no_update,
+            )
+
         elif button_type == "leads-inbound-cloudtalk":
-            # leads.update_lead(lead_id, cloudtalk_upload=True)
+            fields = {
+                "id",
+                "phone",
+                "violation",
+                "court",
+                "accidentCheckbox",
+                "commercialDriverLicence",
+                "ticket_img",
+                "user_id",
+                "cloudtalk_upload",
+                "state",
+                "status",
+                "creation_date",
+            }
+
+            lead = leads.get_lead(lead_id, fields=fields)
+
+            if lead is None:
+                return (
+                    dmc.Notification(
+                        message="Lead not found",
+                        title="Error",
+                        action="show",
+                        id="leads-inbound-alert",
+                        className="m-0",
+                        icon=DashIconify(
+                            icon="mdi:alert-circle-outline",
+                            width=20,
+                            color="white",
+                        ),
+                    ),
+                    dash.no_update,
+                )
+
+            if lead.cloudtalk_upload:
+                return (
+                    dmc.Notification(
+                        message="Lead already uploaded to CloudTalk",
+                        title="Error",
+                        action="show",
+                        id="leads-inbound-alert",
+                        className="m-0",
+                        icon=DashIconify(
+                            icon="mdi:alert-circle-outline",
+                            width=20,
+                            color="white",
+                        ),
+                    ),
+                    dash.no_update,
+                )
+
+            lead_dict = lead.model_dump(include=fields)
+
+            lead_dict = process_lead(lead_dict)
+
+            add_website_lead(
+                lead_dict,
+            )
+
+            leads.patch_lead(lead_id, cloudtalk_upload=True)
             return (
                 dmc.Notification(
                     message="Lead uploaded to CloudTalk",

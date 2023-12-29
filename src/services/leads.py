@@ -66,7 +66,7 @@ def get_leads(
 def get_single_lead(case_id):
     lead = (
         db.collection("leads")
-        .select([f for f in leads.Lead.__fields__.keys() if f != "report"])
+        .select([f for f in leads.Lead.model_fields.keys() if f != "report"])
         .where("case_id", "==", case_id)
         .stream()
     )
@@ -74,6 +74,14 @@ def get_single_lead(case_id):
     if not lead:
         return None
     lead = lead[0]
+    return leads.Lead(**lead.to_dict())
+
+
+def get_lead(lead_id, fields=None):
+    lead = db.collection("leads").document(lead_id).get()
+    if not lead.exists:
+        return None
+
     return leads.Lead(**lead.to_dict())
 
 
@@ -249,3 +257,7 @@ def insert_lead_from_case(case):
             logger.info(f"Succeeded to insert lead for {case.get('case_id')}")
     except Exception as e:
         logger.error(f"Failed to parse lead {case} - {e}")
+
+
+def delete_lead(lead_id):
+    db.collection("leads").document(lead_id).delete()
