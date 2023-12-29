@@ -3,6 +3,7 @@ import os
 from logging.config import dictConfig
 
 import dash_bootstrap_components as dbc
+import dash_mantine_components as dmc
 import diskcache
 from dash import Dash, DiskcacheManager
 from flask_cors import CORS
@@ -109,7 +110,7 @@ def init_app():
     app.title = settings.PROJECT_NAME
 
     # Set the layout
-    app.layout = Layout().render()
+    app.layout = dmc.NotificationsProvider(Layout().render())
 
     # Set the server
     server = app.server
