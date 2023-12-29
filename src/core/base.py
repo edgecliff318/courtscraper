@@ -1,12 +1,13 @@
-from datetime import datetime
 import logging
 import typing as t
+from datetime import datetime
+
+from google.cloud.firestore_v1.base_query import And, FieldFilter, Or
+from google.cloud.firestore_v1.field_path import FieldPath
+from pydantic import BaseModel
 
 from src.core.config import get_settings
 from src.db import db
-from google.cloud.firestore_v1.base_query import FieldFilter, Or, And
-from google.cloud.firestore_v1.field_path import FieldPath
-from pydantic import BaseModel
 
 logger = logging.Logger(__name__)
 
@@ -103,6 +104,9 @@ class BaseService:
         db.collection(self.collection).document(item_id).update(
             **item.model_dump()
         )
+
+    def set_item(self, item_id, item):
+        db.collection(self.collection).document(item_id).set(item.model_dump())
 
     def patch_item(self, item_id, data):
         db.collection(self.collection).document(item_id).update(data)

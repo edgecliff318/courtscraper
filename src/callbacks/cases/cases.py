@@ -59,6 +59,7 @@ def send_many_message(*args, **kwargs):
         include_case_copy = (
             ctx.states["lead-media-enabled-modal.value"] or False
         )
+        skipped = False
         for case in df:
             # Dict keys to lower and replace spaces with underscores
             case = {k.lower().replace(" ", "_"): v for k, v in case.items()}
@@ -72,25 +73,42 @@ def send_many_message(*args, **kwargs):
                 # TODO: add a check validation of template sending SMS with the case data by Twilio
                 sms_message = template_msg.format(**case)
                 for phone in case["phone"].split(", "):
-                    message_status = messages.send_message(
-                        case_id,
-                        sms_message,
-                        phone,
-                        media_enabled=include_case_copy,
-                    )
+                    try:
+                        message_status = messages.send_message(
+                            case_id,
+                            sms_message,
+                            phone,
+                            media_enabled=include_case_copy,
+                        )
+                        if (
+                            message_status == "queued"
+                            or message_status == "accepted"
+                        ):
+                            leads.update_lead_status(case_id, "contacted")
 
-                    if (
-                        message_status == "queued"
-                        or message_status == "accepted"
-                    ):
-                        leads.update_lead_status(case_id, "contacted")
+                        elif message_status == "skipped":
+                            logger.info(
+                                f"Skipping message to {phone} as it was recently sent. Use --force to send anyway"
+                            )
+                        else:
+                            logger.error(
+                                f"An error occurred while sending the message. {message_status}"
+                            )
+                    except Exception as e:
+                        if "skipped" in str(e).lower():
+                            skipped = True
+                        else:
+                            raise e
 
             except Exception as e:
                 logger.error(
                     f"An error occurred while sending the message. {e}"
                 )
                 return f"An error occurred while sending the message {e}"
-        return "Messages sent successfully"
+        if skipped:
+            return "Messages sent successfully. Some messages were skipped as they were recently sent"
+        else:
+            return "Messages sent successfully"
 
     return ""
 

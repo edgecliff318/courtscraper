@@ -7,13 +7,23 @@ from datetime import timedelta
 import pandas as pd
 from google.cloud.storage.retry import DEFAULT_RETRY
 from PIL import Image, ImageDraw, ImageFont
+from rich.console import Console
 from twilio.rest import Client
 
+from src.core.base import BaseService
 from src.core.config import get_settings
 from src.db import bucket, db
 from src.models import messages
 from src.services import cases
 from src.services.emails import GmailConnector
+
+console = Console()
+
+
+class PhoneContactService(BaseService):
+    collection_name = "phone_contacts"
+    serializer = messages.PhoneContact
+
 
 logger = logging.Logger(__name__)
 
@@ -211,6 +221,7 @@ def send_message(
     media_enabled=False,
     method="twilio",
     carrier=None,
+    force_send=False,
 ):
     sms_message = sms_message.replace("\\n", "\n")
 
@@ -225,6 +236,15 @@ def send_message(
 
     # Send message
     if method == "twilio":
+        phone_contact_service = PhoneContactService()
+        last_message = phone_contact_service.get_single_item(phone)
+
+        if last_message is not None and not force_send:
+            console.log(
+                f"Skipping message to {phone} as it was recently sent. Use --force to send anyway"
+            )
+            raise Exception("Skipped as lead already contacted")
+
         client = Client(
             settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN
         )
@@ -235,11 +255,22 @@ def send_message(
             media_url=media_url,
             to=phone,
         )
+
         if twilio_message is None:
             raise Exception("Message not sent")
+
         status = twilio_message.status
         message_id = twilio_message.sid
         creation_date = twilio_message.date_sent
+
+        phone_contact_service.set_item(
+            phone,
+            messages.PhoneContact(
+                phone=phone,
+                last_contacted=datetime.datetime.now(),
+                last_message=sms_message,
+            ),
+        )
 
     elif method == "gmail":
         user_id = settings.SMS_EMAIL_SENDER_ID

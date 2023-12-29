@@ -36,3 +36,9 @@ class Interaction(BaseModel):
     @validator("creation_date", pre=True)
     def set_creation_date_now(cls, v):
         return v or datetime.now()
+
+
+class PhoneContact(BaseModel):
+    phone: Optional[str] = None
+    last_contacted: Optional[datetime] = None
+    last_message: Optional[str] = None
