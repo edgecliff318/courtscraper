@@ -32,7 +32,8 @@ leads_statuses = [
 
 
 class Lead(BaseModel):
-    case_id: str
+    id: Optional[str] = None
+    case_id: Optional[str] = None
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     middle_name: Optional[str] = None
@@ -56,6 +57,16 @@ class Lead(BaseModel):
     disposed: Optional[bool] = False
     carrier: Optional[str] = None
     notes: Optional[str] = None
+
+    # Fields for the inbound leads
+    state: Optional[str] = None
+    violation: Optional[dict] = None
+    creation_date: Optional[datetime] = None
+    court: Optional[dict] = None
+    accidentCheckbox: Optional[bool] = False
+    commercialDriverLicence: Optional[bool] = False
+    ticket_img: Optional[str] = None
+    user_id: Optional[str] = None
 
     # Json Report from BeenVerified
     report: Optional[dict] = None

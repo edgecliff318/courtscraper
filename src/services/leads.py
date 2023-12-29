@@ -9,7 +9,11 @@ logger = logging.getLogger(__name__)
 
 
 def get_leads(
-    court_code_list=None, start_date=None, end_date=None, status=None
+    court_code_list=None,
+    start_date=None,
+    end_date=None,
+    status=None,
+    source=None,
 ):
     # Exclude the field "report" from the collection schema
     leads_list = db.collection("leads").select(
@@ -25,19 +29,38 @@ def get_leads(
         )
 
     if start_date is not None:
-        if isinstance(start_date, str):
-            start_date = pd.to_datetime(start_date)
-        leads_list = leads_list.where("case_date", ">=", start_date)
+        if source == "website":
+            # Transform start_date to timestamp in ms
+            if isinstance(start_date, str):
+                start_date = pd.to_datetime(start_date)
+            start_date = start_date.timestamp() * 1000
+            leads_list = leads_list.where("creation_date", ">=", start_date)
+        else:
+            if isinstance(start_date, str):
+                start_date = pd.to_datetime(start_date)
+            leads_list = leads_list.where("case_date", ">=", start_date)
+
     if end_date is not None:
-        if isinstance(end_date, str):
-            end_date = pd.to_datetime(end_date)
-        leads_list = leads_list.where("case_date", "<=", end_date)
+        if source == "website":
+            # Transform end_date to timestamp in ms
+            if isinstance(end_date, str):
+                end_date = pd.to_datetime(end_date) + pd.Timedelta(days=1)
+            end_date = end_date.timestamp() * 1000
+            leads_list = leads_list.where("creation_date", "<=", end_date)
+        else:
+            if isinstance(end_date, str):
+                end_date = pd.to_datetime(end_date)
+            leads_list = leads_list.where("case_date", "<=", end_date)
+
     if status is not None:
         leads_list = leads_list.where("status", "==", status)
 
+    if source is not None:
+        leads_list = leads_list.where("source", "==", source)
+
     leads_list = leads_list.stream()
 
-    return [leads.Lead(**m.to_dict()) for m in leads_list]
+    return [leads.Lead(id=lead.id, **lead.to_dict()) for lead in leads_list]
 
 
 def get_single_lead(case_id):
