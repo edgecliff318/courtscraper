@@ -159,21 +159,35 @@ def retrieve_cases_il_cook(refresh_courts=None) -> None:
     Scrap the casenet website
     """
     # Get the configuration from Firebase
-    email = "smahmudlaw@gmail.com"
-    password = "Shawn1993!"
-    start_date = "02/01/2024"
-    end_date = "02/01/2024"
+    console.log("Retrieving the configuration from Firebase")
+    account = get_account("il_cook_tyler")
+
+    if account.start_date is None:
+        account.start_date = 0
+
+    if account.end_date is None:
+        account.end_date = 1
 
     # Initiate the scrapper
-    scraper = IlCook(
-        email=email,
-        password=password,
-        start_date=start_date,
-        end_date=end_date,
-    )
+    for shift_days in range(account.start_date, account.end_date):
+        console.log(f"Processing date {shift_days}")
+        target_date = datetime.datetime.now() + datetime.timedelta(
+            days=shift_days
+        )
 
-    # Get the cases
-    asyncio.run(scraper.main())
+        # If not business day or a holiday, skip
+        if target_date.weekday() > 4:
+            continue
+
+        scraper = IlCook(
+            email=account.email,
+            password=account.password,
+            start_date=target_date.strftime("%m/%d/%Y"),
+            end_date=target_date.strftime("%m/%d/%Y"),
+        )
+
+        # Get the cases
+        asyncio.run(scraper.main())
 
 
 def retrieve_cases(source="mo_case_net"):
@@ -181,10 +195,13 @@ def retrieve_cases(source="mo_case_net"):
     Scrap the casenet website
     """
     if source == "mo_case_net":
+        console.log("MO Case Net Scraper")
         retrieve_cases_mo_casenet()
     elif source == "mo_mshp":
+        console.log("MO Highway Patrol Scraper")
         retrieve_cases_mo_mshp()
     elif source == "il_cook":
+        console.log("Cook County, IL Scraper")
         retrieve_cases_il_cook()
 
 
