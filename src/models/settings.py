@@ -1,3 +1,4 @@
+from tracemalloc import start
 from typing import Optional
 
 from pydantic import BaseModel, validator
@@ -5,11 +6,14 @@ from pydantic import BaseModel, validator
 
 class Account(BaseModel):
     username: Optional[str] = None
+    email: Optional[str] = None
     password: Optional[str] = None
     url: Optional[str] = None
     api_key: Optional[str] = None
     active: bool = True
     system: Optional[str] = None
+    start_date: Optional[int] = None
+    end_date: Optional[int] = None
 
 
 class Settings(BaseModel):
