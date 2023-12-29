@@ -99,6 +99,7 @@ def render_inbound_table(data: pd.DataFrame):
                     html.Th("Court"),
                     html.Th("Violation"),
                     html.Th("Phone"),
+                    html.Th("Date"),
                     html.Th("Accident"),
                     html.Th("CDL"),
                     html.Th("Ticket"),
@@ -189,6 +190,13 @@ def render_inbound_table(data: pd.DataFrame):
         else:
             violation = dmc.Text("No violation", size="sm", color="gray")
 
+        # Creation date from ms timestamp
+        creation_date = pd.to_datetime(row.creation_date, unit="ms")
+
+        # UTC to Central time
+        creation_date = creation_date.tz_convert("America/Chicago")
+        creation_date = creation_date.strftime("%Y-%m-%d %H:%M:%S")
+
         accident_checkbox = dmc.Checkbox(
             checked=row.accidentCheckbox, disabled=True, size="xs"
         )
@@ -260,6 +268,7 @@ def render_inbound_table(data: pd.DataFrame):
                     html.Td(court_badge),
                     html.Td(violation),
                     html.Td(humanize_phone(row.phone)),
+                    html.Td(creation_date),
                     html.Td(accident_checkbox),
                     html.Td(commercial_driver_licence),
                     html.Td(ticket_hover),
@@ -326,6 +335,7 @@ def render_inbound_leads(dates, status, n_clicks):
         "cloudtalk_upload",
         "state",
         "status",
+        "creation_date",
     }
 
     def process_lead(lead):
