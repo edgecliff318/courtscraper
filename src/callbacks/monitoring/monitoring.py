@@ -4,7 +4,7 @@ import dash
 import dash_ag_grid as dag
 import dash_bootstrap_components as dbc
 import pandas as pd
-from dash import Input, Output, callback, html
+from dash import Input, Output, callback, html, dcc
 
 from src.commands import leads as leads_commands
 from src.components.toast import build_toast
@@ -14,6 +14,103 @@ from src.services import messages as messages_service
 logger = logging.Logger(__name__)
 
 settings = get_settings()
+
+import time
+import plotly.graph_objects as go
+
+
+import numpy as np 
+
+
+def get_data():
+    date_range = pd.date_range(start='2023-01-01', end='2023-01-31', freq='D')
+    data = {
+        "date": date_range,
+        "stop": np.random.randint(1, 15, size=len(date_range)),
+        "yes": np.random.randint(1, 15, size=len(date_range)),
+        "pending": np.random.randint(1, 15, size=len(date_range)),
+        "error": np.random.randint(1, 15, size=len(date_range)),
+    }
+
+    df = pd.DataFrame(data)
+    return df
+    
+def create_graph():
+    df = get_data()
+   
+    colors_map = {
+        "pending": "#F8795D",
+        "stop": "#28C76F",
+        "yes": "#FF9F43",
+        "error": "grey",
+    }
+
+    fig = go.Figure()
+    fig.add_trace(
+        go.Bar(x=df["date"], y=df["pending"], name="Pending", marker_color=colors_map["pending"])
+    )
+    fig.add_trace(
+        go.Bar(
+            x=df["date"],
+            y=df["stop"],
+            name="Stop",
+            marker_color=colors_map["stop"],
+        )
+    )
+    fig.add_trace(
+        go.Bar(
+            x=df["date"],
+            y=df["yes"],
+            name="Yes",
+            marker_color=colors_map["yes"],
+        )
+    )
+    fig.add_trace(
+        go.Bar(
+            x=df["date"],
+            y=df["error"],
+            name="Error",
+            marker_color=colors_map["error"],
+        )
+    )
+
+  
+    fig.update_layout(
+    title='Wide-Form Input - Stacked Bar Chart',
+    xaxis_tickfont_size=14,
+    yaxis=dict(
+        title='Number of Medals',
+        titlefont_size=16,
+        tickfont_size=14,
+         showline=True,
+        showgrid=True,
+        gridcolor='LightGrey',  # Customize grid color here
+        linecolor='LightGrey'
+    ),
+    xaxis=dict(
+        title='Nations',
+        titlefont_size=16,
+        tickfont_size=14,
+         showline=True,
+        showgrid=True,
+        gridcolor='LightGrey',  # Customize grid color here
+        linecolor='LightGrey'
+    ),
+    
+    barmode='stack' ,
+    paper_bgcolor="rgba(255, 255, 255, 0)",  
+    plot_bgcolor="rgba(255, 255, 255, 0)",
+)
+
+    return dcc.Graph(figure=fig)
+
+
+@callback(
+    Output("graph-container-status-sms", "children"),
+    Input("graph-skeleton-button", "n_clicks"),
+)
+def update_graph(n_clicks):
+    return create_graph()
 
 
 @callback(
@@ -34,9 +131,7 @@ def render_status_msg(dates, direction):
         end_date=end_date,
         direction=direction,
     )
-    df = pd.DataFrame(
-        [interaction.model_dump() for interaction in interactions_list]
-    )
+    df = pd.DataFrame([interaction.model_dump() for interaction in interactions_list])
     cols = [
         "case_id",
         "creation_date",
@@ -71,9 +166,7 @@ def render_status_msg(dates, direction):
     df["creation_date"] = df["creation_date"].dt.tz_convert("US/Central")
 
     df.sort_values(by=["creation_date"], inplace=True, ascending=False)
-    df["creation_date"] = df["creation_date"].dt.strftime(
-        "%m/%d/%Y - %H:%M:%S"
-    )
+    df["creation_date"] = df["creation_date"].dt.strftime("%m/%d/%Y - %H:%M:%S")
     df = df.set_index("case_id")
     df = df.rename(
         columns={
