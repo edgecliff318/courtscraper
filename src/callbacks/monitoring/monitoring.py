@@ -6,13 +6,13 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 import numpy as np
 from dash import Input, Output, callback, html, dcc
+import dash_mantine_components as dmc
 import plotly.graph_objects as go
 
 from src.commands import leads as leads_commands
 from src.components.toast import build_toast
-from src.core.config import get_settings
 from src.services import messages as messages_service
-from src.services.settings import  get_settings as db_settings
+from src.services.settings import get_settings as db_settings
 from src.db import db
 
 
@@ -22,17 +22,24 @@ logger = logging.Logger(__name__)
 @callback(
     Output("switch-automated_message", "checked"),
     Output("switch-settings-txt", "children"),
-    Input("switch-automated_message", "checked")
-    )
+    Input("switch-automated_message", "checked"),
+)
 def settings(checked):
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
     if trigger_id == "switch-automated_message":
-        db.collection("settings").document("main").update({"automated_messaging": checked})
+        db.collection("settings").document("main").update(
+            {"automated_messaging": checked}
+        )
     settings_sms = db_settings("main")
-    return  settings_sms.automated_messaging ,f"Automated Messaging {'Run' if settings_sms.automated_messaging else 'Stop'} "
+    return (
+        settings_sms.automated_messaging,
+        f"Automated Messaging {'Run' if settings_sms.automated_messaging else 'Stop'} ",
+    )
+
 
 def get_data_status_sms():
+    # TODO: Read from DB from firebase 
     date_range = pd.date_range(start="2023-01-01", end="2023-01-31", freq="D")
     data = {
         "date": date_range,
@@ -47,6 +54,7 @@ def get_data_status_sms():
 
 
 def get_data_most_recent_error():
+    # TODO: Read from DB from firebase 
     error_labels = [f"Error {i+1}" for i in range(15)]
     error_counts = np.random.randint(1, 50, size=15)
 
@@ -93,7 +101,7 @@ def create_graph_status_sms():
             gridcolor="LightGrey",
             linecolor="LightGrey",
         ),
-        # barmode="stack",
+        barmode="stack",
         paper_bgcolor="rgba(255, 255, 255, 0)",
         plot_bgcolor="rgba(255, 255, 255, 0)",
     )
@@ -311,15 +319,19 @@ def render_status_msg(dates, direction):
                                 ),
                                 html.Div(
                                     [
-                                        dbc.Button(
+                                        dmc.Button(
                                             "Remove ",
                                             id="cases-process",
-                                            className="card-title m-2",
+                                            color="dark",
+                                            size="sm",
+                                            className="m-1",
                                         ),
-                                        dbc.Button(
+                                        dmc.Button(
                                             "Resend",
                                             id="cases-process",
-                                            className="card-title m-2",
+                                            color="dark",
+                                            size="sm",
+                                            className="m-1",
                                         ),
                                     ],
                                     id="message-monitoring ",
