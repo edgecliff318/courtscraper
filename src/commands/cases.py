@@ -209,15 +209,15 @@ from src.services import messages
 if __name__ == "__main__":
     # typer.run(retrieve_cases)
     courts = get_courts()
-    # settings = get_settings("main")
+    settings = get_settings("main")
     case_net_account = get_account("case_net_missouri")
 
     tz = pytz.timezone("US/Central")
-    messages_list = messages.get_messages_templates()
-    sms = messages.get_single_message_template("marketing_sms_v4")
-    print(sms,"------>")
+    # messages_list = messages.get_messages_templates()
+    # sms = messages.get_single_message_template("marketing_sms_v4")
+    print(settings,"------>")
 
     console.log(
-        f"Start date: {messages_list}"
+        f"Start date: {settings}"
     )
     

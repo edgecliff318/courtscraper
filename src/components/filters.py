@@ -96,12 +96,12 @@ def create_button(label, id, width, lg, xs):
             id=id,
             color="dark",
             size="sm",
-            className="mt-auto"  # Align bottom using margin-top auto
+            className="mt-auto" 
         ),
         width=width,
         lg=lg,
         xs=xs,
-        className="d-flex"  # Flex container for vertical alignment
+        className="d-flex" 
     )
 
 def create_switch():

@@ -19,7 +19,7 @@ settings = get_settings()
 
 @callback(Output("switch-settings-txt", "children"), Input("switch-automated_message", "checked"))
 def settings(checked):
-    return f"Using {'default' if checked else 'custom'} settings"
+    return f"Automated Messaging {'Run' if checked else 'Stop'} "
 
 def get_data_status_sms():
     date_range = pd.date_range(start="2023-01-01", end="2023-01-31", freq="D")
