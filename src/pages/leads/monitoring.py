@@ -24,7 +24,7 @@ def layout():
                             dbc.CardBody(
                                 [
                                     monitoring_controls,
-                                    # html.Div(id="monitoring-status"),
+                                    html.Div(id="monitoring-status"),
                                 ]
                             ),
                         ),
@@ -33,7 +33,7 @@ def layout():
                     ),
                 ]
             ),
-            # html.Div(id="message-monitoring"),
+            html.Div(id="message-monitoring"),
             dbc.Row(
                 [
                     dbc.Col(
