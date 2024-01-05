@@ -204,20 +204,6 @@ def retrieve_cases(source="mo_case_net"):
         console.log("Cook County, IL Scraper")
         retrieve_cases_il_cook()
 
-from src.services import messages
 
 if __name__ == "__main__":
-    # typer.run(retrieve_cases)
-    courts = get_courts()
-    settings = get_settings("main")
-    case_net_account = get_account("case_net_missouri")
-
-    tz = pytz.timezone("US/Central")
-    # messages_list = messages.get_messages_templates()
-    # sms = messages.get_single_message_template("marketing_sms_v4")
-    print(settings,"------>")
-
-    console.log(
-        f"Start date: {settings}"
-    )
-    
+    typer.run(retrieve_cases)

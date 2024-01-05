@@ -17,7 +17,6 @@ from src.db import db
 
 
 logger = logging.Logger(__name__)
-# settings = get_settings()
 
 
 @callback(
@@ -40,7 +39,7 @@ def get_data_status_sms():
         "stop": np.random.randint(1, 15, size=len(date_range)),
         "yes": np.random.randint(1, 15, size=len(date_range)),
         "pending": np.random.randint(1, 15, size=len(date_range)),
-        "error": np.random.randint(1, 15, size=len(date_range)),
+        "send": np.random.randint(1, 15, size=len(date_range)),
     }
 
     df = pd.DataFrame(data)
@@ -62,10 +61,10 @@ def create_graph_status_sms():
         "pending": "grey",
         "stop": "#FF9F43",
         "yes": "#28C76F",
-        "error": "#F8795D",
+        "send": "#F8795D",
     }
     fig = go.Figure()
-    for col in ["pending", "stop", "yes", "error"]:
+    for col in ["pending", "stop", "yes", "send"]:
         fig.add_trace(
             go.Bar(
                 x=df["date"],
@@ -94,7 +93,7 @@ def create_graph_status_sms():
             gridcolor="LightGrey",
             linecolor="LightGrey",
         ),
-        barmode="stack",
+        # barmode="stack",
         paper_bgcolor="rgba(255, 255, 255, 0)",
         plot_bgcolor="rgba(255, 255, 255, 0)",
     )
