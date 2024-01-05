@@ -154,6 +154,7 @@ class ScraperBase:
             console.log(f"Succeeded to insert case {case.get('case_id')}")
         except Exception as e:
             # Save the case in a file for a manual review
+            self.ensure_folder("cases_to_review")
             with open(
                 f"cases_to_review/{case.get('case_id')}.json",
                 "w",

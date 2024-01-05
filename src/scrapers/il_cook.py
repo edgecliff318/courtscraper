@@ -58,9 +58,7 @@ class IlCook(ScraperBase):
         self.search_by = search_by or "Courtroom"
         self.search_filter = search_filter or None
 
-    def _get_id(self, url_path):
-        query_params = parse_qs(urlparse(url_path).query)
-        return query_params.get("id", [None])[0]
+    
 
     async def get_case_details(self, page, url: str) -> dict:
         id = self._get_id(url)

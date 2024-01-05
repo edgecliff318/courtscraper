@@ -12,14 +12,26 @@ from src.commands import leads as leads_commands
 from src.components.toast import build_toast
 from src.core.config import get_settings
 from src.services import messages as messages_service
+from src.services.settings import  get_settings as db_settings
+from src.db import db
+
 
 logger = logging.Logger(__name__)
-settings = get_settings()
+# settings = get_settings()
 
 
-@callback(Output("switch-settings-txt", "children"), Input("switch-automated_message", "checked"))
+@callback(
+    Output("switch-automated_message", "checked"),
+    Output("switch-settings-txt", "children"),
+    Input("switch-automated_message", "checked")
+    )
 def settings(checked):
-    return f"Automated Messaging {'Run' if checked else 'Stop'} "
+    ctx = dash.callback_context
+    trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
+    if trigger_id == "switch-automated_message":
+        db.collection("settings").document("main").update({"automated_messaging": checked})
+    settings_sms = db_settings("main")
+    return  settings_sms.automated_messaging ,f"Automated Messaging {'Run' if settings_sms.automated_messaging else 'Stop'} "
 
 def get_data_status_sms():
     date_range = pd.date_range(start="2023-01-01", end="2023-01-31", freq="D")
