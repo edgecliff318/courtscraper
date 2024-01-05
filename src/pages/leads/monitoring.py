@@ -12,7 +12,6 @@ dash.register_page(__name__, class_icon="ti ti-phone", order=3)
 import plotly.graph_objects as go
 
 import dash_mantine_components as dmc
-from dash import html, Output, Input, callback
 
 
 def layout():
@@ -25,7 +24,7 @@ def layout():
                             dbc.CardBody(
                                 [
                                     monitoring_controls,
-                                    html.Div(id="monitoring-status"),
+                                    # html.Div(id="monitoring-status"),
                                 ]
                             ),
                         ),
@@ -50,8 +49,33 @@ def layout():
                                                 ),
                                                 mb=10,
                                             ),
-                                            dmc.Button(
-                                                "Click Me!", id="graph-skeleton-button"
+                                        ]
+                                    )
+                                ]
+                            ),
+                        ),
+                        width=12,
+                        className="mb-2",
+                    ),
+                ]
+            ),
+            
+            
+        #most recent error
+        dbc.Row(
+                [
+                    dbc.Col(
+                        dbc.Card(
+                            dbc.CardBody(
+                                [
+                                    html.Div(
+                                        [
+                                            dmc.Skeleton(
+                                                visible=False,
+                                                children=html.Div(
+                                                    id="graph-container-most-recent-error",
+                                                ),
+                                                mb=10,
                                             ),
                                         ]
                                     )
@@ -63,5 +87,14 @@ def layout():
                     ),
                 ]
             ),
+        
+        
+        
+        
+        
+        
+        
+        
+        
         ]
     )
