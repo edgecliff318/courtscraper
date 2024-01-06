@@ -19,6 +19,13 @@ class Account(BaseModel):
 class Settings(BaseModel):
     start_date: int
     end_date: int
+    automated_message: Optional[str] = None
+    automated_message_frequency: Optional[int] = None
+    automated_message_period: Optional[list] = None
+    automated_messaging: Optional[bool]  = False
+
+    
+    
 
     # set start_date to 1 if not set
     @validator("start_date")

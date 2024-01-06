@@ -4,16 +4,181 @@ import dash
 import dash_ag_grid as dag
 import dash_bootstrap_components as dbc
 import pandas as pd
-from dash import Input, Output, callback, html
+import numpy as np
+from dash import Input, Output, callback, html, dcc
+import dash_mantine_components as dmc
+import plotly.graph_objects as go
 
 from src.commands import leads as leads_commands
 from src.components.toast import build_toast
-from src.core.config import get_settings
 from src.services import messages as messages_service
+from src.services.settings import get_settings as db_settings
+from src.db import db
+
 
 logger = logging.Logger(__name__)
 
-settings = get_settings()
+
+@callback(
+    Output("switch-automated_message", "checked"),
+    Output("switch-settings-txt", "children"),
+    Input("switch-automated_message", "checked"),
+)
+def settings(checked):
+    ctx = dash.callback_context
+    trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
+    if trigger_id == "switch-automated_message":
+        db.collection("settings").document("main").update(
+            {"automated_messaging": checked}
+        )
+    settings_sms = db_settings("main")
+    return (
+        settings_sms.automated_messaging,
+        f"Automated Messaging {'Run' if settings_sms.automated_messaging else 'Stop'} ",
+    )
+
+
+def get_data_status_sms():
+    # TODO: Read from DB from firebase 
+    date_range = pd.date_range(start="2023-01-01", end="2023-01-31", freq="D")
+    data = {
+        "date": date_range,
+        "stop": np.random.randint(1, 15, size=len(date_range)),
+        "yes": np.random.randint(1, 15, size=len(date_range)),
+        "pending": np.random.randint(1, 15, size=len(date_range)),
+        "send": np.random.randint(1, 15, size=len(date_range)),
+    }
+
+    df = pd.DataFrame(data)
+    return df
+
+
+def get_data_most_recent_error():
+    # TODO: Read from DB from firebase 
+    error_labels = [f"Error {i+1}" for i in range(15)]
+    error_counts = np.random.randint(1, 50, size=15)
+
+    df = pd.DataFrame({"Error": error_labels, "Count": error_counts})
+    df = df.sort_values(by="Count", ascending=True)
+    return df
+
+
+def create_graph_status_sms():
+    df = get_data_status_sms()
+    colors_map = {
+        "pending": "grey",
+        "stop": "#FF9F43",
+        "yes": "#28C76F",
+        "send": "#F8795D",
+    }
+    fig = go.Figure()
+    for col in ["pending", "stop", "yes", "send"]:
+        fig.add_trace(
+            go.Bar(
+                x=df["date"],
+                y=df[col],
+                name=col.capitalize(),
+                marker_color=colors_map[col],
+            )
+        )
+
+    fig.update_layout(
+        title="Response Overview",
+        xaxis=dict(
+            title="Date",
+            tickfont_size=14,
+            showline=True,
+            showgrid=True,
+            gridcolor="LightGrey",
+            linecolor="LightGrey",
+        ),
+        yaxis=dict(
+            title="Number of Responses",
+            titlefont_size=16,
+            tickfont_size=14,
+            showline=True,
+            showgrid=True,
+            gridcolor="LightGrey",
+            linecolor="LightGrey",
+        ),
+        barmode="stack",
+        paper_bgcolor="rgba(255, 255, 255, 0)",
+        plot_bgcolor="rgba(255, 255, 255, 0)",
+    )
+
+    return dcc.Graph(figure=fig)
+
+
+def create_graph_most_recent_error():
+    df = get_data_most_recent_error()
+    max_count = df["Count"].max()
+    color_scale = [
+        "#FFEDA0",
+        "#FED976",
+        "#FEB24C",
+        "#FD8D3C",
+        "#FC4E2A",
+        "#E31A1C",
+        "#BD0026",
+        "#800026",
+    ]
+
+    df["color"] = df["Count"].apply(
+        lambda x: color_scale[int((len(color_scale) - 1) * x / max_count)]
+    )
+
+    y_values = list(range(1, len(df["Error"]) + 1))
+
+    fig = go.Figure()
+
+    fig.add_trace(
+        go.Bar(
+            y=y_values,
+            x=df["Count"],
+            name="Error",
+            marker_color=df["color"],
+            text=df["Error"],
+            textposition="inside",
+            orientation="h",
+            width=0.8,
+        )
+    )
+
+    fig.update_layout(
+        title="Most Recent Errors",
+        yaxis=dict(title="Error Types", tickvals=y_values, tickfont_size=14),
+        xaxis=dict(
+            title="Count",
+            titlefont_size=16,
+            tickfont_size=14,
+            showline=True,
+            showgrid=True,
+            gridcolor="LightGrey",
+            linecolor="LightGrey",
+        ),
+        paper_bgcolor="rgba(255, 255, 255, 0)",
+        plot_bgcolor="rgba(255, 255, 255, 0)",
+    )
+
+    return dcc.Graph(figure=fig)
+
+
+@callback(
+    Output("graph-container-status-sms", "children"),
+    Input("monitoring-date-selector", "value"),
+    Input("monitoring-status-selector", "value"),
+)
+def graph_status_sms(value, direction):
+    return create_graph_status_sms()
+
+
+@callback(
+    Output("graph-container-most-recent-error", "children"),
+    Input("monitoring-date-selector", "value"),
+    Input("monitoring-status-selector", "value"),
+)
+def graph_most_recent_error(value, direction):
+    return create_graph_most_recent_error()
 
 
 @callback(
@@ -34,9 +199,7 @@ def render_status_msg(dates, direction):
         end_date=end_date,
         direction=direction,
     )
-    df = pd.DataFrame(
-        [interaction.model_dump() for interaction in interactions_list]
-    )
+    df = pd.DataFrame([interaction.model_dump() for interaction in interactions_list])
     cols = [
         "case_id",
         "creation_date",
@@ -71,9 +234,7 @@ def render_status_msg(dates, direction):
     df["creation_date"] = df["creation_date"].dt.tz_convert("US/Central")
 
     df.sort_values(by=["creation_date"], inplace=True, ascending=False)
-    df["creation_date"] = df["creation_date"].dt.strftime(
-        "%m/%d/%Y - %H:%M:%S"
-    )
+    df["creation_date"] = df["creation_date"].dt.strftime("%m/%d/%Y - %H:%M:%S")
     df = df.set_index("case_id")
     df = df.rename(
         columns={
@@ -158,15 +319,19 @@ def render_status_msg(dates, direction):
                                 ),
                                 html.Div(
                                     [
-                                        dbc.Button(
+                                        dmc.Button(
                                             "Remove ",
                                             id="cases-process",
-                                            className="card-title m-2",
+                                            color="dark",
+                                            size="sm",
+                                            className="m-1",
                                         ),
-                                        dbc.Button(
+                                        dmc.Button(
                                             "Resend",
                                             id="cases-process",
-                                            className="card-title m-2",
+                                            color="dark",
+                                            size="sm",
+                                            className="m-1",
                                         ),
                                     ],
                                     id="message-monitoring ",
