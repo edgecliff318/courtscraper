@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
 
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3 import Retry
 
 from src.core.config import get_settings
 from src.services import cases as cases_service
@@ -31,13 +33,19 @@ def add_lead_cloud_talk(lead):
         if case.arrest_date is not None:
             case_date = case.arrest_date.strftime("%Y-%m-%d")
         elif case.charges is not None and len(case.charges) > 0:
-            case_date = case.charges[0][
-                "charge_filingdate"
-            ]  # Format MM/DD/YYYY
+            case_charge = case.charges[0]
+
+            if case_charge.get("charge_filingdate") is not None:
+                case_date = case_charge.get("charge_filingdate")
+            elif case_charge.get("offense_date") is not None:
+                case_date = case_charge.get("offense_date")
+            else:
+                case_date = "None"
             # Update format
-            case_date = datetime.strptime(case_date, "%m/%d/%Y").strftime(
-                "%Y-%m-%d"
-            )
+            if case_date != "None":
+                case_date = datetime.strptime(case_date, "%m/%d/%Y").strftime(
+                    "%Y-%m-%d"
+                )
 
         case_location = (
             case.where_held if case.where_held is not None else case.location
@@ -88,7 +96,7 @@ def add_lead_cloud_talk(lead):
             auth=(settings.CLOUDTALK_API_KEY, settings.CLOUDTALK_API_SECRET),
         )
 
-        if response.status_code == 201:
+        if response.status_code == 201 or response.status_code == 200:
             print(f"Contact added for {payload.get('name')}")
             leads_service.patch_lead(lead.case_id, cloudtalk_upload=True)
 
@@ -99,20 +107,6 @@ def add_lead_cloud_talk(lead):
 
 
 def add_website_lead(lead: dict, tag=None):
-    fields = {
-        "id",
-        "phone",
-        "violation",
-        "court",
-        "accidentCheckbox",
-        "commercialDriverLicence",
-        "ticket_img",
-        "user_id",
-        "cloudtalk_upload",
-        "state",
-        "status",
-        "creation_date",
-    }
     url = "https://my.cloudtalk.io/api/"
 
     headers = {
@@ -222,8 +216,20 @@ def process_redudant_numbers():
         "dwi": 5,
         "major": 4,
         "minor": 3,
-        "other": 2,
+        "leads": 2,
+        "other": 1,
     }
+
+    retry_strategy = Retry(
+        total=3,
+        status_forcelist=[429],
+        method_whitelist=["GET"],
+        backoff_factor=2,
+    )
+    adapter = HTTPAdapter(max_retries=retry_strategy)
+    http = requests.Session()
+    http.mount("https://", adapter)
+    http.mount("http://", adapter)
 
     for phone, contacts_items in contacts_by_phone.items():
         if len(contacts_items) > 1:
@@ -231,8 +237,7 @@ def process_redudant_numbers():
             # Get the tags for each contact and keep the one with the highest priority tag
             contact_order = {}
             for contact in contacts_items:
-                # https://my.cloudtalk.io/api/contacts/show/{contactId}.json
-                contact_full = requests.request(
+                contact_full = http.request(
                     "GET",
                     url
                     + f"contacts/show/{contact.get('Contact').get('id')}.json",

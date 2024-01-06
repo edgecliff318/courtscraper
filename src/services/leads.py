@@ -122,6 +122,8 @@ def get_last_lead(
     limit=1,
     search_limit=1000,
 ):
+    search_limit = int(search_limit)
+    limit = int(limit)
     leads_list = db.collection("leads").select(
         [f for f in leads.Lead.__fields__.keys() if f != "report"]
     )
