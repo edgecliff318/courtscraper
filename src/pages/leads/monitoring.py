@@ -13,6 +13,14 @@ dash.register_page(__name__, class_icon="ti ti-phone", order=3)
 
 
 def layout():
+    
+    
+    summary_card = html.Div(
+        dmc.Skeleton(
+            visible=False,
+            children=html.Div(id="messages-summary"),
+        )
+    )
     return html.Div(
         [
             dbc.Row(
@@ -31,6 +39,19 @@ def layout():
                     ),
                 ]
             ),
+            dbc.Row(
+                [
+                    dbc.Col(
+                                                            summary_card
+,
+                        width=12,
+                        className="mb-2",
+                    ),
+                ]
+            ),
+            
+            
+            
             html.Div(id="message-monitoring"),
             dbc.Row(
                 [

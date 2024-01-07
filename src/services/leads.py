@@ -9,24 +9,15 @@ logger = logging.getLogger(__name__)
 
 
 def get_leads(
-    court_code_list=None,
     start_date=None,
     end_date=None,
-    status=None,
     source=None,
 ):
     # Exclude the field "report" from the collection schema
     leads_list = db.collection("leads").select(
         [f for f in leads.Lead.model_fields.keys() if f != "report"]
     )
-    if court_code_list is not None and court_code_list:
-        if not isinstance(court_code_list, list):
-            court_code_list = [
-                court_code_list,
-            ]
-        leads_list = db.collection("leads").where(
-            "court_code", "in", court_code_list
-        )
+   
 
     if start_date is not None:
         if source == "website":
@@ -52,11 +43,7 @@ def get_leads(
                 end_date = pd.to_datetime(end_date)
             leads_list = leads_list.where("case_date", "<=", end_date)
 
-    if status is not None:
-        leads_list = leads_list.where("status", "==", status)
-
-    if source is not None:
-        leads_list = leads_list.where("source", "==", source)
+    
 
     leads_list = leads_list.stream()
 
