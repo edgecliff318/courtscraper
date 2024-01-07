@@ -12,70 +12,10 @@ import plotly.graph_objects as go
 from src.commands import leads as leads_commands
 from src.components.toast import build_toast
 from src.services import messages as messages_service
+from src.services import leads
+from src.services import messages
 from src.services.settings import get_settings as db_settings
 from src.db import db
-
-
-
-
-logger = logging.Logger(__name__)
-
-def process_date(date):
-    try:
-        creation_date = pd.to_datetime(date, unit="ms")
-    except Exception as e:
-        logger.error(f"Error parsing creation_date: {e}")
-        creation_date = pd.to_datetime(date)
-
-    # UTC to Central time
-    creation_date = creation_date.tz_convert("America/Chicago")
-    creation_date = creation_date.strftime("%Y-%m-%d")
-
-
-    return creation_date
-def fetch_messages_status():  #start_date, end_date):
-     # Fields selection
-    lead_fields = {
-        "id",
-        "case_id",
-        "status",
-    }
-    message_fields = {
-        "id",
-        "case_id",
-        "direction",
-        "status",
-        "creation_date",
-    }
-    # messages_response = messages.get_interactions_filtered(
-    #     start_date="2023-09-25",
-    #     end_date="2024-09-26",
-    # )
-    # messages_list = []
-    # for message in messages_response:
-    #     message_data =message.model_dump(include=message_fields)
-    #     lead = leads.get_single_lead(message_data.get("case_id"))
-    #     if lead:
-    #         lead = lead.model_dump(include=lead_fields)
-    #         message_data['status'] = lead.get('status')
-    #     messages_list.append(message_data)
-    # df = pd.DataFrame(messages_list)
-    df = pd.read_csv("leads.csv")
-    def map_status(status):
-        if status in ['stop', 'yes']:
-            return status
-        else:
-            return 'other'
-    df["date"] = df["creation_date"].apply(process_date)
-    df["status"] = df["status"].map(map_status)
-    return df
-
-   
-
-
-        
-    
-
 
 
 COLORS = {
@@ -89,6 +29,59 @@ COLORS = {
     "green": "#28C76F",
     "teal": "#20C997",
 }
+
+
+logger = logging.Logger(__name__)
+
+
+def process_date(date):
+    try:
+        creation_date = pd.to_datetime(date).tz_convert("America/Chicago")
+        creation_date = creation_date.strftime("%Y-%m-%d")
+    except Exception as e:
+        logger.error(f"Error parsing creation_date: {e}")
+        creation_date = None
+
+    return creation_date
+
+def fetch_messages_status(start_date, end_date):
+    # Fields selection
+    lead_fields = {
+        "id",
+        "case_id",
+        "status",
+    }
+    message_fields = {
+        "id",
+        "case_id",
+        "direction",
+        "status",
+        "creation_date",
+    }
+    messages_response = messages.get_interactions_filtered(
+        start_date="2023-09-25",
+        end_date="2024-09-26",
+    )
+    messages_list = []
+    for message in messages_response:
+        message_data =message.model_dump(include=message_fields)
+        lead = leads.get_single_lead(message_data.get("case_id"))
+        if lead:
+            lead = lead.model_dump(include=lead_fields)
+            message_data['status'] = lead.get('status')
+        messages_list.append(message_data)
+    df = pd.DataFrame(messages_list)
+
+    def map_status(status):
+        if status in ["stop", "yes"]:
+            return status
+        else:
+            return "other"
+
+    df["date"] = df["creation_date"].apply(process_date)
+    df["status"] = df["status"].map(map_status)
+    return df
+
 
 def get_base_layout():
     margin_top = 100
@@ -115,6 +108,8 @@ def get_base_layout():
         legend=legend,
     )
     return layout
+
+
 def render_stats_card(kpi_name, kpi_value_formatted, kpi_unit):
     return dmc.Card(
         children=dmc.Stack(
@@ -148,9 +143,9 @@ def render_stats_card(kpi_name, kpi_value_formatted, kpi_unit):
     )
 
 
-def render_message_summary(df: pd.DataFrame):    
+def render_message_summary(df: pd.DataFrame):
     status_counts = df.status.value_counts().to_dict()
-    status_counts['total'] = sum(status_counts.values())
+    status_counts["total"] = sum(status_counts.values())
 
     return dmc.Grid(
         [
@@ -178,7 +173,7 @@ def render_message_summary(df: pd.DataFrame):
                 ),
                 md=3,
             ),
-             dmc.Col(
+            dmc.Col(
                 render_stats_card(
                     "Total message other",
                     f"{status_counts.get('other', 0):,}",
@@ -188,21 +183,18 @@ def render_message_summary(df: pd.DataFrame):
             ),
         ]
     )
-    
 
 
-
-
-def create_graph_status_sms(df: pd.DataFrame)-> dcc.Graph:
+def create_graph_status_sms(df: pd.DataFrame) -> dcc.Graph:
     colors_map = {
-        "other": "grey",
+        "other": "#6610F2",
         "stop": "#FF9F43",
         "yes": "#28C76F",
-        "total": "#F8795D",
+        "total": "#053342",
     }
-    
+
     fig = go.Figure()
-    for col in ['stop', 'yes', 'other' ,'total']:
+    for col in ["stop", "yes", "other", "total"]:
         fig.add_trace(
             go.Bar(
                 x=df["date"],
@@ -212,7 +204,6 @@ def create_graph_status_sms(df: pd.DataFrame)-> dcc.Graph:
             )
         )
 
-   
     fig.update_layout(
         get_base_layout(),
         title="Response Overview",
@@ -226,7 +217,7 @@ def create_graph_most_recent_error():
     df = pd.DataFrame({"Error": error_labels, "Count": error_counts})
     df = df.sort_values(by="Count", ascending=True)
     max_count = df["Count"].max()
-    
+
     color_scale = [
         "#FFEDA0",
         "#FED976",
@@ -274,20 +265,18 @@ def create_graph_most_recent_error():
     Input("monitoring-date-selector", "value"),
     Input("monitoring-status-selector", "value"),
 )
-def graph_status_sms(value, direction):
-    
-    df = fetch_messages_status()
-    pivot_df = df.pivot_table(index='date', columns='status', values='case_id', aggfunc='count')
+def graph_status_sms(dates, direction):
+    (start_date, end_date) = dates
+    df = fetch_messages_status(start_date, end_date)
+    pivot_df = df.pivot_table(
+        index="date", columns="status", values="case_id", aggfunc="count"
+    )
     pivot_df = pivot_df.fillna(0)
-    pivot_df['total'] = pivot_df.sum(axis=1)
+    pivot_df["total"] = pivot_df.sum(axis=1)
     pivot_df = pivot_df.reset_index()
-    pivot_df = pivot_df[['date', 'stop', 'yes', 'other' ,'total']]
-    
-    
-    
-    return [create_graph_status_sms(pivot_df),
-            render_message_summary(df)
-    ]
+    pivot_df = pivot_df[["date", "stop", "yes", "other", "total"]]
+
+    return [create_graph_status_sms(pivot_df), render_message_summary(df)]
 
 
 @callback(
@@ -297,7 +286,6 @@ def graph_status_sms(value, direction):
 )
 def graph_most_recent_error(value, direction):
     return create_graph_most_recent_error()
-
 
 
 @callback(
@@ -317,8 +305,7 @@ def settings(checked):
         settings_sms.automated_messaging,
         f"Automated Messaging {'Run' if settings_sms.automated_messaging else 'Stop'} ",
     )
-    
-    
+
 
 @callback(
     Output("message-monitoring", "children"),
