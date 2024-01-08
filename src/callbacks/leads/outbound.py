@@ -3,10 +3,12 @@ import logging
 import dash.html as html
 import dash_ag_grid as dag
 import dash_bootstrap_components as dbc
+import dash_mantine_components as dmc
 import pandas as pd
 from dash import Input, Output, callback, html
 import dash_mantine_components as dmc
 
+from src.components.cards import render_stats_card
 from src.core.config import get_settings
 from src.core.format import humanize_phone
 from src.services import leads
@@ -14,6 +16,47 @@ from src.services import leads
 logger = logging.Logger(__name__)
 
 settings = get_settings()
+
+
+def render_inbound_summary(data: dict):
+    return dmc.Grid(
+        [
+            dmc.Col(
+                render_stats_card(
+                    "New Leads",
+                    f"{data.get('leads_added_today'):,}",
+                    "leads",
+                ),
+                md=4,
+            ),
+            dmc.Col(
+                render_stats_card(
+                    "Not Contacted Leads",
+                    f"{data.get('not_contacted'):,}",
+                    "leads",
+                ),
+                md=4,
+            ),
+            dmc.Col(
+                render_stats_card(
+                    "Converted Leads",
+                    f"{data.get('leads_converted'):,}",
+                    "leads",
+                ),
+                md=4,
+            ),
+        ]
+    )
+
+
+@callback(
+    Output("leads-summary", "children"),
+    Input("url", "pathname"),
+)
+def render_leads_summary(pathname):
+    lead_service = leads.LeadsService()
+    leads_data = lead_service.get_leads_summary()
+    return render_inbound_summary(leads_data)
 
 
 @callback(

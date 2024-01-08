@@ -2,6 +2,7 @@ import logging
 import typing as t
 from datetime import datetime
 
+from google.cloud.firestore_v1 import aggregation
 from google.cloud.firestore_v1.base_query import And, FieldFilter, Or
 from google.cloud.firestore_v1.field_path import FieldPath
 from pydantic import BaseModel
@@ -129,3 +130,14 @@ class BaseService:
             self.serializer(**self.get_dict(item), id=item.id)
             for item in items
         ]
+
+    def count_items(self, filters=None, **kwargs):
+        filters = filters or self.parse_filters(kwargs)
+        query = db.collection(self.collection).where(filter=filters)
+        aggregate_query = aggregation.AggregationQuery(query)
+        outputs = aggregate_query.count(alias="count").get()
+
+        for output in outputs:
+            return output[0].value
+
+        return None

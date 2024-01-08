@@ -61,7 +61,6 @@ class Lead(BaseModel):
     # Fields for the inbound leads
     state: Optional[str] = None
     violation: Optional[dict] = None
-    creation_date: Optional[datetime] = None
     court: Optional[dict] = None
     accidentCheckbox: Optional[bool] = False
     commercialDriverLicence: Optional[bool] = False

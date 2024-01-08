@@ -22,6 +22,9 @@ def layout():
             html.Div(many_response_model("outbound")),
             
             dbc.Row(
+                id="leads-summary",
+            ),
+            dbc.Row(
                 [
                     dbc.Col(
                         dbc.Card(

@@ -1,7 +1,10 @@
 import logging
+from datetime import datetime
 
 import pandas as pd
+from google.cloud.firestore_v1.base_query import And, FieldFilter, Or
 
+from src.core.base import BaseService
 from src.db import db
 from src.models import leads
 
@@ -268,3 +271,63 @@ def insert_lead_from_case(case):
 
 def delete_lead(lead_id):
     db.collection("leads").document(lead_id).delete()
+
+
+class LeadsService(BaseService):
+    collection_name = "leads"
+    serializer = leads.Lead
+
+    def get_leads_summary(self):
+        # First timestamp of the day
+        start_date = (
+            datetime.now()
+            .replace(hour=0, minute=0, second=0, microsecond=0)
+            .timestamp()
+            * 1000
+        )
+        end_date = (
+            datetime.now()
+            .replace(hour=23, minute=59, second=59, microsecond=999)
+            .timestamp()
+            * 1000
+        )
+
+        filters_bases = [
+            FieldFilter("last_updated", ">=", start_date),
+            FieldFilter("last_updated", "<=", end_date),
+        ]
+
+        # Return dummy data
+
+        return {
+            "leads_added_today": 10,
+            "leads_not_contacted": 5,
+            "leads_converted": 2,
+        }
+
+        # Get all the leads for today
+        leads_added_today = self.count_items(
+            filters=And(filters=filters_bases)
+        )
+
+        # Get all the leads with a status not_contacted
+        leads_not_contacted = self.count_items(
+            filters=And(
+                filters=filters_bases
+                + [FieldFilter("status", "==", "not_contacted")]
+            )
+        )
+
+        # Get all the leads that were converted
+        leads_converted = self.count_items(
+            filters=And(
+                filters=filters_bases
+                + [FieldFilter("status", "==", "converted")]
+            )
+        )
+
+        return {
+            "leads_added_today": leads_added_today,
+            "leads_not_contacted": leads_not_contacted,
+            "leads_converted": leads_converted,
+        }
