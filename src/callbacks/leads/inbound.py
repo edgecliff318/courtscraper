@@ -10,6 +10,7 @@ import pandas as pd
 from dash import ALL, MATCH, Input, Output, callback, html
 from dash_iconify import DashIconify
 
+from src.components.cards import render_stats_card
 from src.connectors.cloudtalk import add_website_lead
 from src.core.config import get_settings
 from src.core.format import humanize_phone
@@ -44,38 +45,6 @@ def process_lead(lead):
     lead["creation_date"] = creation_date
 
     return lead
-
-
-def render_stats_card(kpi_name, kpi_value_formatted, kpi_unit):
-    return dmc.Card(
-        children=dmc.Stack(
-            [
-                dmc.Text(
-                    kpi_name,
-                    size="md",
-                    weight=600,
-                    color="dark",
-                ),
-                dmc.Group(
-                    [
-                        dmc.Title(
-                            kpi_value_formatted,
-                            order=1,
-                            color="indigo",
-                        ),
-                        dmc.Text(
-                            kpi_unit,
-                            weight=500,
-                            color="dark",
-                            mb=4,
-                        ),
-                    ],
-                    align="flex-end",
-                ),
-            ],
-            spacing="sm",
-        ),
-    )
 
 
 def render_inbound_summary(data: pd.DataFrame):
