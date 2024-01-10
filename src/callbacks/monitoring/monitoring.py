@@ -1,22 +1,21 @@
 import logging
+from os import error
 
 import dash
 import dash_ag_grid as dag
 import dash_bootstrap_components as dbc
-import pandas as pd
-import numpy as np
-from dash import Input, Output, callback, html, dcc
 import dash_mantine_components as dmc
+import numpy as np
+import pandas as pd
 import plotly.graph_objects as go
+from dash import Input, Output, callback, dcc, html
 
 from src.commands import leads as leads_commands
 from src.components.toast import build_toast
-from src.services import messages as messages_service
-from src.services import leads
-from src.services import messages
-from src.services.settings import get_settings as db_settings
 from src.db import db
-
+from src.services import leads, messages
+from src.services import messages as messages_service
+from src.services.settings import get_settings as db_settings
 
 COLORS = {
     "blue": "#2B8FB3",
@@ -44,42 +43,41 @@ def process_date(date):
 
     return creation_date
 
-def fetch_messages_status(start_date, end_date):
-    # Fields selection
-    lead_fields = {
-        "id",
-        "case_id",
-        "status",
-    }
-    message_fields = {
-        "id",
-        "case_id",
-        "direction",
-        "status",
-        "creation_date",
-    }
-    messages_response = messages.get_interactions_filtered(
-        start_date="2023-09-25",
-        end_date="2024-09-26",
-    )
-    messages_list = []
-    for message in messages_response:
-        message_data =message.model_dump(include=message_fields)
-        lead = leads.get_single_lead(message_data.get("case_id"))
-        if lead:
-            lead = lead.model_dump(include=lead_fields)
-            message_data['status'] = lead.get('status')
-        messages_list.append(message_data)
-    df = pd.DataFrame(messages_list)
 
-    def map_status(status):
-        if status in ["stop", "yes"]:
-            return status
+def fetch_messages_status(start_date, end_date):
+    messages_response = messages.get_interactions_filtered(
+        start_date=start_date,
+        end_date=end_date,
+    )
+
+    def map_status(message):
+        if message.direction == "outbound":
+            return "sent"
+        if message.message is not None:
+            if "stop" in message.message.lower():
+                return "stop"
+            elif "yes" in message.message.lower():
+                return "yes"
+            else:
+                return "other"
         else:
             return "other"
 
+    messages_list = [
+        {
+            "id": message.id,
+            "case_id": message.case_id,
+            "direction": message.direction,
+            "creation_date": message.creation_date,
+            "status": map_status(message),
+            "message_status": message.status,
+        }
+        for message in messages_response
+    ]
+
+    df = pd.DataFrame(messages_list)
+
     df["date"] = df["creation_date"].apply(process_date)
-    df["status"] = df["status"].map(map_status)
     return df
 
 
@@ -151,15 +149,15 @@ def render_message_summary(df: pd.DataFrame):
         [
             dmc.Col(
                 render_stats_card(
-                    "Total message send",
-                    f"{status_counts.get('total', 0):,}",
+                    "Total Messages Sent",
+                    f"{status_counts.get('sent', 0):,}",
                     "",
                 ),
                 md=3,
             ),
             dmc.Col(
                 render_stats_card(
-                    "Total message stop",
+                    "Stop Messages Received",
                     f"{status_counts.get('stop', 0):,}",
                     "",
                 ),
@@ -167,7 +165,7 @@ def render_message_summary(df: pd.DataFrame):
             ),
             dmc.Col(
                 render_stats_card(
-                    "Total message yes",
+                    "Yes Messages Received",
                     f"{status_counts.get('yes', 0):,}",
                     "",
                 ),
@@ -175,7 +173,7 @@ def render_message_summary(df: pd.DataFrame):
             ),
             dmc.Col(
                 render_stats_card(
-                    "Total message other",
+                    "Other Messages",
                     f"{status_counts.get('other', 0):,}",
                     "",
                 ),
@@ -190,19 +188,20 @@ def create_graph_status_sms(df: pd.DataFrame) -> dcc.Graph:
         "other": "#6610F2",
         "stop": "#FF9F43",
         "yes": "#28C76F",
-        "total": "#053342",
+        "sent": "#053342",
     }
 
     fig = go.Figure()
-    for col in ["stop", "yes", "other", "total"]:
-        fig.add_trace(
-            go.Bar(
-                x=df["date"],
-                y=df[col],
-                name=col.capitalize(),
-                marker_color=colors_map[col],
+    for col in ["stop", "yes", "other", "sent"]:
+        if col in df.columns:
+            fig.add_trace(
+                go.Bar(
+                    x=df["date"],
+                    y=df[col],
+                    name=col.capitalize(),
+                    marker_color=colors_map[col],
+                )
             )
-        )
 
     fig.update_layout(
         get_base_layout(),
@@ -211,12 +210,39 @@ def create_graph_status_sms(df: pd.DataFrame) -> dcc.Graph:
     return dcc.Graph(figure=fig)
 
 
-def create_graph_most_recent_error():
-    error_labels = [f"Error {i+1}" for i in range(15)]
-    error_counts = np.random.randint(1, 50, size=15)
-    df = pd.DataFrame({"Error": error_labels, "Count": error_counts})
-    df = df.sort_values(by="Count", ascending=True)
-    max_count = df["Count"].max()
+def create_graph_most_recent_error(start_date, end_date):
+    twilio_messages = leads_commands.get_twilio_messages(
+        from_date=start_date, to_date=end_date
+    )
+
+    df = pd.DataFrame(
+        [
+            {
+                # Twilio API
+                "account_sid": message.account_sid,
+                "date_created": message.date_created,
+                "date_updated": message.date_updated,
+                "date_sent": message.date_sent,
+                "direction": message.direction,
+                "error_code": message.error_code,
+                "error_message": message.error_message,
+                "price": message.price,
+                "status": message.status,
+            }
+            for message in twilio_messages
+        ]
+    )
+
+    df["date_created"] = pd.to_datetime(df["date_created"])
+    df["date_updated"] = pd.to_datetime(df["date_updated"])
+    df["date_sent"] = pd.to_datetime(df["date_sent"])
+
+    # Group by error code
+    error_counts = df.groupby("error_message").size()
+    error_counts = error_counts.reset_index()
+    error_counts.columns = ["Error", "Count"]
+    error_counts = error_counts.sort_values(by="Count", ascending=True)
+    max_count = error_counts["Count"].max()
 
     color_scale = [
         "#FFEDA0",
@@ -229,21 +255,21 @@ def create_graph_most_recent_error():
         "#800026",
     ]
 
-    df["color"] = df["Count"].apply(
+    error_counts["color"] = error_counts["Count"].apply(
         lambda x: color_scale[int((len(color_scale) - 1) * x / max_count)]
     )
 
-    y_values = list(range(1, len(df["Error"]) + 1))
+    y_values = list(range(1, len(error_counts["Error"]) + 1))
 
     fig = go.Figure()
 
     fig.add_trace(
         go.Bar(
             y=y_values,
-            x=df["Count"],
+            x=error_counts["Count"],
             name="Error",
-            marker_color=df["color"],
-            text=df["Error"],
+            marker_color=error_counts["color"],
+            text=error_counts["Error"],
             textposition="inside",
             orientation="h",
             width=0.8,
@@ -272,9 +298,20 @@ def graph_status_sms(dates, direction):
         index="date", columns="status", values="case_id", aggfunc="count"
     )
     pivot_df = pivot_df.fillna(0)
-    pivot_df["total"] = pivot_df.sum(axis=1)
+    columns = ["stop", "yes", "other", "sent"]
+
+    for col in columns:
+        if col not in pivot_df.columns:
+            pivot_df[col] = 0
+
     pivot_df = pivot_df.reset_index()
-    pivot_df = pivot_df[["date", "stop", "yes", "other", "total"]]
+    pivot_df = pivot_df[
+        [
+            c
+            for c in pivot_df.columns
+            if c in ["date", "stop", "yes", "other", "sent"]
+        ]
+    ]
 
     return [create_graph_status_sms(pivot_df), render_message_summary(df)]
 
@@ -284,8 +321,10 @@ def graph_status_sms(dates, direction):
     Input("monitoring-date-selector", "value"),
     Input("monitoring-status-selector", "value"),
 )
-def graph_most_recent_error(value, direction):
-    return create_graph_most_recent_error()
+def graph_most_recent_error(dates, direction):
+    (start_date, end_date) = dates
+
+    return create_graph_most_recent_error(start_date, end_date)
 
 
 @callback(
@@ -325,7 +364,9 @@ def render_status_msg(dates, direction):
         end_date=end_date,
         direction=direction,
     )
-    df = pd.DataFrame([interaction.model_dump() for interaction in interactions_list])
+    df = pd.DataFrame(
+        [interaction.model_dump() for interaction in interactions_list]
+    )
     cols = [
         "case_id",
         "creation_date",
@@ -360,7 +401,9 @@ def render_status_msg(dates, direction):
     df["creation_date"] = df["creation_date"].dt.tz_convert("US/Central")
 
     df.sort_values(by=["creation_date"], inplace=True, ascending=False)
-    df["creation_date"] = df["creation_date"].dt.strftime("%m/%d/%Y - %H:%M:%S")
+    df["creation_date"] = df["creation_date"].dt.strftime(
+        "%m/%d/%Y - %H:%M:%S"
+    )
     df = df.set_index("case_id")
     df = df.rename(
         columns={
