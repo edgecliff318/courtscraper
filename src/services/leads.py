@@ -52,12 +52,6 @@ def get_leads(
                 end_date = pd.to_datetime(end_date)
             leads_list = leads_list.where("case_date", "<=", end_date)
 
-    if status is not None:
-        leads_list = leads_list.where("status", "==", status)
-
-    if source is not None:
-        leads_list = leads_list.where("source", "==", source)
-
     leads_list = leads_list.stream()
 
     def get_lead_dict(lead):
