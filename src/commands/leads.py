@@ -258,14 +258,7 @@ def process_outbound_message(message):
 
 def sync_twilio(from_date: str = None, to_date: str = None):
     """Sync messages from Twilio."""
-    client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
-
-    if not from_date or not to_date:
-        from_date, to_date = get_default_dates()
-
-    messages_twilio = client.messages.list(
-        date_sent_after=from_date, date_sent_before=to_date
-    )
+    messages_twilio = get_twilio_messages(from_date, to_date)
 
     for message in track(messages_twilio):
         if not hasattr(message, "from_"):
@@ -276,6 +269,19 @@ def sync_twilio(from_date: str = None, to_date: str = None):
             process_inbound_message(message)
         elif "outbound" in str(message.direction).lower():
             process_outbound_message(message)
+
+
+def get_twilio_messages(from_date: str = None, to_date: str = None):
+    client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+
+    if not from_date or not to_date:
+        from_date, to_date = get_default_dates()
+
+    messages_twilio = client.messages.list(
+        date_sent_after=from_date, date_sent_before=to_date
+    )
+
+    return messages_twilio
 
 
 def analyze_leads():
