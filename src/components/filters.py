@@ -2,8 +2,8 @@ from datetime import datetime, timedelta
 
 import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
-from dash_iconify import DashIconify
 from dash import html
+from dash_iconify import DashIconify
 
 from src.components.inputs import generate_form_group
 from src.models import leads as leads_model
@@ -34,7 +34,9 @@ leads_controls = dbc.Row(
                 type="DateRangePicker",
                 persistence_type="session",
                 persistence=True,
-                start_date=(datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d"),
+                start_date=(datetime.now() - timedelta(days=1)).strftime(
+                    "%Y-%m-%d"
+                ),
                 end_date=datetime.now().strftime("%Y-%m-%d"),
             ),
             width=3,
@@ -73,6 +75,7 @@ def create_date_form_group():
         end_date=datetime.now().strftime("%Y-%m-%d"),
     )
 
+
 def create_interaction_form_group():
     return generate_form_group(
         label="Interaction",
@@ -89,55 +92,57 @@ def create_interaction_form_group():
         ],
     )
 
+
 def create_button(label, id, width, lg, xs):
     return dbc.Col(
-        dmc.Button(
-            label,
-            id=id,
-            color="dark",
-            size="sm",
-            className="mt-auto" 
-        ),
+        dmc.Button(label, id=id, color="dark", size="sm", className="mt-auto"),
         width=width,
         lg=lg,
         xs=xs,
-        className="d-flex" 
+        className="d-flex",
     )
+
 
 def create_switch():
     return html.Div(
-    [
-        dmc.Text("Automated Messaging", id="switch-settings-txt", weight=500,color="dark"),
-        dmc.Space(h=10),
-        dmc.Switch(
-            id="switch-automated_message", 
-        thumbIcon=DashIconify(
-            icon="mdi:workflow", 
-            width=16, 
-            color=dmc.theme.DEFAULT_COLORS["teal"][5]
-        ),
-        size="md",
-        color="teal",
-        checked=True,
-    ),
-        
-    ]
-)
+        [
+            dmc.Text(
+                "Automated Messaging",
+                id="switch-settings-txt",
+                weight=500,
+                color="dark",
+            ),
+            dmc.Space(h=10),
+            dmc.Switch(
+                id="switch-automated_message",
+                thumbIcon=DashIconify(
+                    icon="mdi:workflow",
+                    width=16,
+                    color=dmc.theme.DEFAULT_COLORS["teal"][5],
+                ),
+                size="md",
+                color="teal",
+                checked=True,
+            ),
+        ]
+    )
 
 
-
-
-    
 monitoring_controls = dbc.Row(
     [
         dbc.Col(create_date_form_group(), width=3, xs=12, lg=3),
         dbc.Col(create_interaction_form_group(), width=2, xs=12, lg=2),
         create_button("Monitoring", "monitoring-button", 1, 1, 6),
         create_button("Refresh", "monitoring-refresh-button", 1, 1, 6),
-        dbc.Col(create_switch(), width=2, lg=2, xs=12, className="d-flex align-items-center")
-
+        dbc.Col(
+            create_switch(),
+            width=2,
+            lg=2,
+            xs=12,
+            className="d-flex align-items-left",
+        ),
     ],
-    justify="center"  
+    justify="center",
 )
 
 

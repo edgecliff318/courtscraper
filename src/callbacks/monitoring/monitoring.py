@@ -228,10 +228,14 @@ def create_graph_most_recent_error(start_date, end_date):
                 "error_message": message.error_message,
                 "price": message.price,
                 "status": message.status,
+                "from_": message.from_,
+                "to": message.to,
             }
             for message in twilio_messages
         ]
     )
+
+    df["error_message"].fillna("No Error", inplace=True)
 
     df["date_created"] = pd.to_datetime(df["date_created"])
     df["date_updated"] = pd.to_datetime(df["date_updated"])
