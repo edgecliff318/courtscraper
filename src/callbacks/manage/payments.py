@@ -12,16 +12,38 @@ settings = get_settings()
 
 
 @callback(
+    Output("case-manage-payments-price", "value"),
     Output("case-manage-payments-price", "data"),
-    Input("case-manage-payments-products", "value"),
+    Input("case-manage-payments-price", "data"),
+    State("case-manage-payments-price", "value"),
+    State("case-manage-payments-products", "value"),
 )
-def case_manage_payments_price(product_id):
+def case_manage_payments_price_create(price_list, price_selected, product_id):
     payments_service = payments_connector.PaymentService()
+
+    if (price_selected is None or "price_" in str(price_selected)) and (
+        price_list is not None or price_list
+    ):
+        return dash.no_update, dash.no_update
+
+    if price_selected is not None:
+        if "price_" not in str(price_selected):
+            # Create the price
+            payments_service = payments_connector.PaymentService()
+            price = payments_service.create_price(
+                product_id=product_id,
+                amount=int(price_selected) * 100,
+            )
+
+            price_selected = price["id"]
+
     prices = payments_service.get_prices(product_id)
-    return [
+    prices_outputs = [
         {"label": f'$ {str(price["unit_amount"]/100)}', "value": price["id"]}
         for price in prices
     ]
+
+    return price_selected, prices_outputs
 
 
 @callback(
