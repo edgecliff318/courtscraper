@@ -35,13 +35,22 @@ class Settings(BaseSettings):
 
     # Root Path
     # ROOT_PATH: pathlib.Path = pathlib.Path(__file__).parent.parent.parent
-    ROOT_PATH: ClassVar[pathlib.Path] = pathlib.Path(os.getenv("ROOT_PATH", pathlib.Path(__file__).parent.parent.parent))
+    ROOT_PATH: ClassVar[pathlib.Path] = pathlib.Path(
+        os.getenv("ROOT_PATH", pathlib.Path(__file__).parent.parent.parent)
+    )
 
-    DATA_PATH: pathlib.Path = pathlib.Path(os.getenv("DATA_PATH", ROOT_PATH.joinpath("data"))).resolve()
-    CONFIG_PATH: pathlib.Path = pathlib.Path(os.getenv("CONFIG_PATH", ROOT_PATH.joinpath("configuration"))).resolve()
-    UPLOAD_PATH: pathlib.Path = pathlib.Path(os.getenv("UPLOAD_PATH", ROOT_PATH.joinpath("data", "upload"))).resolve()
-    OUTPUT_PATH: pathlib.Path = pathlib.Path(os.getenv("OUTPUT_PATH", ROOT_PATH.joinpath("data", "output"))).resolve()
-
+    DATA_PATH: pathlib.Path = pathlib.Path(
+        os.getenv("DATA_PATH", ROOT_PATH.joinpath("data"))
+    ).resolve()
+    CONFIG_PATH: pathlib.Path = pathlib.Path(
+        os.getenv("CONFIG_PATH", ROOT_PATH.joinpath("configuration"))
+    ).resolve()
+    UPLOAD_PATH: pathlib.Path = pathlib.Path(
+        os.getenv("UPLOAD_PATH", ROOT_PATH.joinpath("data", "upload"))
+    ).resolve()
+    OUTPUT_PATH: pathlib.Path = pathlib.Path(
+        os.getenv("OUTPUT_PATH", ROOT_PATH.joinpath("data", "output"))
+    ).resolve()
 
     # Template
     TEMPLATE: str = os.getenv("TEMPLATE", "plotly")

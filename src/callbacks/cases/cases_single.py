@@ -52,7 +52,11 @@ def send_message(case_id, sms_button, sms_message, phone, media_enabled):
         if not error:
             try:
                 message = messages.send_message(
-                    case_id, sms_message, phone, media_enabled=media_enabled
+                    case_id,
+                    sms_message,
+                    phone,
+                    media_enabled=media_enabled,
+                    force_send=True,
                 )
                 toast = build_toast(
                     f"Message sent succesfully {message}",
