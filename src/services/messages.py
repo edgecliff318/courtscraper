@@ -15,6 +15,8 @@ from src.core.config import get_settings
 from src.db import bucket, db
 from src.models import messages
 from src.services import cases
+from src.services import leads as leads_service
+from src.services import settings as settings_service
 from src.services.emails import GmailConnector
 
 console = Console()
@@ -214,6 +216,26 @@ def get_email_from_phone(phone, carrier):
         return None
 
 
+def get_sender_phone(case_id):
+    logger.info(f"Getting sender phone for case {case_id}")
+    lead = leads_service.get_single_lead(case_id=case_id)
+    account_settings = settings_service.get_settings("main")
+
+    state = None
+    if lead is not None:
+        state = lead.state
+
+    if state is None:
+        state = "MO"
+
+    send_from = account_settings.automated_messaging_mapping.get(
+        state, account_settings.automated_messaging_mapping.get("default")
+    )
+    logger.info(f"Using sender phone {send_from} for case {case_id} - {state}")
+
+    return send_from
+
+
 def send_message(
     case_id,
     sms_message,
@@ -254,6 +276,7 @@ def send_message(
             body=sms_message,
             media_url=media_url,
             to=phone,
+            from_=get_sender_phone(case_id),
         )
 
         if twilio_message is None:

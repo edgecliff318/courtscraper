@@ -26,7 +26,7 @@ class PaymentService:
         )
         return product
 
-    def create_price(self, product_id, amount, currency):
+    def create_price(self, product_id, amount, currency="usd"):
         price = stripe.Price.create(
             product=product_id,
             unit_amount=amount,
@@ -54,7 +54,7 @@ class PaymentService:
         prices = stripe.Price.list(product=product_id)
         return prices.data
 
-    def send_invoice(self, customer_id, product_id, price_id):
+    def create_invoice(self, customer_id, product_id, price_id):
         # Create an Invoice
         invoice = stripe.Invoice.create(
             customer=customer_id,
@@ -69,8 +69,10 @@ class PaymentService:
             quantity=1,
             invoice=invoice.id,
         )
-        # Send the Invoice
-        invoice = stripe.Invoice.send_invoice(invoice.id)
+
+        # Get the link
+        invoice = stripe.Invoice.finalize_invoice(invoice.id)
+
         return invoice
 
     def get_payment_history(self, customer_id):
