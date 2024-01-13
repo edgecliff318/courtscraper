@@ -141,8 +141,9 @@ monitoring_controls = dbc.Row(
             xs=12,
             className="d-flex align-items-left",
         ),
+        
     ],
-    justify="center",
+    justify="left",
 )
 
 

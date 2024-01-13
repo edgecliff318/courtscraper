@@ -8,7 +8,7 @@ import dash_mantine_components as dmc
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
-from dash import Input, Output, callback, dcc, html
+from dash import Input, Output, callback, dcc, html ,State ,ctx
 
 from src.commands import leads as leads_commands
 from src.components.toast import build_toast
@@ -16,6 +16,11 @@ from src.db import db
 from src.services import leads, messages
 from src.services import messages as messages_service
 from src.services.settings import get_settings as db_settings
+from src.components.conversation import messaging_template
+
+import dash_mantine_components as dmc
+from dash import dcc, html
+from dash_iconify import DashIconify
 
 COLORS = {
     "blue": "#2B8FB3",
@@ -289,46 +294,46 @@ def create_graph_most_recent_error(start_date, end_date):
     return dcc.Graph(figure=fig)
 
 
-@callback(
-    Output("graph-container-status-sms", "children"),
-    Output("messages-summary", "children"),
-    Input("monitoring-date-selector", "value"),
-    Input("monitoring-status-selector", "value"),
-)
-def graph_status_sms(dates, direction):
-    (start_date, end_date) = dates
-    df = fetch_messages_status(start_date, end_date)
-    pivot_df = df.pivot_table(
-        index="date", columns="status", values="case_id", aggfunc="count"
-    )
-    pivot_df = pivot_df.fillna(0)
-    columns = ["stop", "yes", "other", "sent"]
+# @callback(
+#     Output("graph-container-status-sms", "children"),
+#     Output("messages-summary", "children"),
+#     Input("monitoring-date-selector", "value"),
+#     Input("monitoring-status-selector", "value"),
+# )
+# def graph_status_sms(dates, direction):
+#     (start_date, end_date) = dates
+#     df = fetch_messages_status(start_date, end_date)
+#     pivot_df = df.pivot_table(
+#         index="date", columns="status", values="case_id", aggfunc="count"
+#     )
+#     pivot_df = pivot_df.fillna(0)
+#     columns = ["stop", "yes", "other", "sent"]
 
-    for col in columns:
-        if col not in pivot_df.columns:
-            pivot_df[col] = 0
+#     for col in columns:
+#         if col not in pivot_df.columns:
+#             pivot_df[col] = 0
 
-    pivot_df = pivot_df.reset_index()
-    pivot_df = pivot_df[
-        [
-            c
-            for c in pivot_df.columns
-            if c in ["date", "stop", "yes", "other", "sent"]
-        ]
-    ]
+#     pivot_df = pivot_df.reset_index()
+#     pivot_df = pivot_df[
+#         [
+#             c
+#             for c in pivot_df.columns
+#             if c in ["date", "stop", "yes", "other", "sent"]
+#         ]
+#     ]
 
-    return [create_graph_status_sms(pivot_df), render_message_summary(df)]
+#     return [create_graph_status_sms(pivot_df), render_message_summary(df)]
 
 
-@callback(
-    Output("graph-container-most-recent-error", "children"),
-    Input("monitoring-date-selector", "value"),
-    Input("monitoring-status-selector", "value"),
-)
-def graph_most_recent_error(dates, direction):
-    (start_date, end_date) = dates
+# @callback(
+#     Output("graph-container-most-recent-error", "children"),
+#     Input("monitoring-date-selector", "value"),
+#     Input("monitoring-status-selector", "value"),
+# )
+# def graph_most_recent_error(dates, direction):
+#     (start_date, end_date) = dates
 
-    return create_graph_most_recent_error(start_date, end_date)
+#     return create_graph_most_recent_error(start_date, end_date)
 
 
 @callback(
@@ -351,7 +356,9 @@ def settings(checked):
 
 
 @callback(
-    Output("message-monitoring", "children"),
+    
+    Output("message-monitoring", "children"), 
+    Output("messages-data", "data"), 
     Input("monitoring-date-selector", "value"),
     Input("monitoring-status-selector", "value"),
 )
@@ -497,14 +504,28 @@ def render_status_msg(dates, direction):
                                             id="cases-process",
                                             color="dark",
                                             size="sm",
-                                            className="m-1",
+                                            className="m-2",
                                         ),
                                         dmc.Button(
                                             "Resend",
                                             id="cases-process",
                                             color="dark",
                                             size="sm",
-                                            className="m-1",
+                                            className="m-2",
+                                        ),
+                                        dmc.Button(
+                                            "Show Conversation",
+                                            id="show-conversation",
+                                            color="dark",
+                                            size="sm",
+                                            className="m-2",
+                                        ),
+                                        dmc.Button(
+                                            "Respnse",
+                                            id="message-response",
+                                            color="dark",
+                                            size="sm",
+                                            className="m-2",
                                         ),
                                     ],
                                     id="message-monitoring ",
@@ -519,7 +540,7 @@ def render_status_msg(dates, direction):
             width=12,
             className="mb-2",
         )
-    ]
+    ], df.to_dict("records")
 
 
 @callback(
@@ -544,3 +565,124 @@ def refresh_messages(n_clicks, dates):
                 f"Messages refreshed failed with {e}",
                 "Messages refreshed",
             )
+
+
+### conversation model
+
+# @callback(
+#     Output("modal", "is_open"),
+#     Output("modal-content", "children"),
+#     Output("memory", "data"),
+#     State("memory", "data"),
+#     Input("portfolio-grid", "selectedRows"),
+#     Input("send-all-cases", "n_clicks"),
+#     Input("cases-process", "n_clicks"),
+#     Input("leads-data", "children"),
+# )
+# def open_modal(data, selection, *args, **kwargs):
+#     if selection and ctx.triggered_id == "cases-process":
+#         df = pd.DataFrame(selection)
+#         df_filter = df[["First Name", "Last Name", "Phone"]]
+#         if data is None:
+#             data = {"df": df.to_dict("records")}
+#         else:
+#             data["df"] = df.to_dict("records")
+#         return True, messaging_template(df_filter), data
+
+#     return dash.no_update, dash.no_update, dash.no_update
+
+
+
+def conversation():
+    
+    container = html.Div([
+    dmc.Container([
+        # Message from the user
+        dmc.Paper(
+            children="This is a user message.",
+            withBorder=True,
+            p="md",
+            shadow="sm",
+            style={
+                "backgroundColor": "#e0f7fa",  # Light blue background
+                "textAlign": "left",
+                "marginBottom": "10px"
+            }
+        ),
+
+        # Message from the other
+        dmc.Paper(
+            children="This is a response from the system.",
+            withBorder=True,
+            p="md",
+            shadow="sm",
+            style={
+                "backgroundColor": "#ffe0b2",  # Light orange background
+                "textAlign": "right",
+                "marginBottom": "10px"
+            }
+        ),
+
+        # Add more messages as needed
+
+    ], style={"maxWidth": 500})  # Set the maximum width of the container
+])
+
+    
+    return dmc.Stack(
+        [
+                        container ,
+            dmc.TextInput(
+            styles={
+                "input": {
+                    "fontSize": 15,
+                    "boxShadow": "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px",
+                    "border": "none",
+                },
+            },
+            id="message-response-input",
+            placeholder="What do you want to know about your business?",
+            # icon=DashIconify(icon="ic:round-search"),
+            radius="lg",
+            size="lg",
+            w="80%",
+            m="auto",
+            rightSection=dmc.ActionIcon(
+                DashIconify(icon="ic:round-send", width=20),
+                id="button",
+                radius="md",
+                size="lg",
+                mr=17,
+            ),
+        ), 
+            
+            
+        ]
+    )
+
+
+@callback(
+    Output("modal-conversation", "is_open"),
+    Output("modal-conversation-content", "children"),
+    Input("portfolio-grid", "selectedRows"),
+    Input("show-conversation", "n_clicks"),
+    Input("message-monitoring", "children"),
+    State("messages-data", "data"), 
+
+    
+    prevent_initial_call=False,
+
+)
+def open_modal_conversation(selection, click,  children , data):
+    print("open_modal_conversation")
+    if selection and ctx.triggered_id == "show-conversation":
+        df = pd.DataFrame(selection)
+        df_filter = df[[ "Phone" , "Direction" , "Message", "Phone" , "SID" ,"Sending At"]]
+        # if data is None:
+        #     data = {"df": df.to_dict("records")}
+        # else:
+        #     data["df"] = df.to_dict("records")
+        # return True, messaging_template(df_filter), data
+        return True, conversation()
+
+    return dash.no_update , dash.no_update

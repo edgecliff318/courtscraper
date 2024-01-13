@@ -5,6 +5,7 @@ import dash_ag_grid as dag
 import dash_bootstrap_components as dbc
 import pandas as pd
 from dash import Input, Output, callback, html
+import dash_mantine_components as dmc
 
 from src.core.config import get_settings
 from src.core.format import humanize_phone
@@ -209,7 +210,7 @@ def render_leads(court_code_list, dates, status):
         },
     ]
     grid = dag.AgGrid(
-        id="portfolio-grid",
+        id="outbound-data-grid",
         columnDefs=column_defs,
         rowData=df.to_dict("records"),
         columnSize="autoSize",
@@ -229,10 +230,11 @@ def render_leads(court_code_list, dates, status):
                         html.Div(
                             [
                                 html.H3("Cases", className="card-title"),
-                                dbc.Button(
+                                dmc.Button(
                                     "Cases Process",
-                                    id="cases-process",
-                                    className="card-title",
+                                    id="outbound-response-many",
+                                    color="dark",
+                                    # className="card-title",
                                 ),
                             ],
                             className="d-flex justify-content-between",
