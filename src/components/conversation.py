@@ -5,7 +5,7 @@ import dash_bootstrap_components as dbc
 from dash import dcc, html
 import dash_ag_grid as dag
 import dash_mantine_components as dmc
-
+import pandas as pd
 
 from src.components.filters import leads_controls
 from src.components.inputs import generate_form_group
@@ -14,6 +14,146 @@ from src.models import leads as leads_model
 logger = logging.Logger(__name__)
 
 
+def create_chat_bubble(text, from_user=True):
+    return html.Div(
+        children=[
+            dcc.Markdown(text)
+        ],
+        style={
+            "maxWidth": "60%",
+            "backgroundColor": "#DCF8C6" if from_user else "#F0F0F0",
+            "padding": "10px",
+            "borderRadius": "15px",
+            "margin": "5px",
+            "textAlign": "left",
+            "marginLeft": "0" if from_user else "auto",
+            "marginRight": "auto" if from_user else "0",
+            "wordBreak": "break-word"
+        }
+    )
+
+def create_chat(df: pd.DataFrame):
+    
+    
+    list_of_messages = [
+        {
+            "message": "Hello! How can I help you today?",
+            'direction': 'outbound',
+            'send at': '2021-09-01 12:00:00'
+        }
+        ,
+        {
+            "message": "I need assistance with my account.",
+            'direction': 'inbound',
+            'send at': '2021-09-01 12:00:00'
+        },
+        {
+            "message": "I need assistance with my account.",
+            'direction': 'inbound',
+            'send at': '2021-09-01 12:00:00'
+        },
+        {
+            "message": "I need assistance with my account.",
+            'direction': 'outbound',
+            'send at': '2021-09-01 12:00:00'
+        },
+         {
+            "message": "Hello! How can I help you today?",
+            'direction': 'outbound',
+            'send at': '2021-09-01 12:00:00'
+        }
+        ,
+        {
+            "message": "I need assistance with my account.",
+            'direction': 'inbound',
+            'send at': '2021-09-01 12:00:00'
+        },
+        {
+            "message": "I need assistance with my account.",
+            'direction': 'inbound',
+            'send at': '2021-09-01 12:00:00'
+        },
+        {
+            "message": "I need assistance with my account.",
+            'direction': 'outbound',
+            'send at': '2021-09-01 12:00:00'
+        },
+         {
+            "message": "Hello! How can I help you today?",
+            'direction': 'outbound',
+            'send at': '2021-09-01 12:00:00'
+        }
+        ,
+        {
+            "message": "I need assistance with my account.",
+            'direction': 'inbound',
+            'send at': '2021-09-01 12:00:00'
+        },
+        {
+            "message": "I need assistance with my account.",
+            'direction': 'inbound',
+            'send at': '2021-09-01 12:00:00'
+        },
+        {
+            "message": "I need assistance with my account.",
+            'direction': 'outbound',
+            'send at': '2021-09-01 12:00:00'
+        },
+         {
+            "message": "Hello! How can I help you today?",
+            'direction': 'outbound',
+            'send at': '2021-09-01 12:00:00'
+        }
+        ,
+        {
+            "message": "I need assistance with my account.",
+            'direction': 'inbound',
+            'send at': '2021-09-01 12:00:00'
+        },
+        {
+            "message": "I need assistance with my account.",
+            'direction': 'inbound',
+            'send at': '2021-09-01 12:00:00'
+        },
+        {
+            "message": "I need assistance with my account.",
+            'direction': 'outbound',
+            'send at': '2021-09-01 12:00:00'
+        },
+    ]
+        
+    
+    return html.Div(
+    [
+        dmc.Container(
+            # [
+            #     create_chat_bubble("Hello! Howhhfjhjdhfjhjkhfjdsf can I help you today?", from_user=True),
+            #     create_chat_bubble("I need fbdsjfjhdshfjsdhjkfassistance with my account.", from_user=False),
+            #     # Add more chat bubbles as needed
+            # ],
+            [
+                create_chat_bubble(message["message"], from_user=True if message["direction"] == "outbound" else False)
+                for message in list_of_messages
+            ],
+            style={
+                "display": "flex",
+                "flexDirection": "column",
+                "maxWidth": "500px",
+                "margin": "auto",
+                "paddingTop": "10px",
+                 "maxHeight": "50vh",  
+                "overflowY": "scroll" 
+            }
+        )
+    ],
+    style={
+        "height": "100vh",
+        "backgroundColor": "#E5E5E5",
+        "padding": "20px",
+          "maxHeight": "50vh",  
+                "overflowY": "scroll" 
+    }
+)
 
 
 
@@ -47,7 +187,7 @@ def many_response_model(prefix: str) -> html.Div:
         for text, button_id, color in [
             ("Update Status", "modal-lead-status-update", "dark"),
             ("Generate Letters", "generate-letters", "dark"),
-            ("Send all cases", "send-all", "green"),
+            ("Send all cases", "send", "green"),
             ("Cancel", "send-all-cases", "red")
         ]
     ]
@@ -88,15 +228,17 @@ def messaging_template(df, prefix: str = "outbound"):
         }
         for col in df.columns
     ]
-    grid = dag.AgGrid(
-        id=f"{prefix}-portfolio-grid-multiple-selected",
-        columnDefs=column_defs,
-        rowData=df.to_dict("records"),
-        columnSize="sizeToFit",
-        dashGridOptions={
-            "undoRedoCellEditing": True,
-        },
-    )
+    # grid = dag.AgGrid(
+    #     id=f"{prefix}-portfolio-grid-multiple-selected",
+    #     columnDefs=column_defs,
+    #     rowData=df.to_dict("records"),
+    #     columnSize="sizeToFit",
+    #     dashGridOptions={
+    #         "undoRedoCellEditing": True,
+    #     },
+    # )
+    
+    grid = create_chat(df)
 
     msg = html.Div(
         [
@@ -164,25 +306,6 @@ def messaging_template(df, prefix: str = "outbound"):
 
 def conversation_model():
     
-    status_options = [
-        dbc.Col("Update the leads status", width=3),
-        dbc.Col(
-            generate_form_group(
-                label="Update the leads status",
-                id="modal-lead-status",
-                placeholder="Set the status",
-                type="Dropdown",
-                options=[
-                    o
-                    for o in leads_model.leads_statuses
-                    if o["value"] != "all"
-                ],
-                persistence_type="session",
-                persistence=True,
-            ),
-            width=4,
-        ),
-    ]
     return html.Div(
         [
             html.Div(
@@ -197,23 +320,5 @@ def conversation_model():
                 ),
                 className="m-3",
             ),
-            # dbc.Row(
-            #     [
-            #         dbc.Col(
-            #             dbc.Card(
-            #                 dbc.CardBody(
-            #                     [
-            #                         leads_controls,
-            #                     ]
-            #                 ),
-            #             ),
-            #             width=12,
-            #             className="mb-2",
-            #         ),
-            #     ]
-            # ),
-            # dbc.Row([], id="cases-data"),
-            # dbc.Row([], id="leads-data"),
-            # dbc.Row([html.Div(id="selections-multiple-click-output")]),
         ]
     )

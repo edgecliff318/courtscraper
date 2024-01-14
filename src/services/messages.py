@@ -159,6 +159,19 @@ def get_interactions(case_id=None) -> t.List[messages.Interaction]:
     return [messages.Interaction(**i.to_dict()) for i in interactions]
 
 
+def get_interactions_by_phone(phone: str | None = None) -> t.List[messages.Interaction]:
+    if phone is None:
+        interactions = db.collection("interactions").stream()
+    else:
+        interactions = (
+            db.collection("interactions")
+            .where("phone", "==", phone)
+            .stream()
+        )
+
+    return [messages.Interaction(**i.to_dict()) for i in interactions]
+
+
 def get_interactions_filtered(
     case_id=None, start_date=None, end_date=None, direction=None
 ) -> t.List[messages.Interaction]:

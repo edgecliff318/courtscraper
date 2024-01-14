@@ -17,6 +17,7 @@ from src.services import leads, messages
 from src.services import messages as messages_service
 from src.services.settings import get_settings as db_settings
 from src.components.conversation import messaging_template
+import re
 
 import dash_mantine_components as dmc
 from dash import dcc, html
@@ -37,6 +38,13 @@ COLORS = {
 
 logger = logging.Logger(__name__)
 
+
+def extract_case_id(text):
+    pattern = r"\[(\d+)\]"
+    match = re.search(pattern, text)
+    if match:
+        return match.group(1)
+    return None
 
 def process_date(date):
     try:
@@ -358,9 +366,11 @@ def settings(checked):
 @callback(
     
     Output("message-monitoring", "children"), 
-    Output("messages-data", "data"), 
+    Output("monitoring-data", "data"), 
     Input("monitoring-date-selector", "value"),
     Input("monitoring-status-selector", "value"),
+    
+    prevent_initial_call=False,
 )
 def render_status_msg(dates, direction):
     (start_date, end_date) = dates
@@ -475,7 +485,7 @@ def render_status_msg(dates, direction):
     ]
 
     grid = dag.AgGrid(
-        id="portfolio-grid",
+        id="monitoring-data-grid",
         columnDefs=column_defs,
         rowData=df.to_dict("records"),
         columnSize="autoSize",
@@ -522,7 +532,7 @@ def render_status_msg(dates, direction):
                                         ),
                                         dmc.Button(
                                             "Respnse",
-                                            id="message-response",
+                                            id="monitoring-response-many",
                                             color="dark",
                                             size="sm",
                                             className="m-2",
@@ -540,7 +550,7 @@ def render_status_msg(dates, direction):
             width=12,
             className="mb-2",
         )
-    ], df.to_dict("records")
+    ] , df.to_dict("records")
 
 
 @callback(
@@ -567,33 +577,9 @@ def refresh_messages(n_clicks, dates):
             )
 
 
-### conversation model
-
-# @callback(
-#     Output("modal", "is_open"),
-#     Output("modal-content", "children"),
-#     Output("memory", "data"),
-#     State("memory", "data"),
-#     Input("portfolio-grid", "selectedRows"),
-#     Input("send-all-cases", "n_clicks"),
-#     Input("cases-process", "n_clicks"),
-#     Input("leads-data", "children"),
-# )
-# def open_modal(data, selection, *args, **kwargs):
-#     if selection and ctx.triggered_id == "cases-process":
-#         df = pd.DataFrame(selection)
-#         df_filter = df[["First Name", "Last Name", "Phone"]]
-#         if data is None:
-#             data = {"df": df.to_dict("records")}
-#         else:
-#             data["df"] = df.to_dict("records")
-#         return True, messaging_template(df_filter), data
-
-#     return dash.no_update, dash.no_update, dash.no_update
 
 
-
-def conversation():
+def conversation(df_conversation):
     
     container = html.Div([
     dmc.Container([
@@ -642,7 +628,6 @@ def conversation():
             },
             id="message-response-input",
             placeholder="What do you want to know about your business?",
-            # icon=DashIconify(icon="ic:round-search"),
             radius="lg",
             size="lg",
             w="80%",
@@ -664,25 +649,36 @@ def conversation():
 @callback(
     Output("modal-conversation", "is_open"),
     Output("modal-conversation-content", "children"),
-    Input("portfolio-grid", "selectedRows"),
+    Input("monitoring-data-grid", "selectedRows"),
+    State("monitoring-data", "data"), 
+    
     Input("show-conversation", "n_clicks"),
     Input("message-monitoring", "children"),
-    State("messages-data", "data"), 
+    Input("monitoring-date-selector", "value"),
 
-    
+    # State("monitoring-memory", "data"), 
     prevent_initial_call=False,
 
 )
-def open_modal_conversation(selection, click,  children , data):
-    print("open_modal_conversation")
+def open_modal_conversation(selection,data, *args, **kwargs):
+    
     if selection and ctx.triggered_id == "show-conversation":
         df = pd.DataFrame(selection)
-        df_filter = df[[ "Phone" , "Direction" , "Message", "Phone" , "SID" ,"Sending At"]]
-        # if data is None:
-        #     data = {"df": df.to_dict("records")}
-        # else:
-        #     data["df"] = df.to_dict("records")
-        # return True, messaging_template(df_filter), data
-        return True, conversation()
+        df_filter = df[[ "Phone" , "Direction" , "Message", ]]
+        if df_filter.empty:
+            return False, dash.no_update
+        
+        
+        case_id = extract_case_id(df["Case ID"].iloc[0])
+        
+        messages = messages_service.get_interactions(
+            case_id=case_id
+        )
+        df_conversation = pd.DataFrame([message.model_dump() for message in messages])
+        df_conversation["creation_date"] = pd.to_datetime(df_conversation["creation_date"], utc=True)
+        df_conversation.sort_values(by=["creation_date"], inplace=True, ascending=True)
+        df_conversation["creation_date"] = df_conversation["creation_date"].dt.tz_convert("US/Central")
+        df_conversation = df_conversation[["direction", "message", "creation_date"]]
+        return True, conversation(df_conversation)
 
     return dash.no_update , dash.no_update

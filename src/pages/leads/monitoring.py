@@ -60,11 +60,16 @@ def layout():
                      id="message-monitoring",
                      ),
             
+             html.Div(
+                     id="leads-data",
+                     ),
+            
+            
             
              html.Div([
                          conversation_model(),
-                         many_response_model(),
-                        dcc.Store(id="messages-data", storage_type="memory"),
+                         many_response_model("monitoring"),
+                        dcc.Store(id="monitoring-data", storage_type="memory"),
              ]
 
                      ),

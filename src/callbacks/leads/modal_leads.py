@@ -23,7 +23,7 @@ def handle_modal(prefix):
         Output(f"{prefix}-modal-content", "children"),
         Output(f"{prefix}-memory", "data"),
         State(f"{prefix}-memory", "data"),
-        Input(f"{prefix}-data-grid", "selectedRows"),  # portfolio-grid
+        Input(f"{prefix}-data-grid", "selectedRows"),  
         Input(f"{prefix}-send-all", "n_clicks"),
         Input(f"{prefix}-response-many", "n_clicks"),
         Input("leads-data", "children"),
@@ -34,7 +34,8 @@ def handle_modal(prefix):
 
         if selection and (triggered_id == f"{prefix}-response-many"):
             df = pd.DataFrame(selection)
-            df_filter = df[["First Name", "Last Name", "Phone"]]
+            # df_filter = df[["First Name", "Last Name", "Phone"]]
+            df_filter = df[[ "Phone"]]
             data = (
                 {"df": df.to_dict("records")}
                 if data is None
@@ -48,24 +49,3 @@ def handle_modal(prefix):
 for prefix in ["outbound", "monitoring"]:
     handle_modal(prefix)
 
-# @callback(
-#     Output("modal", "is_open"),
-#     Output("modal-content", "children"),
-#     Output("memory", "data"),
-#     State("memory", "data"),
-#     Input("portfolio-grid", "selectedRows"),
-#     Input("send-all-cases", "n_clicks"),
-#     Input("cases-process", "n_clicks"),
-#     Input("leads-data", "children"),
-# )
-# def open_modal(data, selection, *args, **kwargs):
-#     if selection and ctx.triggered_id == "cases-process":
-#         df = pd.DataFrame(selection)
-#         df_filter = df[["First Name", "Last Name", "Phone"]]
-#         if data is None:
-#             data = {"df": df.to_dict("records")}
-#         else:
-#             data["df"] = df.to_dict("records")
-#         return True, messaging_template(df_filter), data
-
-#     return dash.no_update, dash.no_update, dash.no_update
