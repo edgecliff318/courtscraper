@@ -11,6 +11,9 @@ import dash_mantine_components as dmc
 from src.components.inputs import generate_form_group
 from src.components.conversation import messaging_template
 from src.core.config import get_settings
+from src.components.conversation import messaging_template
+import re
+from src.services import messages as messages_service
 
 logger = logging.Logger(__name__)
 
@@ -41,7 +44,7 @@ def handle_modal(prefix):
                 if data is None
                 else {"df": df.to_dict("records")}
             )
-            return True, messaging_template(df_filter, prefix), data
+            return True, messaging_template(df, prefix), data
 
         return dash.no_update, dash.no_update, dash.no_update
 

@@ -1,24 +1,47 @@
 import logging
 
-import dash
 import dash_bootstrap_components as dbc
 from dash import dcc, html
-import dash_ag_grid as dag
 import dash_mantine_components as dmc
 import pandas as pd
 
-from src.components.filters import leads_controls
 from src.components.inputs import generate_form_group
 from src.models import leads as leads_model
 
 logger = logging.Logger(__name__)
 
 
+import re
+from src.services import messages as messages_service
+
+
+def extract_case_id(text):
+    pattern = r"\[(\d+)\]"
+    match = re.search(pattern, text)
+    if match:
+        return match.group(1)
+    return None
+
+
+def get_conversation(df: pd.DataFrame) -> list:
+    case_id = extract_case_id(df["Case ID"].iloc[0])
+
+    messages = messages_service.get_interactions(case_id=case_id)
+    df_conversation = pd.DataFrame([message.model_dump() for message in messages])
+    df_conversation["creation_date"] = pd.to_datetime(
+        df_conversation["creation_date"], utc=True
+    )
+    df_conversation.sort_values(by=["creation_date"], inplace=True, ascending=True)
+    df_conversation["creation_date"] = df_conversation["creation_date"].dt.tz_convert(
+        "US/Central"
+    )
+    df_conversation = df_conversation[["direction", "message", "creation_date"]]
+    return df_conversation.to_dict("records")
+
+
 def create_chat_bubble(text, from_user=True):
     return html.Div(
-        children=[
-            dcc.Markdown(text)
-        ],
+        children=[dcc.Markdown(text)],
         style={
             "maxWidth": "60%",
             "backgroundColor": "#DCF8C6" if from_user else "#F0F0F0",
@@ -28,133 +51,48 @@ def create_chat_bubble(text, from_user=True):
             "textAlign": "left",
             "marginLeft": "0" if from_user else "auto",
             "marginRight": "auto" if from_user else "0",
-            "wordBreak": "break-word"
-        }
+            "wordBreak": "break-word",
+        },
     )
 
-def create_chat(df: pd.DataFrame):
-    
-    
-    list_of_messages = [
-        {
-            "message": "Hello! How can I help you today?",
-            'direction': 'outbound',
-            'send at': '2021-09-01 12:00:00'
-        }
-        ,
-        {
-            "message": "I need assistance with my account.",
-            'direction': 'inbound',
-            'send at': '2021-09-01 12:00:00'
-        },
-        {
-            "message": "I need assistance with my account.",
-            'direction': 'inbound',
-            'send at': '2021-09-01 12:00:00'
-        },
-        {
-            "message": "I need assistance with my account.",
-            'direction': 'outbound',
-            'send at': '2021-09-01 12:00:00'
-        },
-         {
-            "message": "Hello! How can I help you today?",
-            'direction': 'outbound',
-            'send at': '2021-09-01 12:00:00'
-        }
-        ,
-        {
-            "message": "I need assistance with my account.",
-            'direction': 'inbound',
-            'send at': '2021-09-01 12:00:00'
-        },
-        {
-            "message": "I need assistance with my account.",
-            'direction': 'inbound',
-            'send at': '2021-09-01 12:00:00'
-        },
-        {
-            "message": "I need assistance with my account.",
-            'direction': 'outbound',
-            'send at': '2021-09-01 12:00:00'
-        },
-         {
-            "message": "Hello! How can I help you today?",
-            'direction': 'outbound',
-            'send at': '2021-09-01 12:00:00'
-        }
-        ,
-        {
-            "message": "I need assistance with my account.",
-            'direction': 'inbound',
-            'send at': '2021-09-01 12:00:00'
-        },
-        {
-            "message": "I need assistance with my account.",
-            'direction': 'inbound',
-            'send at': '2021-09-01 12:00:00'
-        },
-        {
-            "message": "I need assistance with my account.",
-            'direction': 'outbound',
-            'send at': '2021-09-01 12:00:00'
-        },
-         {
-            "message": "Hello! How can I help you today?",
-            'direction': 'outbound',
-            'send at': '2021-09-01 12:00:00'
-        }
-        ,
-        {
-            "message": "I need assistance with my account.",
-            'direction': 'inbound',
-            'send at': '2021-09-01 12:00:00'
-        },
-        {
-            "message": "I need assistance with my account.",
-            'direction': 'inbound',
-            'send at': '2021-09-01 12:00:00'
-        },
-        {
-            "message": "I need assistance with my account.",
-            'direction': 'outbound',
-            'send at': '2021-09-01 12:00:00'
-        },
-    ]
-        
-    
-    return html.Div(
-    [
-        dmc.Container(
-            # [
-            #     create_chat_bubble("Hello! Howhhfjhjdhfjhjkhfjdsf can I help you today?", from_user=True),
-            #     create_chat_bubble("I need fbdsjfjhdshfjsdhjkfassistance with my account.", from_user=False),
-            #     # Add more chat bubbles as needed
-            # ],
-            [
-                create_chat_bubble(message["message"], from_user=True if message["direction"] == "outbound" else False)
-                for message in list_of_messages
-            ],
-            style={
-                "display": "flex",
-                "flexDirection": "column",
-                "maxWidth": "500px",
-                "margin": "auto",
-                "paddingTop": "10px",
-                 "maxHeight": "50vh",  
-                "overflowY": "scroll" 
-            }
-        )
-    ],
-    style={
-        "height": "100vh",
-        "backgroundColor": "#E5E5E5",
-        "padding": "20px",
-          "maxHeight": "50vh",  
-                "overflowY": "scroll" 
-    }
-)
 
+def create_chat(df: pd.DataFrame):
+    list_of_messages = get_conversation(df)
+
+    return html.Div(
+        [
+            dmc.Container(
+                # [
+                #     create_chat_bubble("Hello! Howhhfjhjdhfjhjkhfjdsf can I help you today?", from_user=True),
+                #     create_chat_bubble("I need fbdsjfjhdshfjsdhjkfassistance with my account.", from_user=False),
+                #     # Add more chat bubbles as needed
+                # ],
+                [
+                    create_chat_bubble(
+                        message["message"],
+                        from_user=True if message["direction"] == "outbound" else False,
+                    )
+                    for message in list_of_messages
+                ],
+                style={
+                    "display": "flex",
+                    "flexDirection": "column",
+                    "maxWidth": "500px",
+                    "margin": "auto",
+                    "paddingTop": "10px",
+                    "maxHeight": "50vh",
+                    "overflowY": "scroll",
+                },
+            )
+        ],
+        style={
+            "height": "100vh",
+            "backgroundColor": "#E5E5E5",
+            "padding": "20px",
+            "maxHeight": "50vh",
+            "overflowY": "scroll",
+        },
+    )
 
 
 def generate_status_options(prefix: str):
@@ -171,24 +109,20 @@ def generate_status_options(prefix: str):
                 persistence=True,
             ),
             width=4,
-        )
+        ),
     ]
+
 
 def many_response_model(prefix: str) -> html.Div:
     status_options = generate_status_options(prefix)
 
     modal_footer_buttons = [
-        dmc.Button(
-            text,
-            id=f"{prefix}-{button_id}",
-            className="ml-auto",
-            color=color
-        )
+        dmc.Button(text, id=f"{prefix}-{button_id}", className="ml-auto", color=color)
         for text, button_id, color in [
             ("Update Status", "modal-lead-status-update", "dark"),
             ("Generate Letters", "generate-letters", "dark"),
-            ("Send all cases", "send", "green"),
-            ("Cancel", "send-all-cases", "red")
+            ("Send ", "send-all", "green"),
+            ("Cancel", "send-all-cases", "red"),
         ]
     ]
 
@@ -203,16 +137,20 @@ def many_response_model(prefix: str) -> html.Div:
                     html.Div(id=f"{prefix}-modal-content-sending-status"),
                     dbc.Row(status_options, className="m-2"),
                     dbc.Row(id=f"{prefix}-modal-lead-status-update-status"),
-                    dbc.Row(id=f"{prefix}-modal-content-generate-letters-status", className="m-2"),
-                    dbc.ModalFooter(modal_footer_buttons, className="d-flex justify-content-end"),
+                    dbc.Row(
+                        id=f"{prefix}-modal-content-generate-letters-status",
+                        className="m-2",
+                    ),
+                    dbc.ModalFooter(
+                        modal_footer_buttons, className="d-flex justify-content-end"
+                    ),
                 ],
                 id=f"{prefix}-modal",
                 size="xl",
-            )
+            ),
         ],
         className="m-3",
     )
-
 
 
 def messaging_template(df, prefix: str = "outbound"):
@@ -228,6 +166,7 @@ def messaging_template(df, prefix: str = "outbound"):
         }
         for col in df.columns
     ]
+
     # grid = dag.AgGrid(
     #     id=f"{prefix}-portfolio-grid-multiple-selected",
     #     columnDefs=column_defs,
@@ -237,7 +176,8 @@ def messaging_template(df, prefix: str = "outbound"):
     #         "undoRedoCellEditing": True,
     #     },
     # )
-    
+
+#TODO: add conditional to check monitoring conversation render conversation
     grid = create_chat(df)
 
     msg = html.Div(
@@ -305,7 +245,6 @@ def messaging_template(df, prefix: str = "outbound"):
 
 
 def conversation_model():
-    
     return html.Div(
         [
             html.Div(
@@ -313,7 +252,6 @@ def conversation_model():
                     [
                         dbc.ModalHeader("Conversation"),
                         dbc.ModalBody(id="modal-conversation-content"),
-                       
                     ],
                     id="modal-conversation",
                     size="xl",
