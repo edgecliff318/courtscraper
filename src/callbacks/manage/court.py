@@ -345,7 +345,10 @@ def modal_court_preview(opened, update, template, pars, case_id):
 
 
 @callback(
-    output=Output("modal-court-response", "children"),
+    outputs=[
+        Output("modal-court-response", "children"),
+        Output("modal-next-step-trigger", "data"),
+    ],
     inputs=[
         Input("modal-court-submit", "n_clicks"),
         State("case-id", "children"),
@@ -391,14 +394,17 @@ def modal_court_submit(n_clicks, case_id, template):
         if event.get("template") in [
             e.get("template") for e in events if e.get("template") is not None
         ]:
-            return html.Div(
-                [
-                    dmc.Alert(
-                        "Document already uploaded to the court system",
-                        color="red",
-                        title="Information",
-                    ),
-                ]
+            return (
+                html.Div(
+                    [
+                        dmc.Alert(
+                            "Document already uploaded to the court system",
+                            color="red",
+                            title="Information",
+                        ),
+                    ]
+                ),
+                dash.no_update,
             )
 
         template_details = templates.get_single_template(template)
@@ -440,4 +446,4 @@ def modal_court_submit(n_clicks, case_id, template):
                     title="Success",
                 )
             ]
-        )
+        ), {"next_step": "court"}

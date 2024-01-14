@@ -126,7 +126,10 @@ def modal_prosecutor_preview(
 
 
 @callback(
-    output=Output("modal-prosecutor-response", "children"),
+    outputs=[
+        Output("modal-prosecutor-response", "children"),
+        Output("modal-next-step-trigger", "data"),
+    ],
     inputs=[
         Input("modal-prosecutor-submit", "n_clicks"),
         State({"type": "modal-prosecutor-pars", "index": ALL}, "value"),
@@ -158,7 +161,7 @@ def modal_prosecutor_submit(n_clicks, pars, case_id, template):
             f'{{"index":"attachments","type":"modal-prosecutor-pars"}}.value',
             [],
         )
-        return send_email(
+        output, message = send_email(
             template=template,
             trigger="modal-client-submit",
             case_id=case_id,
@@ -168,3 +171,6 @@ def modal_prosecutor_submit(n_clicks, pars, case_id, template):
             attachments=attachments,
             role="prosecutor",
         )
+        return message, {"next_step": "modal-prosecutor-submit"}
+
+    return dash.no_update, dash.no_update

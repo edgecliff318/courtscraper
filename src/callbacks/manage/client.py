@@ -62,7 +62,9 @@ def modal_client_pars(opened, update, template, pars, case_id):
     inputs = ctx.inputs
     states = ctx.states
 
-    params = get_email_params(template, trigger, case_id, states, inputs)
+    params = get_email_params(
+        template, trigger, case_id, states, inputs, include_invoice=True
+    )
     return params
 
 
@@ -100,6 +102,7 @@ def modal_client_preview(
         file_content,
         filename,
         role="client",
+        include_invoice=True,
     )
     # Put the attachements in a multi select
     # and add a button to upload the attachments
@@ -108,7 +111,10 @@ def modal_client_preview(
 
 
 @callback(
-    output=Output("modal-client-response", "children"),
+    outputs=[
+        Output("modal-client-response", "children"),
+        Output("modal-next-step-trigger", "data"),
+    ],
     inputs=[
         Input("modal-client-submit", "n_clicks"),
         State({"type": "modal-client-pars", "index": ALL}, "value"),
@@ -137,10 +143,10 @@ def modal_client_submit(n_clicks, pars, case_id, template):
     ctx = dash.callback_context
     if ctx.triggered[0]["prop_id"] == "modal-client-submit.n_clicks":
         attachments = ctx.states.get(
-            f'{{"index":"attachments","type":"modal-client-pars"}}.value',
+            '{{"index":"attachments","type":"modal-client-pars"}}.value',
             [],
         )
-        return send_email(
+        output, message = send_email(
             template=template,
             trigger="modal-client-submit",
             case_id=case_id,
@@ -149,4 +155,9 @@ def modal_client_submit(n_clicks, pars, case_id, template):
             attachments=attachments,
             send_function=send_to_client,
             role="client",
+            include_invoice=True,
         )
+
+        return message, {"next_step": "modal-client-submit"}
+
+    return dash.no_update, dash.no_update

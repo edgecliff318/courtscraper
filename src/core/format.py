@@ -1,3 +1,6 @@
+from datetime import datetime
+
+
 def humanize_phone(phone):
     try:
         # Convert +15555555555 to +1 (555) 555-5555
@@ -9,3 +12,7 @@ def humanize_phone(phone):
         )
     except Exception:
         return phone
+
+
+def timestamp_to_date(timestamp):
+    return datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M")

@@ -7,6 +7,10 @@ import openai
 from dash import dcc, html
 from flask import session
 
+from src.components.cases.payments import (
+    get_invoice_widget,
+)
+from src.connectors import payments as payments_connector
 from src.core.config import get_settings
 from src.db import bucket
 from src.services import cases, participants, templates
@@ -16,8 +20,53 @@ logger = logging.getLogger(__name__)
 settings = get_settings()
 
 
+def get_invoice_text(invoices):
+    invoice_text = None
+    if invoices is not None and invoices:
+        invoice_text = []
+        # Generate link
+        payments_service = payments_connector.PaymentService()
+        for invoice in invoices:
+            invoice_data = payments_service.get_invoice(invoice)
+            invoice_link = invoice_data.hosted_invoice_url
+            invoice_amount = invoice_data.amount_due / 100
+            invoice_message = (
+                f"<a href='{invoice_link}'>Invoice {invoice_amount:.2f} $</a>"
+            )
+
+            invoice_text.append(invoice_message)
+
+        invoice_text = "<br>".join(invoice_text)
+
+    return invoice_text
+
+
+def update_email_text(email_text, invoice_text):
+    if email_text is None:
+        return email_text
+    if invoice_text is None and "{{invoice}}" in email_text:
+        raise ValueError(
+            "Please select an invoice as the email contains the invoice text but no invoice was selected",
+        )
+
+    if invoice_text is not None:
+        if "{{invoice}}" not in email_text:
+            raise ValueError(
+                "Please add {{invoice}} to the email body to add the invoice link that you selected",
+            )
+        email_text = email_text.replace("{{invoice}}", invoice_text)
+
+    return email_text
+
+
 def get_email_params(
-    template, trigger, case_id, states, inputs, role="client"
+    template,
+    trigger,
+    case_id,
+    states,
+    inputs,
+    role="client",
+    include_invoice=True,
 ):
     template_details = templates.get_single_template(template)
 
@@ -26,7 +75,6 @@ def get_email_params(
     documents = bucket.list_blobs(prefix=f"cases/{case_id}/", delimiter="/")
 
     # Attachments form
-
     attachments = dmc.Stack(
         [
             dmc.MultiSelect(
@@ -63,6 +111,7 @@ def get_email_params(
 
     # Params should be subject, body (texarea), attachments
     emails_list = []
+    participants_list = []
     if (
         case_data.get("case_participants") is not None
         and len(case_data.get("case_participants", [])) > 0
@@ -86,6 +135,11 @@ def get_email_params(
         case_data["participant_name"] = ", ".join(
             [p.capitalize() for p in participant_names]
         )
+
+    # Invoice form
+    invoice_widget = html.Div()
+    if include_invoice:
+        invoice_widget = get_invoice_widget(participants_list, role=role)
 
     # Get the signature from the settings
     user_email = session.get("profile", {}).get("name", None)
@@ -164,6 +218,10 @@ def get_email_params(
             dmc.Text(
                 "Use <strong> text </strong> to bold the text", size="xs"
             ),
+            dmc.Text(
+                "Use {{invoice}} to place the invoice link and text",
+                size="xs",
+            ),
             html.A(
                 dmc.Text(
                     "See all the possible formatting options here", size="xs"
@@ -172,6 +230,7 @@ def get_email_params(
                 target="_blank",
             ),
             attachments,
+            invoice_widget,
         ]
     )
 
@@ -187,6 +246,7 @@ def get_preview(
     file_content,
     filename,
     role="client",
+    include_invoice=False,
 ):
     logger.info(f"Getting the context data for {template}")
     message = dmc.Text("Email Preview")
@@ -230,6 +290,14 @@ def get_preview(
     else:
         attachment_stack = dmc.Text("No attachments")
 
+    # If invoices added
+    invoice_text = None
+    if include_invoice:
+        invoices = inputs.get(
+            f'{{"index":"invoices","type":"modal-{role}-pars"}}.value', []
+        )
+        invoice_text = get_invoice_text(invoices)
+
     # If click on preview-{attachment}, then preview the attachment
     if isinstance(trigger, dict) and trigger.get("index", "").startswith(
         "preview-"
@@ -254,9 +322,21 @@ def get_preview(
         )
 
     else:
-        preview = html.Div(
-            inputs.get(f'{{"index":"body","type":"modal-{role}-pars"}}.value')
+        email_text = inputs.get(
+            f'{{"index":"body","type":"modal-{role}-pars"}}.value'
         )
+
+        try:
+            email_text = update_email_text(email_text, invoice_text)
+
+        except ValueError as e:
+            message = dmc.Alert(
+                f"Error generating the email: {e}",
+                color="red",
+                title="Error",
+            )
+
+        preview = html.Div(email_text)
 
     document_preview = dmc.Card(
         children=[
@@ -284,6 +364,7 @@ def send_email(
     attachments,
     send_function,
     role="client",
+    include_invoice=False,
 ):
     # Check the event on the case events
     email = states.get(f'{{"index":"email","type":"modal-{role}-pars"}}.value')
@@ -315,7 +396,7 @@ def send_email(
     if not template_details.repeat and event.get("template") in [
         e.get("template") for e in events if e.get("template") is not None
     ]:
-        return html.Div(
+        return False, html.Div(
             [
                 dmc.Alert(
                     f"Email already sent to the {role}",
@@ -332,6 +413,13 @@ def send_email(
 
     params.setdefault("template_title", template_details.name)
 
+    if include_invoice:
+        invoices = states.get(
+            f'{{"index":"invoices","type":"modal-{role}-pars"}}.value', []
+        )
+        invoice_text = get_invoice_text(invoices)
+        body = update_email_text(body, invoice_text)
+
     # Upload the document to the client
     try:
         output = send_function(
@@ -339,7 +427,7 @@ def send_email(
         )
     except Exception as e:
         logger.error(f"Error sending the email: {e}")
-        return html.Div(
+        return False, html.Div(
             [
                 dmc.Alert(
                     f"Error sending the email: {e}",
@@ -360,7 +448,9 @@ def send_email(
     # Upload the event
     cases.patch_case(case_id, {"events": events})
 
-    return html.Div(
+    event["template"] = template_details
+
+    return event, html.Div(
         [
             dmc.Alert(
                 f"Message successfully sent to the {role} through Intercom",

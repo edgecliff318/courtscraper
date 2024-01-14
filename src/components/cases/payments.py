@@ -5,6 +5,7 @@ from dash import dcc, html
 from dash_iconify import DashIconify
 
 from src.connectors import payments as payments_connector
+from src.core.format import timestamp_to_date
 from src.models.cases import Case
 from src.services.participants import ParticipantsService
 
@@ -35,37 +36,7 @@ def generate_table(data, columns):
     )
 
 
-def get_case_payments(case: Case):
-    # Get the list of participants
-    participants_service = ParticipantsService()
-
-    if case.participants is None or len(case.participants) == 0:
-        return dmc.Alert(
-            "No participants found ! Please add participants to the case",
-            color="red",
-            title="No participants found",
-        )
-
-    participants_list = participants_service.get_items(
-        id=case.participants, role="defendant"
-    )
-
-    if len(participants_list) == 0:
-        return dmc.Alert(
-            "No participants found",
-            color="red",
-            title="No participants found",
-        )
-
-    if len(participants_list) > 1:
-        return dmc.Alert(
-            "Multiple participants found",
-            color="red",
-            title="Multiple participants found",
-        )
-
-    participant = participants_list[0]
-
+def get_invoice_form():
     # Get the list of payments
     payments_service = payments_connector.PaymentService()
 
@@ -121,27 +92,118 @@ def get_case_payments(case: Case):
             ),
         ]
     )
+    return invoice_form
 
-    if participant.stripe_id is None:
+
+def get_invoice_widget(participants_list, role="client"):
+    invoices_options = []
+    if len(participants_list) == 0:
+        invoice_form = dmc.Text("No participants found. Please add one.")
+    elif len(participants_list) > 1:
+        invoice_form = dmc.Text(
+            "Multiple participants found. Please select one."
+        )
+    else:
+        participant = participants_list[0]
+
+        invoice_form = get_invoice_form()
+        invoices = get_invoice_history(participant)
+
+        invoices_options = [
+            {
+                "label": f"{timestamp_to_date(invoice.get('created'))} - {invoice.get('amount_due')/100:.2f} $",
+                "value": invoice.get("id"),
+            }
+            for invoice in invoices
+        ]
+
+    invoice_section = dmc.Stack(
+        [
+            dmc.Title("Select an Invoice to Embed", order=4),
+            dmc.MultiSelect(
+                label="Invoices",
+                placeholder="Select the invoices",
+                data=[
+                    {
+                        "label": invoice.get("label"),
+                        "value": invoice.get("value"),
+                    }
+                    for invoice in invoices_options
+                ],
+                value=[],
+                id={"type": f"modal-{role}-pars", "index": "invoices"},
+            ),
+            dmc.Title("Create a New Invoice (if not already done)", order=5),
+            invoice_form,
+        ]
+    )
+
+    return invoice_section
+
+
+def get_invoice_history(participant):
+    participants_service = ParticipantsService()
+    payments_service = payments_connector.PaymentService()
+
+    if isinstance(participant, str):
+        stripe_id = participant
+
+    elif participant.stripe_id is None:
         if participant.email is None:
-            return dmc.Alert(
-                (
-                    "Please update the participant in the case/details "
-                    "section in order "
-                    "to retrieve the data from Stripe on the payments"
-                    " and send invoices."
-                ),
-                color="red",
-                title="No email found",
-            )
+            raise ValueError("No Email found for the participant")
         customer = payments_service.get_or_customer(participant.email)
         participant.stripe_id = customer.id
         participants_service.patch_item(
             participant.id, {"stripe_id": customer.id}
         )
+        stripe_id = customer.id
+    else:
+        stripe_id = participant.stripe_id
+
+    invoice_history = payments_service.get_invoice_history(stripe_id)
+
+    return invoice_history
+
+
+def get_case_payments(case: Case):
+    # Get the list of participants
+    participants_service = ParticipantsService()
+
+    if case.participants is None or len(case.participants) == 0:
+        return dmc.Alert(
+            "No participants found ! Please add participants to the case",
+            color="red",
+            title="No participants found",
+        )
+
+    participants_list = participants_service.get_items(
+        id=case.participants, role="defendant"
+    )
+
+    if len(participants_list) == 0:
+        return dmc.Alert(
+            "No participants found",
+            color="red",
+            title="No participants found",
+        )
+
+    if len(participants_list) > 1:
+        return dmc.Alert(
+            "Multiple participants found",
+            color="red",
+            title="Multiple participants found",
+        )
+
+    participant = participants_list[0]
+
+    # Get the list of payments
+    payments_service = payments_connector.PaymentService()
+
+    invoice_form = get_invoice_form()
+
+    invoice_history = get_invoice_history(participant)
 
     # Get the payment history
-    payment_history = payments_service
     payment_history = payments_service.get_payment_history(
         participant.stripe_id
     )
@@ -149,10 +211,6 @@ def get_case_payments(case: Case):
     # Create a table with the payment history
     payment_history_table = generate_table(
         data=payment_history, columns=["created", "amount", "description"]
-    )
-
-    invoice_history = payments_service.get_invoice_history(
-        participant.stripe_id
     )
 
     # Create a table with the invoice history

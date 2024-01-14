@@ -52,6 +52,8 @@ class PaymentService:
 
     def get_prices(self, product_id):
         prices = stripe.Price.list(product=product_id)
+        # Sort by increasing prices (lowest first)
+        prices.data.sort(key=lambda x: x.unit_amount)
         return prices.data
 
     def create_invoice(self, customer_id, product_id, price_id):
@@ -82,4 +84,8 @@ class PaymentService:
 
     def get_invoice_history(self, customer_id):
         invoice_history = stripe.Invoice.list(customer=customer_id)
-        return invoice_history
+        return invoice_history.data
+
+    def get_invoice(self, invoice_id):
+        invoice = stripe.Invoice.retrieve(invoice_id)
+        return invoice
