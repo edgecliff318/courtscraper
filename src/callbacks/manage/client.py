@@ -111,9 +111,9 @@ def modal_client_preview(
 
 
 @callback(
-    outputs=[
+    output=[
         Output("modal-client-response", "children"),
-        Output("modal-next-step-trigger", "data"),
+        Output("modal-next-step-trigger", "data", allow_duplicate=True),
     ],
     inputs=[
         Input("modal-client-submit", "n_clicks"),
@@ -141,7 +141,10 @@ def modal_client_preview(
 )
 def modal_client_submit(n_clicks, pars, case_id, template):
     ctx = dash.callback_context
-    if ctx.triggered[0]["prop_id"] == "modal-client-submit.n_clicks":
+    if (
+        ctx.triggered[0]["prop_id"] == "modal-client-submit.n_clicks"
+        and template is not None
+    ):
         attachments = ctx.states.get(
             '{{"index":"attachments","type":"modal-client-pars"}}.value',
             [],

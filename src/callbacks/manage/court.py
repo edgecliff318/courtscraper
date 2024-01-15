@@ -345,9 +345,9 @@ def modal_court_preview(opened, update, template, pars, case_id):
 
 
 @callback(
-    outputs=[
+    output=[
         Output("modal-court-response", "children"),
-        Output("modal-next-step-trigger", "data"),
+        Output("modal-next-step-trigger", "data", allow_duplicate=True),
     ],
     inputs=[
         Input("modal-court-submit", "n_clicks"),
@@ -374,7 +374,10 @@ def modal_court_preview(opened, update, template, pars, case_id):
 )
 def modal_court_submit(n_clicks, case_id, template):
     ctx = dash.callback_context
-    if ctx.triggered[0]["prop_id"] == "modal-court-submit.n_clicks":
+    if (
+        ctx.triggered[0]["prop_id"] == "modal-court-submit.n_clicks"
+        and template is not None
+    ):
         # Check the event on the case events
         event = {
             "case_id": case_id,
@@ -447,3 +450,5 @@ def modal_court_submit(n_clicks, case_id, template):
                 )
             ]
         ), {"next_step": "court"}
+
+    return dash.no_update, dash.no_update
