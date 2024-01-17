@@ -1,106 +1,73 @@
 import logging
 
-
 import dash_mantine_components as dmc
+
+from src.components.cases.status import case_statuses
 from src.models.cases import Case
 
 logger = logging.Logger(__name__)
 
 
+def get_event_text(state: str, events: list):
+    text = []
+    for e in events:
+        if e.get("case_status") == state:
+            text.append(
+                dmc.Text(
+                    [
+                        f"{case_statuses.get(state, {}).get('label')} submitted by ",
+                        dmc.Anchor(e.get("email"), href="#", size="sm"),
+                        " on ",
+                        dmc.Anchor(e.get("date"), href="#", size="sm"),
+                    ],
+                    color="dimmed",
+                    size="sm",
+                )
+            )
+
+    return text
+
+
 def get_case_timeline(case: Case):
-    events = case.events
+    case_events = case.events or []
+
+    case_events_timeline = [
+        status_id
+        for status_id, status_details in case_statuses.items()
+        if status_details.get("show", True)
+        or status_id in [c.get("case_status") for c in case_events]
+    ]
+    active = 1
+    for order, status_key in enumerate(case_events_timeline):
+        if status_key == case.status:
+            active = order + 1
 
     timeline = dmc.Timeline(
-        active=1,
+        active=active,
         bulletSize=15,
         lineWidth=2,
         children=[
             dmc.TimelineItem(
-                title="Case Created & Paid",
-            ),
-            dmc.TimelineItem(
-                title="EOA",
-                children=[
-                    dmc.Text(
-                        [
-                            "EOA submitted by ",
-                            dmc.Anchor("Shawn Meyer", href="#", size="sm"),
-                            " on ",
-                            dmc.Anchor("2021-01-01", href="#", size="sm"),
-                        ],
-                        color="dimmed",
-                        size="sm",
-                    ),
-                ],
-            ),
-            dmc.TimelineItem(
-                title="RFR Pending",
-                lineVariant="dashed",
-                children=[
-                    dmc.Text(
-                        [
-                            "RFR submitted by ",
-                            dmc.Anchor(
-                                "Shawn Meyer",
-                                href="#",
-                                size="sm",
-                            ),
-                            " on ",
-                            dmc.Anchor("2021-01-01", href="#", size="sm"),
-                        ],
-                        color="dimmed",
-                        size="sm",
-                    ),
-                ],
-            ),
-            dmc.TimelineItem(
-                title="RFR Approved",
-                children=[
-                    dmc.Text(
-                        ["RFR to be approved by the client &  the attorney"],
-                    )
-                ],
-            ),
-            dmc.TimelineItem(
-                title="RFR Signed",
-                children=[
-                    dmc.Text(
-                        [
-                            "RFR to be signed by the client",
-                        ]
-                    )
-                ],
-            ),
-            dmc.TimelineItem(
-                title="RFR Paid by Client",
-                children=[
-                    dmc.Text(
-                        [
-                            "RFR Agreement paid by the client",
-                        ]
-                    )
-                ],
-            ),
-            dmc.TimelineItem(
-                title="Court Acceptance",
-                children=[
-                    dmc.Text(
-                        [
-                            "Court to accept the RFR proposal",
-                        ]
-                    )
-                ],
-            ),
-            dmc.TimelineItem(
-                title="Case Closed",
-                children=[
-                    dmc.Text(
-                        [
-                            "Case closed and archived",
-                        ]
-                    )
-                ],
-            ),
+                title=status_details.get("label"),
+                children=get_event_text(status_id, case.events),
+            )
+            for status_id, status_details in case_statuses.items()
+            if status_details.get("show", True)
+            or status_id in [c.get("case_status") for c in case_events]
         ],
     )
-    return timeline
+
+    button = dmc.Button(
+        "Update Status",
+        variant="filled",
+        color="dark",
+        id="update-status-button",
+        size="sm",
+    )
+    return dmc.Stack(
+        [
+            dmc.Text("Case Timeline", weight=600, size="lg"),
+            button,
+            timeline,
+        ]
+    )

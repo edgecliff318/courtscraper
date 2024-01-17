@@ -113,7 +113,7 @@ def modal_next_step_submit(
     participant = get_defendent(case)
 
     # Updating the case
-    cases_service.patch_case(case_id, {"case_status": status})
+    cases_service.patch_case(case_id, {"status": status})
 
     alert_message = "Case updated successfully"
 
