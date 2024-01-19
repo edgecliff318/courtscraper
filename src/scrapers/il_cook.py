@@ -3,7 +3,7 @@ import os
 import os.path
 import sys
 from datetime import date
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, urljoin, urlparse
 
 from dotenv import load_dotenv
 from playwright.async_api import async_playwright
@@ -55,10 +55,10 @@ class IlCook(ScraperBase):
         self.search_hearing_type = (
             search_hearing_type or "All Traffic Hearing Types"
         )
-        self.search_by = search_by or "Courtroom"
+        self.search_by = search_by or "Case Number"
         self.search_filter = search_filter or None
 
-    
+        super().__init__(email, password)
 
     async def get_case_details(self, page, url: str) -> dict:
         id = self._get_id(url)
@@ -82,64 +82,80 @@ class IlCook(ScraperBase):
 
             options = await self._get_options(page)
 
+            total_inserted_cases = 0
+
             # Getting cases for each court room
             for k, v in options.items():
-                # Get the cases from the search
+                current_datetime = date.today()
                 console.log(f"Getting cases for {k}: {v}")
-                if v == "":
-                    console.log("No value for this key, skipping...")
-                    continue
-                await self._go_to_table(page, value=v)
-                console.log("Table loaded")
 
-                console.log("Downloading list of cases...")
-                cases_list = await self.get_cases(page)
-                console.log(f"List of cases downloaded ({len(cases_list)})")
+                last_case_id_nb = self.state.get(f"last_case_id_nb_{v}", 1)
 
-                count = 0
-                for case in cases_list:
-                    hearing_type = (
-                        case.get("HearingTypeId", {})
-                        .get("Description")
-                        .lower()
-                    )
+                consecutive_not_found = 0
 
-                    count += 1
+                case_id_nb = last_case_id_nb
 
-                    if (
-                        "initial" not in hearing_type
-                        and "zoom" not in hearing_type
-                    ):
-                        console.log(
-                            f"Case {case.get('CaseNumber')} with Hearing Type: {hearing_type} is not an initial hearing or . Skipping ..."
+                while True:
+                    try:
+                        if consecutive_not_found > 10:
+                            console.log(
+                                f"Consecutive not found cases for {k}: {v}. Skipping ..."
+                            )
+                            break
+                        case_id_full = f"{str(current_datetime.year)[2:]}TR{v}{str(case_id_nb).zfill(7)}"
+                        case_id_nb += 1
+
+                        if self.check_if_exists(case_id_full):
+                            console.log(
+                                f"Case {case_id_full} already exists. Skipping ..."
+                            )
+                            continue
+                        # Searching for the case
+                        smart_search_data = await self.get_extra_data(
+                            page, case_id_full
                         )
-                        continue
 
-                    if self.check_if_exists(case.get("CaseNumber")):
+                        if not smart_search_data:
+                            console.log(
+                                f"Case {case_id_full} not found. Skipping ..."
+                            )
+                            consecutive_not_found += 1
+                            continue
+
+                        consecutive_not_found = 0
                         console.log(
-                            f"Case {case.get('CaseNumber')} already exists. Skipping ..."
+                            f"Downloading case details for {case_id_full}"
                         )
+
+                        # Join smart_search_data.get("case_url") with the base url
+                        case_url = urljoin(
+                            self.BASE_URL, smart_search_data.get("case_url")
+                        )
+
+                        case_details = await self.get_case_details(
+                            page, case_url
+                        )
+
+                        case_details.update(smart_search_data)
+                        self.insert_case(case_details)
+                        console.log(
+                            f"Inserted case {case_id_full} - Total ({total_inserted_cases})"
+                        )
+
+                        self.insert_lead(case_details)
+                        console.log(
+                            f"Inserted lead for {case_id_full}  Total ({total_inserted_cases})"
+                        )
+
+                        self.state[f"last_case_id_nb_{v}"] = case_id_nb
+                        self.update_state()
+                    except TimeoutError:
+                        console.log("Timeout error")
+                        # Sleep for 5 minutes
+                        await page.wait_for_timeout(300000)
+                    except Exception as e:
+                        console.log(f"Failed to insert case - {e}")
                         continue
-
-                    console.log(
-                        f"Downloading case details for {case.get('CaseNumber')}"
-                    )
-                    case_details = await self.get_case_details(
-                        page, case.get("CaseLoadUrl")
-                    )
-                    extra_data = await self.get_extra_data(
-                        page, case_details.get("case_id")
-                    )
-                    case_details.update(extra_data)
-                    self.insert_case(case_details)
-                    console.log(
-                        f"Inserted case {case_details.get('case_id')} ({count}/{len(cases_list)})"
-                    )
-
-                    self.insert_lead(case_details)
-                    console.log(
-                        f"Inserted lead for {case_details.get('case_id')} ({count}/{len(cases_list)})"
-                    )
 
             await browser.close()
 
@@ -170,6 +186,16 @@ class IlCook(ScraperBase):
         await page.wait_for_load_state()
 
     async def _get_options(self, page):
+        if self.search_by == "Case Number":
+            return {
+                "District 1": "1",
+                "District 2": "2",
+                "District 3": "3",
+                "District 4": "4",
+                "District 5": "5",
+                "District 6": "6",
+            }
+
         url = "https://cccportal.cookcountyclerkofcourt.org/CCCPortal/Home/Dashboard/26"
         await page.goto(url, timeout=120000)
         await page.locator("#cboHSSearchBy").select_option(
@@ -189,6 +215,8 @@ class IlCook(ScraperBase):
         return {k: label for k, label in zip(option_values, option_texts)}
 
     async def _go_to_table(self, page, value):
+        if self.search_by == "Case Number":
+            pass
         url = "https://cccportal.cookcountyclerkofcourt.org/CCCPortal/Home/Dashboard/26"
         await page.goto(url, timeout=120000)
         await page.wait_for_selector("#cboHSLocationGroup")
@@ -281,7 +309,13 @@ class IlCook(ScraperBase):
             cells = await row.query_selector_all("td")
 
             # Creating a dictionary for each row
+            # Case link from cells[1] get a then get data-url attribute
+            first_row = await cells[1].query_selector("a")
+            # Get a element from the first row
+            first_row_href = await first_row.get_attribute("data-url")
+
             row_data = {
+                "case_url": first_row_href,
                 "filing_date": await cells[3].inner_text(),
                 "type": await cells[4].inner_text(),
                 "case_status": await cells[5].inner_text(),
