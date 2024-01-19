@@ -15,6 +15,7 @@ from src.models import cases as cases_model
 from src.models import leads as leads_model
 from src.services import cases as cases_service
 from src.services import leads as leads_service
+from src.services import settings as settings_service
 
 settings = get_settings()
 console = Console()
@@ -33,6 +34,18 @@ class ScraperBase:
         self.password = password
         self.url = url
         self._GLOBAL_SESSION = None
+        self.scraper_service = settings_service.ScrapersService()
+        self.scraper_settings = self.scraper_service.get_single_item(
+            self.__class__.__name__
+        )
+        self.state = self.scraper_settings.state or {}
+
+    def update_state(self):
+        """Update the scraper settings."""
+        console.log(f"Updating state for {self.__class__.__name__}")
+        self.scraper_service.patch_item(
+            self.__class__.__name__, {"state": self.state}
+        )
 
     def scrape(self, search_parameters):
         """
@@ -163,6 +176,7 @@ class ScraperBase:
                 json.dump(case, f, default=str)
 
             console.log(f"Failed to parse case {case} - {e}")
+            raise e
 
     def insert_lead(self, case):
         """Insert the lead into the database."""
@@ -174,3 +188,4 @@ class ScraperBase:
             console.log(f"Succeeded to insert lead for {case.get('case_id')}")
         except Exception as e:
             console.log(f"Failed to parse lead {case} - {e}")
+            raise e
