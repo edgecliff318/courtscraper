@@ -1,11 +1,9 @@
 import logging
-from os import error
 
 import dash
 import dash_ag_grid as dag
 import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
-import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 from dash import Input, Output, callback, dcc, html
