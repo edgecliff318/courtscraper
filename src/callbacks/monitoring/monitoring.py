@@ -302,46 +302,46 @@ def create_graph_most_recent_error(start_date, end_date):
     return dcc.Graph(figure=fig)
 
 
-# @callback(
-#     Output("graph-container-status-sms", "children"),
-#     Output("messages-summary", "children"),
-#     Input("monitoring-date-selector", "value"),
-#     Input("monitoring-status-selector", "value"),
-# )
-# def graph_status_sms(dates, direction):
-#     (start_date, end_date) = dates
-#     df = fetch_messages_status(start_date, end_date)
-#     pivot_df = df.pivot_table(
-#         index="date", columns="status", values="case_id", aggfunc="count"
-#     )
-#     pivot_df = pivot_df.fillna(0)
-#     columns = ["stop", "yes", "other", "sent"]
+@callback(
+    Output("graph-container-status-sms", "children"),
+    Output("messages-summary", "children"),
+    Input("monitoring-date-selector", "value"),
+    Input("monitoring-status-selector", "value"),
+)
+def graph_status_sms(dates, direction):
+    (start_date, end_date) = dates
+    df = fetch_messages_status(start_date, end_date)
+    pivot_df = df.pivot_table(
+        index="date", columns="status", values="case_id", aggfunc="count"
+    )
+    pivot_df = pivot_df.fillna(0)
+    columns = ["stop", "yes", "other", "sent"]
 
-#     for col in columns:
-#         if col not in pivot_df.columns:
-#             pivot_df[col] = 0
+    for col in columns:
+        if col not in pivot_df.columns:
+            pivot_df[col] = 0
 
-#     pivot_df = pivot_df.reset_index()
-#     pivot_df = pivot_df[
-#         [
-#             c
-#             for c in pivot_df.columns
-#             if c in ["date", "stop", "yes", "other", "sent"]
-#         ]
-#     ]
+    pivot_df = pivot_df.reset_index()
+    pivot_df = pivot_df[
+        [
+            c
+            for c in pivot_df.columns
+            if c in ["date", "stop", "yes", "other", "sent"]
+        ]
+    ]
 
-#     return [create_graph_status_sms(pivot_df), render_message_summary(df)]
+    return [create_graph_status_sms(pivot_df), render_message_summary(df)]
 
 
-# @callback(
-#     Output("graph-container-most-recent-error", "children"),
-#     Input("monitoring-date-selector", "value"),
-#     Input("monitoring-status-selector", "value"),
-# )
-# def graph_most_recent_error(dates, direction):
-#     (start_date, end_date) = dates
+@callback(
+    Output("graph-container-most-recent-error", "children"),
+    Input("monitoring-date-selector", "value"),
+    Input("monitoring-status-selector", "value"),
+)
+def graph_most_recent_error(dates, direction):
+    (start_date, end_date) = dates
 
-#     return create_graph_most_recent_error(start_date, end_date)
+    return create_graph_most_recent_error(start_date, end_date)
 
 
 @callback(
@@ -525,7 +525,7 @@ def render_status_msg(dates, direction):
                                         ),
                                         dmc.Button(
                                             "Show Conversation",
-                                            id="show-conversation",
+                                            id="conversation-response-many",
                                             color="dark",
                                             size="sm",
                                             className="m-2",
@@ -590,28 +590,28 @@ def conversation(df_conversation):
             p="md",
             shadow="sm",
             style={
-                "backgroundColor": "#e0f7fa",  # Light blue background
+                "backgroundColor": "#e0f7fa", 
                 "textAlign": "left",
                 "marginBottom": "10px"
             }
         ),
 
-        # Message from the other
+       
         dmc.Paper(
             children="This is a response from the system.",
             withBorder=True,
             p="md",
             shadow="sm",
             style={
-                "backgroundColor": "#ffe0b2",  # Light orange background
+                "backgroundColor": "#ffe0b2", 
                 "textAlign": "right",
                 "marginBottom": "10px"
             }
         ),
 
-        # Add more messages as needed
+    
 
-    ], style={"maxWidth": 500})  # Set the maximum width of the container
+    ], style={"maxWidth": 500}) 
 ])
 
     
@@ -656,7 +656,7 @@ def conversation(df_conversation):
     Input("message-monitoring", "children"),
     Input("monitoring-date-selector", "value"),
 
-    # State("monitoring-memory", "data"), 
+    State("monitoring-memory", "data"), 
     prevent_initial_call=False,
 
 )

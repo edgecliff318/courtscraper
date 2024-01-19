@@ -20,6 +20,7 @@ def layout():
         [
           #modal for many response 
             html.Div(many_response_model("outbound")),
+            
             dbc.Row(
                 [
                     dbc.Col(

@@ -38,7 +38,7 @@ def handle_modal(prefix):
         if selection and (triggered_id == f"{prefix}-response-many"):
             df = pd.DataFrame(selection)
             # df_filter = df[["First Name", "Last Name", "Phone"]]
-            df_filter = df[[ "Phone"]]
+            # df_filter = df[[ "Phone"]]
             data = (
                 {"df": df.to_dict("records")}
                 if data is None
@@ -49,6 +49,35 @@ def handle_modal(prefix):
         return dash.no_update, dash.no_update, dash.no_update
 
 
-for prefix in ["outbound", "monitoring"]:
+for prefix in ["outbound", "monitoring" ]:
     handle_modal(prefix)
 
+
+
+
+
+
+@callback(
+        Output("conversation-modal", "is_open"),
+        Output("conversation-modal-content", "children"),
+        Output("conversation-memory", "data"),
+        State("conversation-memory", "data"),
+        Input("monitoring-data-grid", "selectedRows"),  
+        Input("monitoring-send-all", "n_clicks"),
+        Input("conversation-response-many", "n_clicks"),
+        Input("leads-data", "children"),
+        prevent_initial_call=False,
+    )
+def open_modal(data, selection, *args, **kwargs):
+    triggered_id = ctx.triggered_id if ctx.triggered_id else ""
+    if selection and (triggered_id == "conversation-response-many"):
+        df = pd.DataFrame(selection)
+        # df_filter = df[["First Name", "Last Name", "Phone"]]
+        df_filter = df[[ "Phone"]]
+        data = (
+            {"df": df.to_dict("records")}
+            if data is None
+            else {"df": df.to_dict("records")}
+        )
+        return True, messaging_template(df, prefix), data
+    return dash.no_update, dash.no_update, dash.no_update

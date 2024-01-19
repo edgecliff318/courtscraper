@@ -6,7 +6,6 @@ from dash import html
 import dash_mantine_components as dmc
 
 from src.components.filters import monitoring_controls
-from src.components.conversation import conversation_model
 from src.components.conversation import many_response_model
 
 from dash import dcc, html
@@ -67,63 +66,66 @@ def layout():
             
             
              html.Div([
-                         conversation_model(),
+                         
                          many_response_model("monitoring"),
                         dcc.Store(id="monitoring-data", storage_type="memory"),
+                        many_response_model("conversation"),
+                        dcc.Store(id="conversation-data", storage_type="memory"),
+                        
              ]
 
                      ),
             
-            # dbc.Row(
-            #     [
-            #         dbc.Col(
-            #             dbc.Card(
-            #                 dbc.CardBody(
-            #                     [
-            #                         html.Div(
-            #                             [
-            #                                 dmc.Skeleton(
-            #                                     visible=False,
-            #                                     children=html.Div(
-            #                                         id="graph-container-status-sms",
-            #                                     ),
-            #                                     mb=10,
-            #                                 ),
-            #                             ]
-            #                         )
-            #                     ]
-            #                 ),
-            #             ),
-            #             width=12,
-            #             className="mb-2",
-            #         ),
-            #     ]
-            # ),
+            dbc.Row(
+                [
+                    dbc.Col(
+                        dbc.Card(
+                            dbc.CardBody(
+                                [
+                                    html.Div(
+                                        [
+                                            dmc.Skeleton(
+                                                visible=False,
+                                                children=html.Div(
+                                                    id="graph-container-status-sms",
+                                                ),
+                                                mb=10,
+                                            ),
+                                        ]
+                                    )
+                                ]
+                            ),
+                        ),
+                        width=12,
+                        className="mb-2",
+                    ),
+                ]
+            ),
             # most recent error
-            # dbc.Row(
-            #     [
-            #         dbc.Col(
-            #             dbc.Card(
-            #                 dbc.CardBody(
-            #                     [
-            #                         html.Div(
-            #                             [
-            #                                 dmc.Skeleton(
-            #                                     visible=False,
-            #                                     children=html.Div(
-            #                                         id="graph-container-most-recent-error",
-            #                                     ),
-            #                                     mb=10,
-            #                                 ),
-            #                             ]
-            #                         )
-            #                     ]
-            #                 ),
-            #             ),
-            #             width=12,
-            #             className="mb-2",
-            #         ),
-            #     ]
-            # ),
+            dbc.Row(
+                [
+                    dbc.Col(
+                        dbc.Card(
+                            dbc.CardBody(
+                                [
+                                    html.Div(
+                                        [
+                                            dmc.Skeleton(
+                                                visible=False,
+                                                children=html.Div(
+                                                    id="graph-container-most-recent-error",
+                                                ),
+                                                mb=10,
+                                            ),
+                                        ]
+                                    )
+                                ]
+                            ),
+                        ),
+                        width=12,
+                        className="mb-2",
+                    ),
+                ]
+            ),
         ]
     )

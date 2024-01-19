@@ -62,11 +62,7 @@ def create_chat(df: pd.DataFrame):
     return html.Div(
         [
             dmc.Container(
-                # [
-                #     create_chat_bubble("Hello! Howhhfjhjdhfjhjkhfjdsf can I help you today?", from_user=True),
-                #     create_chat_bubble("I need fbdsjfjhdshfjsdhjkfassistance with my account.", from_user=False),
-                #     # Add more chat bubbles as needed
-                # ],
+              
                 [
                     create_chat_bubble(
                         message["message"],
@@ -154,7 +150,20 @@ def many_response_model(prefix: str) -> html.Div:
 
 
 def messaging_template(df, prefix: str = "outbound"):
-    column_defs = [
+   
+    import dash
+    ctx = dash.callback_context
+    button_id = ctx.triggered[0]["prop_id"].split(".")[0]
+    if button_id == "conversation-response-many":
+        grid = create_chat(df)
+    else:
+        import dash_ag_grid as dag
+        if 'First Name'  in df.columns and 'Last Name'  in df.columns:
+            cols = ['First Name', 'Last Name', 'Phone']
+        else:
+            cols = ['Phone']
+        df = df[cols]
+        column_defs = [
         {
             "headerName": col,
             "field": col,
@@ -167,18 +176,17 @@ def messaging_template(df, prefix: str = "outbound"):
         for col in df.columns
     ]
 
-    # grid = dag.AgGrid(
-    #     id=f"{prefix}-portfolio-grid-multiple-selected",
-    #     columnDefs=column_defs,
-    #     rowData=df.to_dict("records"),
-    #     columnSize="sizeToFit",
-    #     dashGridOptions={
-    #         "undoRedoCellEditing": True,
-    #     },
-    # )
+        grid = dag.AgGrid(
+        id=f"{prefix}-portfolio-grid-multiple-selected",
+        columnDefs=column_defs,
+        rowData=df.to_dict("records"),
+        columnSize="sizeToFit",
+        dashGridOptions={
+            "undoRedoCellEditing": True,
+        },
+    )
 
-#TODO: add conditional to check monitoring conversation render conversation
-    grid = create_chat(df)
+
 
     msg = html.Div(
         [
