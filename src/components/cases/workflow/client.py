@@ -1,6 +1,5 @@
 import logging
 
-
 import dash_mantine_components as dmc
 from dash import html
 from dash_iconify import DashIconify
@@ -67,6 +66,8 @@ def get_client_section():
                                                 leftIcon=DashIconify(
                                                     icon="fluent:database-plug-connected-20-filled"
                                                 ),
+                                                variant="filled",
+                                                color="dark",
                                             ),
                                             dmc.Button(
                                                 "Submit to client",
@@ -75,6 +76,8 @@ def get_client_section():
                                                 leftIcon=DashIconify(
                                                     icon="formkit:submit"
                                                 ),
+                                                variant="filled",
+                                                color="dark",
                                             ),
                                             dmc.Button(
                                                 "Cancel Submission",
@@ -84,6 +87,8 @@ def get_client_section():
                                                     icon="fluent:delete-20-filled"
                                                 ),
                                                 disabled=True,
+                                                variant="filled",
+                                                color="dark",
                                             ),
                                         ]
                                     ),
@@ -110,6 +115,8 @@ def get_client_section():
                 "Preview & Submit",
                 leftIcon=DashIconify(icon="fluent:preview-link-20-filled"),
                 id="modal-client-preview-button",
+                variant="filled",
+                color="dark",
             ),
         ],
         style={"maxWidth": "400px"},

@@ -120,17 +120,20 @@ def render_reply_section():
                 [
                     dmc.Button(
                         "Send",
-                        color="blue",
+                        variant="filled",
+                        color="dark",
                         id="email-reply-button",
                     ),
                     dmc.Button(
                         "Send to All",
-                        color="blue",
+                        variant="filled",
+                        color="dark",
                         id="email-reply-all-button",
                     ),
                     dmc.Button(
                         "Generate Reply",
-                        color="blue",
+                        variant="filled",
+                        color="dark",
                         id="email-generate-button",
                     ),
                 ]

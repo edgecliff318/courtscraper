@@ -334,6 +334,7 @@ def modal_court_preview(opened, update, template, pars, case_id):
                     "Download",
                     variant="outline",
                     leftIcon=DashIconify(icon="mdi:download"),
+                    color="dark",
                 ),
                 href=media_url,
             ),

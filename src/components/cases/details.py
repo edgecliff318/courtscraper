@@ -1,9 +1,10 @@
 import dash_mantine_components as dmc
+from dash import dcc, html
+from dash_iconify import DashIconify
+
 from src.components.edits import render_edit_component
 from src.models.cases import Case
 from src.services.participants import ParticipantsService
-from dash_iconify import DashIconify
-from dash import dcc, html
 
 
 def get_participants_section(case):
@@ -35,7 +36,7 @@ def get_participants_section(case):
             dcc.Link(
                 dmc.Button(
                     f"{p.role.capitalize()} - {p.first_name} {p.last_name}",
-                    color="blue",
+                    color="dark",
                     variant="light",
                     size="xs",
                     rightIcon=DashIconify(icon="carbon:view"),
@@ -84,13 +85,13 @@ def get_case_details(case: Case):
                 [
                     dmc.Button(
                         "Sync with Casenet",
-                        color="indigo",
+                        color="dark",
                         id="case-manage-refresh",
                         leftIcon=DashIconify(icon="material-symbols:save"),
                     ),
                     dmc.Button(
                         "Insert Participants from Case",
-                        color="indigo",
+                        color="dark",
                         id="case-manage-insert-participants",
                         leftIcon=DashIconify(icon="mdi:arrow-up-bold"),
                     ),

@@ -66,6 +66,8 @@ def get_prosecutor_section():
                                                 leftIcon=DashIconify(
                                                     icon="fluent:database-plug-connected-20-filled"
                                                 ),
+                                                variant="filled",
+                                                color="dark",
                                             ),
                                             dmc.Button(
                                                 "Submit to prosecutor",
@@ -74,6 +76,8 @@ def get_prosecutor_section():
                                                 leftIcon=DashIconify(
                                                     icon="formkit:submit"
                                                 ),
+                                                variant="filled",
+                                                color="dark",
                                             ),
                                             dmc.Button(
                                                 "Cancel Submission",
@@ -83,6 +87,8 @@ def get_prosecutor_section():
                                                     icon="fluent:delete-20-filled"
                                                 ),
                                                 disabled=True,
+                                                variant="filled",
+                                                color="dark",
                                             ),
                                         ]
                                     ),
@@ -109,6 +115,8 @@ def get_prosecutor_section():
                 "Preview & Submit",
                 leftIcon=DashIconify(icon="fluent:preview-link-20-filled"),
                 id="modal-prosecutor-preview-button",
+                variant="filled",
+                color="dark",
             ),
         ],
         style={"maxWidth": "400px"},

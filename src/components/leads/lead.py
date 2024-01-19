@@ -115,7 +115,7 @@ def get_lead_card(lead):
                             "index": lead.case_id,
                         },
                         leftIcon=DashIconify(icon="healthicons:yes"),
-                        color="green",
+                        color="dark",
                         variant="filled"
                         if lead.status == "won"
                         else "outline",

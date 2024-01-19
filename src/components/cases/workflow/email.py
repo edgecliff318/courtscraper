@@ -281,6 +281,8 @@ def get_preview(
                                 "type": f"modal-{role}-pars",
                                 "index": f"preview-{a}",
                             },
+                            variant="filled",
+                            color="dark",
                         ),
                     ]
                 )

@@ -1,9 +1,10 @@
 import logging
 
 import dash_mantine_components as dmc
-from src.components.inputs import generate_form_group
+from dash import dcc, html
 from dash_iconify import DashIconify
-from dash import html, dcc
+
+from src.components.inputs import generate_form_group
 
 logger = logging.Logger(__name__)
 
@@ -52,19 +53,19 @@ def render_edit_component(fields, collection, item_id, new=True):
             [
                 dmc.Button(
                     "Save",
-                    color="indigo",
+                    color="dark",
                     id="edit-component-save",
                     leftIcon=DashIconify(icon="material-symbols:save"),
                 ),
                 dmc.Button(
                     "Reset",
-                    color="indigo",
+                    color="dark",
                     id="edit-component-reset",
                     leftIcon=DashIconify(icon="material-symbols:reset"),
                 ),
                 dmc.Button(
                     "New",
-                    color="indigo",
+                    color="dark",
                     id="edit-component-new",
                     leftIcon=DashIconify(icon="carbon:reset"),
                     style={"display": "none" if new else "block"},

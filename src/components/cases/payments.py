@@ -71,7 +71,7 @@ def get_invoice_form():
     # Create an invoice button
     invoice_create_button = dmc.Button(
         "Create Invoice",
-        color="blue",
+        color="dark",
         variant="outline",
         id="case-manage-payments-create-invoice",
         leftIcon=DashIconify(icon="mdi:invoice-add"),
