@@ -1,6 +1,5 @@
 import logging
 
-import dash
 import pandas as pd
 from dash import Input, Output, callback, dcc
 
@@ -14,18 +13,6 @@ import plotly.graph_objects as go
 logger = logging.Logger(__name__)
 
 settings = get_settings()
-
-COLORS = {
-    "blue": "#2B8FB3",
-    "indigo": "#6610F2",
-    "purple": "#053342",
-    "pink": "#D63384",
-    "red": "#F8795D",
-    "orange": "#F8795D",
-    "yellow": "#FF9F43",
-    "green": "#28C76F",
-    "teal": "#20C997",
-}
 
 
 def get_base_layout():
@@ -55,6 +42,63 @@ def get_base_layout():
     return layout
 
 
+def create_graph_leads_status(df: pd.DataFrame):
+    colors_map = {
+        "not_prioritized": "#FF5733",
+        "not_contacted": "#FFC300",
+        "contacted": "#DAF7A6",
+        "responded": "#28C76F",
+        "not_found": "#C70039",
+        "processing_error": "#900C3F",
+        "not_valid": "#581845",
+        "new": "#007BFF",
+        "processing": "#FFC107",
+        "stop": "#FF9F43",
+    }
+
+    status_columns = [
+        "not_prioritized",
+        "not_contacted",
+        "contacted",
+        "responded",
+        "not_found",
+        "processing_error",
+        "not_valid",
+        "new",
+        "processing",
+        "stop",
+    ]
+    fig = go.Figure()
+    for status in status_columns:
+        fig.add_trace(
+            go.Bar(
+                x=[status],
+                y=[df[df["status"] == status].shape[0]],
+                name=status,
+                marker_color=colors_map[status],
+            )
+        )
+
+    fig.update_layout(
+        get_base_layout(),
+        title_text="Leads by Status",
+        xaxis_title="Status",
+        yaxis_title="Leads",
+        legend_title="Status",
+        barmode="stack",
+        coloraxis_colorbar=dict(
+            thicknessmode="pixels",
+            thickness=15,
+            lenmode="pixels",
+            len=200,
+            yanchor="top",
+            y=1,
+            ticks="outside",
+            dtick=1000,
+        ),
+    )
+
+    return dcc.Graph(figure=fig)
 
 
 def create_graph_leads_state(df: pd.DataFrame):
@@ -225,4 +269,4 @@ def render_scrapper_monitoring(dates, scrapper, n_clicks):
         end_date=end_date,
     )
     df = pd.DataFrame([lead.model_dump() for lead in leads_list])
-    return create_graph_leads_status(df) , create_graph_leads_state(df)
+    return create_graph_leads_status(df), create_graph_leads_state(df)
