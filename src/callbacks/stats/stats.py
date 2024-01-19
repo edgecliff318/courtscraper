@@ -254,10 +254,8 @@ def render_message_summary(df: pd.DataFrame):
 
 
 def render_inbound_summary(data: pd.DataFrame):
-    # Total leads
     total_leads = len(data)
 
-    # Total leads by status
     total_leads_by_status = data.groupby("status").size().to_dict()
 
     return dmc.Grid(
@@ -295,10 +293,9 @@ def render_inbound_summary(data: pd.DataFrame):
     Output("graph-container-leads-status", "children"),
     Output("graph-container-leads-state", "children"),
     Input("monitoring-date-selector", "value"),
-    Input("scrapper-selector", "value"),
-    Input("scrapper-refresh-button", "n_clicks"),
+    Input("stats-refresh-button", "n_clicks"),
 )
-def render_scrapper_monitoring(dates, scrapper, n_clicks):
+def render_scrapper_monitoring(dates, n_clicks):
     (start_date, end_date) = dates
     leads_list = leads.get_leads(
         start_date=start_date,
@@ -372,10 +369,9 @@ def fetch_messages_status(start_date, end_date):
     Output("overview-inbound-summary", "children"),
     Output("overview-message-summary", "children"),
     Input("monitoring-date-selector", "value"),
-    Input("scrapper-selector", "value"),
-    Input("scrapper-refresh-button", "n_clicks"),
+    Input("stats-refresh-button", "n_clicks"),
 )
-def render_inbound_monitoring(dates, scrapper, n_clicks):
+def render_inbound_monitoring(dates, n_clicks):
     (start_date, end_date) = dates
     
     df_messages = fetch_messages_status(start_date, end_date)

@@ -167,8 +167,7 @@ monitoring_controls = dbc.Row(
 stats_controls = dbc.Row(
     [
         dbc.Col(create_date_form_group(), width=3, xs=12, lg=3),
-        dbc.Col(create_scrapper_form_group(), width=2, xs=12, lg=2),
-        create_button("Refresh", "scrapper-refresh-button", 1, 1, 6),
+        create_button("Run", "stats-refresh-button", 1, 1, 6),
       
     ],
     justify="left",
