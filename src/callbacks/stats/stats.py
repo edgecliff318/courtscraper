@@ -4,7 +4,7 @@ import pandas as pd
 from dash import Input, Output, callback, dcc
 
 from src.core.config import get_settings
-from src.services import leads
+from src.services import leads , messages
 import dash_mantine_components as dmc
 
 import plotly.graph_objects as go
@@ -252,6 +252,45 @@ def render_message_summary(df: pd.DataFrame):
     )
 
 
+
+def render_inbound_summary(data: pd.DataFrame):
+    # Total leads
+    total_leads = len(data)
+
+    # Total leads by status
+    total_leads_by_status = data.groupby("status").size().to_dict()
+
+    return dmc.Grid(
+        [
+            dmc.Col(
+                render_stats_card(
+                    "Total leads",
+                    f"{total_leads:,}",
+                    "leads",
+                ),
+                md=4,
+            ),
+            dmc.Col(
+                render_stats_card(
+                    "New Leads",
+                    f"{total_leads_by_status.get('new', 0):,}",
+                    "leads",
+                ),
+                md=4,
+            ),
+            dmc.Col(
+                render_stats_card(
+                    "Leads Processed",
+                    f"{(total_leads - total_leads_by_status.get('new', 0)):,}",
+                    "leads",
+                ),
+                md=4,
+            ),
+        ]
+    )
+
+
+
 @callback(
     Output("graph-container-leads-status", "children"),
     Output("graph-container-leads-state", "children"),
@@ -261,12 +300,92 @@ def render_message_summary(df: pd.DataFrame):
 )
 def render_scrapper_monitoring(dates, scrapper, n_clicks):
     (start_date, end_date) = dates
-    # ctx = dash.callback_context
-    # trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
-
     leads_list = leads.get_leads(
         start_date=start_date,
         end_date=end_date,
     )
+    
+    if not leads_list:
+        return "No leads found for the selected period.", "No leads found for the selected period."
+
     df = pd.DataFrame([lead.model_dump() for lead in leads_list])
-    return create_graph_leads_status(df), create_graph_leads_state(df)
+
+    graph_leads_status = create_graph_leads_status(df)
+    graph_leads_state = create_graph_leads_state(df)
+
+    return graph_leads_status, graph_leads_state
+
+
+def process_date(date):
+    try:
+        creation_date = pd.to_datetime(date).tz_convert("America/Chicago")
+        creation_date = creation_date.strftime("%Y-%m-%d")
+    except Exception as e:
+        logger.error(f"Error parsing creation_date: {e}")
+        creation_date = None
+
+    return creation_date
+
+def fetch_messages_status(start_date, end_date):
+    messages_response = messages.get_interactions_filtered(
+        start_date=start_date,
+        end_date=end_date,
+    )
+
+    def map_status(message):
+        if message.direction == "outbound":
+            return "sent"
+        if message.message is not None:
+            if "stop" in message.message.lower():
+                return "stop"
+            elif "yes" in message.message.lower():
+                return "yes"
+            else:
+                return "other"
+        else:
+            return "other"
+
+    messages_list = [
+        {
+            "id": message.id,
+            "case_id": message.case_id,
+            "direction": message.direction,
+            "creation_date": message.creation_date,
+            "status": map_status(message),
+            "message_status": message.status,
+        }
+        for message in messages_response
+    ]
+
+    df = pd.DataFrame(messages_list)
+
+    df["date"] = df["creation_date"].apply(process_date)
+    return df
+
+
+
+
+
+
+
+@callback(
+    Output("overview-inbound-summary", "children"),
+    Output("overview-message-summary", "children"),
+    Input("monitoring-date-selector", "value"),
+    Input("scrapper-selector", "value"),
+    Input("scrapper-refresh-button", "n_clicks"),
+)
+def render_inbound_monitoring(dates, scrapper, n_clicks):
+    (start_date, end_date) = dates
+    
+    df_messages = fetch_messages_status(start_date, end_date)
+
+    leads_list = leads.get_leads(start_date=start_date, end_date=end_date)
+    fields = {"id", "phone", "violation", "court", "state", "status"}
+    leads_list = [lead.model_dump(include=fields) for lead in leads_list]
+    df_leads = pd.DataFrame(leads_list)
+
+    inbound_summary = render_inbound_summary(df_leads)
+    message_summary = render_message_summary(df_messages)
+
+    return inbound_summary, message_summary

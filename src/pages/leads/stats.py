@@ -27,6 +27,58 @@ def layout():
                     ),
                 ]
             ),
+            
+            
+            
+            dbc.Row(
+                [
+                    dbc.Col(
+                        
+                                [
+                                    html.Div(
+                                        [
+                                            dmc.Skeleton(
+                                                visible=False,
+                                                # visible=True,
+                                                children=html.Div(
+                                                    id="overview-inbound-summary",
+                                                ),
+                                                mb=10,
+                                            ),
+                                        ]
+                                    )
+                                ],
+                       
+                        width=12,
+                        className="mb-2",
+                    ),
+                ]
+            ),
+            
+            dbc.Row(
+                [
+                    dbc.Col(
+                        
+                                [
+                                    html.Div(
+                                        [
+                                            dmc.Skeleton(
+                                                visible=False,
+                                                # visible=True,
+                                                children=html.Div(
+                                                    id="overview-message-summary",
+                                                ),
+                                                mb=10,
+                                            ),
+                                        ]
+                                    )
+                                ],
+                       
+                        width=12,
+                        className="mb-2",
+                    ),
+                ]
+            ),
             dbc.Row(
                 [
                     dbc.Col(
@@ -41,59 +93,8 @@ def layout():
                     ),
                 ]
             ),
-            dbc.Row(
-                [
-                    dbc.Col(
-                        dbc.Card(
-                            dbc.CardBody(
-                                [
-                                    html.Div(
-                                        [
-                                            dmc.Skeleton(
-                                                visible=False,
-                                                # visible=True,
-                                                children=html.Div(
-                                                    id="overview-test",
-                                                ),
-                                                mb=10,
-                                            ),
-                                        ]
-                                    )
-                                ]
-                            ),
-                        ),
-                        width=12,
-                        className="mb-2",
-                    ),
-                ]
-            ),
-            ###
-            dbc.Row(
-                [
-                    dbc.Col(
-                        dbc.Card(
-                            dbc.CardBody(
-                                [
-                                    html.Div(
-                                        [
-                                            dmc.Skeleton(
-                                                visible=False,
-                                                # visible=True,
-                                                children=html.Div(
-                                                    id="overview",
-                                                ),
-                                                mb=10,
-                                            ),
-                                        ]
-                                    )
-                                ]
-                            ),
-                        ),
-                        width=12,
-                        className="mb-2",
-                    ),
-                ]
-            ),
+            
+        
             
         #graph leads state
          dbc.Row(

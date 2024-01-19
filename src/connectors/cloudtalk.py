@@ -334,3 +334,10 @@ def mapping(charges):
 
     print(f"{charges} mapped to {output}")
     return output
+
+
+if __name__ == "__main__":
+    print("Running")
+    # process_redudant_numbers()
+    # add_lead_cloud_talk(lead)
+    # add_website_lead(lead)
