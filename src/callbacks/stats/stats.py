@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 import dash_mantine_components as dmc
 import pandas as pd
@@ -427,14 +428,12 @@ def render_inbound_monitoring(dates, n_clicks):
 )
 def render_call_monitoring(dates, n_clicks):
     (start_date, end_date) = dates
-    from datetime import datetime
 
     start_date, end_date = [
         datetime.strptime(date, "%Y-%m-%d") for date in dates
     ]
 
     calls = fetch_call_history(start_date, end_date)
-    import pandas as pd
 
     df = pd.DataFrame(calls)
     df["date"] = pd.to_datetime(df["answered_at"]).dt.date

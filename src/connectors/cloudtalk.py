@@ -239,8 +239,7 @@ def process_redudant_numbers():
             for contact in contacts_items:
                 contact_full = http.request(
                     "GET",
-                    url
-                    + f"contacts/show/{contact.get('Contact').get('id')}.json",
+                    url + f"contacts/show/{contact.get('Contact').get('id')}.json",
                     headers=headers,
                     auth=(
                         settings.CLOUDTALK_API_KEY,
@@ -254,9 +253,7 @@ def process_redudant_numbers():
                 for tag in tags:
                     if tag.get("name") in contacts_by_tag_order.keys():
                         contact_order[contact.get("Contact").get("id")] = {
-                            "order": contacts_by_tag_order.get(
-                                tag.get("name")
-                            ),
+                            "order": contacts_by_tag_order.get(tag.get("name")),
                             "tag": tag.get("name"),
                         }
 
@@ -339,13 +336,12 @@ def mapping(charges):
 def fetch_call_history(date_from, date_to):
     url = "https://my.cloudtalk.io/api/"
     headers = {"Content-Type": "application/json"}
+
     params = {
-            'date_from': date_from.strftime('%Y-%m-%d %H:%M:%S'),
-            'date_to': date_to.strftime('%Y-%m-%d %H:%M:%S'),
-        }
+        "date_from": date_from.strftime("%Y-%m-%d %H:%M:%S"),
+        "date_to": date_to.strftime("%Y-%m-%d %H:%M:%S"),
+    }
 
-
-    print("Getting call history")
     response = requests.request(
         "GET",
         url + "calls/index.json",
@@ -362,7 +358,6 @@ def fetch_call_history(date_from, date_to):
         call.get("Cdr") for call in calls_json.get("responseData").get("data")
     ]
 
-
     while current_page < pages:
         print(f"Getting page {current_page + 1}")
         current_page += 1
@@ -375,9 +370,7 @@ def fetch_call_history(date_from, date_to):
         )
         calls_json = response.json()
         calls_list += [
-            call.get("Cdr")
-            for call in calls_json.get("responseData").get("data")
+            call.get("Cdr") for call in calls_json.get("responseData").get("data")
         ]
 
-
-        return calls_list
+    return calls_list

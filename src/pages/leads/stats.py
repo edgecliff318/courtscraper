@@ -20,11 +20,15 @@ def layout():
                 md=3,
             )
             for i in range(4)
-        ]
+        ],
+        style={"overflow": "hidden"},
     )
-    skeleton_card = dmc.Skeleton(
-        height="400px",
-        width="90vw",
+    skeleton_card = html.Div(
+        dmc.Skeleton(
+            height="400px",
+            width="90vw",
+        ),
+        style={"overflow": "hidden"},
     )
     return html.Div(
         [
@@ -41,7 +45,6 @@ def layout():
                         ),
                         width=12,
                         className="mb-2 p-1",
-                        style={"overflow": "auto"},
                     ),
                 ]
             ),
@@ -56,6 +59,7 @@ def layout():
                             html.Div(
                                 children=skeleton_cards,
                                 id="overview-inbound-summary",
+                                style={"overflow": "auto"},
                             ),
                         ],
                         width=12,
@@ -94,7 +98,6 @@ def layout():
                         ),
                         width=12,
                         className="mb-2 p-1",
-                        style={"overflow": "auto"},
                     ),
                 ]
             ),
