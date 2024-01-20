@@ -343,7 +343,6 @@ def fetch_call_history(date_from, date_to):
         params = {
             'date_from': date_from.strftime('%Y-%m-%d %H:%M:%S'),
             'date_to': date_to.strftime('%Y-%m-%d %H:%M:%S'),
-            # Add other parameters as necessary
         }
 
         print("Getting call history")
@@ -380,7 +379,6 @@ def fetch_call_history(date_from, date_to):
             call.get("Cdr") for call in calls_json.get("responseData").get("data")
         ]
 
-        print(f"Found {len(calls_list)} calls")
         return calls_list
     
 if __name__ == "__main__":
