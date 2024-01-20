@@ -41,11 +41,17 @@ def get_base_layout():
     return layout
 
 
-
 def create_graph_bar_leads_state(df: pd.DataFrame):
     df["date"] = pd.to_datetime(df["last_updated"]).dt.date
+    df["source"].fillna("mo_casenet", inplace=True)
+    source_rename_dict = {
+        "il_cook": "IL Cook County",
+        "mo_casenet": "MO Casenet",
+        "mo_mshp": "MO Highway Patrol",
+    }
+    df["source"] = df["source"].map(source_rename_dict)
     pivot_df = df.pivot_table(
-        index="date", columns="state", values="last_updated", aggfunc="count"
+        index="date", columns="source", values="last_updated", aggfunc="count"
     )
     pivot_df = pivot_df.fillna(0)
     pivot_df["total"] = pivot_df.sum(axis=1)
@@ -59,14 +65,13 @@ def create_graph_bar_leads_state(df: pd.DataFrame):
                 x=pivot_df["date"],
                 y=pivot_df[state],
                 name=state,
-                marker_color=settings.colors_mapping[state],
+                marker_color=settings.colors_mapping.get(state, "#FF5733"),
             )
         )
 
-    fig.update_layout(get_base_layout(), title_text="Leads by state")
+    fig.update_layout(get_base_layout(), title_text="Leads by Source")
 
     return dcc.Graph(figure=fig)
-
 
 
 def create_graph_leads_status(df: pd.DataFrame):
@@ -312,6 +317,7 @@ def render_inbound_summary(data: pd.DataFrame):
         ]
     )
 
+
 @callback(
     Output("graph-container-leads-status", "children"),
     Output("graph-container-leads-state", "children"),
@@ -334,22 +340,15 @@ def render_scrapper_monitoring(dates, _):
 
     grid_layout = dmc.Grid(
         children=[
-            dmc.Col(
-                children=graph_choropleth_leads_state,
-                mx=1,
-                span=5
-            ),
-            dmc.Col(
-                children=graph_bar_leads_state,
-                mx=1,
-                span=5
-            ),
+            dmc.Col(children=graph_choropleth_leads_state, mx=1, span=5),
+            dmc.Col(children=graph_bar_leads_state, mx=1, span=5),
         ],
         gutter="xl",
-        justify="space-between",     
+        justify="space-between",
     )
 
     return graph_leads_status, grid_layout
+
 
 def process_date(date):
     try:

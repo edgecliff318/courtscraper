@@ -5,7 +5,6 @@ from typing import ClassVar, Dict
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-
 COLORS_MAPPING = {
     "AL": "#FF5733",
     "AK": "#33FF57",
@@ -57,6 +56,10 @@ COLORS_MAPPING = {
     "WV": "#FFC433",
     "WI": "#33FFC4",
     "WY": "#FF5733",
+    # Case Sources
+    "IL Cook County": "#FF5733",
+    "MO Casenet": "#33FF57",
+    "MO Highway Patrol": "#3357FF",
     # leads status
     "not_prioritized": "#FF5733",
     "not_contacted": "#FFC300",
@@ -98,7 +101,9 @@ class Settings(BaseSettings):
 
     # Configuration
     CONFIG_FILENAME: str = os.getenv("CONFIG_FILENAME", "config.json")
-    CONFIG_TEST_FILENAME: str = os.getenv("CONFIG_TEST_FILENAME", "config_test.json")
+    CONFIG_TEST_FILENAME: str = os.getenv(
+        "CONFIG_TEST_FILENAME", "config_test.json"
+    )
 
     # Root Path
     # ROOT_PATH: pathlib.Path = pathlib.Path(__file__).parent.parent.parent
@@ -123,7 +128,9 @@ class Settings(BaseSettings):
     TEMPLATE: str = os.getenv("TEMPLATE", "plotly")
 
     # Case Net
-    CASE_NET_URL: str = os.getenv("CASE_NET_URL", "https://www.courts.mo.gov/cnet")
+    CASE_NET_URL: str = os.getenv(
+        "CASE_NET_URL", "https://www.courts.mo.gov/cnet"
+    )
     CASE_NET_USERNAME: str = os.getenv("CASE_NET_USERNAME", "smeyer4040")
     CASE_NET_PASSWORD: str = os.getenv("CASE_NET_PASSWORD", "MASdorm1993!MAS")
 
@@ -149,7 +156,9 @@ class Settings(BaseSettings):
 
     # AUTH0 Configuration
     AUTH0_DOMAIN: str = os.getenv("AUTH0_DOMAIN", "fubloo.us.auth0.com")
-    AUTH0_AUDIENCE: str = os.getenv("AUTH0_AUDIENCE", "https://fubloo.us.auth0.com")
+    AUTH0_AUDIENCE: str = os.getenv(
+        "AUTH0_AUDIENCE", "https://fubloo.us.auth0.com"
+    )
     AUTH0_CLIENT_ID: str = os.getenv("AUTH0_CLIENT_ID", "")
     AUTH0_CLIENT_SECRET: str = os.getenv("AUTH0_CLIENT_SECRET", "")
     AUTH0_CALLBACK_URL: str = os.getenv(
@@ -171,7 +180,9 @@ class Settings(BaseSettings):
     LOGIN_URL: str = os.getenv("LOGIN_URL", "/login")
     LOGOUT_URL: str = os.getenv("LOGOUT_URL", "/logout")
     CALLBACK_URL: str = os.getenv("CALLBACK_URL", "/callback")
-    REDIRECT_URI: str = os.getenv("REDIRECT_URI", "http://localhost:8000/callback")
+    REDIRECT_URI: str = os.getenv(
+        "REDIRECT_URI", "http://localhost:8000/callback"
+    )
 
     # keys session
     JWT_PAYLOAD: str = os.getenv("JWT_PAYLOAD", "jwt_payload")
@@ -199,8 +210,12 @@ class Settings(BaseSettings):
     )
 
     # Beenverified Configuration
-    BEEN_VERIFIED_EMAIL: str = os.getenv("BEEN_VERIFIED_EMAIL", "ttdwoman@gmail.com")
-    BEEN_VERIFIED_PASSWORD: str = os.getenv("BEEN_VERIFIED_PASSWORD", "0TTD2023!")
+    BEEN_VERIFIED_EMAIL: str = os.getenv(
+        "BEEN_VERIFIED_EMAIL", "ttdwoman@gmail.com"
+    )
+    BEEN_VERIFIED_PASSWORD: str = os.getenv(
+        "BEEN_VERIFIED_PASSWORD", "0TTD2023!"
+    )
 
     # Gotenberg Configuration
     GOTENBERG_URL: str = os.getenv("GOTENBERG_URL", "http://localhost:3001")
@@ -233,13 +248,19 @@ class Settings(BaseSettings):
     )
 
     # Intercom Sender
-    INTERCOM_SENDER_ID: str = os.getenv("INTERCOM_SENDER_ID", "sam@tickettakedown.com")
+    INTERCOM_SENDER_ID: str = os.getenv(
+        "INTERCOM_SENDER_ID", "sam@tickettakedown.com"
+    )
 
     # SMS Email Sender
-    SMS_EMAIL_SENDER_ID: str = os.getenv("SMS_EMAIL_SENDER_ID", "ttdwoman@gmail.com")
+    SMS_EMAIL_SENDER_ID: str = os.getenv(
+        "SMS_EMAIL_SENDER_ID", "ttdwoman@gmail.com"
+    )
 
     # CloudTalk Config
-    CLOUDTALK_API_KEY: str = os.getenv("CLOUDTALK_API_KEY", "QAPAMJXG6CYT2SLOVRWQW5B")
+    CLOUDTALK_API_KEY: str = os.getenv(
+        "CLOUDTALK_API_KEY", "QAPAMJXG6CYT2SLOVRWQW5B"
+    )
     CLOUDTALK_API_SECRET: str = os.getenv(
         "CLOUDTALK_API_SECRET", "ebsKYEo,Lt9GjAMIp3hx0miUZCuS8nBygNcqXkT1F24_R"
     )
