@@ -24,7 +24,7 @@ def layout():
     )
     skeleton_card = dmc.Skeleton(
         height="400px",
-        width="94vw",
+        width="90vw",
     )
     return html.Div(
         [

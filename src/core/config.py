@@ -1,9 +1,78 @@
 import os
 import pathlib
 from functools import lru_cache
-from typing import ClassVar
+from typing import ClassVar, Dict
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+COLORS_MAPPING = {
+    "AL": "#FF5733",
+    "AK": "#33FF57",
+    "AZ": "#3357FF",
+    "AR": "#FF33FB",
+    "CA": "#57FF33",
+    "CO": "#F833FF",
+    "CT": "#33FFF3",
+    "DE": "#FFC433",
+    "FL": "#33FFC4",
+    "GA": "#FF5733",
+    "HI": "#FF33A5",
+    "ID": "#33A5FF",
+    "IL": "#FF3333",
+    "IN": "#33FF57",
+    "IA": "#FF5733",
+    "KS": "#3357FF",
+    "KY": "#FF33FB",
+    "LA": "#57FF33",
+    "ME": "#F833FF",
+    "MD": "#33FFF3",
+    "MA": "#FFC433",
+    "MI": "#33FFC4",
+    "MN": "#FF5733",
+    "MS": "#FF33A5",
+    "MO": "#33A5FF",
+    "MT": "#FF3333",
+    "NE": "#33FF57",
+    "NV": "#FF5733",
+    "NH": "#3357FF",
+    "NJ": "#FF33FB",
+    "NM": "#57FF33",
+    "NY": "#F833FF",
+    "NC": "#33FFF3",
+    "ND": "#FFC433",
+    "OH": "#33FFC4",
+    "OK": "#FF5733",
+    "OR": "#FF33A5",
+    "PA": "#33A5FF",
+    "RI": "#FF3333",
+    "SC": "#33FF57",
+    "SD": "#FF5733",
+    "TN": "#3357FF",
+    "TX": "#6610F2",
+    "UT": "#FF33FB",
+    "VT": "#57FF33",
+    "VA": "#F833FF",
+    "WA": "#33FFF3",
+    "WV": "#FFC433",
+    "WI": "#33FFC4",
+    "WY": "#FF5733",
+    # leads status
+    "not_prioritized": "#FF5733",
+    "not_contacted": "#FFC300",
+    "contacted": "#DAF7A6",
+    "responded": "#28C76F",
+    "not_found": "#C70039",
+    "processing_error": "#900C3F",
+    "not_valid": "#581845",
+    "new": "#007BFF",
+    "processing": "#FFC107",
+    "stop": "#FF9F43",
+    # calls
+    "total": "#6610F2",
+    "incoming": "#28C76F",
+    "outgoing": "#053342",
+}
 
 
 class Settings(BaseSettings):
@@ -29,9 +98,7 @@ class Settings(BaseSettings):
 
     # Configuration
     CONFIG_FILENAME: str = os.getenv("CONFIG_FILENAME", "config.json")
-    CONFIG_TEST_FILENAME: str = os.getenv(
-        "CONFIG_TEST_FILENAME", "config_test.json"
-    )
+    CONFIG_TEST_FILENAME: str = os.getenv("CONFIG_TEST_FILENAME", "config_test.json")
 
     # Root Path
     # ROOT_PATH: pathlib.Path = pathlib.Path(__file__).parent.parent.parent
@@ -56,9 +123,7 @@ class Settings(BaseSettings):
     TEMPLATE: str = os.getenv("TEMPLATE", "plotly")
 
     # Case Net
-    CASE_NET_URL: str = os.getenv(
-        "CASE_NET_URL", "https://www.courts.mo.gov/cnet"
-    )
+    CASE_NET_URL: str = os.getenv("CASE_NET_URL", "https://www.courts.mo.gov/cnet")
     CASE_NET_USERNAME: str = os.getenv("CASE_NET_USERNAME", "smeyer4040")
     CASE_NET_PASSWORD: str = os.getenv("CASE_NET_PASSWORD", "MASdorm1993!MAS")
 
@@ -84,9 +149,7 @@ class Settings(BaseSettings):
 
     # AUTH0 Configuration
     AUTH0_DOMAIN: str = os.getenv("AUTH0_DOMAIN", "fubloo.us.auth0.com")
-    AUTH0_AUDIENCE: str = os.getenv(
-        "AUTH0_AUDIENCE", "https://fubloo.us.auth0.com"
-    )
+    AUTH0_AUDIENCE: str = os.getenv("AUTH0_AUDIENCE", "https://fubloo.us.auth0.com")
     AUTH0_CLIENT_ID: str = os.getenv("AUTH0_CLIENT_ID", "")
     AUTH0_CLIENT_SECRET: str = os.getenv("AUTH0_CLIENT_SECRET", "")
     AUTH0_CALLBACK_URL: str = os.getenv(
@@ -108,9 +171,7 @@ class Settings(BaseSettings):
     LOGIN_URL: str = os.getenv("LOGIN_URL", "/login")
     LOGOUT_URL: str = os.getenv("LOGOUT_URL", "/logout")
     CALLBACK_URL: str = os.getenv("CALLBACK_URL", "/callback")
-    REDIRECT_URI: str = os.getenv(
-        "REDIRECT_URI", "http://localhost:8000/callback"
-    )
+    REDIRECT_URI: str = os.getenv("REDIRECT_URI", "http://localhost:8000/callback")
 
     # keys session
     JWT_PAYLOAD: str = os.getenv("JWT_PAYLOAD", "jwt_payload")
@@ -138,12 +199,8 @@ class Settings(BaseSettings):
     )
 
     # Beenverified Configuration
-    BEEN_VERIFIED_EMAIL: str = os.getenv(
-        "BEEN_VERIFIED_EMAIL", "ttdwoman@gmail.com"
-    )
-    BEEN_VERIFIED_PASSWORD: str = os.getenv(
-        "BEEN_VERIFIED_PASSWORD", "0TTD2023!"
-    )
+    BEEN_VERIFIED_EMAIL: str = os.getenv("BEEN_VERIFIED_EMAIL", "ttdwoman@gmail.com")
+    BEEN_VERIFIED_PASSWORD: str = os.getenv("BEEN_VERIFIED_PASSWORD", "0TTD2023!")
 
     # Gotenberg Configuration
     GOTENBERG_URL: str = os.getenv("GOTENBERG_URL", "http://localhost:3001")
@@ -176,24 +233,19 @@ class Settings(BaseSettings):
     )
 
     # Intercom Sender
-    INTERCOM_SENDER_ID: str = os.getenv(
-        "INTERCOM_SENDER_ID", "sam@tickettakedown.com"
-    )
+    INTERCOM_SENDER_ID: str = os.getenv("INTERCOM_SENDER_ID", "sam@tickettakedown.com")
 
     # SMS Email Sender
-    SMS_EMAIL_SENDER_ID: str = os.getenv(
-        "SMS_EMAIL_SENDER_ID", "ttdwoman@gmail.com"
-    )
+    SMS_EMAIL_SENDER_ID: str = os.getenv("SMS_EMAIL_SENDER_ID", "ttdwoman@gmail.com")
 
     # CloudTalk Config
-    CLOUDTALK_API_KEY: str = os.getenv(
-        "CLOUDTALK_API_KEY", "QAPAMJXG6CYT2SLOVRWQW5B"
-    )
+    CLOUDTALK_API_KEY: str = os.getenv("CLOUDTALK_API_KEY", "QAPAMJXG6CYT2SLOVRWQW5B")
     CLOUDTALK_API_SECRET: str = os.getenv(
         "CLOUDTALK_API_SECRET", "ebsKYEo,Lt9GjAMIp3hx0miUZCuS8nBygNcqXkT1F24_R"
     )
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    colors_mapping: Dict = COLORS_MAPPING
 
 
 @lru_cache
