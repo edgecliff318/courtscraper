@@ -44,8 +44,8 @@ def layout(*args, **kwargs):
                 dmc.Button(
                     "Authorize Gmail",
                     leftIcon=DashIconify(icon="mdi:email-outline"),
-                    color="green",
                     variant="filled",
+                    color="dark",
                     className="mt-2",
                 ),
                 href=emails_auth.get_authorization_url(),

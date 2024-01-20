@@ -39,3 +39,7 @@ class Settings(BaseModel):
 class UserSettings(BaseModel):
     email: Optional[str] = None
     signature: Optional[str] = None
+
+
+class Scrapers(BaseModel):
+    state: Optional[dict] = None

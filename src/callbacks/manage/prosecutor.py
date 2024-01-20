@@ -1,5 +1,4 @@
 import logging
-from sqlite3 import Blob
 
 import dash
 from dash import ALL, Input, Output, State, callback
@@ -126,7 +125,10 @@ def modal_prosecutor_preview(
 
 
 @callback(
-    output=Output("modal-prosecutor-response", "children"),
+    output=[
+        Output("modal-prosecutor-response", "children"),
+        Output("modal-next-step-trigger", "data", allow_duplicate=True),
+    ],
     inputs=[
         Input("modal-prosecutor-submit", "n_clicks"),
         State({"type": "modal-prosecutor-pars", "index": ALL}, "value"),
@@ -153,12 +155,15 @@ def modal_prosecutor_preview(
 )
 def modal_prosecutor_submit(n_clicks, pars, case_id, template):
     ctx = dash.callback_context
-    if ctx.triggered[0]["prop_id"] == "modal-prosecutor-submit.n_clicks":
+    if (
+        ctx.triggered[0]["prop_id"] == "modal-prosecutor-submit.n_clicks"
+        and template is not None
+    ):
         attachments = ctx.states.get(
             f'{{"index":"attachments","type":"modal-prosecutor-pars"}}.value',
             [],
         )
-        return send_email(
+        output, message = send_email(
             template=template,
             trigger="modal-client-submit",
             case_id=case_id,
@@ -168,3 +173,6 @@ def modal_prosecutor_submit(n_clicks, pars, case_id, template):
             attachments=attachments,
             role="prosecutor",
         )
+        return message, {"next_step": "modal-prosecutor-submit"}
+
+    return dash.no_update, dash.no_update

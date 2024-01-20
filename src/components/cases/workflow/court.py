@@ -66,6 +66,8 @@ def get_court_section():
                                                 leftIcon=DashIconify(
                                                     icon="fluent:database-plug-connected-20-filled"
                                                 ),
+                                                variant="filled",
+                                                color="dark",
                                             ),
                                             dmc.Button(
                                                 "Submit to Court",
@@ -74,6 +76,8 @@ def get_court_section():
                                                 leftIcon=DashIconify(
                                                     icon="formkit:submit"
                                                 ),
+                                                variant="filled",
+                                                color="dark",
                                             ),
                                             dmc.Button(
                                                 "Cancel Submission",
@@ -83,6 +87,8 @@ def get_court_section():
                                                     icon="fluent:delete-20-filled"
                                                 ),
                                                 disabled=True,
+                                                variant="filled",
+                                                color="dark",
                                             ),
                                         ]
                                     ),
@@ -109,6 +115,8 @@ def get_court_section():
                 "Preview & Submit to Court",
                 leftIcon=DashIconify(icon="fluent:preview-link-20-filled"),
                 id="modal-court-preview-button",
+                variant="filled",
+                color="dark",
             ),
         ],
         style={"maxWidth": "400px"},

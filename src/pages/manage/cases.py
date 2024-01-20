@@ -8,6 +8,7 @@ from dash_iconify import DashIconify
 from src.components.cases.details import get_case_details
 from src.components.cases.documents import get_case_documents
 from src.components.cases.events import get_case_events
+from src.components.cases.next_steps import get_next_step_modal
 from src.components.cases.payments import get_case_payments
 from src.components.cases.search import get_case_search
 from src.components.cases.summary import get_case_summary
@@ -156,7 +157,7 @@ def layout(case_id):
             ),
             dbc.Col(
                 dmc.Paper(
-                    [get_case_tabs(case)],
+                    [get_case_tabs(case), get_next_step_modal()],
                     shadow="xs",
                     p="md",
                     radius="md",

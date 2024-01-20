@@ -20,3 +20,8 @@ def get_account(account_name: str):
 class UserSettingsService(BaseService):
     collection_name = "userSettings"
     serializer = settings.UserSettings
+
+
+class ScrapersService(BaseService):
+    collection_name = "scrapers"
+    serializer = settings.Scrapers

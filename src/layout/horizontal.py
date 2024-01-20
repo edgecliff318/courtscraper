@@ -86,6 +86,8 @@ class Layout:
         content_wrapper = html.Div(
             [
                 dcc.Location(id="url", refresh="callback-nav"),
+                dcc.Store(id="invoice-data-refresh"),
+                dcc.Store(id="modal-next-step-trigger"),
                 html.Div(id="navbar-menu"),
                 content,
                 self.build_footer(),

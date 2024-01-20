@@ -334,6 +334,7 @@ def modal_court_preview(opened, update, template, pars, case_id):
                     "Download",
                     variant="outline",
                     leftIcon=DashIconify(icon="mdi:download"),
+                    color="dark",
                 ),
                 href=media_url,
             ),
@@ -345,7 +346,10 @@ def modal_court_preview(opened, update, template, pars, case_id):
 
 
 @callback(
-    output=Output("modal-court-response", "children"),
+    output=[
+        Output("modal-court-response", "children"),
+        Output("modal-next-step-trigger", "data", allow_duplicate=True),
+    ],
     inputs=[
         Input("modal-court-submit", "n_clicks"),
         State("case-id", "children"),
@@ -371,7 +375,10 @@ def modal_court_preview(opened, update, template, pars, case_id):
 )
 def modal_court_submit(n_clicks, case_id, template):
     ctx = dash.callback_context
-    if ctx.triggered[0]["prop_id"] == "modal-court-submit.n_clicks":
+    if (
+        ctx.triggered[0]["prop_id"] == "modal-court-submit.n_clicks"
+        and template is not None
+    ):
         # Check the event on the case events
         event = {
             "case_id": case_id,
@@ -391,14 +398,17 @@ def modal_court_submit(n_clicks, case_id, template):
         if event.get("template") in [
             e.get("template") for e in events if e.get("template") is not None
         ]:
-            return html.Div(
-                [
-                    dmc.Alert(
-                        "Document already uploaded to the court system",
-                        color="red",
-                        title="Information",
-                    ),
-                ]
+            return (
+                html.Div(
+                    [
+                        dmc.Alert(
+                            "Document already uploaded to the court system",
+                            color="red",
+                            title="Information",
+                        ),
+                    ]
+                ),
+                dash.no_update,
             )
 
         template_details = templates.get_single_template(template)
@@ -440,4 +450,6 @@ def modal_court_submit(n_clicks, case_id, template):
                     title="Success",
                 )
             ]
-        )
+        ), {"next_step": "court"}
+
+    return dash.no_update, dash.no_update

@@ -4,8 +4,10 @@ import dash
 import dash_mantine_components as dmc
 from dash import ALL, Input, Output, State, callback
 
+from src.components.cases.payments import get_invoice_history
 from src.connectors import payments as payments_connector
 from src.core.config import get_settings
+from src.core.format import timestamp_to_date
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -48,6 +50,7 @@ def case_manage_payments_price_create(price_list, price_selected, product_id):
 
 @callback(
     Output("case-manage-payments-status", "children"),
+    Output("invoice-data-refresh", "data"),
     Input("case-manage-payments-create-invoice", "n_clicks"),
     State("case-manage-payments-products", "value"),
     State("case-manage-payments-price", "value"),
@@ -60,16 +63,53 @@ def case_manage_payments_send(n_clicks, product_id, price_id, customer_id):
     if (
         ctx.triggered[0]["prop_id"]
         == "case-manage-payments-create-invoice.n_clicks"
-    ):
+    ) and price_id is not None:
         payments_service = payments_connector.PaymentService()
 
-        invoice = payments_service.send_invoice(
+        invoice = payments_service.create_invoice(
             customer_id=customer_id, product_id=product_id, price_id=price_id
         )
 
-        return dmc.Alert(
-            f"The invoice has been sent to the customer with id {invoice.id}",
-            color="success",
-            variant="light",
-            title="Invoice sent",
+        return (
+            dmc.Alert(
+                f"The invoice has been created for to the customer with id {invoice.id}",
+                color="success",
+                variant="light",
+                title="Invoice Created",
+            ),
+            invoice.id,
         )
+
+    return dash.no_update, None
+
+
+@callback(
+    Output({"type": "modal-client-pars", "index": "invoices"}, "data"),
+    Output({"type": "modal-client-pars", "index": "invoices"}, "value"),
+    Input("invoice-data-refresh", "data"),
+    State("case-manage-payments-customer-id", "data"),
+    State({"type": "modal-client-pars", "index": "invoices"}, "value"),
+)
+def update_invoice_list(invoice_date_refresh, customer_id, invoices_selected):
+    if invoice_date_refresh is None:
+        return dash.no_update, dash.no_update
+
+    if customer_id is None:
+        return dash.no_update, dash.no_update
+
+    invoices = get_invoice_history(customer_id)
+
+    invoices_options = [
+        {
+            "label": f"{timestamp_to_date(invoice.get('created'))} - {invoice.get('amount_due')/100:.2f} $",
+            "value": invoice.get("id"),
+        }
+        for invoice in invoices
+    ]
+
+    if invoices_selected is None:
+        invoices_selected = []
+
+    invoices_selected.append(invoice_date_refresh)
+
+    return invoices_options, invoices_selected

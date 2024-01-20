@@ -17,6 +17,34 @@ case_statuses = {
         "color": "orange",
         "section": "pending",
     },
+    "continuance": {
+        "value": "continuance",
+        "label": "Motion for Continuance Requested",
+        "color": "orange",
+        "section": "pending",
+        "show": False,
+    },
+    "court": {
+        "value": "court",
+        "label": "Court Submission",
+        "color": "orange",
+        "section": "pending",
+        "show": False,
+    },
+    "court_response": {
+        "value": "court",
+        "label": "Court Submission",
+        "color": "orange",
+        "section": "pending",
+        "show": False,
+    },
+    "customer": {
+        "value": "customer",
+        "label": "Customer Request",
+        "color": "orange",
+        "section": "pending",
+        "show": False,
+    },
     "rev_int": {
         "value": "rev_int",
         "label": "Internal Review",
@@ -46,12 +74,14 @@ case_statuses = {
         "label": "Recommendation Rejected",
         "color": "red",
         "section": "todo",
+        "show": False,
     },
     "rec_del": {
         "value": "rec_del",
         "label": "Recommendation Delayed",
         "color": "pink",
         "section": "todo",
+        "show": False,
     },
     "rec_rev": {
         "value": "rec_rev",
@@ -88,6 +118,7 @@ case_statuses = {
         "label": "Court Appearance Required",
         "color": "red",
         "section": "pending",
+        "show": False,
     },
     "close": {
         "value": "close",

@@ -119,7 +119,9 @@ class Settings(BaseSettings):
     # firebase configuration
     GOOGLE_APPLICATION_CREDENTIALS: str = os.getenv(
         "GOOGLE_APPLICATION_CREDENTIALS",
-        "fubloo-1b0e8-firebase-adminsdk-5j6zr-6b8d8d1c0b.json",
+        CONFIG_PATH.joinpath(
+            "fubloo-1b0e8-firebase-adminsdk-5j6zr-6b8d8d1c0b.json"
+        ).name,
     )
 
     # llm
@@ -175,7 +177,7 @@ class Settings(BaseSettings):
 
     # Intercom Sender
     INTERCOM_SENDER_ID: str = os.getenv(
-        "INTERCOM_SENDER_ID", "samama@tickettakedown.com"
+        "INTERCOM_SENDER_ID", "sam@tickettakedown.com"
     )
 
     # SMS Email Sender

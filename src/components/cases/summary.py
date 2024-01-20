@@ -1,14 +1,11 @@
 import logging
 
-
 import dash_mantine_components as dmc
 from dash import html
-from src.components.cases.status import get_case_status_color
 
-
+from src.components.cases.status import case_statuses, get_case_status_color
 from src.components.groups import create_group_item
 from src.models.cases import Case
-
 
 logger = logging.Logger(__name__)
 
@@ -31,11 +28,12 @@ def get_case_summary(case: Case):
                     dmc.Text(f"Case#{case.case_id}", weight=500),
                     html.Div(hidden=True, children=case.case_id, id="case-id"),
                     dmc.Badge(
-                        case.status.capitalize()
+                        case_statuses.get(case.status, {}).get("label")
                         if case.status is not None
                         else "Filed",
                         color=get_case_status_color(case.status),
                         variant="light",
+                        size="sm",
                     ),
                 ],
                 position="apart",

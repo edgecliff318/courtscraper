@@ -89,7 +89,7 @@ def create_case_card(case_data: dict) -> dmc.Card:
             dmc.Button(
                 "View Details",
                 variant="light",
-                color="blue",
+                color="dark",
                 fullWidth=True,
                 mt="md",
                 radius="md",
