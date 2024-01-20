@@ -429,7 +429,8 @@ def render_status_msg(dates, direction):
     df.reset_index(inplace=True)
 
     df["Case ID"] = df["Case ID"].map(lambda x: f"[{x}](/case/{x})")
-
+    number_of_leads = df["Case ID"].nunique()
+    
     column_defs = [
         {
             "headerName": "Case ID",
@@ -493,7 +494,7 @@ def render_status_msg(dates, direction):
                         html.Div(
                             [
                                 html.H3(
-                                    "SMS Monitoring",
+                                    f"SMS Monitoring of leads {number_of_leads}",
                                     className="card-title m-1",
                                 ),
                                 html.Div(

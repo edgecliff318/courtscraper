@@ -27,7 +27,11 @@ def layout():
             for i in range(4)
         ]
     )
-    summary_card = html.Div(children=skeleton_cards, id="messages-summary")
+    skeleton_card = dmc.Skeleton(
+        height="400px",
+        width="90vw",
+    )
+
     return html.Div(
         [
             dbc.Row(
@@ -49,14 +53,30 @@ def layout():
             dbc.Row(
                 [
                     dbc.Col(
-                        summary_card,
+                        html.Div(children=skeleton_cards, id="messages-summary"),
                         width=12,
-                        className="mb-2",
+                        className="mb-2 p-1",
                     ),
                 ]
             ),
-            html.Div(
-                id="message-monitoring",
+            dbc.Row(
+                [
+                    dbc.Col(
+                          dbc.Card(
+                            dbc.CardBody(
+                        [
+                            html.Div(
+                                children=skeleton_card,
+                                id="message-monitoring",
+                            )
+                        ]
+                            ))
+                        ,
+                        width=12,
+                        className="mb-2 p-1",
+                    ),
+                ]
+                          
             ),
             html.Div(
                 id="leads-data",
@@ -76,21 +96,14 @@ def layout():
                             dbc.CardBody(
                                 [
                                     html.Div(
-                                        [
-                                            dmc.Skeleton(
-                                                visible=False,
-                                                children=html.Div(
-                                                    id="graph-container-status-sms",
-                                                ),
-                                                mb=10,
-                                            ),
-                                        ]
+                                        children=skeleton_card,
+                                        id="graph-container-status-sms",
                                     )
                                 ]
                             ),
                         ),
                         width=12,
-                        className="mb-2",
+                        className="mb-2 p-1",
                     ),
                 ]
             ),
@@ -102,21 +115,14 @@ def layout():
                             dbc.CardBody(
                                 [
                                     html.Div(
-                                        [
-                                            dmc.Skeleton(
-                                                visible=False,
-                                                children=html.Div(
-                                                    id="graph-container-most-recent-error",
-                                                ),
-                                                mb=10,
-                                            ),
-                                        ]
+                                        children=skeleton_card,
+                                        id="graph-container-most-recent-error",
                                     )
                                 ]
                             ),
                         ),
                         width=12,
-                        className="mb-2",
+                        className="mb-2 p-1",
                     ),
                 ]
             ),

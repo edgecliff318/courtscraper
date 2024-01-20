@@ -44,7 +44,7 @@ def create_chat_bubble(text, from_user=True):
         children=[dcc.Markdown(text)],
         style={
             "maxWidth": "60%",
-            "backgroundColor": "#DCF8C6" if from_user else "#F0F0F0",
+            "backgroundColor": "#F0F0F0" if from_user else  "#DCF8C6",
             "padding": "10px",
             "borderRadius": "15px",
             "margin": "5px",
