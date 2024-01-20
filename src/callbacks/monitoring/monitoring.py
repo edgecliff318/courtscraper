@@ -497,21 +497,7 @@ def render_status_msg(dates, direction):
                                     className="card-title m-1",
                                 ),
                                 html.Div(
-                                    [
-                                        dmc.Button(
-                                            "Remove ",
-                                            id="cases-process",
-                                            color="dark",
-                                            size="sm",
-                                            className="m-2",
-                                        ),
-                                        dmc.Button(
-                                            "Resend",
-                                            id="cases-process",
-                                            color="dark",
-                                            size="sm",
-                                            className="m-2",
-                                        ),
+                                    [                                      
                                         dmc.Button(
                                             "Show Conversation",
                                             id="conversation-response-many",

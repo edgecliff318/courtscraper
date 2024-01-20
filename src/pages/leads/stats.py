@@ -9,6 +9,22 @@ dash.register_page(__name__, class_icon="ti ti-dashboard", order=2)
 
 
 def layout():
+    skeleton_cards = dmc.Grid(
+        children=[
+            dmc.Col(
+                dmc.Skeleton(
+                    height="150px",
+                    width="23vw",
+                ),
+                md=3,
+            )
+            for i in range(4)
+        ]
+    )
+    skeleton_card = dmc.Skeleton(
+        height="400px",
+        width="94vw",
+    )
     return html.Div(
         [
             dbc.Row(
@@ -23,106 +39,39 @@ def layout():
                             ),
                         ),
                         width=12,
-                        className="mb-2",
-                    ),
-                ]
-            ),
-            
-            
-            
-            dbc.Row(
-                [
-                    dbc.Col(
-                        
-                                [
-                                    html.Div(
-                                        [
-                                            dmc.Skeleton(
-                                                visible=False,
-                                                # visible=True,
-                                                children=html.Div(
-                                                    id="overview-inbound-summary",
-                                                ),
-                                                mb=10,
-                                            ),
-                                        ]
-                                    )
-                                ],
-                       
-                        width=12,
-                        className="mb-2",
-                    ),
-                ]
-            ),
-            
-            dbc.Row(
-                [
-                    dbc.Col(
-                        
-                                [
-                                    html.Div(
-                                        [
-                                            dmc.Skeleton(
-                                                visible=False,
-                                                # visible=True,
-                                                children=html.Div(
-                                                    id="overview-message-summary",
-                                                ),
-                                                mb=10,
-                                            ),
-                                        ]
-                                    )
-                                ],
-                       
-                        width=12,
-                        className="mb-2",
+                        className="mb-2 p-1",
                     ),
                 ]
             ),
             dbc.Row(
                 [
                     dbc.Col(
-                        html.Div(
-                            dmc.Skeleton(
-                                visible=False,
-                                children=html.Div(id="scrapper-summary"),
+                        [
+                            html.Div(
+                                children=skeleton_cards,
+                                id="overview-inbound-summary",
                             )
-                        ),
+                        ],
                         width=12,
-                        className="mb-2",
+                        className="mb-2 p-1",
                     ),
                 ]
             ),
-            
-        
-            
-        #graph leads state
-         dbc.Row(
+            dbc.Row(
                 [
                     dbc.Col(
-                        dbc.Card(
-                            dbc.CardBody(
-                                [
-                                    html.Div(
-                                        [
-                                            dmc.Skeleton(
-                                                visible=False,
-                                                children=html.Div(
-                                                    id="graph-container-leads-state",
-                                                ),
-                                                mb=10,
-                                            ),
-                                        ]
-                                    )
-                                ]
-                            ),
-                        ),
+                        [
+                            html.Div(
+                                children=skeleton_cards,
+                                id="overview-message-summary",
+                            )
+                        ],
                         width=12,
-                        className="mb-2",
+                        className="mb-2 p-1",
                     ),
                 ]
             ),
-            # leads status
+           
             dbc.Row(
                 [
                     dbc.Col(
@@ -130,46 +79,50 @@ def layout():
                             dbc.CardBody(
                                 [
                                     html.Div(
-                                        [
-                                            dmc.Skeleton(
-                                                visible=False,
-                                                children=html.Div(
-                                                    id="graph-container-leads-status",
-                                                ),
-                                                mb=10,
-                                            ),
-                                        ]
+                                        children=skeleton_card,
+                                        id="graph-container-leads-state",
                                     )
                                 ]
                             ),
                         ),
                         width=12,
-                        className="mb-2",
+                        className="mb-2 p-1",
                     ),
                 ]
             ),
-             dbc.Row(
+            dbc.Row(
                 [
                     dbc.Col(
                         dbc.Card(
                             dbc.CardBody(
                                 [
                                     html.Div(
-                                        [
-                                            dmc.Skeleton(
-                                                visible=False,
-                                                children=html.Div(
-                                                    id="graph-container-call",
-                                                ),
-                                                mb=10,
-                                            ),
-                                        ]
+                                        children=skeleton_card,
+                                        id="graph-container-leads-status",
                                     )
                                 ]
                             ),
                         ),
                         width=12,
-                        className="mb-2",
+                        className="mb-2 p-1",
+                    ),
+                ]
+            ),
+            dbc.Row(
+                [
+                    dbc.Col(
+                        dbc.Card(
+                            dbc.CardBody(
+                                [
+                                    html.Div(
+                                        children=skeleton_card,
+                                        id="graph-container-call",
+                                    )
+                                ]
+                            ),
+                        ),
+                        width=12,
+                        className="mb-2 p-1",
                     ),
                 ]
             ),
