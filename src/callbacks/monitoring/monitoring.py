@@ -6,7 +6,7 @@ import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
 import pandas as pd
 import plotly.graph_objects as go
-from dash import Input, Output, callback, dcc, html ,State ,ctx
+from dash import Input, Output, callback, dcc, html, State, ctx
 
 from src.commands import leads as leads_commands
 from src.components.toast import build_toast
@@ -43,6 +43,7 @@ def extract_case_id(text):
     if match:
         return match.group(1)
     return None
+
 
 def process_date(date):
     try:
@@ -321,11 +322,7 @@ def graph_status_sms(dates, direction):
 
     pivot_df = pivot_df.reset_index()
     pivot_df = pivot_df[
-        [
-            c
-            for c in pivot_df.columns
-            if c in ["date", "stop", "yes", "other", "sent"]
-        ]
+        [c for c in pivot_df.columns if c in ["date", "stop", "yes", "other", "sent"]]
     ]
 
     return [create_graph_status_sms(pivot_df), render_message_summary(df)]
@@ -362,12 +359,10 @@ def settings(checked):
 
 
 @callback(
-    
-    Output("message-monitoring", "children"), 
-    Output("monitoring-data", "data"), 
+    Output("message-monitoring", "children"),
+    Output("monitoring-data", "data"),
     Input("monitoring-date-selector", "value"),
     Input("monitoring-status-selector", "value"),
-    
     prevent_initial_call=False,
 )
 def render_status_msg(dates, direction):
@@ -383,9 +378,7 @@ def render_status_msg(dates, direction):
         end_date=end_date,
         direction=direction,
     )
-    df = pd.DataFrame(
-        [interaction.model_dump() for interaction in interactions_list]
-    )
+    df = pd.DataFrame([interaction.model_dump() for interaction in interactions_list])
     cols = [
         "case_id",
         "creation_date",
@@ -420,9 +413,7 @@ def render_status_msg(dates, direction):
     df["creation_date"] = df["creation_date"].dt.tz_convert("US/Central")
 
     df.sort_values(by=["creation_date"], inplace=True, ascending=False)
-    df["creation_date"] = df["creation_date"].dt.strftime(
-        "%m/%d/%Y - %H:%M:%S"
-    )
+    df["creation_date"] = df["creation_date"].dt.strftime("%m/%d/%Y - %H:%M:%S")
     df = df.set_index("case_id")
     df = df.rename(
         columns={
@@ -548,7 +539,7 @@ def render_status_msg(dates, direction):
             width=12,
             className="mb-2",
         )
-    ] , df.to_dict("records")
+    ], df.to_dict("records")
 
 
 @callback(
@@ -576,71 +567,65 @@ def refresh_messages(n_clicks, dates):
             )
 
 
-
-
 def conversation(df_conversation):
-    
-    container = html.Div([
-    dmc.Container([
-        # Message from the user
-        dmc.Paper(
-            children="This is a user message.",
-            withBorder=True,
-            p="md",
-            shadow="sm",
-            style={
-                "backgroundColor": "#e0f7fa", 
-                "textAlign": "left",
-                "marginBottom": "10px"
-            }
-        ),
+    container = html.Div(
+        [
+            dmc.Container(
+                [
+                    # Message from the user
+                    dmc.Paper(
+                        children="This is a user message.",
+                        withBorder=True,
+                        p="md",
+                        shadow="sm",
+                        style={
+                            "backgroundColor": "#e0f7fa",
+                            "textAlign": "left",
+                            "marginBottom": "10px",
+                        },
+                    ),
+                    dmc.Paper(
+                        children="This is a response from the system.",
+                        withBorder=True,
+                        p="md",
+                        shadow="sm",
+                        style={
+                            "backgroundColor": "#ffe0b2",
+                            "textAlign": "right",
+                            "marginBottom": "10px",
+                        },
+                    ),
+                ],
+                style={"maxWidth": 500},
+            )
+        ]
+    )
 
-       
-        dmc.Paper(
-            children="This is a response from the system.",
-            withBorder=True,
-            p="md",
-            shadow="sm",
-            style={
-                "backgroundColor": "#ffe0b2", 
-                "textAlign": "right",
-                "marginBottom": "10px"
-            }
-        ),
-
-    
-
-    ], style={"maxWidth": 500}) 
-])
-
-    
     return dmc.Stack(
         [
-                        container ,
+            container,
             dmc.TextInput(
-            styles={
-                "input": {
-                    "fontSize": 15,
-                    "boxShadow": "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px",
-                    "border": "none",
+                styles={
+                    "input": {
+                        "fontSize": 15,
+                        "boxShadow": "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px",
+                        "border": "none",
+                    },
                 },
-            },
-            id="message-response-input",
-            placeholder="What do you want to know about your business?",
-            radius="lg",
-            size="lg",
-            w="80%",
-            m="auto",
-            rightSection=dmc.ActionIcon(
-                DashIconify(icon="ic:round-send", width=20),
-                id="button",
-                radius="md",
+                id="message-response-input",
+                placeholder="What do you want to know about your business?",
+                radius="lg",
                 size="lg",
-                mr=17,
+                w="80%",
+                m="auto",
+                rightSection=dmc.ActionIcon(
+                    DashIconify(icon="ic:round-send", width=20),
+                    id="button",
+                    radius="md",
+                    size="lg",
+                    mr=17,
+                ),
             ),
-        ), 
-            
-            
         ]
     )
 
@@ -649,35 +634,38 @@ def conversation(df_conversation):
     Output("modal-conversation", "is_open"),
     Output("modal-conversation-content", "children"),
     Input("monitoring-data-grid", "selectedRows"),
-    State("monitoring-data", "data"), 
-    
+    State("monitoring-data", "data"),
     Input("show-conversation", "n_clicks"),
     Input("message-monitoring", "children"),
     Input("monitoring-date-selector", "value"),
-
-    State("monitoring-memory", "data"), 
+    State("monitoring-memory", "data"),
     prevent_initial_call=False,
-
 )
-def open_modal_conversation(selection,data, *args, **kwargs):
-    
+def open_modal_conversation(selection, data, *args, **kwargs):
     if selection and ctx.triggered_id == "show-conversation":
         df = pd.DataFrame(selection)
-        df_filter = df[[ "Phone" , "Direction" , "Message", ]]
+        df_filter = df[
+            [
+                "Phone",
+                "Direction",
+                "Message",
+            ]
+        ]
         if df_filter.empty:
             return False, dash.no_update
-        
-        
+
         case_id = extract_case_id(df["Case ID"].iloc[0])
-        
-        messages = messages_service.get_interactions(
-            case_id=case_id
-        )
+
+        messages = messages_service.get_interactions(case_id=case_id)
         df_conversation = pd.DataFrame([message.model_dump() for message in messages])
-        df_conversation["creation_date"] = pd.to_datetime(df_conversation["creation_date"], utc=True)
+        df_conversation["creation_date"] = pd.to_datetime(
+            df_conversation["creation_date"], utc=True
+        )
         df_conversation.sort_values(by=["creation_date"], inplace=True, ascending=True)
-        df_conversation["creation_date"] = df_conversation["creation_date"].dt.tz_convert("US/Central")
+        df_conversation["creation_date"] = df_conversation[
+            "creation_date"
+        ].dt.tz_convert("US/Central")
         df_conversation = df_conversation[["direction", "message", "creation_date"]]
         return True, conversation(df_conversation)
 
-    return dash.no_update , dash.no_update
+    return dash.no_update, dash.no_update
