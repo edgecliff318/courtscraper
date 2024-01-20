@@ -66,7 +66,7 @@ leads_controls = dbc.Row(
 def create_date_form_group():
     return generate_form_group(
         label="Date",
-        id="monitoring-date-selector",
+        id="stats-date-selector",
         placeholder="Select a Date",
         type="DateRangePicker",
         persistence_type="session",

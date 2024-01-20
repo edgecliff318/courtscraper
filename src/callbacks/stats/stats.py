@@ -275,7 +275,7 @@ def render_inbound_summary(data: pd.DataFrame):
 @callback(
     Output("graph-container-leads-status", "children"),
     Output("graph-container-leads-state", "children"),
-    Input("monitoring-date-selector", "value"),
+    Input("stats-date-selector", "value"),
     Input("stats-refresh-button", "n_clicks"),
 )
 def render_scrapper_monitoring(dates, n_clicks):
@@ -350,7 +350,7 @@ def fetch_messages_status(start_date, end_date):
 @callback(
     Output("overview-inbound-summary", "children"),
     Output("overview-message-summary", "children"),
-    Input("monitoring-date-selector", "value"),
+    Input("stats-date-selector", "value"),
     Input("stats-refresh-button", "n_clicks"),
 )
 def render_inbound_monitoring(dates, n_clicks):
@@ -371,7 +371,7 @@ def render_inbound_monitoring(dates, n_clicks):
 
 @callback(
     Output("graph-container-call", "children"),
-    Input("monitoring-date-selector", "value"),
+    Input("stats-date-selector", "value"),
     Input("stats-refresh-button", "n_clicks"),
 )
 def render_call_monitoring(dates, n_clicks):
