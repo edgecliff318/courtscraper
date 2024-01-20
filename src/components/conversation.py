@@ -1,18 +1,19 @@
 import logging
+import re
 
 import dash_bootstrap_components as dbc
 from dash import dcc, html
 import dash_mantine_components as dmc
+import dash_ag_grid as dag
+
 import pandas as pd
+import dash
 
 from src.components.inputs import generate_form_group
 from src.models import leads as leads_model
+from src.services import messages as messages_service
 
 logger = logging.Logger(__name__)
-
-
-import re
-from src.services import messages as messages_service
 
 
 def extract_case_id(text):
@@ -21,6 +22,14 @@ def extract_case_id(text):
     if match:
         return match.group(1)
     return None
+
+
+def create_single_selection_alert():
+    return dmc.Alert(
+        "Please select just one row to show the conversion.",
+        title="Alert: Multiple Selections!",
+        color="red",
+    )
 
 
 def get_conversation(df: pd.DataFrame) -> list:
@@ -44,7 +53,7 @@ def create_chat_bubble(text, from_user=True):
         children=[dcc.Markdown(text)],
         style={
             "maxWidth": "60%",
-            "backgroundColor": "#F0F0F0" if from_user else  "#DCF8C6",
+            "backgroundColor": "#F0F0F0" if from_user else "#DCF8C6",
             "padding": "10px",
             "borderRadius": "15px",
             "margin": "5px",
@@ -62,7 +71,6 @@ def create_chat(df: pd.DataFrame):
     return html.Div(
         [
             dmc.Container(
-              
                 [
                     create_chat_bubble(
                         message["message"],
@@ -150,43 +158,53 @@ def many_response_model(prefix: str) -> html.Div:
 
 
 def messaging_template(df, prefix: str = "outbound"):
-   
-    import dash
     ctx = dash.callback_context
     button_id = ctx.triggered[0]["prop_id"].split(".")[0]
+    title = None
     if button_id == "conversation-response-many":
-        grid = create_chat(df)
-    else:
-        import dash_ag_grid as dag
-        if 'First Name'  in df.columns and 'Last Name'  in df.columns:
-            cols = ['First Name', 'Last Name', 'Phone']
+        num_row = df.SID.nunique()
+        if num_row != 1:
+            return create_single_selection_alert()
         else:
-            cols = ['Phone']
+            from dash_iconify import DashIconify
+
+            first_phone = df["Phone"].iloc[0]
+            title = dmc.Alert(
+                f"{first_phone}",
+                title="Number Phone ",
+                icon=DashIconify(icon="ph:phone-bold"),
+                color="violet",
+                className="my-3 p-3",
+            )
+            grid = create_chat(df)
+    else:
+        if "First Name" in df.columns and "Last Name" in df.columns:
+            cols = ["First Name", "Last Name", "Phone"]
+        else:
+            cols = ["Phone"]
         df = df[cols]
         column_defs = [
-        {
-            "headerName": col,
-            "field": col,
-            "editable": True,
-            "filter": "agTextColumnFilter",
-            "sortable": True,
-            "resizable": True,
-            "flex": 1,
-        }
-        for col in df.columns
-    ]
+            {
+                "headerName": col,
+                "field": col,
+                "editable": True,
+                "filter": "agTextColumnFilter",
+                "sortable": True,
+                "resizable": True,
+                "flex": 1,
+            }
+            for col in df.columns
+        ]
 
         grid = dag.AgGrid(
-        id=f"{prefix}-portfolio-grid-multiple-selected",
-        columnDefs=column_defs,
-        rowData=df.to_dict("records"),
-        columnSize="sizeToFit",
-        dashGridOptions={
-            "undoRedoCellEditing": True,
-        },
-    )
-
-
+            id=f"{prefix}-portfolio-grid-multiple-selected",
+            columnDefs=column_defs,
+            rowData=df.to_dict("records"),
+            columnSize="sizeToFit",
+            dashGridOptions={
+                "undoRedoCellEditing": True,
+            },
+        )
 
     msg = html.Div(
         [
@@ -246,7 +264,7 @@ def messaging_template(df, prefix: str = "outbound"):
     return html.Div(
         [
             dbc.Col([msg], className="mb-2", width=6),
-            dbc.Col([grid], className="mb-2", width=6),
+            dbc.Col([title, grid], className="mb-2", width=6),
         ],
         className="d-flex justify-content-between",
     )

@@ -430,7 +430,7 @@ def render_status_msg(dates, direction):
 
     df["Case ID"] = df["Case ID"].map(lambda x: f"[{x}](/case/{x})")
     number_of_leads = df["Case ID"].nunique()
-    
+
     column_defs = [
         {
             "headerName": "Case ID",
@@ -487,45 +487,39 @@ def render_status_msg(dates, direction):
         },
     )
     return [
-        dbc.Col(
-            dbc.Card(
-                dbc.CardBody(
+        dbc.CardBody(
+            [
+                html.Div(
                     [
+                        html.H3(
+                            f"SMS Monitoring of leads {number_of_leads}",
+                            className="card-title m-1",
+                        ),
                         html.Div(
                             [
-                                html.H3(
-                                    f"SMS Monitoring of leads {number_of_leads}",
-                                    className="card-title m-1",
+                                dmc.Button(
+                                    "Show Conversation",
+                                    id="conversation-response-many",
+                                    color="dark",
+                                    size="sm",
+                                    className="m-2",
                                 ),
-                                html.Div(
-                                    [                                      
-                                        dmc.Button(
-                                            "Show Conversation",
-                                            id="conversation-response-many",
-                                            color="dark",
-                                            size="sm",
-                                            className="m-2",
-                                        ),
-                                        dmc.Button(
-                                            "Respnse",
-                                            id="monitoring-response-many",
-                                            color="dark",
-                                            size="sm",
-                                            className="m-2",
-                                        ),
-                                    ],
-                                    id="message-monitoring ",
+                                dmc.Button(
+                                    "Bulk response",
+                                    id="monitoring-response-many",
+                                    color="dark",
+                                    size="sm",
+                                    className="m-2",
                                 ),
                             ],
-                            className="d-flex justify-content-between",
+                            id="message-monitoring ",
                         ),
-                        grid,
-                    ]
+                    ],
+                    className="d-flex justify-content-between",
                 ),
-            ),
-            width=12,
-            className="mb-2",
-        )
+                grid,
+            ]
+        ),
     ], df.to_dict("records")
 
 
