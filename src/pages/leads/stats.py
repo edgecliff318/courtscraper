@@ -41,6 +41,7 @@ def layout():
                         ),
                         width=12,
                         className="mb-2 p-1",
+                        style={"overflow": "auto"},
                     ),
                 ]
             ),
@@ -48,10 +49,14 @@ def layout():
                 [
                     dbc.Col(
                         [
+                            dmc.Title("Inbound Overview", order=2),
+                            dmc.Text(
+                                "Inbound leads summary for customers and leads that submitted a form on the website."
+                            ),
                             html.Div(
                                 children=skeleton_cards,
                                 id="overview-inbound-summary",
-                            )
+                            ),
                         ],
                         width=12,
                         className="mb-2 p-1",
@@ -62,10 +67,12 @@ def layout():
                 [
                     dbc.Col(
                         [
+                            dmc.Title("Outbound Summary", order=2),
+                            dmc.Text("Leads that were contacted by SMS or Phone Call."),
                             html.Div(
                                 children=skeleton_cards,
                                 id="overview-message-summary",
-                            )
+                            ),
                         ],
                         width=12,
                         className="mb-2 p-1",
@@ -87,6 +94,7 @@ def layout():
                         ),
                         width=12,
                         className="mb-2 p-1",
+                        style={"overflow": "auto"},
                     ),
                 ]
             ),

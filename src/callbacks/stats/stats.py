@@ -1,14 +1,13 @@
 import logging
 
+import dash_mantine_components as dmc
 import pandas as pd
 import plotly.graph_objects as go
 from dash import Input, Output, callback, dcc
-import dash_mantine_components as dmc
 
+from src.connectors.cloudtalk import fetch_call_history
 from src.core.config import get_settings
 from src.services import leads, messages
-from src.connectors.cloudtalk import fetch_call_history
-
 
 logger = logging.Logger(__name__)
 
@@ -42,6 +41,7 @@ def get_base_layout():
     return layout
 
 
+
 def create_graph_bar_leads_state(df: pd.DataFrame):
     df["date"] = pd.to_datetime(df["last_updated"]).dt.date
     pivot_df = df.pivot_table(
@@ -68,6 +68,7 @@ def create_graph_bar_leads_state(df: pd.DataFrame):
     return dcc.Graph(figure=fig)
 
 
+
 def create_graph_leads_status(df: pd.DataFrame):
     status_columns = [
         "not_prioritized",
@@ -81,11 +82,24 @@ def create_graph_leads_status(df: pd.DataFrame):
         "processing",
         "stop",
     ]
+
+    renamed_status_columns = {
+        "not_prioritized": "Not Prioritized",
+        "not_contacted": "Not Contacted",
+        "contacted": "Contacted",
+        "responded": "Responded",
+        "not_found": "Not Found",
+        "processing_error": "Processing Error",
+        "not_valid": "Not Valid",
+        "new": "New",
+        "processing": "Processing",
+        "stop": "Stop",
+    }
     fig = go.Figure()
     for status in status_columns:
         fig.add_trace(
             go.Bar(
-                x=[status],
+                x=[renamed_status_columns[status]],
                 y=[df[df["status"] == status].shape[0]],
                 name=status,
                 marker_color=settings.colors_mapping[status],
@@ -109,6 +123,7 @@ def create_graph_leads_status(df: pd.DataFrame):
             ticks="outside",
             dtick=1000,
         ),
+        showlegend=False,
     )
 
     return dcc.Graph(figure=fig)
@@ -116,7 +131,10 @@ def create_graph_leads_status(df: pd.DataFrame):
 
 def create_graph_choropleth_leads_state(df: pd.DataFrame):
     leads_scraped_by_state = (
-        df.groupby("state").size().reset_index(name="leads_scraped_by_state")
+        df.fillna("MO")
+        .groupby("state")
+        .size()
+        .reset_index(name="leads_scraped_by_state")
     )
 
     fig = go.Figure(
@@ -130,9 +148,7 @@ def create_graph_choropleth_leads_state(df: pd.DataFrame):
     )
 
     fig.update_layout(
-        title_text="Leads Scraped by State",
         geo_scope="usa",
-        margin=dict(l=0, r=0, t=0, b=0),
         coloraxis_colorbar=dict(
             thicknessmode="pixels",
             thickness=15,
@@ -143,7 +159,25 @@ def create_graph_choropleth_leads_state(df: pd.DataFrame):
             ticks="outside",
             dtick=1000,
         ),
+        # Deactivate Scroll Zoom
+        dragmode=False,
     )
+
+    fig.update_layout(
+        xaxis=dict(showgrid=False, zeroline=False, visible=False),
+        yaxis=dict(showgrid=False, zeroline=False, visible=True),
+    )
+    fig.update_yaxes(tickfont=dict(color="black"), showticklabels=True)
+    fig.update_layout(
+        xaxis_tickformat=" ", yaxis_tickformat=" ", yaxis_ticksuffix="  "
+    )
+    fig.update_layout(
+        xaxis=dict(domain=[0.45, 0.95]),
+        yaxis=dict(anchor="free", position=0.02, side="right"),
+    )
+
+    # Update the margin
+    fig.update_layout(margin=dict(l=0, r=0, t=0.1))
 
     return dcc.Graph(figure=fig)
 
@@ -396,7 +430,9 @@ def render_call_monitoring(dates, n_clicks):
     (start_date, end_date) = dates
     from datetime import datetime
 
-    start_date, end_date = [datetime.strptime(date, "%Y-%m-%d") for date in dates]
+    start_date, end_date = [
+        datetime.strptime(date, "%Y-%m-%d") for date in dates
+    ]
 
     calls = fetch_call_history(start_date, end_date)
     import pandas as pd

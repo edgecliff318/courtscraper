@@ -71,7 +71,7 @@ def create_date_form_group(id: str):
         type="DateRangePicker",
         persistence_type="session",
         persistence=True,
-        start_date=(datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d"),
+        start_date=(datetime.now() - timedelta(days=2)).strftime("%Y-%m-%d"),
         end_date=datetime.now().strftime("%Y-%m-%d"),
     )
 
@@ -94,7 +94,6 @@ def create_interaction_form_group():
 
 
 def create_scrapper_form_group():
-    
     return generate_form_group(
         label="Scrapper",
         id="scrapper-selector",
@@ -107,9 +106,9 @@ def create_scrapper_form_group():
             {"label": "scrapper1", "value": "scrapper1"},
             {"label": "scrapper2", "value": "scrapper2"},
             {"label": "scrapper3", "value": "scrapper3"},
-           
         ],
     )
+
 
 def create_button(label, id, width, lg, xs):
     return dbc.Col(
@@ -159,7 +158,6 @@ monitoring_controls = dbc.Row(
             xs=12,
             className="d-flex align-items-left",
         ),
-        
     ],
     justify="left",
 )
@@ -169,10 +167,10 @@ stats_controls = dbc.Row(
     [
         dbc.Col(create_date_form_group("stats-date-selector"), width=3, xs=12, lg=3),
         create_button("Run", "stats-refresh-button", 1, 1, 6),
-      
     ],
     justify="left",
 )
+
 
 def generate_col(content, **kwargs):
     """Generate a column with specified width configurations."""
