@@ -6,6 +6,9 @@ from dash import html
 import dash_mantine_components as dmc
 
 from src.components.filters import monitoring_controls
+from src.components.conversation import many_response_model
+
+from dash import dcc, html
 
 logger = logging.Logger(__name__)
 
@@ -52,7 +55,27 @@ def layout():
             
             
             
-            html.Div(id="message-monitoring"),
+            html.Div(
+                     id="message-monitoring",
+                     ),
+            
+             html.Div(
+                     id="leads-data",
+                     ),
+            
+            
+            
+             html.Div([
+                         
+                         many_response_model("monitoring"),
+                        dcc.Store(id="monitoring-data", storage_type="memory"),
+                        many_response_model("conversation"),
+                        dcc.Store(id="conversation-data", storage_type="memory"),
+                        
+             ]
+
+                     ),
+            
             dbc.Row(
                 [
                     dbc.Col(

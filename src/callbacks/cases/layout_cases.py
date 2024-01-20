@@ -1,6 +1,7 @@
 import logging
 
-from dash import Input, Output, callback
+from dash import Input, Output, callback, ctx
+import dash
 
 from src.core.config import get_settings
 from src.services import messages
@@ -12,18 +13,20 @@ settings = get_settings()
 
 @callback(
     Output("lead-single-message-selector-modal", "data"),
-    Input("modal", "children"),
+    Input("lead-single-message-modal", "value"),
 )
-def render_message_selector(_):
-    messages_list = messages.get_messages_templates()
-    options = [
-        {
-            "label": c.template_name,
-            "value": c.template_id,
-        }
-        for c in messages_list
-    ]
-    return options
+def render_message_selector(*args):
+    print("render_message_selector")
+    triggered_id = ctx.triggered[0]["prop_id"].split(".")[0]
+
+    if triggered_id.endswith("-modal"):
+        messages_list = messages.get_messages_templates()
+        options = [
+            {"label": c.template_name, "value": c.template_id} for c in messages_list
+        ]
+        return options
+
+    return dash.no_update
 
 
 @callback(
