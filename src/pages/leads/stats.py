@@ -1,89 +1,177 @@
 import dash
 import dash_bootstrap_components as dbc
-from dash import dcc, html
+from dash import html
+import dash_mantine_components as dmc
+from src.components.filters import stats_controls
 
-from src.components.filters import leads_controls
 
 dash.register_page(__name__, class_icon="ti ti-dashboard", order=2)
 
 
 def layout():
-    overview = html.Div(id="overview")
-
-    leads_by_county = dbc.Card(
-        dbc.CardBody(
-            [
-                html.H3("Leads By County"),
-                html.Hr(className="my-2"),
-                dcc.Graph(
-                    id="leads-by-county",
-                ),
-            ],
-        ),
-    )
-
-    leads_by_status = dbc.Card(
-        dbc.CardBody(
-            [
-                html.H3("Leads By Status"),
-                html.Hr(className="my-2"),
-                dcc.Graph(
-                    id="leads-by-status",
-                ),
-            ],
-        ),
-    )
-
-    interactions_by_date = dbc.Card(
-        dbc.CardBody(
-            [
-                html.H3("Interactions By Date"),
-                html.Hr(className="my-2"),
-                dcc.Graph(
-                    id="interactions-by-date",
-                ),
-            ],
-        ),
-    )
-
-    stats_for_each_county = dbc.Card(
-        dbc.CardBody(
-            [
-                html.H3("Stats For Each County"),
-                html.Hr(className="my-2"),
-                html.Div(id="stats-for-each-county"),
-            ],
-        ),
-    )
-
-    return dbc.Row(
+    return html.Div(
         [
-            dcc.Interval(
-                id="interval-component",
-                interval=1000 * 1000,  # in milliseconds
-                n_intervals=0,
+            dbc.Row(
+                [
+                    dbc.Col(
+                        dbc.Card(
+                            dbc.CardBody(
+                                [
+                                    stats_controls,
+                                    html.Div(id="monitoring-status"),
+                                ]
+                            ),
+                        ),
+                        width=12,
+                        className="mb-2",
+                    ),
+                ]
             ),
-            leads_controls,
-            overview,
-            dbc.Col(
-                [leads_by_county],
-                md=6,
-                class_name="mb-2",
+            
+            
+            
+            dbc.Row(
+                [
+                    dbc.Col(
+                        
+                                [
+                                    html.Div(
+                                        [
+                                            dmc.Skeleton(
+                                                visible=False,
+                                                # visible=True,
+                                                children=html.Div(
+                                                    id="overview-inbound-summary",
+                                                ),
+                                                mb=10,
+                                            ),
+                                        ]
+                                    )
+                                ],
+                       
+                        width=12,
+                        className="mb-2",
+                    ),
+                ]
             ),
-            dbc.Col(
-                [leads_by_status],
-                md=6,
-                class_name="mb-2",
+            
+            dbc.Row(
+                [
+                    dbc.Col(
+                        
+                                [
+                                    html.Div(
+                                        [
+                                            dmc.Skeleton(
+                                                visible=False,
+                                                # visible=True,
+                                                children=html.Div(
+                                                    id="overview-message-summary",
+                                                ),
+                                                mb=10,
+                                            ),
+                                        ]
+                                    )
+                                ],
+                       
+                        width=12,
+                        className="mb-2",
+                    ),
+                ]
             ),
-            dbc.Col(
-                [interactions_by_date],
-                md=12,
-                class_name="mb-2",
+            dbc.Row(
+                [
+                    dbc.Col(
+                        html.Div(
+                            dmc.Skeleton(
+                                visible=False,
+                                children=html.Div(id="scrapper-summary"),
+                            )
+                        ),
+                        width=12,
+                        className="mb-2",
+                    ),
+                ]
             ),
-            dbc.Col(
-                [stats_for_each_county],
-                md=12,
-                class_name="mb-2",
+            
+        
+            
+        #graph leads state
+         dbc.Row(
+                [
+                    dbc.Col(
+                        dbc.Card(
+                            dbc.CardBody(
+                                [
+                                    html.Div(
+                                        [
+                                            dmc.Skeleton(
+                                                visible=False,
+                                                children=html.Div(
+                                                    id="graph-container-leads-state",
+                                                ),
+                                                mb=10,
+                                            ),
+                                        ]
+                                    )
+                                ]
+                            ),
+                        ),
+                        width=12,
+                        className="mb-2",
+                    ),
+                ]
+            ),
+            # leads status
+            dbc.Row(
+                [
+                    dbc.Col(
+                        dbc.Card(
+                            dbc.CardBody(
+                                [
+                                    html.Div(
+                                        [
+                                            dmc.Skeleton(
+                                                visible=False,
+                                                children=html.Div(
+                                                    id="graph-container-leads-status",
+                                                ),
+                                                mb=10,
+                                            ),
+                                        ]
+                                    )
+                                ]
+                            ),
+                        ),
+                        width=12,
+                        className="mb-2",
+                    ),
+                ]
+            ),
+             dbc.Row(
+                [
+                    dbc.Col(
+                        dbc.Card(
+                            dbc.CardBody(
+                                [
+                                    html.Div(
+                                        [
+                                            dmc.Skeleton(
+                                                visible=False,
+                                                children=html.Div(
+                                                    id="graph-container-call",
+                                                ),
+                                                mb=10,
+                                            ),
+                                        ]
+                                    )
+                                ]
+                            ),
+                        ),
+                        width=12,
+                        className="mb-2",
+                    ),
+                ]
             ),
         ]
     )

@@ -93,6 +93,24 @@ def create_interaction_form_group():
     )
 
 
+def create_scrapper_form_group():
+    
+    return generate_form_group(
+        label="Scrapper",
+        id="scrapper-selector",
+        placeholder="Select the Scrapper",
+        type="Select",
+        persistence_type="session",
+        persistence=True,
+        value="scrapper1",
+        options=[
+            {"label": "scrapper1", "value": "scrapper1"},
+            {"label": "scrapper2", "value": "scrapper2"},
+            {"label": "scrapper3", "value": "scrapper3"},
+           
+        ],
+    )
+
 def create_button(label, id, width, lg, xs):
     return dbc.Col(
         dmc.Button(label, id=id, color="dark", size="sm", className="mt-auto"),
@@ -145,6 +163,15 @@ monitoring_controls = dbc.Row(
     justify="center",
 )
 
+
+stats_controls = dbc.Row(
+    [
+        dbc.Col(create_date_form_group(), width=3, xs=12, lg=3),
+        create_button("Run", "stats-refresh-button", 1, 1, 6),
+      
+    ],
+    justify="left",
+)
 
 def generate_col(content, **kwargs):
     """Generate a column with specified width configurations."""
