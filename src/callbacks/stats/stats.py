@@ -1,13 +1,13 @@
 import logging
 
 import pandas as pd
+import plotly.graph_objects as go
 from dash import Input, Output, callback, dcc
-
-from src.core.config import get_settings
-from src.services import leads , messages
 import dash_mantine_components as dmc
 
-import plotly.graph_objects as go
+from src.core.config import get_settings
+from src.services import leads, messages
+from src.connectors.cloudtalk import fetch_call_history
 
 
 logger = logging.Logger(__name__)
@@ -135,46 +135,31 @@ def create_graph_leads_state(df: pd.DataFrame):
     return dcc.Graph(figure=fig)
 
 
-class LeadPipeline:
-    # Leads Scraped Today
-    def leads_scraped_today(self, data: pd.DataFrame) -> pd.DataFrame:
-        """
-        Process the data.
-        add a column with the number of leads scraped today
-        """
-        data["leads_scraped_today"] = data[
-            data["last_updated"].dt.date == pd.Timestamp.today().date()
-        ].count()["id"]
+def create_graph_calls(df: pd.DataFrame):
+    colors_map = {
+        "total": "#6610F2",
+        "incoming": "#28C76F",
+        "outgoing": "#053342",
+    }
 
-        return data
+    status_columns = ["total", "incoming", "outgoing"]
+    fig = go.Figure()
+    for status in status_columns:
+        fig.add_trace(
+            go.Bar(
+                x=df["date"],
+                y=df[status],
+                name=status,
+                marker_color=colors_map[status],
+            )
+        )
 
-    # Leads Scraped by State
-    def leads_scraped_by_state(self, data: pd.DataFrame) -> pd.DataFrame:
-        """
-        Process the data.
-        add a column with the number of leads scraped today
-        """
-        states_count = data.groupby("state").count()["id"].to_dict()
-        data["leads_scraped_by_state"] = data.state.map(states_count)
+    fig.update_layout(
+        get_base_layout(),
+        title_text="Calls Overview",
+    )
 
-        return data
-
-    # Leads by status
-    def leads_by_status(self, data: pd.DataFrame) -> pd.DataFrame:
-        """
-        Process the data.
-        add a column with the number of leads scraped today
-        """
-        status_count = data.groupby("status").count()["id"].to_dict()
-        data["leads_by_status"] = data.status.map(status_count)
-
-        return data
-
-    def process(self, data: pd.DataFrame) -> pd.DataFrame:
-        """
-        Process the data.
-        """
-        return data.pipe(self.leads_scraped_today)
+    return dcc.Graph(figure=fig)
 
 
 def render_stats_card(kpi_name, kpi_value_formatted, kpi_unit):
@@ -252,7 +237,6 @@ def render_message_summary(df: pd.DataFrame):
     )
 
 
-
 def render_inbound_summary(data: pd.DataFrame):
     total_leads = len(data)
 
@@ -288,7 +272,6 @@ def render_inbound_summary(data: pd.DataFrame):
     )
 
 
-
 @callback(
     Output("graph-container-leads-status", "children"),
     Output("graph-container-leads-state", "children"),
@@ -301,9 +284,12 @@ def render_scrapper_monitoring(dates, n_clicks):
         start_date=start_date,
         end_date=end_date,
     )
-    
+
     if not leads_list:
-        return "No leads found for the selected period.", "No leads found for the selected period."
+        return (
+            "No leads found for the selected period.",
+            "No leads found for the selected period.",
+        )
 
     df = pd.DataFrame([lead.model_dump() for lead in leads_list])
 
@@ -322,6 +308,7 @@ def process_date(date):
         creation_date = None
 
     return creation_date
+
 
 def fetch_messages_status(start_date, end_date):
     messages_response = messages.get_interactions_filtered(
@@ -360,11 +347,6 @@ def fetch_messages_status(start_date, end_date):
     return df
 
 
-
-
-
-
-
 @callback(
     Output("overview-inbound-summary", "children"),
     Output("overview-message-summary", "children"),
@@ -373,7 +355,7 @@ def fetch_messages_status(start_date, end_date):
 )
 def render_inbound_monitoring(dates, n_clicks):
     (start_date, end_date) = dates
-    
+
     df_messages = fetch_messages_status(start_date, end_date)
 
     leads_list = leads.get_leads(start_date=start_date, end_date=end_date)
@@ -385,3 +367,31 @@ def render_inbound_monitoring(dates, n_clicks):
     message_summary = render_message_summary(df_messages)
 
     return inbound_summary, message_summary
+
+
+@callback(
+    Output("graph-container-call", "children"),
+    Input("monitoring-date-selector", "value"),
+    Input("stats-refresh-button", "n_clicks"),
+)
+def render_call_monitoring(dates, n_clicks):
+    (start_date, end_date) = dates
+    from datetime import datetime
+
+    start_date, end_date = [datetime.strptime(date, "%Y-%m-%d") for date in dates]
+
+    calls = fetch_call_history(start_date, end_date)
+    import pandas as pd
+
+    df = pd.DataFrame(calls)
+    df["date"] = pd.to_datetime(df["answered_at"]).dt.date
+    pivot_df = df.pivot_table(
+        index="date", columns="type", values="answered_at", aggfunc="count"
+    )
+    pivot_df = pivot_df.fillna(0)
+    pivot_df["total"] = pivot_df.sum(axis=1)
+    pivot_df = pivot_df.reset_index()
+
+    graph_calls = create_graph_calls(pivot_df)
+
+    return graph_calls

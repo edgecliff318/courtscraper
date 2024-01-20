@@ -524,6 +524,7 @@ def render_status_msg(dates, direction):
     Output("monitoring-status", "children"),
     Input("monitoring-refresh-button", "n_clicks"),
     Input("monitoring-date-selector", "value"),
+    prevent_initial_call=True,
 )
 def refresh_messages(n_clicks, dates):
     (start_date, end_date) = dates

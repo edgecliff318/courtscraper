@@ -148,5 +148,30 @@ def layout():
                     ),
                 ]
             ),
+             dbc.Row(
+                [
+                    dbc.Col(
+                        dbc.Card(
+                            dbc.CardBody(
+                                [
+                                    html.Div(
+                                        [
+                                            dmc.Skeleton(
+                                                visible=False,
+                                                children=html.Div(
+                                                    id="graph-container-call",
+                                                ),
+                                                mb=10,
+                                            ),
+                                        ]
+                                    )
+                                ]
+                            ),
+                        ),
+                        width=12,
+                        className="mb-2",
+                    ),
+                ]
+            ),
         ]
     )
