@@ -119,7 +119,7 @@ def handle_send_message(prefix):
         return ""
 
 
-for prefix in ["outbound", "monitoring" ]:
+for prefix in ["outbound", "monitoring", "conversation" ]:
     handle_send_message(prefix)
 
 @callback(

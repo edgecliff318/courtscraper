@@ -125,7 +125,7 @@ def many_response_model(prefix: str) -> html.Div:
         dmc.Button(text, id=f"{prefix}-{button_id}", className="ml-auto", color=color)
         for text, button_id, color in [
             ("Update Status", "modal-lead-status-update", "dark"),
-            ("Generate Letters", "generate-letters", "dark"),
+            # ("Generate Letters", "generate-letters", "dark"),
             ("Send ", "send-all", "green"),
             ("Cancel", "all-cancel", "red"),
         ]

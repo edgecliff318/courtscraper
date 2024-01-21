@@ -273,8 +273,11 @@ def send_message(
     if method == "twilio":
         phone_contact_service = PhoneContactService()
         last_message = phone_contact_service.get_single_item(phone)
+        import dash
+        ctx = dash.callback_context
+        button_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
-        if last_message is not None and not force_send:
+        if last_message is not None and not force_send and button_id != "conversation-send-all":
             console.log(
                 f"Skipping message to {phone} as it was recently sent. Use --force to send anyway"
             )
