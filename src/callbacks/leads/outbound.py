@@ -6,7 +6,6 @@ import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
 import pandas as pd
 from dash import Input, Output, callback, html
-import dash_mantine_components as dmc
 
 from src.components.cards import render_stats_card
 from src.core.config import get_settings
@@ -126,6 +125,11 @@ def render_leads(court_code_list, dates, status):
     df["email"] = df["email"].map(transform_emails)
 
     df["case_index"] = df.index
+
+    total_leads = len(df)
+    total_phones = df.phone.map(
+        lambda x: len(x.split(",")) if x is not None else 0
+    ).sum()
 
     df = df.rename(
         columns={
@@ -273,11 +277,25 @@ def render_leads(court_code_list, dates, status):
                         html.Div(
                             [
                                 html.H3("Cases", className="card-title"),
-                                dmc.Button(
-                                    "Cases Process",
-                                    id="outbound-response-many",
-                                    color="dark",
-                                    # className="card-title",
+                                dmc.Group(
+                                    [
+                                        dmc.Text(
+                                            f"{total_leads} Leads",
+                                            size="sm",
+                                            color="gray",
+                                        ),
+                                        dmc.Text(
+                                            f"{total_phones} Phones",
+                                            size="sm",
+                                            color="gray",
+                                        ),
+                                        dmc.Button(
+                                            "Cases Process",
+                                            id="outbound-response-many",
+                                            color="dark",
+                                            # className="card-title",
+                                        ),
+                                    ]
                                 ),
                             ],
                             className="d-flex justify-content-between",
