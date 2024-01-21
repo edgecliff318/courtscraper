@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 import dash_mantine_components as dmc
@@ -8,6 +9,8 @@ from src.connectors import payments as payments_connector
 from src.core.format import timestamp_to_date
 from src.models.cases import Case
 from src.services.participants import ParticipantsService
+
+logger = logging.getLogger(__name__)
 
 
 def format_table_row(row, column):
@@ -142,25 +145,29 @@ def get_invoice_widget(participants_list, role="client"):
 
 
 def get_invoice_history(participant):
-    participants_service = ParticipantsService()
-    payments_service = payments_connector.PaymentService()
+    try:
+        participants_service = ParticipantsService()
+        payments_service = payments_connector.PaymentService()
 
-    if isinstance(participant, str):
-        stripe_id = participant
+        if isinstance(participant, str):
+            stripe_id = participant
 
-    elif participant.stripe_id is None:
-        if participant.email is None:
-            raise ValueError("No Email found for the participant")
-        customer = payments_service.get_or_customer(participant.email)
-        participant.stripe_id = customer.id
-        participants_service.patch_item(
-            participant.id, {"stripe_id": customer.id}
-        )
-        stripe_id = customer.id
-    else:
-        stripe_id = participant.stripe_id
+        elif participant.stripe_id is None:
+            if participant.email is None:
+                raise ValueError("No Email found for the participant")
+            customer = payments_service.get_or_customer(participant.email)
+            participant.stripe_id = customer.id
+            participants_service.patch_item(
+                participant.id, {"stripe_id": customer.id}
+            )
+            stripe_id = customer.id
+        else:
+            stripe_id = participant.stripe_id
 
-    invoice_history = payments_service.get_invoice_history(stripe_id)
+        invoice_history = payments_service.get_invoice_history(stripe_id)
+    except Exception as e:
+        invoice_history = []
+        logger.error(e)
 
     return invoice_history
 
