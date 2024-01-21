@@ -56,7 +56,6 @@ def handle_send_message(prefix):
         cancel=[Input(f"{prefix}-all-cancel", "n_clicks")],
     )
     def send_many_message(*args, **kwargs):
-        print("send_many_message")
         if ctx.triggered_id == f"{prefix}-send-all":
             df = ctx.states[f"{prefix}-memory.data"]["df"] or []
             template_msg = ctx.states["lead-single-message-modal.value"] or ""
@@ -64,7 +63,6 @@ def handle_send_message(prefix):
                 ctx.states["lead-media-enabled-modal.value"] or False
             )
             skipped = False
-            # should lowercase
             df = [{k.lower(): v for k, v in case.items()} for case in df]
             for case in df:
                 # Dict keys to lower and replace spaces with underscores
