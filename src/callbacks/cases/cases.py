@@ -2,6 +2,7 @@ import logging
 
 import dash
 import dash.html as html
+import dash_mantine_components as dmc
 from dash import Input, Output, State, callback, ctx
 
 from src.components.toast import build_toast
@@ -38,13 +39,13 @@ def send_message(case_id, sms_button, sms_message, phone, media_enabled):
 
         return message
 
+
 # ["outbound", "monitoring" ]:
 # prefix = "monitoring"
 def handle_send_message(prefix):
     @callback(
         Output(f"{prefix}-modal-content-sending-status", "children"),
         Input(f"{prefix}-send-all", "n_clicks"),
-
         Input(f"{prefix}-modal-content", "children"),
         State(f"{prefix}-memory", "data"),
         State("lead-single-message-modal", "value"),
@@ -62,14 +63,17 @@ def handle_send_message(prefix):
             include_case_copy = (
                 ctx.states["lead-media-enabled-modal.value"] or False
             )
+            contacted_phone_nbs = set()
             skipped = False
             df = [{k.lower(): v for k, v in case.items()} for case in df]
             for case in df:
                 # Dict keys to lower and replace spaces with underscores
-                case = {k.lower().replace(" ", "_"): v for k, v in case.items()}
+                case = {
+                    k.lower().replace(" ", "_"): v for k, v in case.items()
+                }
 
                 # first_name and last_name should be capitalized
-                case["first_name"] = case.get("first_name" , "").capitalize()
+                case["first_name"] = case.get("first_name", "").capitalize()
                 case["last_name"] = case.get("last_name", "").capitalize()
 
                 case_id = case.get("case_index")
@@ -77,12 +81,16 @@ def handle_send_message(prefix):
                     # TODO: add a check validation of template sending SMS with the case data by Twilio
                     sms_message = template_msg.format(**case)
                     for phone in case["phone"].split(", "):
+                        if phone in contacted_phone_nbs:
+                            continue
                         try:
                             message_status = messages.send_message(
                                 case_id,
                                 sms_message,
                                 phone,
                                 media_enabled=include_case_copy,
+                                force_send=prefix == "conversation"
+                                or prefix == "monitoring",
                             )
                             if (
                                 message_status == "queued"
@@ -98,6 +106,7 @@ def handle_send_message(prefix):
                                 logger.error(
                                     f"An error occurred while sending the message. {message_status}"
                                 )
+                            contacted_phone_nbs.add(phone)
                         except Exception as e:
                             if "skipped" in str(e).lower():
                                 skipped = True
@@ -108,17 +117,35 @@ def handle_send_message(prefix):
                     logger.error(
                         f"An error occurred while sending the message. {e}"
                     )
-                    return f"An error occurred while sending the message {e}"
+                    message = (
+                        f"An error occurred while sending the message {e}"
+                    )
+                    return dmc.Alert(
+                        message,
+                        color="danger",
+                        className="mt-2",
+                    )
             if skipped:
-                return "Messages sent successfully. Some messages were skipped as they were recently sent"
+                message = "Messages sent successfully. Some messages were skipped as they were recently sent"
+                return dmc.Alert(
+                    message,
+                    color="warning",
+                    className="mt-2",
+                )
             else:
-                return "Messages sent successfully"
+                message = "Messages sent successfully"
+                return dmc.Alert(
+                    message,
+                    color="success",
+                    className="mt-2",
+                )
 
         return ""
 
 
-for prefix in ["outbound", "monitoring", "conversation" ]:
+for prefix in ["outbound", "monitoring", "conversation"]:
     handle_send_message(prefix)
+
 
 @callback(
     Output("modal-content-generate-letters-status", "children"),
