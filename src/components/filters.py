@@ -71,8 +71,8 @@ def create_date_form_group(id: str):
         type="DateRangePicker",
         persistence_type="session",
         persistence=True,
-        start_date=(datetime.now() - timedelta(days=2)).strftime("%Y-%m-%d"),
-        end_date=datetime.now().strftime("%Y-%m-%d"),
+        start_date=(datetime.now() - timedelta(days=0)).strftime("%Y-%m-%d"),
+        end_date=(datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d"),
     )
 
 
@@ -112,7 +112,9 @@ def create_scrapper_form_group():
 
 def create_button(label, id, width, lg, xs):
     return dbc.Col(
-        dmc.Button(label, id=id, color="dark", size="sm", className="mt-auto "),
+        dmc.Button(
+            label, id=id, color="dark", size="sm", className="mt-auto "
+        ),
         width=width,
         lg=lg,
         xs=xs,
@@ -147,7 +149,12 @@ def create_switch():
 
 monitoring_controls = dbc.Row(
     [
-        dbc.Col(create_date_form_group("monitoring-date-selector"), width=3, xs=12, lg=3),
+        dbc.Col(
+            create_date_form_group("monitoring-date-selector"),
+            width=3,
+            xs=12,
+            lg=3,
+        ),
         dbc.Col(create_interaction_form_group(), width=2, xs=12, lg=2),
         create_button("Monitoring", "monitoring-button", 1, 1, 6),
         create_button("Refresh", "monitoring-refresh-button", 1, 1, 6),
@@ -165,7 +172,9 @@ monitoring_controls = dbc.Row(
 
 stats_controls = dbc.Row(
     [
-        dbc.Col(create_date_form_group("stats-date-selector"), width=3, xs=12, lg=3),
+        dbc.Col(
+            create_date_form_group("stats-date-selector"), width=3, xs=12, lg=3
+        ),
         create_button("Run", "stats-refresh-button", 1, 1, 6),
     ],
     justify="left",
