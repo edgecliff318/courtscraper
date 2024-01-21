@@ -1,4 +1,5 @@
 import logging
+import re
 
 import dash
 import dash_ag_grid as dag
@@ -6,20 +7,14 @@ import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
 import pandas as pd
 import plotly.graph_objects as go
-from dash import Input, Output, callback, dcc, html, State, ctx
+from dash import Input, Output, State, callback, ctx, dcc, html
+from dash_iconify import DashIconify
 
 from src.commands import leads as leads_commands
 from src.components.toast import build_toast
 from src.db import db
-from src.services import leads, messages
 from src.services import messages as messages_service
 from src.services.settings import get_settings as db_settings
-from src.components.conversation import messaging_template
-import re
-
-import dash_mantine_components as dmc
-from dash import dcc, html
-from dash_iconify import DashIconify
 
 COLORS = {
     "blue": "#2B8FB3",
@@ -57,7 +52,7 @@ def process_date(date):
 
 
 def fetch_messages_status(start_date, end_date):
-    messages_response = messages.get_interactions_filtered(
+    messages_response = messages_service.get_interactions_filtered(
         start_date=start_date,
         end_date=end_date,
     )
@@ -322,7 +317,11 @@ def graph_status_sms(dates, direction):
 
     pivot_df = pivot_df.reset_index()
     pivot_df = pivot_df[
-        [c for c in pivot_df.columns if c in ["date", "stop", "yes", "other", "sent"]]
+        [
+            c
+            for c in pivot_df.columns
+            if c in ["date", "stop", "yes", "other", "sent"]
+        ]
     ]
 
     return [create_graph_status_sms(pivot_df), render_message_summary(df)]
@@ -378,7 +377,9 @@ def render_status_msg(dates, direction):
         end_date=end_date,
         direction=direction,
     )
-    df = pd.DataFrame([interaction.model_dump() for interaction in interactions_list])
+    df = pd.DataFrame(
+        [interaction.model_dump() for interaction in interactions_list]
+    )
     cols = [
         "case_id",
         "creation_date",
@@ -413,7 +414,9 @@ def render_status_msg(dates, direction):
     df["creation_date"] = df["creation_date"].dt.tz_convert("US/Central")
 
     df.sort_values(by=["creation_date"], inplace=True, ascending=False)
-    df["creation_date"] = df["creation_date"].dt.strftime("%m/%d/%Y - %H:%M:%S")
+    df["creation_date"] = df["creation_date"].dt.strftime(
+        "%m/%d/%Y - %H:%M:%S"
+    )
     df = df.set_index("case_id")
     df = df.rename(
         columns={
@@ -427,11 +430,18 @@ def render_status_msg(dates, direction):
     )
     df.index.name = "Case ID"
     df.reset_index(inplace=True)
-
+    df["case_index"] = df["Case ID"]
     df["Case ID"] = df["Case ID"].map(lambda x: f"[{x}](/case/{x})")
+
     number_of_leads = df["Case ID"].nunique()
 
     column_defs = [
+        {
+            # Hidden case id column
+            "headerName": "case_index",
+            "field": "case_index",
+            "hide": True,
+        },
         {
             "headerName": "Case ID",
             "field": "Case ID",
@@ -492,11 +502,14 @@ def render_status_msg(dates, direction):
                 html.Div(
                     [
                         html.H3(
-                            f"SMS Monitoring of leads {number_of_leads}",
+                            "SMS Monitoring of Leads",
                             className="card-title m-1",
                         ),
-                        html.Div(
+                        dmc.Group(
                             [
+                                dmc.Text(
+                                    f"Number of leads: {number_of_leads}"
+                                ),
                                 dmc.Button(
                                     "Show Conversation",
                                     id="conversation-response-many",
@@ -638,15 +651,21 @@ def open_modal_conversation(selection, data, *args, **kwargs):
         case_id = extract_case_id(df["Case ID"].iloc[0])
 
         messages = messages_service.get_interactions(case_id=case_id)
-        df_conversation = pd.DataFrame([message.model_dump() for message in messages])
+        df_conversation = pd.DataFrame(
+            [message.model_dump() for message in messages]
+        )
         df_conversation["creation_date"] = pd.to_datetime(
             df_conversation["creation_date"], utc=True
         )
-        df_conversation.sort_values(by=["creation_date"], inplace=True, ascending=True)
+        df_conversation.sort_values(
+            by=["creation_date"], inplace=True, ascending=True
+        )
         df_conversation["creation_date"] = df_conversation[
             "creation_date"
         ].dt.tz_convert("US/Central")
-        df_conversation = df_conversation[["direction", "message", "creation_date"]]
+        df_conversation = df_conversation[
+            ["direction", "message", "creation_date"]
+        ]
         return True, conversation(df_conversation)
 
     return dash.no_update, dash.no_update
