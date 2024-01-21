@@ -38,6 +38,7 @@ def layout():
                                 stats_controls,
                                 html.Div(id="monitoring-status"),
                             ],
+                            style={"overflow": "visible"},
                         ),
                         span=12,
                         className="mb-2 p-1",
@@ -51,7 +52,6 @@ def layout():
                             html.Div(
                                 children=skeleton_cards,
                                 id="overview-inbound-summary",
-                                style={"overflow": "auto"},
                             ),
                         ],
                         span=12,
@@ -60,7 +60,9 @@ def layout():
                     dmc.Col(
                         [
                             dmc.Title("Outbound Summary", order=2),
-                            dmc.Text("Leads that were contacted by SMS or Phone Call."),
+                            dmc.Text(
+                                "Leads that were contacted by SMS or Phone Call."
+                            ),
                             html.Div(
                                 children=skeleton_cards,
                                 id="overview-message-summary",

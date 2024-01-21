@@ -436,6 +436,13 @@ def render_call_monitoring(dates, n_clicks):
     calls = fetch_call_history(start_date, end_date)
 
     df = pd.DataFrame(calls)
+    if df.empty:
+        no_data_message = "No calls found for the selected period."
+        return dmc.Alert(
+            children=no_data_message,
+            color="dark",
+            mb=0,
+        )
     df["date"] = pd.to_datetime(df["answered_at"]).dt.date
     pivot_df = df.pivot_table(
         index="date", columns="type", values="answered_at", aggfunc="count"

@@ -173,7 +173,10 @@ monitoring_controls = dbc.Row(
 stats_controls = dbc.Row(
     [
         dbc.Col(
-            create_date_form_group("stats-date-selector"), width=3, xs=12, lg=3
+            create_date_form_group("stats-date-selector"),
+            width=3,
+            xs=12,
+            lg=3,
         ),
         create_button("Run", "stats-refresh-button", 1, 1, 6),
     ],
