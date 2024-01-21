@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 import dash_mantine_components as dmc
 import pandas as pd
@@ -41,20 +42,40 @@ def get_base_layout():
     return layout
 
 
-def create_graph_leads_status(df: pd.DataFrame):
-    colors_map = {
-        "not_prioritized": "#6610F2",
-        "not_contacted": "#6610F2",
-        "contacted": "#6610F2",
-        "responded": "#6610F2",
-        "not_found": "#6610F2",
-        "processing_error": "#6610F2",
-        "not_valid": "#6610F2",
-        "new": "#6610F2",
-        "processing": "#6610F2",
-        "stop": "#6610F2",
+def create_graph_bar_leads_state(df: pd.DataFrame):
+    df["date"] = pd.to_datetime(df["last_updated"]).dt.date
+    df["source"].fillna("mo_casenet", inplace=True)
+    source_rename_dict = {
+        "il_cook": "IL Cook County",
+        "mo_casenet": "MO Casenet",
+        "mo_mshp": "MO Highway Patrol",
     }
+    df["source"] = df["source"].map(source_rename_dict)
+    pivot_df = df.pivot_table(
+        index="date", columns="source", values="last_updated", aggfunc="count"
+    )
+    pivot_df = pivot_df.fillna(0)
+    pivot_df["total"] = pivot_df.sum(axis=1)
+    pivot_df = pivot_df.reset_index()
 
+    columns = list(set(pivot_df.columns.to_list()) - set(["date"]))
+    fig = go.Figure()
+    for state in columns:
+        fig.add_trace(
+            go.Bar(
+                x=pivot_df["date"],
+                y=pivot_df[state],
+                name=state,
+                marker_color=settings.colors_mapping.get(state, "#FF5733"),
+            )
+        )
+
+    fig.update_layout(get_base_layout(), title_text="Leads by Source")
+
+    return dcc.Graph(figure=fig)
+
+
+def create_graph_leads_status(df: pd.DataFrame):
     status_columns = [
         "not_prioritized",
         "not_contacted",
@@ -87,7 +108,7 @@ def create_graph_leads_status(df: pd.DataFrame):
                 x=[renamed_status_columns[status]],
                 y=[df[df["status"] == status].shape[0]],
                 name=status,
-                marker_color=colors_map[status],
+                marker_color=settings.colors_mapping[status],
             )
         )
 
@@ -114,7 +135,7 @@ def create_graph_leads_status(df: pd.DataFrame):
     return dcc.Graph(figure=fig)
 
 
-def create_graph_leads_state(df: pd.DataFrame):
+def create_graph_choropleth_leads_state(df: pd.DataFrame):
     leads_scraped_by_state = (
         df.fillna("MO")
         .groupby("state")
@@ -168,12 +189,6 @@ def create_graph_leads_state(df: pd.DataFrame):
 
 
 def create_graph_calls(df: pd.DataFrame):
-    colors_map = {
-        "total": "#6610F2",
-        "incoming": "#28C76F",
-        "outgoing": "#053342",
-    }
-
     status_columns = ["total", "incoming", "outgoing"]
     fig = go.Figure()
     for status in status_columns:
@@ -182,7 +197,7 @@ def create_graph_calls(df: pd.DataFrame):
                 x=df["date"],
                 y=df[status],
                 name=status,
-                marker_color=colors_map[status],
+                marker_color=settings.colors_mapping[status],
             )
         )
 
@@ -307,28 +322,33 @@ def render_inbound_summary(data: pd.DataFrame):
 @callback(
     Output("graph-container-leads-status", "children"),
     Output("graph-container-leads-state", "children"),
-    Input("monitoring-date-selector", "value"),
+    Input("stats-date-selector", "value"),
     Input("stats-refresh-button", "n_clicks"),
 )
-def render_scrapper_monitoring(dates, n_clicks):
-    (start_date, end_date) = dates
-    leads_list = leads.get_leads(
-        start_date=start_date,
-        end_date=end_date,
-    )
+def render_scrapper_monitoring(dates, _):
+    start_date, end_date = dates
+    leads_list = leads.get_leads(start_date=start_date, end_date=end_date)
 
     if not leads_list:
-        return (
-            "No leads found for the selected period.",
-            "No leads found for the selected period.",
-        )
+        no_data_message = "No leads found for the selected period."
+        return no_data_message, no_data_message
 
     df = pd.DataFrame([lead.model_dump() for lead in leads_list])
 
     graph_leads_status = create_graph_leads_status(df)
-    graph_leads_state = create_graph_leads_state(df)
+    graph_choropleth_leads_state = create_graph_choropleth_leads_state(df)
+    graph_bar_leads_state = create_graph_bar_leads_state(df)
 
-    return graph_leads_status, graph_leads_state
+    grid_layout = dmc.Grid(
+        children=[
+            dmc.Col(children=graph_choropleth_leads_state, mx=1, span=5),
+            dmc.Col(children=graph_bar_leads_state, mx=1, span=5),
+        ],
+        gutter="xl",
+        justify="space-between",
+    )
+
+    return graph_leads_status, grid_layout
 
 
 def process_date(date):
@@ -382,7 +402,7 @@ def fetch_messages_status(start_date, end_date):
 @callback(
     Output("overview-inbound-summary", "children"),
     Output("overview-message-summary", "children"),
-    Input("monitoring-date-selector", "value"),
+    Input("stats-date-selector", "value"),
     Input("stats-refresh-button", "n_clicks"),
 )
 def render_inbound_monitoring(dates, n_clicks):
@@ -403,21 +423,26 @@ def render_inbound_monitoring(dates, n_clicks):
 
 @callback(
     Output("graph-container-call", "children"),
-    Input("monitoring-date-selector", "value"),
+    Input("stats-date-selector", "value"),
     Input("stats-refresh-button", "n_clicks"),
 )
 def render_call_monitoring(dates, n_clicks):
     (start_date, end_date) = dates
-    from datetime import datetime
 
     start_date, end_date = [
         datetime.strptime(date, "%Y-%m-%d") for date in dates
     ]
 
     calls = fetch_call_history(start_date, end_date)
-    import pandas as pd
 
     df = pd.DataFrame(calls)
+    if df.empty:
+        no_data_message = "No calls found for the selected period."
+        return dmc.Alert(
+            children=no_data_message,
+            color="dark",
+            mb=0,
+        )
     df["date"] = pd.to_datetime(df["answered_at"]).dt.date
     pivot_df = df.pivot_table(
         index="date", columns="type", values="answered_at", aggfunc="count"
