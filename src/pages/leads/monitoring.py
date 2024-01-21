@@ -25,11 +25,16 @@ def layout():
                 md=3,
             )
             for i in range(4)
-        ]
+        ],
+        style={"overflow": "hidden"},
     )
-    skeleton_card = dmc.Skeleton(
-        height="400px",
-        width="90vw",
+    
+    skeleton_card = html.Div(
+        dmc.Skeleton(
+            height="400px",
+            width="90vw",
+        ),
+        style={"overflow": "hidden"},
     )
 
     return html.Div(

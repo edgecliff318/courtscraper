@@ -6,6 +6,8 @@ import dash_ag_grid as dag
 import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
 import pandas as pd
+from dash_iconify import DashIconify
+
 from dash import dcc, html
 
 from src.components.inputs import generate_form_group
@@ -35,21 +37,15 @@ def get_conversation(df: pd.DataFrame) -> list:
     case_id = extract_case_id(df["Case ID"].iloc[0])
 
     messages = messages_service.get_interactions(case_id=case_id)
-    df_conversation = pd.DataFrame(
-        [message.model_dump() for message in messages]
-    )
+    df_conversation = pd.DataFrame([message.model_dump() for message in messages])
     df_conversation["creation_date"] = pd.to_datetime(
         df_conversation["creation_date"], utc=True
     )
-    df_conversation.sort_values(
-        by=["creation_date"], inplace=True, ascending=True
+    df_conversation.sort_values(by=["creation_date"], inplace=True, ascending=True)
+    df_conversation["creation_date"] = df_conversation["creation_date"].dt.tz_convert(
+        "US/Central"
     )
-    df_conversation["creation_date"] = df_conversation[
-        "creation_date"
-    ].dt.tz_convert("US/Central")
-    df_conversation = df_conversation[
-        ["direction", "message", "creation_date"]
-    ]
+    df_conversation = df_conversation[["direction", "message", "creation_date"]]
     return df_conversation.to_dict("records")
 
 
@@ -79,9 +75,7 @@ def create_chat(df: pd.DataFrame):
                 [
                     create_chat_bubble(
                         message["message"],
-                        from_user=True
-                        if message["direction"] == "outbound"
-                        else False,
+                        from_user=True if message["direction"] == "outbound" else False,
                     )
                     for message in list_of_messages
                 ],
@@ -115,11 +109,7 @@ def generate_status_options(prefix: str):
                 id=f"{prefix}-modal-lead-status",
                 placeholder="Set the status",
                 type="Dropdown",
-                options=[
-                    o
-                    for o in leads_model.leads_statuses
-                    if o["value"] != "all"
-                ],
+                options=[o for o in leads_model.leads_statuses if o["value"] != "all"],
                 persistence_type="session",
                 persistence=True,
             ),
@@ -132,14 +122,12 @@ def many_response_model(prefix: str) -> html.Div:
     status_options = generate_status_options(prefix)
 
     modal_footer_buttons = [
-        dmc.Button(
-            text, id=f"{prefix}-{button_id}", className="ml-auto", color=color
-        )
+        dmc.Button(text, id=f"{prefix}-{button_id}", className="ml-auto", color=color)
         for text, button_id, color in [
             ("Update Status", "modal-lead-status-update", "dark"),
             ("Generate Letters", "generate-letters", "dark"),
             ("Send ", "send-all", "green"),
-            ("Cancel", "send-all-cases", "red"),
+            ("Cancel", "all-cancel", "red"),
         ]
     ]
 
@@ -150,9 +138,7 @@ def many_response_model(prefix: str) -> html.Div:
                 [
                     dbc.ModalHeader("More information about the selected SMS"),
                     dbc.ModalBody(id=f"{prefix}-modal-content"),
-                    html.Div(
-                        id=f"{prefix}-hidden-div", style={"display": "none"}
-                    ),
+                    html.Div(id=f"{prefix}-hidden-div", style={"display": "none"}),
                     html.Div(id=f"{prefix}-modal-content-sending-status"),
                     dbc.Row(status_options, className="m-2"),
                     dbc.Row(id=f"{prefix}-modal-lead-status-update-status"),
@@ -182,8 +168,6 @@ def messaging_template(df, prefix: str = "outbound"):
         if num_row != 1:
             return create_single_selection_alert()
         else:
-            from dash_iconify import DashIconify
-
             first_phone = df["Phone"].iloc[0]
             title = dmc.Alert(
                 f"{first_phone}",

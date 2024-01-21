@@ -38,80 +38,89 @@ def send_message(case_id, sms_button, sms_message, phone, media_enabled):
 
         return message
 
+# ["outbound", "monitoring" ]:
+# prefix = "monitoring"
+def handle_send_message(prefix):
+    @callback(
+        Output(f"{prefix}-modal-content-sending-status", "children"),
+        Input(f"{prefix}-send-all", "n_clicks"),
 
-@callback(
-    Output("modal-content-sending-status", "children"),
-    Input("send-all-cases", "n_clicks"),
-    Input("modal-content", "children"),
-    State("memory", "data"),
-    State("lead-single-message-modal", "value"),
-    State("lead-media-enabled-modal", "value"),
-    running=[
-        (Output("send-all-cases", "disabled"), True, False),
-        (Output("send-all-cases-cancel", "disabled"), False, True),
-    ],
-    cancel=[Input("send-all-cases-cancel", "n_clicks")],
-)
-def send_many_message(*args, **kwargs):
-    if ctx.triggered_id == "send-all-cases":
-        df = ctx.states["memory.data"]["df"] or []
-        template_msg = ctx.states["lead-single-message-modal.value"] or ""
-        include_case_copy = (
-            ctx.states["lead-media-enabled-modal.value"] or False
-        )
-        skipped = False
-        for case in df:
-            # Dict keys to lower and replace spaces with underscores
-            case = {k.lower().replace(" ", "_"): v for k, v in case.items()}
+        Input(f"{prefix}-modal-content", "children"),
+        State(f"{prefix}-memory", "data"),
+        State("lead-single-message-modal", "value"),
+        State("lead-media-enabled-modal", "value"),
+        running=[
+            (Output(f"{prefix}-send-all", "disabled"), True, False),
+            (Output(f"{prefix}-all-cancel", "disabled"), False, True),
+        ],
+        cancel=[Input(f"{prefix}-all-cancel", "n_clicks")],
+    )
+    def send_many_message(*args, **kwargs):
+        print("send_many_message")
+        if ctx.triggered_id == f"{prefix}-send-all":
+            df = ctx.states[f"{prefix}-memory.data"]["df"] or []
+            template_msg = ctx.states["lead-single-message-modal.value"] or ""
+            include_case_copy = (
+                ctx.states["lead-media-enabled-modal.value"] or False
+            )
+            skipped = False
+            # should lowercase
+            df = [{k.lower(): v for k, v in case.items()} for case in df]
+            for case in df:
+                # Dict keys to lower and replace spaces with underscores
+                case = {k.lower().replace(" ", "_"): v for k, v in case.items()}
 
-            # first_name and last_name should be capitalized
-            case["first_name"] = case["first_name"].capitalize()
-            case["last_name"] = case["last_name"].capitalize()
+                # first_name and last_name should be capitalized
+                case["first_name"] = case.get("first_name" , "").capitalize()
+                case["last_name"] = case.get("last_name", "").capitalize()
 
-            case_id = case["case_index"]
-            try:
-                # TODO: add a check validation of template sending SMS with the case data by Twilio
-                sms_message = template_msg.format(**case)
-                for phone in case["phone"].split(", "):
-                    try:
-                        message_status = messages.send_message(
-                            case_id,
-                            sms_message,
-                            phone,
-                            media_enabled=include_case_copy,
-                        )
-                        if (
-                            message_status == "queued"
-                            or message_status == "accepted"
-                        ):
-                            leads.update_lead_status(case_id, "contacted")
-
-                        elif message_status == "skipped":
-                            logger.info(
-                                f"Skipping message to {phone} as it was recently sent. Use --force to send anyway"
+                case_id = case.get("case_index")
+                try:
+                    # TODO: add a check validation of template sending SMS with the case data by Twilio
+                    sms_message = template_msg.format(**case)
+                    for phone in case["phone"].split(", "):
+                        try:
+                            message_status = messages.send_message(
+                                case_id,
+                                sms_message,
+                                phone,
+                                media_enabled=include_case_copy,
                             )
-                        else:
-                            logger.error(
-                                f"An error occurred while sending the message. {message_status}"
-                            )
-                    except Exception as e:
-                        if "skipped" in str(e).lower():
-                            skipped = True
-                        else:
-                            raise e
+                            if (
+                                message_status == "queued"
+                                or message_status == "accepted"
+                            ):
+                                leads.update_lead_status(case_id, "contacted")
 
-            except Exception as e:
-                logger.error(
-                    f"An error occurred while sending the message. {e}"
-                )
-                return f"An error occurred while sending the message {e}"
-        if skipped:
-            return "Messages sent successfully. Some messages were skipped as they were recently sent"
-        else:
-            return "Messages sent successfully"
+                            elif message_status == "skipped":
+                                logger.info(
+                                    f"Skipping message to {phone} as it was recently sent. Use --force to send anyway"
+                                )
+                            else:
+                                logger.error(
+                                    f"An error occurred while sending the message. {message_status}"
+                                )
+                        except Exception as e:
+                            if "skipped" in str(e).lower():
+                                skipped = True
+                            else:
+                                raise e
 
-    return ""
+                except Exception as e:
+                    logger.error(
+                        f"An error occurred while sending the message. {e}"
+                    )
+                    return f"An error occurred while sending the message {e}"
+            if skipped:
+                return "Messages sent successfully. Some messages were skipped as they were recently sent"
+            else:
+                return "Messages sent successfully"
 
+        return ""
+
+
+for prefix in ["outbound", "monitoring" ]:
+    handle_send_message(prefix)
 
 @callback(
     Output("modal-content-generate-letters-status", "children"),
