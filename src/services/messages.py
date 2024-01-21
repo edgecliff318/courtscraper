@@ -159,14 +159,14 @@ def get_interactions(case_id=None) -> t.List[messages.Interaction]:
     return [messages.Interaction(**i.to_dict()) for i in interactions]
 
 
-def get_interactions_by_phone(phone: str | None = None) -> t.List[messages.Interaction]:
+def get_interactions_by_phone(
+    phone: str | None = None,
+) -> t.List[messages.Interaction]:
     if phone is None:
         interactions = db.collection("interactions").stream()
     else:
         interactions = (
-            db.collection("interactions")
-            .where("phone", "==", phone)
-            .stream()
+            db.collection("interactions").where("phone", "==", phone).stream()
         )
 
     return [messages.Interaction(**i.to_dict()) for i in interactions]
@@ -273,11 +273,7 @@ def send_message(
     if method == "twilio":
         phone_contact_service = PhoneContactService()
         last_message = phone_contact_service.get_single_item(phone)
-        import dash
-        ctx = dash.callback_context
-        button_id = ctx.triggered[0]["prop_id"].split(".")[0]
-
-        if last_message is not None and not force_send and button_id != "conversation-send-all":
+        if last_message is not None and not force_send:
             console.log(
                 f"Skipping message to {phone} as it was recently sent. Use --force to send anyway"
             )
