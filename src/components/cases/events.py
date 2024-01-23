@@ -1,3 +1,4 @@
+import datetime
 import logging
 
 import dash_ag_grid as dag
@@ -20,7 +21,12 @@ def get_case_events(case):
     events = case.events
 
     for e in events:
-        e["date"] = e["date"].strftime("%Y-%m-%d - %H:%M:%S")
+        e["date"] = (
+            e["date"].strftime("%Y-%m-%d - %H:%M:%S")
+            if e["date"] is not None
+            and isinstance(e["date"], datetime.datetime)
+            else e["date"]
+        )
 
     return dag.AgGrid(
         id="case-events",
