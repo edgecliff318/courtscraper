@@ -49,7 +49,9 @@ def get_case_timeline(case: Case):
         children=[
             dmc.TimelineItem(
                 title=status_details.get("label"),
-                children=get_event_text(status_id, case.events),
+                children=get_event_text(status_id, case.events)
+                if case.events is not None
+                else [],
             )
             for status_id, status_details in case_statuses.items()
             if status_details.get("show", True)
