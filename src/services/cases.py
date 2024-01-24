@@ -15,6 +15,7 @@ def get_cases(
     end_date=None,
     disposition=None,
     source=None,
+    flag=None,
 ):
     cases_list = db.collection("cases")
 
@@ -43,6 +44,11 @@ def get_cases(
     if source is not None:
         cases_list = cases_list.where(
             field_path="source", op_string="==", value=source
+        )
+
+    if flag is not None:
+        cases_list = cases_list.where(
+            field_path="flag", op_string="==", value=flag
         )
 
     cases_list = cases_list.stream()

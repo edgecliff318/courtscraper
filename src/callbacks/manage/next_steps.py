@@ -60,13 +60,13 @@ def modal_next_step(data, n_clicks_close, n_clicks_update_status):
     if data is None:
         data = {}
 
-    suggested_next_step = data.get("next_step")
+    suggested_next_step = data.get("next_case_status")
     message = data.get("message")
     send_sms = data.get("send_sms", False)
 
     options = [
         {
-            "label": status_details.get("label"),
+            "label": status_details.get("short_description"),
             "value": status_id,
         }
         for status_id, status_details in case_statuses.items()
@@ -113,7 +113,12 @@ def modal_next_step_submit(
     participant = get_defendent(case)
 
     # Updating the case
-    cases_service.patch_case(case_id, {"status": status})
+    flag = case_statuses.get(status, {}).get("flag")
+    update_dict = {"status": status}
+    if flag is not None:
+        update_dict["flag"] = flag
+
+    cases_service.patch_case(case_id, update_dict)
 
     alert_message = "Case updated successfully"
 

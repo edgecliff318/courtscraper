@@ -28,7 +28,9 @@ def get_case_summary(case: Case):
                     dmc.Text(f"Case#{case.case_id}", weight=500),
                     html.Div(hidden=True, children=case.case_id, id="case-id"),
                     dmc.Badge(
-                        case_statuses.get(case.status, {}).get("label")
+                        case_statuses.get(case.status, {}).get(
+                            "short_description"
+                        )
                         if case.status is not None
                         else "Filed",
                         color=get_case_status_color(case.status),

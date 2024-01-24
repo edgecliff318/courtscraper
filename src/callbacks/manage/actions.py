@@ -31,7 +31,7 @@ def convert_date_format(date_str_or_obj, timezone="Etc/GMT-1") -> str:
     return formatted_date
 
 
-def create_case_card(case_data: dict) -> dmc.Card:
+def create_case_card(case_data: dict):
     case_id = case_data.get("case_id", "N/A")
     status = (
         "filed"
@@ -59,51 +59,73 @@ def create_case_card(case_data: dict) -> dmc.Card:
     card_layout = [
         dmc.Group(
             [
-                dmc.Text(f"Case: {case_id}", weight=500),
+                dmc.Text(f"Case#{case_id}", weight=500),
+                dmc.Text(full_name, weight=500),
+            ],
+            position="apart",
+        ),
+        dmc.Group(
+            [
+                dmc.Text("Status"),
                 dmc.Badge(
-                    str(status).capitalize(),
+                    case_statuses.get(status, {}).get(
+                        "short_description", status
+                    ),
                     color=get_case_status_color(status),
                     variant="light",
                 ),
             ],
             position="apart",
-            mt="md",
-            mb="xs",
         ),
-        dmc.Text(full_name, weight=500),
         dmc.Text(f"Case Date: {case_date}", size="sm", color="dimmed"),
+        dmc.Text(f"Last Updated: {last_updated}", size="sm", color="dimmed"),
+        dmc.Text("Suggested Action"),
         dmc.Group(
             [
-                dmc.Text(f"Next Action:", size="sm", color="dimmed"),
                 dmc.Badge(
                     next_action,
                     color=get_case_status_color(status),
                     variant="light",
                 ),
-            ],
-            mt="md",
-            mb="xs",
+            ]
         ),
-        dmc.Text(f"Last Updated: {last_updated}", size="sm", color="dimmed"),
-        html.A(
-            dmc.Button(
-                "View Details",
-                variant="light",
-                color="dark",
-                fullWidth=True,
-                mt="md",
-                radius="md",
-            ),
-            href=f"/manage/cases/{case_id}",
+        dmc.Group(
+            [
+                html.A(
+                    dmc.Button(
+                        "Suggested Action",
+                        variant="light",
+                        color="dark",
+                        fullWidth=True,
+                        mt="md",
+                        radius="md",
+                    ),
+                    href=f"/manage/cases/{case_id}",
+                ),
+                html.A(
+                    dmc.Button(
+                        "Send Reminder",
+                        variant="light",
+                        color="dark",
+                        fullWidth=True,
+                        mt="md",
+                        radius="md",
+                    ),
+                    href=f"/manage/cases/{case_id}",
+                ),
+            ]
         ),
     ]
 
-    return dmc.Card(
-        children=card_layout,
-        withBorder=True,
-        shadow="sm",
-        radius="md",
-        style={"margin": "6px"},
+    return html.A(
+        children=dmc.Card(
+            children=card_layout,
+            withBorder=True,
+            shadow="sm",
+            radius="md",
+            style={"margin": "6px"},
+        ),
+        href=f"/manage/cases/{case_id}",
     )
 
 
@@ -131,47 +153,35 @@ def create_case_column(cases, title):
     )
 
 
-def filter_cases_by_status(cases_list):
-    cases_by_status = {"todo": [], "pending": [], "closed": []}
-
-    for case in cases_list:
-        case_dic = case.model_dump()
-        status = "filed" if not case_dic.get("status") else case_dic["status"]
-        section = (
-            "todo"
-            if not case_statuses[status].get("section")
-            else case_statuses[status]["section"]
-        )
-
-        if section in cases_by_status:
-            cases_by_status[section].append(case_dic)
-
-    return cases_by_status
-
-
 def create_case_div(cases):
     return html.Div(
-        [create_case_card(case) for case in cases], style={"overflowY": "auto"}
+        [create_case_card(case.model_dump()) for case in cases],
+        style={"overflowY": "auto"},
     )
 
 
 @callback(
-    Output("case_card_col_1", "children"),
-    Output("case_card_col_2", "children"),
-    Output("case_card_col_3", "children"),
+    Output("case_card_col_todo", "children"),
     Input("court-selector", "value"),
-    Input("date-selector", "value"),
 )
-def render_actions(court_code_list, dates):
-    start_date, end_date = dates
-    start_date = convert_date_format(start_date)
-    end_date = convert_date_format(end_date)
+def render_actions_todo(court_code_list):
+    cases_list_todo = cases.get_cases(court_code_list, flag="todo")
+    return create_case_div(cases_list_todo)
 
-    cases_list = cases.get_cases(court_code_list, None, None, None)
-    cases_by_status = filter_cases_by_status(cases_list)
 
-    return (
-        create_case_div(cases_by_status["todo"]),
-        create_case_div(cases_by_status["pending"]),
-        create_case_div(cases_by_status["closed"]),
-    )
+@callback(
+    Output("case_card_col_pending", "children"),
+    Input("court-selector", "value"),
+)
+def render_actions_pending(court_code_list):
+    cases_list_pending = cases.get_cases(court_code_list, flag="pending")
+    return create_case_div(cases_list_pending)
+
+
+@callback(
+    Output("case_card_col_closed", "children"),
+    Input("court-selector", "value"),
+)
+def render_actions_closed(court_code_list):
+    cases_list_closed = cases.get_cases(court_code_list, flag="closed")
+    return create_case_div(cases_list_closed)

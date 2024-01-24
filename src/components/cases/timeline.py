@@ -34,13 +34,13 @@ def get_case_timeline(case: Case):
     case_events_timeline = [
         status_id
         for status_id, status_details in case_statuses.items()
-        if status_details.get("show", True)
+        if status_details.get("mandatory", True)
         or status_id in [c.get("case_status") for c in case_events]
     ]
-    active = 1
+    active = 0
     for order, status_key in enumerate(case_events_timeline):
         if status_key == case.status:
-            active = order + 1
+            active = order
 
     timeline = dmc.Timeline(
         active=active,
@@ -48,13 +48,13 @@ def get_case_timeline(case: Case):
         lineWidth=2,
         children=[
             dmc.TimelineItem(
-                title=status_details.get("label"),
+                title=status_details.get("short_description"),
                 children=get_event_text(status_id, case.events)
                 if case.events is not None
                 else [],
             )
             for status_id, status_details in case_statuses.items()
-            if status_details.get("show", True)
+            if status_details.get("mandatory", True)
             or status_id in [c.get("case_status") for c in case_events]
         ],
     )
