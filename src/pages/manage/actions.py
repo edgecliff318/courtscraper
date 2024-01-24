@@ -47,7 +47,7 @@ def layout():
                                     ]
                                 ),
                                 html.Div(
-                                    id="case_card_col_1",
+                                    id="case_card_col_todo",
                                     style={"overflowY": "auto"},
                                 ),
                             ],
@@ -71,7 +71,7 @@ def layout():
                                     ]
                                 ),
                                 html.Div(
-                                    id="case_card_col_2",
+                                    id="case_card_col_pending",
                                     style={"overflowY": "auto"},
                                 ),
                             ],
@@ -95,7 +95,7 @@ def layout():
                                     ]
                                 ),
                                 html.Div(
-                                    id="case_card_col_3",
+                                    id="case_card_col_closed",
                                     style={"overflowY": "auto"},
                                 ),
                             ],
