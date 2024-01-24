@@ -38,7 +38,10 @@ class ScraperBase:
         self.scraper_settings = self.scraper_service.get_single_item(
             self.__class__.__name__
         )
-        self.state = self.scraper_settings.state or {}
+        if self.scraper_settings is None:
+            self.state = {}
+        else:
+            self.state = self.scraper_settings.state or {}
 
     def update_state(self):
         """Update the scraper settings."""
