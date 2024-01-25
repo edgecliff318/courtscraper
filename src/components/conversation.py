@@ -154,7 +154,6 @@ def many_response_model(prefix: str) -> html.Div:
             ("Send ", "send-all", "green"),
             ("Cancel", "all-cancel", "red"),
         ]
-        if prefix != "conversation" or prefix != "monitoring"
     ]
 
     return html.Div(

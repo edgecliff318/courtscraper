@@ -49,16 +49,6 @@ def render_inbound_summary(data: dict):
 
 
 @callback(
-    Output("leads-summary", "children"),
-    Input("url", "pathname"),
-)
-def render_leads_summary(pathname):
-    lead_service = leads.LeadsService()
-    leads_data = lead_service.get_leads_summary()
-    return render_inbound_summary(leads_data)
-
-
-@callback(
     Output("leads-data", "children"),
     Input("court-selector", "value"),
     Input("date-selector", "value"),
