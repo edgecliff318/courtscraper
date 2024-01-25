@@ -40,8 +40,6 @@ def send_message(case_id, sms_button, sms_message, phone, media_enabled):
         return message
 
 
-# ["outbound", "monitoring" ]:
-# prefix = "monitoring"
 def handle_send_message(prefix):
     @callback(
         Output(f"{prefix}-modal-content-sending-status", "children"),
@@ -142,98 +140,98 @@ def handle_send_message(prefix):
 
         return ""
 
+    @callback(
+        Output(f"{prefix}-modal-content-generate-letters-status", "children"),
+        Input(f"{prefix}-generate-letters", "n_clicks"),
+        Input(f"{prefix}-modal-content", "children"),
+        State(f"{prefix}-memory", "data"),
+    )
+    def generate_many_letters(*args, **kwargs):
+        if ctx.triggered_id == f"{prefix}-generate-letters":
+            df = ctx.states[f"{prefix}-memory.data"]["df"] or []
+            case_ids = [c.get("case_index") for c in df]
+
+            try:
+                (
+                    media_url_envelope,
+                    media_url_letter,
+                ) = letters.generate_many_letters(case_ids)
+
+                leads.update_multiple_leads_status(
+                    case_ids=case_ids, status="mailed"
+                )
+
+                output = html.Div(
+                    [
+                        html.H6(
+                            "The zip files were generated : ",
+                            className="card-title",
+                        ),
+                        # Small button
+                        html.A(
+                            "Download Envelope",
+                            href=media_url_envelope,
+                            target="_blank",
+                            className="btn btn-primary m-1 btn-sm",
+                        ),
+                        html.A(
+                            "Download Letter",
+                            href=media_url_letter,
+                            target="_blank",
+                            className="btn btn-primary m-1 btn-sm",
+                        ),
+                        build_toast(
+                            "The letter zip and envelopes zip were generated successfully",
+                            "Letters and envelopes generated ✅",
+                        ),
+                    ],
+                )
+                return output
+
+            except Exception as e:
+                toast = build_toast(
+                    "Letters could not be generated",
+                    f"An error occurred ❌ {e}",
+                    color="danger",
+                )
+                return toast
+
+        return ""
+
+    @callback(
+        Output(f"{prefix}-modal-lead-status-update-status", "children"),
+        Input(f"{prefix}-modal-lead-status-update", "n_clicks"),
+        State(f"{prefix}-memory", "data"),
+        State(f"{prefix}-modal-lead-status", "value"),
+    )
+    def update_many_lead_status(*args, **kwargs):
+        if ctx.triggered_id == f"{prefix}-modal-lead-status-update":
+            df = ctx.states[f"{prefix}-memory.data"]["df"] or []
+            case_ids = [c.get("case_index") for c in df]
+            status = (
+                ctx.states[f"{prefix}-modal-lead-status.value"] or "contacted"
+            )
+
+            try:
+                leads.update_multiple_leads_status(
+                    case_ids=case_ids, status=status
+                )
+                toast = build_toast(
+                    "Leads status updated successfully",
+                    "Leads status updated successfully ✅",
+                )
+                return toast
+
+            except Exception as e:
+                toast = build_toast(
+                    "Leads status could not be updated",
+                    f"An error occurred ❌ {e}",
+                    color="danger",
+                )
+                return toast
+
+        return ""
+
 
 for prefix in ["outbound", "monitoring", "conversation"]:
     handle_send_message(prefix)
-
-
-@callback(
-    Output("modal-content-generate-letters-status", "children"),
-    Input("generate-letters", "n_clicks"),
-    Input("modal-content", "children"),
-    State("memory", "data"),
-)
-def generate_many_letters(*args, **kwargs):
-    if ctx.triggered_id == "generate-letters":
-        df = ctx.states["memory.data"]["df"] or []
-        case_ids = [c.get("case_index") for c in df]
-
-        try:
-            (
-                media_url_envelope,
-                media_url_letter,
-            ) = letters.generate_many_letters(case_ids)
-
-            leads.update_multiple_leads_status(
-                case_ids=case_ids, status="mailed"
-            )
-
-            output = html.Div(
-                [
-                    html.H6(
-                        "The zip files were generated : ",
-                        className="card-title",
-                    ),
-                    # Small button
-                    html.A(
-                        "Download Envelope",
-                        href=media_url_envelope,
-                        target="_blank",
-                        className="btn btn-primary m-1 btn-sm",
-                    ),
-                    html.A(
-                        "Download Letter",
-                        href=media_url_letter,
-                        target="_blank",
-                        className="btn btn-primary m-1 btn-sm",
-                    ),
-                    build_toast(
-                        "The letter zip and envelopes zip were generated successfully",
-                        "Letters and envelopes generated ✅",
-                    ),
-                ],
-            )
-            return output
-
-        except Exception as e:
-            toast = build_toast(
-                "Letters could not be generated",
-                f"An error occurred ❌ {e}",
-                color="danger",
-            )
-            return toast
-
-    return ""
-
-
-@callback(
-    Output("modal-lead-status-update-status", "children"),
-    Input("modal-lead-status-update", "n_clicks"),
-    State("memory", "data"),
-    State("modal-lead-status", "value"),
-)
-def update_many_lead_status(*args, **kwargs):
-    if ctx.triggered_id == "modal-lead-status-update":
-        df = ctx.states["memory.data"]["df"] or []
-        case_ids = [c.get("case_index") for c in df]
-        status = ctx.states["modal-lead-status.value"] or "contacted"
-
-        try:
-            leads.update_multiple_leads_status(
-                case_ids=case_ids, status=status
-            )
-            toast = build_toast(
-                "Leads status updated successfully",
-                "Leads status updated successfully ✅",
-            )
-            return toast
-
-        except Exception as e:
-            toast = build_toast(
-                "Leads status could not be updated",
-                f"An error occurred ❌ {e}",
-                color="danger",
-            )
-            return toast
-
-    return ""
