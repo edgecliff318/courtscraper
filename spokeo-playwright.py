@@ -23,7 +23,7 @@ def search_person(page, firstName, lastName, middleName="", city=None, state=Non
     # https://www.spokeo.com/Samama-Mahmud?middle_name=B
     url = f"https://www.spokeo.com/{firstName}-{lastName}?middle_name={middleName}"
     page.goto(url)
-    # https://www.spokeo.com/Samama-Mahmud/Wisconsin/Milwaukee/p2015111502099087352946730813837
+    l = "https://www.spokeo.com/Samama-Mahmud/Wisconsin/Milwaukee/p2015111502099087352946730813837"
     
     link_elements = page.query_selector_all('.e1ndw42t0')
     links = [
@@ -33,7 +33,27 @@ def search_person(page, firstName, lastName, middleName="", city=None, state=Non
     return links
 
 
+def login(page,context, email, password):
+    page.goto('https://www.spokeo.com/login')
+    
+    page.click('input[name="password"]')
+    page.fill('input[name="password"]', password)
+    #clcik inside the input box
+    page.click('input[name="email"]')
+    page.fill('input[name="email"]', email)
+    
+    
+    stealth_sync(page)
+    page.wait_for_selector('button:has-text("LOGIN")', state="visible")
 
+    page.click('button:has-text("LOGIN")')
+    page.wait_for_load_state()
+    state = context.storage_state()
+    import os
+    os.makedirs('playwright/.auth', exist_ok=True)
+    with open('playwright/.auth/state.json', 'w') as f:
+        f.write(state)
+    return page
     
     
 
@@ -43,23 +63,24 @@ def run(playwright):
     email = "Shawn@tickettakedown.com"
     password = "?XCcFLCrhr3uQg@"
     browser = playwright.chromium.launch(headless=False)
-    page = browser.new_page()
-    page.goto('https://www.spokeo.com/login')
+    # context =  browser.new_context(storage_state='state.json')
+    #check if there is a saved state
+    import os
+    os.makedirs('playwright/.auth', exist_ok=True)
+    if os.path.exists('playwright/.auth/state.json'):
+        # with open('', 'r') as f:
+        #     state = f.read()
+        context = browser.new_context(storage_state="playwright/.auth/state.json")
+        page = context.new_page()
 
-    #clcik inside the input box
-    page.click('input[name="password"]')
-    page.fill('input[name="password"]', password)
-    #clcik inside the input box
-    page.click('input[name="email"]')
-    page.fill('input[name="email"]', email)
-    
-    
-    #disable_stealth(page)
-    stealth_sync(page)
-    page.wait_for_selector('button:has-text("LOGIN")', state="visible")
+    else:
+        context =  browser.new_context()
+        page =  context.new_page()
+        page = login(page, context, email, password)
 
-    page.click('button:has-text("LOGIN")')
-    page.wait_for_load_state()
+
+    print(page.title())
+    ## save state
     search_person(
         page,
         "Samama",
