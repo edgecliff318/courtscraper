@@ -390,8 +390,7 @@ def send_email(
     # Upload the case to casenet
     if events is None:
         events = []
-    # TODO: Remove afterwards
-    events = []
+
     # If the event is already in the list, raise an error$
     template_details = templates.get_single_template(template)
     if not template_details.repeat and event.get("template") in [

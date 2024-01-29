@@ -39,6 +39,7 @@ def send_to_client(email, subject, message, attachments):
         sender=sender,
         contact=contact,
         message=message,
+        subject=subject,
     )
 
     return output
