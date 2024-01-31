@@ -4,6 +4,7 @@ import dash
 import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
 from dash import html
+from dash_iconify import DashIconify
 
 from src.components.filters import cases_controls
 
@@ -35,21 +36,18 @@ def layout():
             dmc.Grid(
                 children=[
                     dmc.Col(
-                        dmc.Navbar(
-                            p="md",
+                        dmc.Card(
                             children=[
-                                html.H4(
-                                    "To-do",
-                                    style={
-                                        "marginTop": "4px",
-                                        "textAlign": "center",
-                                    },
-                                ),
-                                dmc.Divider(
-                                    size="sm", style={"marginBottom": "10px"}
+                                dmc.Group(
+                                    [
+                                        DashIconify(
+                                            icon="ri:todo-line", width=20
+                                        ),
+                                        dmc.Title("To-do", order=2),
+                                    ]
                                 ),
                                 html.Div(
-                                    id="case_card_col_1",
+                                    id="case_card_col_todo",
                                     style={"overflowY": "auto"},
                                 ),
                             ],
@@ -61,21 +59,19 @@ def layout():
                         xs=12,
                     ),
                     dmc.Col(
-                        dmc.Navbar(
-                            p="md",
+                        dmc.Card(
                             children=[
-                                html.H4(
-                                    "Pending",
-                                    style={
-                                        "marginTop": "4px",
-                                        "textAlign": "center",
-                                    },
-                                ),
-                                dmc.Divider(
-                                    size="sm", style={"marginBottom": "10px"}
+                                dmc.Group(
+                                    [
+                                        DashIconify(
+                                            icon="ri:time-fill",
+                                            width=20,
+                                        ),
+                                        dmc.Title("Pending", order=2),
+                                    ]
                                 ),
                                 html.Div(
-                                    id="case_card_col_2",
+                                    id="case_card_col_pending",
                                     style={"overflowY": "auto"},
                                 ),
                             ],
@@ -87,21 +83,19 @@ def layout():
                         xs=12,
                     ),
                     dmc.Col(
-                        dmc.Navbar(
-                            p="md",
+                        dmc.Card(
                             children=[
-                                html.H4(
-                                    "Closed Recently",
-                                    style={
-                                        "marginTop": "4px",
-                                        "textAlign": "center",
-                                    },
-                                ),
-                                dmc.Divider(
-                                    size="sm", style={"marginBottom": "10px"}
+                                dmc.Group(
+                                    [
+                                        DashIconify(
+                                            icon="fluent-mdl2:completed-solid",
+                                            width=20,
+                                        ),
+                                        dmc.Title("Closed Recently", order=2),
+                                    ]
                                 ),
                                 html.Div(
-                                    id="case_card_col_3",
+                                    id="case_card_col_closed",
                                     style={"overflowY": "auto"},
                                 ),
                             ],

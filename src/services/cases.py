@@ -5,6 +5,7 @@ from typing import MutableMapping
 from google.cloud.firestore_v1.base_query import And, FieldFilter, Or
 from pydantic import ValidationError
 
+from src.core.dynamic_fields import CaseDynamicFields
 from src.db import db
 from src.models import cases
 
@@ -15,6 +16,7 @@ def get_cases(
     end_date=None,
     disposition=None,
     source=None,
+    flag=None,
 ):
     cases_list = db.collection("cases")
 
@@ -43,6 +45,11 @@ def get_cases(
     if source is not None:
         cases_list = cases_list.where(
             field_path="source", op_string="==", value=source
+        )
+
+    if flag is not None:
+        cases_list = cases_list.where(
+            field_path="flag", op_string="==", value=flag
         )
 
     cases_list = cases_list.stream()
@@ -136,10 +143,16 @@ def flatten(dictionary, parent_key="", separator="_"):
 
 
 def get_context_data(case_id, default_value="!!!TO_FILL!!!") -> defaultdict:
-    case_data = get_single_case(case_id).model_dump()
+    case = get_single_case(case_id)
+    case_data = case.model_dump()
 
     case_data = flatten(case_data)
+
+    case_data = CaseDynamicFields().update(case, case_data)
+
     case_data = {f"case_{key}": value for key, value in case_data.items()}
+
+    case_data["invoice_link"] = "{{invoice}}"
 
     if case_data.get("case_middle_name") is None:
         case_data["case_middle_name"] = ""

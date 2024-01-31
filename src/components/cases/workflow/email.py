@@ -7,14 +7,13 @@ import openai
 from dash import dcc, html
 from flask import session
 
-from src.components.cases.payments import (
-    get_invoice_widget,
-)
+from src.components.cases.payments import get_invoice_widget
 from src.connectors import payments as payments_connector
 from src.core.config import get_settings
 from src.db import bucket
-from src.services import cases, participants, templates
+from src.services import cases, participants
 from src.services import settings as settings_service
+from src.services import templates
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -391,8 +390,7 @@ def send_email(
     # Upload the case to casenet
     if events is None:
         events = []
-    # TODO: Remove afterwards
-    events = []
+
     # If the event is already in the list, raise an error$
     template_details = templates.get_single_template(template)
     if not template_details.repeat and event.get("template") in [

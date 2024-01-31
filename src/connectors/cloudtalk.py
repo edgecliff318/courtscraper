@@ -239,8 +239,7 @@ def process_redudant_numbers():
             for contact in contacts_items:
                 contact_full = http.request(
                     "GET",
-                    url
-                    + f"contacts/show/{contact.get('Contact').get('id')}.json",
+                    url + f"contacts/show/{contact.get('Contact').get('id')}.json",
                     headers=headers,
                     auth=(
                         settings.CLOUDTALK_API_KEY,
@@ -254,9 +253,7 @@ def process_redudant_numbers():
                 for tag in tags:
                     if tag.get("name") in contacts_by_tag_order.keys():
                         contact_order[contact.get("Contact").get("id")] = {
-                            "order": contacts_by_tag_order.get(
-                                tag.get("name")
-                            ),
+                            "order": contacts_by_tag_order.get(tag.get("name")),
                             "tag": tag.get("name"),
                         }
 
@@ -343,10 +340,8 @@ def fetch_call_history(date_from, date_to):
     params = {
         "date_from": date_from.strftime("%Y-%m-%d %H:%M:%S"),
         "date_to": date_to.strftime("%Y-%m-%d %H:%M:%S"),
-        # Add other parameters as necessary
     }
 
-    print("Getting call history")
     response = requests.request(
         "GET",
         url + "calls/index.json",
@@ -375,22 +370,7 @@ def fetch_call_history(date_from, date_to):
         )
         calls_json = response.json()
         calls_list += [
-            call.get("Cdr")
-            for call in calls_json.get("responseData").get("data")
+            call.get("Cdr") for call in calls_json.get("responseData").get("data")
         ]
 
-    print(f"Found {len(calls_list)} calls")
     return calls_list
-
-
-if __name__ == "__main__":
-    print("Running")
-
-    # Example usage
-    date_from = datetime(2024, 1, 16)
-    date_to = datetime(2024, 1, 18)
-    calls = fetch_call_history(date_from, date_to)
-    import pandas as pd
-
-    df = pd.DataFrame(calls)
-    print(calls)

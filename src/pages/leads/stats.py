@@ -8,6 +8,26 @@ dash.register_page(__name__, class_icon="ti ti-dashboard", order=2)
 
 
 def layout():
+    skeleton_cards = dmc.Grid(
+        children=[
+            dmc.Col(
+                dmc.Skeleton(
+                    height="150px",
+                    width="23vw",
+                ),
+                md=3,
+            )
+            for i in range(4)
+        ],
+        style={"overflow": "hidden"},
+    )
+    skeleton_card = html.Div(
+        dmc.Skeleton(
+            height="400px",
+            width="90vw",
+        ),
+        style={"overflow": "hidden"},
+    )
     return html.Div(
         [
             dmc.Grid(
@@ -18,11 +38,10 @@ def layout():
                                 stats_controls,
                                 html.Div(id="monitoring-status"),
                             ],
-                            style={"overflow": "auto"},
+                            style={"overflow": "visible"},
                         ),
                         span=12,
-                        className="mb-2",
-                        style={"overflow": "auto"},
+                        className="mb-2 p-1",
                     ),
                     dmc.Col(
                         [
@@ -31,19 +50,12 @@ def layout():
                                 "Inbound leads summary for customers and leads that submitted a form on the website."
                             ),
                             html.Div(
-                                [
-                                    dmc.Skeleton(
-                                        visible=False,
-                                        children=html.Div(
-                                            id="overview-inbound-summary",
-                                        ),
-                                        mb=10,
-                                    ),
-                                ]
+                                children=skeleton_cards,
+                                id="overview-inbound-summary",
                             ),
                         ],
                         span=12,
-                        className="mb-2",
+                        className="mb-2 p-1",
                     ),
                     dmc.Col(
                         [
@@ -51,88 +63,49 @@ def layout():
                             dmc.Text(
                                 "Leads that were contacted by SMS or Phone Call."
                             ),
-                            dmc.Skeleton(
-                                visible=False,
-                                # visible=True,
-                                children=html.Div(
-                                    id="overview-message-summary",
-                                ),
-                                mb=10,
+                            html.Div(
+                                children=skeleton_cards,
+                                id="overview-message-summary",
                             ),
                         ],
                         span=12,
-                        className="mb-2",
-                    ),
-                    dmc.Col(
-                        [
-                            dmc.Title("Scraping Overview", order=2),
-                            dmc.Text(
-                                "Scraping summary for all scrapers by State."
-                            ),
-                            html.Div(
-                                dmc.Skeleton(
-                                    visible=False,
-                                    children=html.Div(id="scrapper-summary"),
-                                )
-                            ),
-                        ],
-                        span=12,
-                        className="mb-2",
-                    ),
-                    dmc.Col(
-                        dmc.Card(
-                            html.Div(
-                                [
-                                    dmc.Skeleton(
-                                        visible=False,
-                                        children=html.Div(
-                                            id="graph-container-leads-state",
-                                        ),
-                                        mb=10,
-                                    ),
-                                ]
-                            )
-                        ),
-                        span=12,
-                        className="mb-2",
+                        className="mb-2 p-1",
                     ),
                     dmc.Col(
                         dmc.Card(
                             [
                                 html.Div(
-                                    [
-                                        dmc.Skeleton(
-                                            visible=False,
-                                            children=html.Div(
-                                                id="graph-container-leads-status",
-                                            ),
-                                            mb=10,
-                                        ),
-                                    ]
+                                    children=skeleton_card,
+                                    id="graph-container-leads-state",
                                 )
                             ]
                         ),
                         span=12,
-                        className="mb-2",
+                        className="mb-2 p-1",
                     ),
                     dmc.Col(
                         dmc.Card(
                             [
                                 html.Div(
-                                    [
-                                        dmc.Skeleton(
-                                            visible=False,
-                                            children=html.Div(
-                                                id="graph-container-call",
-                                            ),
-                                            mb=10,
-                                        ),
-                                    ]
+                                    children=skeleton_card,
+                                    id="graph-container-leads-status",
                                 )
                             ]
                         ),
                         span=12,
-                        className="mb-2",
+                        className="mb-2 p-1",
+                    ),
+                    dmc.Col(
+                        dmc.Card(
+                            [
+                                html.Div(
+                                    children=skeleton_card,
+                                    id="graph-container-call",
+                                )
+                            ]
+                        ),
+                        span=12,
+                        className="mb-2 p-1",
                     ),
                 ]
             ),
