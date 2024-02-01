@@ -22,7 +22,7 @@ class MyCase:
         # Refresh the headers
         url = "https://auth.mycase.com/login_sessions?client_id=tCEM8hNY7GaC2c8P&response_type=code"
         # TODO: #17 Move the login details to Firebase
-        payload = "utf8=%E2%9C%93&login_session%5Bemail%5D=shawn%40tickettakedown.com&login_session%5Bpassword%5D=TTDsm23!"
+        payload = "utf8=%E2%9C%93&login_session%5Bemail%5D=team%40tickettakedown.com&login_session%5Bpassword%5D=TTDpro24!"
         headers = {
             "authority": "auth.mycase.com",
             "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
@@ -258,15 +258,17 @@ class MyCase:
                         "custom_field_id": "552480",
                     },
                     "1": {
-                        "value": "CIRCUIT"
-                        if (
-                            case.court_type is not None
-                            and (
-                                "circ" in case.court_type.lower()
-                                or case.court_type.lower() == "c"
+                        "value": (
+                            "CIRCUIT"
+                            if (
+                                case.court_type is not None
+                                and (
+                                    "circ" in case.court_type.lower()
+                                    or case.court_type.lower() == "c"
+                                )
                             )
-                        )
-                        else "MUNICIPAL",
+                            else "MUNICIPAL"
+                        ),
                         "custom_field_id": "552482",
                     },
                     "2": {
@@ -282,9 +284,11 @@ class MyCase:
                         "custom_field_id": "552501",
                     },
                     "5": {
-                        "value": case.judge.get("formatted_name")
-                        if case.judge is not None
-                        else "",
+                        "value": (
+                            case.judge.get("formatted_name")
+                            if case.judge is not None
+                            else ""
+                        ),
                         "custom_field_id": "552502",
                     },
                     "6": {
@@ -294,9 +298,11 @@ class MyCase:
                     "7": {"value": "", "custom_field_id": "561063"},
                     "8": {"value": "", "custom_field_id": "561643"},
                     "9": {
-                        "value": case.fine.get("total_amount", "")
-                        if case.fine is not None
-                        else "",
+                        "value": (
+                            case.fine.get("total_amount", "")
+                            if case.fine is not None
+                            else ""
+                        ),
                         "custom_field_id": "561644",
                     },
                     "10": {"value": "", "custom_field_id": "561645"},
