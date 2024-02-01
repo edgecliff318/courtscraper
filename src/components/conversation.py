@@ -16,7 +16,7 @@ logger = logging.Logger(__name__)
 
 
 def extract_case_id(text):
-    pattern = r"\[(\d+)\]"
+    pattern = r"\[(.*?)\]"
     match = re.search(pattern, text)
     if match:
         return match.group(1)
@@ -92,9 +92,11 @@ def create_chat(df: pd.DataFrame, phone=None):
                 [
                     create_chat_bubble(
                         message["message"],
-                        from_user=True
-                        if message["direction"] == "outbound"
-                        else False,
+                        from_user=(
+                            True
+                            if message["direction"] == "outbound"
+                            else False
+                        ),
                         date=message["creation_date"],
                     )
                     for message in list_of_messages
