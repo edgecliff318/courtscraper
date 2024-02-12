@@ -7,9 +7,14 @@ from pydantic import BaseModel, validator
 leads_statuses = [
     {"label": "All", "value": "all"},
     {"label": "New", "value": "new"},
+    {"label": "Prioritized", "value": "prioritized"},
     {
         "label": "Not Contacted",
         "value": "not_contacted",
+    },
+    {
+        "label": "Not Contacted - Top Priority",
+        "value": "not_prioritized",
     },
     {"label": "Not Found", "value": "not_found"},
     {"label": "Not Valid", "value": "not_valid"},
