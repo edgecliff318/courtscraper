@@ -71,7 +71,7 @@ class Case(BaseModel):
     dockets: Optional[List[Dict]] = None
     documents: Optional[List[Dict]] = None
     charges: Optional[List[Dict]] = None
-    judge: Optional[Dict] = None
+    judge: Optional[Dict] | str = None
     court_type: Optional[str] = None
     ticket_searchresult: Optional[Dict] = None
     fine: Optional[Dict] = None

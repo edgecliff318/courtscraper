@@ -77,7 +77,9 @@ class BeenVerifiedScrapper:
             self.driver.find_element(By.ID, "magic-link-email-field").click()
 
             # 5 | type | id=login-password | Marcus1995!
-            self.driver.find_element(By.ID, "magic-link-email-field").send_keys(
+            self.driver.find_element(
+                By.ID, "magic-link-email-field"
+            ).send_keys(
                 os.environ.get("BEEN_VERIFIED_EMAIL", "fublooman@gmail.com")
             )
             # 6 | click on connect
@@ -130,7 +132,7 @@ class BeenVerifiedScrapper:
         if search_query.get("city") in result.text.lower():
             score += 1
 
-        if search_query.get("state") in result.text.lower():
+        if f"{search_query.get('state')}\n" in result.text.lower():
             score += 1
 
         if search_query.get("age") in result.text.lower():
@@ -220,6 +222,8 @@ class BeenVerifiedScrapper:
             "age": get_param(params, "age"),
         }
 
+        console.log(query)
+
         attribute_id = None
 
         search_score = [self.get_score(result, query) for result in results]
@@ -239,7 +243,9 @@ class BeenVerifiedScrapper:
         # Initial window handle
         window_handles = self.driver.window_handles.copy()
 
-        self.driver.find_element(By.CSS_SELECTOR, f"#{attribute_id} .btn").click()
+        self.driver.find_element(
+            By.CSS_SELECTOR, f"#{attribute_id} .btn"
+        ).click()
 
         # Check if blocked here by the captcha
         try:
@@ -252,11 +258,11 @@ class BeenVerifiedScrapper:
             logger.error("Blocked by captcha")
 
             # Send a message to me and Shawn to check
-            client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
-
-            sms_message = (
-                f"Connect to solve the captcha for the BeenVerified Scraper {link}"
+            client = Client(
+                settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN
             )
+
+            sms_message = f"Connect to solve the captcha for the BeenVerified Scraper {link}"
 
             phone_ayoub = "+33674952271"
             phone_shawn = "+1816518-8838"
@@ -338,6 +344,15 @@ class BeenVerifiedScrapper:
         except selenium.common.exceptions.NoSuchElementException:
             logger.error(f"No details found for {link}")
             return output
+
+        age = report.get("meta", {}).get("search_data").get("age")
+
+        if query.get("age") is not None:
+            try:
+                if abs(int(age) - int(query.get("age", 0))) > 5:
+                    output["exact_match"] = False
+            except Exception as e:
+                logger.error(f"Error parsing the age. Exception{e} ")
         output["error"] = False
         return output
 
@@ -351,7 +366,7 @@ class BeenVerifiedScrapper:
         city=None,
     ):
         # state = "MO"
-        url = f"https://www.beenverified.com/app/search/person?"
+        url = f"https://www.beenverified.com/rf/search/person?"
         if first_name is not None:
             url += f"fname={first_name}&"
         if last_name is not None:

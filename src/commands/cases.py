@@ -50,6 +50,8 @@ def retrieve_cases_mo_casenet():
                 court.code == "MEYER"
                 or court.code == "TONI"
                 or court.code == "temp"
+                or court.state != "MO"
+                or court.code == "IL_COOK"
             ):
                 continue
             cases_retrieved = []

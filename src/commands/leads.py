@@ -22,29 +22,76 @@ console = Console()
 logger = logging.getLogger()
 settings = get_settings()
 
+filters_keywords_include = [
+    "speed",
+    "alcohol",
+    "driving",
+    "expired",
+    "insurance",
+    "dwi",
+    "trespass",
+    "fail to stop",
+    "assault",
+    "possess",
+    "disorderly conduct",
+    "drove",
+    "eluding",
+    "excessive",
+    "fail to obey",
+    "fail to proceed",
+    "fail to signal",
+    "fail to yield",
+    "fail to drive",
+    "failed to drive",
+    "failed to make",
+    "failed to obey",
+    "failed to stop",
+    "failed to yield",
+    "turning",
+    "too closely",
+    "improper lane use",
+    "u-turn",
+    "minor in possession",
+    "miscellaneous moving violation",
+    "miscellaneous weapon violation",
+    "careless and imprudent manner",
+    "oper a motor",
+    "oper mtr",
+    "operate motor",
+    "operate vehicle",
+    "pass vehicle",
+    "red light violation",
+    "resisting arrest",
+]
+
+filter_keyword_exclude = ["expired plates"]
+
 
 def filter_leads(lead: leads_model.Lead):
     # If the lead.charges_description contains any of speed, alcohol, driving, expired, insurance
     # return True
+
     if lead.charges_description is None:
         return False
-    if "speed" in lead.charges_description.lower():
-        return True
-    if "alcohol" in lead.charges_description.lower():
-        return True
-    if "driving" in lead.charges_description.lower():
-        return True
-    if "expired" in lead.charges_description.lower():
-        return True
-    if "insurance" in lead.charges_description.lower():
-        return True
+
+    for keyword in filter_keyword_exclude:
+        if keyword in lead.charges_description.lower():
+            return False
+
+    for keyword in filters_keywords_include:
+        if keyword in lead.charges_description.lower():
+            return True
+
     return False
 
 
 def retrieve_leads():
     # Get all processing leads and change them to new
 
-    leads_processing = leads_service.get_leads(status="processing")
+    leads_processing = leads_service.get_leads(
+        status="processing",
+        start_date=datetime.datetime.now() - datetime.timedelta(days=10),
+    )
 
     leads_service.update_multiple_leads_status(
         [x.case_id for x in leads_processing], "new"
@@ -57,14 +104,18 @@ def retrieve_leads():
     error_count = 0
 
     while True:
-        lead = leads_service.get_last_lead(status="new")
+        lead = leads_service.get_last_lead(status="prioritized")
+        prioritized = True
+        if lead is None:
+            prioritized = False
+            lead = leads_service.get_last_lead(status="new")
 
         if lead is None:
             console.log("No new leads found")
             time.sleep(300)
             continue
 
-        if not filter_leads(lead):
+        if not filter_leads(lead) and not prioritized:
             leads_service.update_lead_status(lead.case_id, "not_prioritized")
             continue
 
@@ -76,16 +127,23 @@ def retrieve_leads():
             first_name = lead.first_name
             last_name = lead.last_name
             middle_name = case.middle_name
-            city = case.address_city
+            city = (
+                case.address_city
+                if case.address_city is not None
+                else lead.city
+            )
             if last_name is not None and len(last_name.split(" ")) > 1:
                 middle_name = last_name.split(" ")[0]
                 last_name = last_name.split(" ")[1]
+
+            state = lead.state if lead.state is not None else "MO"
             link = scrapper.get_beenverified_link(
                 first_name=first_name,
                 last_name=last_name,
                 middle_name=middle_name,
                 year=lead.year_of_birth,
                 city=city,
+                state=state,
             )
             try:
                 data = scrapper.retrieve_information(link)
@@ -114,7 +172,11 @@ def retrieve_leads():
             lead_data["details"] = data.get("details")
             lead_data["email"] = json.loads(json.dumps(data.get("email")))
             lead_data["address"] = json.loads(json.dumps(data.get("address")))
-            lead_data["status"] = "not_contacted"
+            lead_data["status"] = (
+                "not_contacted"
+                if not prioritized
+                else "not_contacted_prioritized"
+            )
             lead_data["report"] = json.loads(json.dumps(data.get("report")))
 
             if lead_data["phone"] is None or len(lead_data["phone"]) == 0:

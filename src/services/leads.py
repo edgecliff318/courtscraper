@@ -155,6 +155,14 @@ def get_last_lead(
 
     leads_list = [l for l in leads_list if l.charges_description is not None]
 
+    if status == "not_contacted_prioritized":
+        leads_list = [l for l in leads_list]
+        if leads_list:
+            if limit == 1:
+                return leads_list[0]
+            return leads_list
+        return None
+
     if leads_list:
         returned_list = []
         alcohol_related = [
