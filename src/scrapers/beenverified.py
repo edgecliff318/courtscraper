@@ -48,7 +48,7 @@ class BeenVerifiedScrapper:
         self.email_sensor = None
         if not cache:
             self.driver = webdriver.Firefox(options=self.options)
-            self.driver = webdriver.Chrome(options=self.options)
+            # self.driver = webdriver.Chrome(options=self.options)
             # self.driver = webdriver.Remote(
             #     command_executor=settings.SELENIUM_STANDALONE_URL,
             #     options=self.options,
@@ -109,6 +109,40 @@ class BeenVerifiedScrapper:
 
             logger.debug(f"Issue with Beenverified {e}")
 
+    def get_score(self, result, search_query):
+        score = 0
+
+        if search_query.get("first_name") not in result.text.lower():
+            score = -1
+            return score
+        if search_query.get("last_name") not in result.text.lower():
+            score = -1
+            return score
+        if "deceased" in result.text.lower():
+            score = -1
+            return score
+        score = 0
+
+        if "alias" in result.text.lower():
+            score += 1
+
+        if "relatives" in result.text.lower():
+            score += 1
+
+        if search_query.get("city") in result.text.lower():
+            score += 1
+
+        if f"{search_query.get('state')}\n" in result.text.lower():
+            score += 1
+
+        if search_query.get("age") in result.text.lower():
+            score += 1
+
+        if search_query.get("middle_name") in result.text.lower():
+            score += 1
+
+        return score
+
     def retrieve_information(self, link):
         if self.cache:
             self.driver = webdriver.Chrome(options=self.options)
@@ -154,6 +188,7 @@ class BeenVerifiedScrapper:
 
         if "no exact match" in results_count.lower():
             output["exact_match"] = False  # TODO: return output
+            return output
 
         # Go through the results:
         try:
@@ -165,7 +200,45 @@ class BeenVerifiedScrapper:
             return output
 
         # Focus on the first element:
-        attribute_id = results[0].get_attribute("id")
+        # Example of the results.text results[0].text
+        # 'NAME MATCH\nJoseph Ruvin\nDeceased\nBrooklyn, NY\nBorn\nJul 1892\nKnown locations\nBrooklyn, NY\nView person report'
+
+        # Extract the params from the link
+        parsed_url = urlparse(link)
+        params = parse_qs(parsed_url.query)
+
+        def get_param(params, key):
+            if params.get(key):
+                return params.get(key)[0].lower()
+            else:
+                return ""
+
+        query = {
+            "first_name": get_param(params, "fname"),
+            "last_name": get_param(params, "ln"),
+            "middle_name": get_param(params, "mn"),
+            "state": get_param(params, "state"),
+            "city": get_param(params, "city"),
+            "age": get_param(params, "age"),
+        }
+
+        console.log(query)
+
+        attribute_id = None
+
+        search_score = [self.get_score(result, query) for result in results]
+
+        # Get the index and value of the max score
+        max_score = max(search_score)
+        index_max_score = search_score.index(max_score)
+
+        if max_score == -1:
+            output["exact_match"] = False
+            logger.error(f"No relevant results found for {link}")
+            return output
+
+        # Get the attribute id of the element with the max score
+        attribute_id = results[index_max_score].get_attribute("id")
 
         # Initial window handle
         window_handles = self.driver.window_handles.copy()
@@ -246,6 +319,11 @@ class BeenVerifiedScrapper:
 
         if people:
             contact_details = people[0].get("contact", {})
+
+            if contact_details is None:
+                logger.error(f"No contact details found for {link}")
+                output["exact_match"] = False
+                return output
             mapping = {
                 "addresses": "address",
                 "emails": "email",
@@ -266,6 +344,15 @@ class BeenVerifiedScrapper:
         except selenium.common.exceptions.NoSuchElementException:
             logger.error(f"No details found for {link}")
             return output
+
+        age = report.get("meta", {}).get("search_data").get("age")
+
+        if query.get("age") is not None:
+            try:
+                if abs(int(age) - int(query.get("age", 0))) > 5:
+                    output["exact_match"] = False
+            except Exception as e:
+                logger.error(f"Error parsing the age. Exception{e} ")
         output["error"] = False
         return output
 
@@ -278,8 +365,8 @@ class BeenVerifiedScrapper:
         state="MO",
         city=None,
     ):
-        state = "MO"
-        url = f"https://www.beenverified.com/app/search/person?"
+        # state = "MO"
+        url = f"https://www.beenverified.com/rf/search/person?"
         if first_name is not None:
             url += f"fname={first_name}&"
         if last_name is not None:

@@ -52,6 +52,8 @@ def retrieve_cases_mo_casenet(case_type="Traffic%2FMunicipal"):
                 court.code == "MEYER"
                 or court.code == "TONI"
                 or court.code == "temp"
+                or court.state != "MO"
+                or court.code == "IL_COOK"
             ):
                 continue
 
