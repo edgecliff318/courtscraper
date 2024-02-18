@@ -249,7 +249,7 @@ class Settings(BaseSettings):
 
     # Intercom Sender
     INTERCOM_SENDER_ID: str = os.getenv(
-        "INTERCOM_SENDER_ID", "sam@tickettakedown.com"
+        "INTERCOM_SENDER_ID", "cooper@tickettakedown.com"
     )
 
     # SMS Email Sender

@@ -48,7 +48,7 @@ for prefix in ["outbound", "monitoring"]:
     Output("conversation-modal-content", "children"),
     Output("conversation-memory", "data"),
     State("conversation-memory", "data"),
-    Input("monitoring-data-grid", "selectedRows"),
+    State("monitoring-data-grid", "selectedRows"),
     Input("monitoring-send-all", "n_clicks"),
     Input("conversation-response-many", "n_clicks"),
     Input("leads-data", "children"),
@@ -70,3 +70,13 @@ def open_modal(data, selection, *args, **kwargs):
             data,
         )
     return dash.no_update, dash.no_update, dash.no_update
+
+
+# Unselect all rows
+@callback(
+    Output("monitoring-data-grid", "selectedRows"),
+    Input("conversation-response-unselect-all", "n_clicks"),
+    prevent_initial_call=True,
+)
+def unselect_all_rows(*args, **kwargs):
+    return []

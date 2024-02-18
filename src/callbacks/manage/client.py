@@ -10,6 +10,7 @@ from src.components.cases.workflow.email import (
 )
 from src.connectors.intercom import IntercomConnector
 from src.core.config import get_settings
+from src.services import templates as templates_service
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -18,13 +19,15 @@ settings = get_settings()
 def send_to_client(email, subject, message, attachments):
     intercom = IntercomConnector(settings.INTERCOM_API_KEY)
 
-    contact = intercom.search_contact(email=email)
+    if email is None:
+        raise Exception("Please set the email address of the client.")
+
+    contact = intercom.search_contact(email=email.lower())
 
     if contact is None:
-        raise Exception(
-            f"Contact {email} not found on Intercom. "
-            f"Please check the used email or add it to Intercom."
-        )
+        intercom.create_contact(email=email.lower())
+        contact = intercom.search_contact(email=email.lower())
+
     admins = intercom.get_admins()
     sender = None
     for admin in admins:
@@ -36,6 +39,7 @@ def send_to_client(email, subject, message, attachments):
         sender=sender,
         contact=contact,
         message=message,
+        subject=subject,
     )
 
     return output
@@ -160,7 +164,16 @@ def modal_client_submit(n_clicks, pars, case_id, template):
             role="client",
             include_invoice=True,
         )
-
-        return message, {"next_step": "modal-client-submit"}
+        output = True
+        if output is True:
+            template_details = templates_service.get_single_template(template)
+            next_step = {
+                "message": template_details.sms_message,
+                "send_sms": template_details.sms,
+                "next_case_status": template_details.next_case_status,
+            }
+            return message, next_step
+        else:
+            return message, dash.no_update
 
     return dash.no_update, dash.no_update

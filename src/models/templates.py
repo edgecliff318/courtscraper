@@ -21,6 +21,9 @@ class Template(BaseModel):
     user: Optional[str] = None
     trigger: Optional[str] = None
     repeat: Optional[bool] = False
+    sms: Optional[bool] = False
+    sms_message: Optional[str] = None
+    next_case_status: Optional[str] = None
 
     @validator("creation_date", pre=True)
     def set_creation_date_now(cls, v):

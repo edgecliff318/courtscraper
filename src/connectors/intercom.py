@@ -72,7 +72,7 @@ class IntercomConnector:
 
             if len(contacts_list) > 1:
                 logger.error(f"More than one contact found: {contact}")
-                raise Exception("More than one contact found")
+                return contacts_list[0]
 
             return None
 
@@ -82,16 +82,30 @@ class IntercomConnector:
         admins = self.session.get(f"{self.base_url}/admins")
         return admins.json().get("admins")
 
+    def create_contact(self, email, name=None, phone=None):
+        url = f"{self.base_url}/contacts"
+        payload = {
+            "email": email,
+        }
+        if name is not None:
+            payload["name"] = name
+
+        if phone is not None:
+            payload["phone"] = phone
+
+        response = self.session.post(url, json=payload)
+        return response.json()
+
     def get_admin(self, admin_id):
         admin = self.session.get(f"{self.base_url}/admins/{admin_id}")
         return admin.json()
 
-    def send_message(self, sender, contact, message):
+    def send_message(self, sender, contact, message, subject):
         url = f"{self.base_url}/messages"
 
         payload = {
             "message_type": "email",
-            "subject": "Hey there!",
+            "subject": subject,
             "template": "personal",
             "from": {"type": sender.get("type"), "id": sender.get("id")},
             "body": message,

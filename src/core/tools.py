@@ -124,7 +124,7 @@ class SensorEmail:
         self.imap_url = "imap.gmail.com"
         # self.threshold_time =  (datetime.datetime.now() - datetime.timedelta(days=1)).strftime('%d-%b-%Y')
         self.threshold_time = (
-            datetime.datetime.utcnow() - datetime.timedelta(minutes=5)
+            datetime.datetime.utcnow() - datetime.timedelta(minutes=10)
         ).strftime("%d-%b-%Y")
         # Convert to UTC format
 
@@ -168,8 +168,8 @@ class SensorEmail:
         return list_ids
 
     def get_boy_magic_link(self, my_mail, email_id):
-        status, email_data = my_mail.fetch(
-            email_id, "(BODY[HEADER] BODY[TEXT])"
+        status, email_data = my_mail.uid(
+            "fetch", email_id, "(BODY[HEADER] BODY[TEXT])"
         )
         header = email_data[0][1].decode(
             "utf-8"
@@ -178,11 +178,16 @@ class SensorEmail:
 
     def get_link(self, email_txt):
         link_pattern = re.compile(
-            r"https://click\.email\.beenverified\.com/\?qs=\S*"
+            r"href.*https://www\.beenverified\.com/magic_links\S*"
         )
         link_match = link_pattern.search(email_txt)
+        text = link_match.group()
+        link_pattern = re.compile(
+            r"https://click\.email\.beenverified\.com/\?qs=\S*"
+        )
+        link_match = link_pattern.search(text)
         link = link_match.group()
-        return link
+        return link.replace('"', "")
 
     def get_magic_link(self):
         my_mail = self.get_my_mail()

@@ -174,6 +174,8 @@ class IlCook(ScraperBase):
 
         await page.fill('input[name="UserName"]', self.email)
         await page.fill('input[name="Password"]', self.password)
+        await page.check('input[id="TOSCheckBox"]')
+
         login_button = await page.query_selector(
             "button[class='btn btn-primary']"
         )

@@ -23,10 +23,10 @@ console = Console()
 logger = logging.getLogger()
 
 
-def retrieve_cases_mo_casenet():
+def retrieve_cases_mo_casenet(case_type="Traffic%2FMunicipal"):
     courts = get_courts()
     settings = get_settings("main")
-    case_net_account = get_account("case_net_missouri")
+    case_net_account = get_account("case_net_missouri_sam")
 
     tz = pytz.timezone("US/Central")
 
@@ -34,13 +34,15 @@ def retrieve_cases_mo_casenet():
         f"Start date: {settings.start_date}, " f"End date: {settings.end_date}"
     )
 
-    case_type = "Traffic%2FMunicipal"
-
     case_net = CaseNet(
         url=case_net_account.url,
         username=case_net_account.username,
         password=case_net_account.password,
     )
+
+    court_filter = {
+        "Criminal": ["CAS", "CLY", "JAK", "JON", "LAF", "RAY", "PLA"]
+    }
 
     for day in range(-settings.end_date, -settings.start_date - 1, -1):
         date = str((datetime.datetime.now(tz) + Day(day)).date())
@@ -50,8 +52,14 @@ def retrieve_cases_mo_casenet():
                 court.code == "MEYER"
                 or court.code == "TONI"
                 or court.code == "temp"
+                or court.state != "MO"
+                or court.code == "IL_COOK"
             ):
                 continue
+
+            if court_filter.get(case_type) is not None:
+                if court.id not in court_filter.get(case_type, []):
+                    continue
             cases_retrieved = []
             while True:
                 console.log(f"Processing {court.name} ({court.code})")
@@ -104,6 +112,8 @@ def retrieve_cases_mo_casenet():
                             lead_parsed.case_id
                         )
                         if lead_loaded is None:
+                            if case_type == "Criminal":
+                                lead_parsed.status = "prioritized"
                             leads_service.insert_lead(lead_parsed)
                     except Exception as e:
                         console.log(f"Failed to parse lead {case} - {e}")
@@ -203,6 +213,9 @@ def retrieve_cases(source="mo_case_net"):
     elif source == "il_cook":
         console.log("Cook County, IL Scraper")
         retrieve_cases_il_cook()
+    elif source == "mo_case_net_criminal":
+        console.log("MO Case Net Scraper - Criminal")
+        retrieve_cases_mo_casenet("Criminal")
 
 
 if __name__ == "__main__":

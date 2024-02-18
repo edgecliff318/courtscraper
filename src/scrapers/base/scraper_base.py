@@ -147,9 +147,9 @@ class ScraperBase:
                 self.t_dict(i) if isinstance(i, (dict, list)) else i for i in d
             ]
         return {
-            self.to_snake(a): self.t_dict(b)
-            if isinstance(b, (dict, list))
-            else b
+            self.to_snake(a): (
+                self.t_dict(b) if isinstance(b, (dict, list)) else b
+            )
             for a, b in d.items()
         }
 

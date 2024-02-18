@@ -57,7 +57,7 @@ def get_verified_link(name, year_of_birth):
         state="MO",
     ):
         state = "MO"
-        url = f"https://www.beenverified.com/app/search/person?"
+        url = f"https://www.beenverified.com/rf/search/person?"
         if first_name is not None:
             url += f"fname={first_name}&"
         if last_name is not None:

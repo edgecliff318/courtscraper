@@ -42,7 +42,9 @@ def generate_form_group(
     elif type == "Button":
         field = dbc.Button(id=id, children=placeholder, **kwargs)
     elif type == "Textarea":
-        field = dmc.Textarea(id=id, placeholder=placeholder, **kwargs)
+        field = dmc.Textarea(
+            id=id, placeholder=placeholder, value=value, **kwargs
+        )
     else:
         field = ""
 

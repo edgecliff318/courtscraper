@@ -511,6 +511,13 @@ def render_status_msg(dates, direction):
                                     f"Number of leads: {number_of_leads}"
                                 ),
                                 dmc.Button(
+                                    "Unselect All",
+                                    id="conversation-response-unselect-all",
+                                    color="dark",
+                                    size="sm",
+                                    className="m-2",
+                                ),
+                                dmc.Button(
                                     "Show Conversation",
                                     id="conversation-response-many",
                                     color="dark",

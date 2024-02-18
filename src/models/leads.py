@@ -7,9 +7,14 @@ from pydantic import BaseModel, validator
 leads_statuses = [
     {"label": "All", "value": "all"},
     {"label": "New", "value": "new"},
+    {"label": "Prioritized", "value": "prioritized"},
     {
         "label": "Not Contacted",
         "value": "not_contacted",
+    },
+    {
+        "label": "Not Contacted - Top Priority",
+        "value": "not_prioritized",
     },
     {"label": "Not Found", "value": "not_found"},
     {"label": "Not Valid", "value": "not_valid"},
@@ -41,7 +46,7 @@ class Lead(BaseModel):
     age: Optional[int] = None
     year_of_birth: Optional[int] = None
     email: Optional[str | dict] = None
-    phone: Optional[str | dict] = None
+    phone: Optional[str | dict | list] = None
     phones: Optional[list] = None
     email: Optional[str | dict] = None
     address: Optional[str | dict] = None
