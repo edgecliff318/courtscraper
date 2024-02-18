@@ -26,6 +26,7 @@ logger = logging.Logger(__name__)
 console = Console()
 
 
+
 class CaptchaException(Exception):
     pass
 
@@ -47,8 +48,8 @@ class BeenVerifiedScrapper:
         self.magic_link = None
         self.email_sensor = None
         if not cache:
-            self.driver = webdriver.Firefox(options=self.options)
-            # self.driver = webdriver.Chrome(options=self.options)
+            # self.driver = webdriver.Firefox(options=self.options)
+            self.driver = webdriver.Chrome(options=self.options)
             # self.driver = webdriver.Remote(
             #     command_executor=settings.SELENIUM_STANDALONE_URL,
             #     options=self.options,
