@@ -37,3 +37,6 @@ google-auth-oauthlib
 langchain
 openai
 stripe
+
+#scraper
+playwright

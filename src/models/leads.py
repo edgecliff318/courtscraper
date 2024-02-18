@@ -48,6 +48,7 @@ class Lead(BaseModel):
     email: Optional[str | dict] = None
     phone: Optional[str | dict | list] = None
     phones: Optional[list] = None
+    email: Optional[str | dict] = None
     address: Optional[str | dict] = None
     city: Optional[str] = None
     state: Optional[str] = None
@@ -72,9 +73,10 @@ class Lead(BaseModel):
     ticket_img: Optional[str] = None
     user_id: Optional[str] = None
 
-    # Json Report from BeenVerified
+    # Json Report from Lead Scrapers
     report: Optional[dict] = None
     details: Optional[str] = None
+    lead_source: Optional[str] = None
 
     # CloudTalk
     cloudtalk_upload: Optional[bool] = False
