@@ -136,13 +136,20 @@ class Pennsylvania(ScraperBase):
     async def process_case_data(self, webpage, case_rows):
         case_urls = await self.fetch_case_urls(case_rows)
         console.log(f"Case URLs length: {len(case_urls)}")
-        case_urls = case_urls[:2]
+        cases = []
         try:
             for case_url in case_urls:
                 case_file = await self.generate_case_file(webpage, case_url)
-                case_content = await self.load_case_file(case_file)
-                case_data = self.extract_case_details(case_content)
+                try:
+                    case_content = await self.load_case_file(case_file)
+                    case_data = self.extract_case_details(case_content)
+                except Exception as e:
+                    console.log(f"An error occurred while extracting case details: {str(e)}")
+                    case_data = {}
                 print(case_data)
+                cases.append(case_data)
+                
+            return cases
         except Exception as e:
             console.log(f"An error occurred while processing case data: {str(e)}")
 
@@ -155,7 +162,9 @@ class Pennsylvania(ScraperBase):
                 await self.navigate_to_page(page)
                 await self.perform_search(page, self.start_date, self.end_date)
                 rows = await self.extract_table_data(page)
+                console.log(f"Rows length: {len(rows)}")
                 await self.process_case_data(page, rows)
+                console.log("Process completed")
                 await browser.close()
         except Exception as e:
             console.log(f"An error occurred: {str(e)}")
