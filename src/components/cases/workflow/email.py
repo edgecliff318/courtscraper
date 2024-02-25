@@ -71,7 +71,8 @@ def get_email_params(
 
     logger.info(f"Getting the context data for {template}")
 
-    documents = bucket.list_blobs(prefix=f"cases/{case_id}/", delimiter="/")
+    documents = get_documents(case_id)
+    
 
     # Attachments form
     attachments = dmc.Stack(
@@ -79,9 +80,7 @@ def get_email_params(
             dmc.MultiSelect(
                 label="Attachments",
                 placeholder="Select the attachments",
-                data=[
-                    {"label": doc.name, "value": doc.name} for doc in documents
-                ],
+                data=documents,
                 value=[],
                 id={"type": f"modal-{role}-pars", "index": "attachments"},
             ),
@@ -234,6 +233,29 @@ def get_email_params(
     )
 
     return params
+
+def get_documents(case_id):
+    case = cases.get_single_case(case_id)
+    document_blobs = bucket.list_blobs(prefix=f"cases/{case_id}/", delimiter="/")
+
+    documents = []
+    for blob in document_blobs:
+        source = "Uploaded/Generated"
+        file_path = blob.name
+        if case.documents is not None:
+            case_document = case.documents[0]
+            case_path = case_document.get("file_path")
+            if case_path:
+                case_path = case_path.replace("?", "_")
+            if case_path in file_path:
+                source = case_document.get("source", "Casenet")
+                documents.append({"label": f"{file_path.split('/')[-1]} ({source})", "value": file_path})
+            else:
+                documents.append({"label": f"{file_path.split('/')[-1]} ({source})", "value": file_path})
+        else:
+            documents.append({"label": f"{file_path.split('/')[-1]} ({source})", "value": file_path})
+    
+    return documents
 
 
 def get_preview(
