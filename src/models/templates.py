@@ -12,7 +12,7 @@ class Template(BaseModel):
     enabled: Optional[bool] = True
     category: Optional[str] = None
     creator: Optional[str] = None
-    type: Optional[str] = "file"  # file, html, text
+    type: Optional[str] = "file"  # file, html, text, form
     subject: Optional[str] = None
     text: Optional[str] = None
     filepath: Optional[str] = None
@@ -36,3 +36,20 @@ class Template(BaseModel):
     @validator("creator", pre=True)
     def set_creator(cls, v):
         return v or "admin"
+
+
+class TemplateV2(BaseModel):
+    customer_id: str
+    template_id: str
+    type: str | None = None
+    details: dict | None = None
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+    @validator("created_at", pre=True)
+    def set_created_at_now(cls, v):
+        return v or datetime.now()
+
+    @validator("updated_at", pre=True)
+    def set_updated_at_now(cls, v):
+        return v or datetime.now()
