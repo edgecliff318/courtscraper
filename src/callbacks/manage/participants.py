@@ -1,15 +1,13 @@
 import logging
 
-
 import dash
 import dash_mantine_components as dmc
 from dash import Input, Output, callback, dcc
-from src.models import participants
 
-
+import src.models as models
 import src.services.cases as cases_service
 from src.core.config import get_settings
-import src.models as models
+from src.models import participants
 from src.services.participants import ParticipantsService
 
 logger = logging.getLogger(__name__)

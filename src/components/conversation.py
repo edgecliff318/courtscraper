@@ -32,8 +32,10 @@ def create_single_selection_alert():
 
 
 def get_conversation(df: pd.DataFrame, phone=None) -> list:
-    case_id = extract_case_id(df["Case ID"].iloc[0])
+    case_id = extract_case_id(df["Case ID"].iloc[0]) or df["Case ID"].iloc[0]
 
+    if case_id is None:
+        return []
     messages = messages_service.get_interactions(case_id=case_id)
     if phone is not None:
         messages = [
@@ -44,6 +46,10 @@ def get_conversation(df: pd.DataFrame, phone=None) -> list:
     df_conversation = pd.DataFrame(
         [message.model_dump() for message in messages]
     )
+
+    if df_conversation.empty:
+        return []
+
     df_conversation["creation_date"] = pd.to_datetime(
         df_conversation["creation_date"], utc=True
     )
@@ -93,7 +99,7 @@ def create_chat(df: pd.DataFrame, phone=None):
                     create_chat_bubble(
                         message["message"],
                         from_user=(
-                            True
+                            False
                             if message["direction"] == "outbound"
                             else False
                         ),

@@ -152,7 +152,7 @@ def get_invoice_history(participant):
         if isinstance(participant, str):
             stripe_id = participant
 
-        elif participant.stripe_id is None:
+        elif participant.stripe_id is None or participant.stripe_id == "":
             if participant.email is None:
                 raise ValueError("No Email found for the participant")
             customer = payments_service.get_or_customer(participant.email)

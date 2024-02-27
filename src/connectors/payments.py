@@ -46,7 +46,7 @@ class PaymentService:
 
         if len(customer) >= 2:
             logger.error("More than one customer found")
-            raise Exception("More than one customer found")
+            return customer.data[0]
 
         return customer.data[0]
 
@@ -89,3 +89,7 @@ class PaymentService:
     def get_invoice(self, invoice_id):
         invoice = stripe.Invoice.retrieve(invoice_id)
         return invoice
+
+    def get_last_payments(self, limit=50):
+        payments = stripe.PaymentIntent.list(limit=limit)
+        return payments.data

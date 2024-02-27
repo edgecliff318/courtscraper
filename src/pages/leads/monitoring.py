@@ -1,13 +1,12 @@
 import logging
 
 import dash
-from dash import dcc, html
 import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
+from dash import dcc, html
 
-from src.components.filters import monitoring_controls
 from src.components.conversation import many_response_model
-
+from src.components.filters import monitoring_controls
 
 logger = logging.Logger(__name__)
 
@@ -28,7 +27,7 @@ def layout():
         ],
         style={"overflow": "hidden"},
     )
-    
+
     skeleton_card = html.Div(
         dmc.Skeleton(
             height="400px",
@@ -58,7 +57,9 @@ def layout():
             dbc.Row(
                 [
                     dbc.Col(
-                        html.Div(children=skeleton_cards, id="messages-summary"),
+                        html.Div(
+                            children=skeleton_cards, id="messages-summary"
+                        ),
                         width=12,
                         className="mb-2 p-1",
                     ),
@@ -67,21 +68,20 @@ def layout():
             dbc.Row(
                 [
                     dbc.Col(
-                          dbc.Card(
+                        dbc.Card(
                             dbc.CardBody(
-                        [
-                            html.Div(
-                                children=skeleton_card,
-                                id="message-monitoring",
+                                [
+                                    html.Div(
+                                        children=skeleton_card,
+                                        id="message-monitoring",
+                                    )
+                                ]
                             )
-                        ]
-                            ))
-                        ,
+                        ),
                         width=12,
                         className="mb-2 p-1",
                     ),
                 ]
-                          
             ),
             html.Div(
                 id="leads-data",
