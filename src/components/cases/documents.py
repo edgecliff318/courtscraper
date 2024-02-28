@@ -15,7 +15,9 @@ settings = get_settings()
 
 
 def get_documents(case: Case) -> pd.DataFrame:
-    document_blobs = bucket.list_blobs(prefix=f"cases/{case.case_id}/", delimiter="/")
+    document_blobs = bucket.list_blobs(
+        prefix=f"cases/{case.case_id}/", delimiter="/"
+    )
 
     documents = []
     for blob in document_blobs:
@@ -51,6 +53,7 @@ def get_documents(case: Case) -> pd.DataFrame:
     df = pd.DataFrame(documents)
 
     return df
+
 
 def get_case_documents(case: Case):
     logger.info(f"Getting the documents for case {case.case_id}")

@@ -88,7 +88,8 @@ def handle_send_message(prefix):
                                 phone,
                                 media_enabled=include_case_copy,
                                 force_send=prefix == "conversation"
-                                or prefix == "monitoring",
+                                or prefix == "monitoring"
+                                or prefix == "communication",
                             )
                             if (
                                 message_status == "queued"
@@ -233,5 +234,5 @@ def handle_send_message(prefix):
         return ""
 
 
-for prefix in ["outbound", "monitoring", "conversation"]:
+for prefix in ["outbound", "monitoring", "conversation", "communication"]:
     handle_send_message(prefix)

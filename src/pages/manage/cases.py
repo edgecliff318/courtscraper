@@ -14,6 +14,7 @@ from src.components.cases.search import get_case_search
 from src.components.cases.summary import get_case_summary
 from src.components.cases.timeline import get_case_timeline
 from src.components.cases.workflow.workflow import get_case_workflow
+from src.components.cases.communications import get_case_communications
 from src.services import cases
 
 logger = logging.Logger(__name__)
@@ -50,6 +51,13 @@ def get_case_tabs(case):
                         value="events",
                     ),
                     dmc.Tab(
+                        "Communications",
+                        rightSection=DashIconify(
+                            icon="material-symbols:comment-outline", width=16
+                        ),
+                        value="communications",
+                    ),
+                    dmc.Tab(
                         "Documents",
                         rightSection=DashIconify(
                             icon="et:documents", width=16
@@ -74,6 +82,9 @@ def get_case_tabs(case):
             ),
             dmc.TabsPanel(get_case_workflow(case), value="workflow"),
             dmc.TabsPanel(get_case_events(case), value="events"),
+            dmc.TabsPanel(
+                get_case_communications(case), value="communications"
+            ),
             dmc.TabsPanel(get_case_documents(case), value="documents"),
             dmc.TabsPanel(get_case_payments(case), value="payments"),
             dmc.TabsPanel(get_case_details(case), value="details"),
