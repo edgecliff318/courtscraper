@@ -1,3 +1,4 @@
+import json
 import logging
 from datetime import timedelta
 from typing import List
@@ -225,7 +226,7 @@ def render_case_details(case_id):
                     email = None
             status = lead_details.status
             notes = lead_details.notes
-            lead_details_dict = lead_details.model_dump()
+            lead_details_dict = json.loads(lead_details.model_dump_json())
 
         if case_details is None:
             parties = pd.DataFrame(
