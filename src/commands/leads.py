@@ -87,7 +87,6 @@ def filter_leads(lead: leads_model.Lead):
 
 def retrieve_leads():
     # Get all processing leads and change them to new
-
     leads_processing = leads_service.get_leads(
         status="processing",
         start_date=datetime.datetime.now() - datetime.timedelta(days=10),
@@ -202,9 +201,9 @@ def retrieve_leads():
                             "status"
                         ] = "not_valid"
                     if phone.carrier is not None:
-                        phone_transformed[lead_phone_id][
-                            "carrier"
-                        ] = phone.carrier["type"]
+                        phone_transformed[lead_phone_id]["carrier"] = (
+                            phone.carrier["type"]
+                        )
 
                         phone_transformed[lead_phone_id].update(phone.carrier)
                         if (

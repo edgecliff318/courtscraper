@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pandas as pd
 from google.cloud.firestore_v1.base_query import And, FieldFilter, Or
@@ -123,7 +123,7 @@ def get_last_lead(
     end_date=None,
     status=None,
     limit=1,
-    search_limit=1000,
+    search_limit=2000,
 ):
     search_limit = int(search_limit)
     limit = int(limit)
@@ -231,10 +231,23 @@ def get_last_lead(
             if len(returned_list) >= limit:
                 return returned_list
 
-        returned_list += leads_list
-        if limit == 1:
-            return returned_list[0]
-        return returned_list
+        speeding = [
+            x
+            for x in leads_list
+            if x.charges_description is not None
+            and "speeding" in x.charges_description.lower()
+        ]
+        if speeding:
+            returned_list += speeding
+            if limit == 1:
+                return returned_list[0]
+            if len(returned_list) >= limit:
+                return returned_list
+
+        # returned_list += leads_list
+        # if limit == 1:
+        # return returned_list[0]
+        return None
     else:
         return None
 
@@ -339,3 +352,14 @@ class LeadsService(BaseService):
             "leads_not_contacted": leads_not_contacted,
             "leads_converted": leads_converted,
         }
+
+
+if __name__ == "__main__":
+    today = datetime.now()
+    lead = get_last_lead(
+        start_date=today - timedelta(days=14),
+        end_date=today + timedelta(days=1),
+        status="new",
+        limit=1,
+    )
+    print(lead)
