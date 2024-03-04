@@ -14,7 +14,7 @@ leads_statuses = [
     },
     {
         "label": "Not Contacted - Top Priority",
-        "value": "not_prioritized",
+        "value": "not_contacted_prioritized",
     },
     {"label": "Not Found", "value": "not_found"},
     {"label": "Not Valid", "value": "not_valid"},

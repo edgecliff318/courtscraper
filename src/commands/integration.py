@@ -11,7 +11,9 @@ from src.services import leads as leads_service
 console = Console()
 
 
-def upload_to_cloud_talk(limit=50, status="not_contacted", search_limit=2000):
+def upload_to_cloud_talk(
+    limit=50, status="not_contacted_prioritized", search_limit=2000
+):
     leads_list = leads_service.get_last_lead(
         status=status,
         limit=limit,
