@@ -26,7 +26,6 @@ logger = logging.Logger(__name__)
 console = Console()
 
 
-
 class CaptchaException(Exception):
     pass
 

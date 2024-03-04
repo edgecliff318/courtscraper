@@ -14,51 +14,38 @@ logger = logging.getLogger(__name__)
 settings = get_settings()
 
 
-def get_documents(case: Case) -> pd.DataFrame:
-    document_blobs = bucket.list_blobs(
-        prefix=f"cases/{case.case_id}/", delimiter="/"
-    )
-
-    documents = []
-    for blob in document_blobs:
-        source = "Uploaded/Generated"
-        file_path = blob.name
-        if case.documents is not None:
-            case_document = case.documents[0]
-            case_file_path = case_document.get("file_path")
-            if case_file_path:
-                case_file_path = case_file_path.replace("?", "_")
-            if case_file_path in file_path:
-                source = case_document.get("source", "Casenet")
-            documents.append(
-                {
-                    "docket_desc": blob.name.split("/")[-1],
-                    "file_path": blob.name,
-                    "document_extension": blob.name.split(".")[-1],
-                    "source": source,
-                    "updated": blob.updated,
-                }
-            )
-        else:
-            documents.append(
-                {
-                    "docket_desc": blob.name.split("/")[-1],
-                    "file_path": blob.name,
-                    "document_extension": blob.name.split(".")[-1],
-                    "source": source,
-                    "updated": blob.updated,
-                }
-            )
-
-    df = pd.DataFrame(documents)
-
-    return df
-
-
 def get_case_documents(case: Case):
     logger.info(f"Getting the documents for case {case.case_id}")
 
-    documents = get_documents(case)
+    # Get the documents from the dockets on Case Net
+    if case.documents is not None:
+        documents = pd.DataFrame(case.documents)
+    else:
+        documents = pd.DataFrame(
+            columns=["docket_desc", "file_path", "document_extension"]
+        )
+
+    documents["source"] = "Casenet"
+
+    # Get the pushed and uploaded documents
+    documents_case = bucket.list_blobs(
+        prefix=f"cases/{case.case_id}/", delimiter="/"
+    )
+
+    if documents_case is not None:
+        documents_case = [
+            {
+                "docket_desc": document.name.split("/")[-1],
+                "file_path": document.name,
+                "document_extension": document.name.split(".")[-1],
+                "source": "Uploaded/Generated",
+                "updated": document.updated,
+            }
+            for document in documents_case
+        ]
+        documents_case = pd.DataFrame(documents_case)
+        documents = pd.concat([documents, documents_case])
+
     columns = ["docket_desc", "file_path", "document_extension", "source"]
     documents = documents[columns].rename(
         columns={
