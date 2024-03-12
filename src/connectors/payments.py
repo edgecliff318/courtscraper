@@ -11,6 +11,14 @@ stripe.api_key = setttings.STRIPE_SECRET_KEY
 logger = logging.getLogger(__name__)
 
 
+def get_custom_fields(checkout, field_name):
+    custom_fields = checkout.get("custom_fields", [])
+    for field in custom_fields:
+        if field.get("key") == field_name:
+            return field.get("text").get("value")
+    return None
+
+
 class PaymentService:
     def __init__(self) -> None:
         pass
@@ -90,6 +98,52 @@ class PaymentService:
         invoice = stripe.Invoice.retrieve(invoice_id)
         return invoice
 
-    def get_last_payments(self, limit=50):
-        payments = stripe.PaymentIntent.list(limit=limit)
+    def get_last_payments(self, limit=3):
+        """
+                expand[]: source
+        expand[]: customer
+        expand[]: invoice
+        expand[]: payment_method
+        expand[]: charges.data.customer
+        expand[]: charges.data.refunds.total_count
+        expand[]: latest_charge.customer
+        expand[]: latest_charge.refunds.total_count
+        expand[]: charges.data.refunds.data.balance_transaction.automatic_transfer
+        expand[]: latest_charge.refunds.data.balance_transaction.automatic_transfer
+        expand[]: charges.data.balance_transaction.automatic_transfer
+        expand[]: latest_charge.balance_transaction.automatic_transfer
+        expand[]: charges.data.dispute.balance_transactions.automatic_transfer
+        expand[]: latest_charge.dispute.balance_transactions.automatic_transfer
+        expand[]: charges.data.review
+        expand[]: latest_charge.review
+        expand[]: charges.data.application_fee
+        expand[]: latest_charge.application_fee
+        expand[]: charges.data.early_fraud_warning
+        expand[]: latest_charge.early_fraud_warning
+        """
+
+        payments = stripe.PaymentIntent.list(
+            limit=limit,
+            expand=[
+                "data.customer",
+                "data.invoice",
+                "data.payment_method",
+                "data.charges.data.customer",
+            ],
+        )
         return payments.data
+
+    def get_last_checkouts(self, limit=30):
+        checkout_sessions = stripe.checkout.Session.list(
+            limit=limit,
+            status="complete",
+            expand=[
+                "data.customer",
+                "data.invoice",
+            ],
+        )
+        return checkout_sessions.data
+
+    def get_checkout(self, checkout_id):
+        checkout = stripe.checkout.Session.retrieve(checkout_id)
+        return checkout

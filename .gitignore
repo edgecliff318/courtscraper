@@ -154,3 +154,6 @@ templates/
 cases_to_review
 
 playwright/.auth
+otr_archive
+otr
+csv

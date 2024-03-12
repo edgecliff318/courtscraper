@@ -3,9 +3,14 @@ from datetime import datetime
 
 import dash
 import dash_mantine_components as dmc
+import pandas as pd
 import pytz
+from dash import html
 
-from src.connectors.payments import PaymentService
+from src.connectors.payments import PaymentService, get_custom_fields
+from src.core.dynamic_fields import CaseDynamicFields
+from src.services.billings import BillingsService
+from src.services.cases import CasesService, get_many_cases
 
 logger = logging.Logger(__name__)
 
@@ -14,45 +19,438 @@ dash.register_page(
 )
 
 
+class PaymentsTable:
+    def __init__(self):
+        pass
+
+    def render_header(self):
+        return dmc.Grid(
+            [
+                dmc.Col(
+                    dmc.Text(
+                        "Billing",
+                        color="dark",
+                        weight=600,
+                    ),
+                    span=3,
+                ),
+                dmc.Col(
+                    dmc.Text(
+                        "Payment",
+                        color="dark",
+                        weight=600,
+                    ),
+                    span=3,
+                ),
+                dmc.Col(
+                    dmc.Text(
+                        "Cases",
+                        color="dark",
+                        weight=600,
+                    ),
+                    span=3,
+                ),
+                dmc.Col(
+                    dmc.Text(
+                        "Actions",
+                        color="dark",
+                        weight=600,
+                    ),
+                    span=3,
+                ),
+            ],
+            style={"border-bottom": "1px solid #e1e1e1"},
+        )
+
+    def int_to_date(self, timestamp):
+        date = datetime.fromtimestamp(timestamp)
+        # Convert to Chicago timezone
+        date = date.astimezone(pytz.timezone("America/Chicago"))
+        return date.strftime("%Y-%m-%d %H:%M:%S")
+
+    def render_billing_info(self, checkout):
+        customer_details = checkout.get("customer_details", {})
+        if customer_details is None:
+            return dmc.Text("No customer details", size="sm")
+        address = customer_details.get("address", {})
+
+        address_render = []
+        if address is not None:
+            if address.get("line1"):
+                address_render.append(
+                    dmc.Text(f"{address.get('line1')}", size="xs")
+                )
+            if address.get("line2"):
+                address_render.append(
+                    dmc.Text(f"{address.get('line2')}", size="xs")
+                )
+            if (
+                address.get("postal_code")
+                or address.get("city")
+                or address.get("state")
+            ):
+                address_render.append(
+                    dmc.Text(
+                        f"{address.get('postal_code', '')}, {address.get('city', '')}, {address.get('state', '')}",
+                        size="xs",
+                    )
+                )
+
+        return dmc.Stack(
+            [
+                dmc.Group(
+                    [
+                        dmc.Text(
+                            f"{customer_details.get('name')}",
+                            size="sm",
+                            weight=600,
+                            color="dark",
+                        ),
+                        dmc.Text(
+                            get_custom_fields(checkout, "birthdate"),
+                            size="sm",
+                            weight=600,
+                            color="dark",
+                        ),
+                    ],
+                    position="apart",
+                ),
+                dmc.Group(
+                    [
+                        dmc.Text(customer_details.get("email"), size="xs"),
+                        dmc.Text(customer_details.get("phone"), size="xs"),
+                    ],
+                    position="apart",
+                ),
+            ]
+            + address_render,
+            spacing="xs",
+        )
+
+    def render_checkout_info(self, checkout):
+        return dmc.Stack(
+            [
+                dmc.Group(
+                    [
+                        dmc.Text("Amount", size="sm", weight=600),
+                        dmc.Text(
+                            f"{checkout.get('amount_total') / 100} $",
+                            size="sm",
+                        ),
+                    ],
+                    position="apart",
+                    spacing="xs",
+                ),
+                dmc.Group(
+                    [
+                        dmc.Text("Date", size="sm", weight=600),
+                        dmc.Text(
+                            self.int_to_date(checkout.get("created")),
+                            size="sm",
+                        ),
+                    ],
+                    position="apart",
+                    spacing="xs",
+                ),
+                dmc.Group(
+                    [
+                        dmc.Text("Status", size="sm", weight=600),
+                        dmc.Badge(
+                            checkout.get("status"),
+                            size="sm",
+                            color=(
+                                "green"
+                                if checkout.get("status") == "complete"
+                                else "red"
+                            ),
+                        ),
+                    ],
+                    position="apart",
+                    spacing="xs",
+                ),
+                dmc.Group(
+                    [
+                        dmc.Text("Driver Name", size="sm", weight=600),
+                        dmc.Text(
+                            get_custom_fields(
+                                checkout, "nameofdriverifdifferentthanpayment"
+                            ),
+                            size="sm",
+                        ),
+                    ],
+                    position="apart",
+                    spacing="xs",
+                ),
+                dmc.Group(
+                    [
+                        dmc.Text("Tickets", size="sm", weight=600),
+                        dmc.Text(
+                            get_custom_fields(checkout, "tickets"),
+                            size="sm",
+                        ),
+                    ],
+                    position="apart",
+                    spacing="xs",
+                ),
+            ],
+            spacing="xs",
+        )
+
+    def render_actions(self, checkout):
+        styles_locked = {
+            "label": {
+                "&[data-checked]": {
+                    "&, &:hover": {
+                        "backgroundColor": dmc.theme.DEFAULT_COLORS["dark"][9],
+                        "color": "white",
+                    },
+                },
+            }
+        }
+        styles_onboarded = {
+            "label": {
+                "&[data-checked]": {
+                    "&, &:hover": {
+                        "backgroundColor": dmc.theme.DEFAULT_COLORS["green"][
+                            9
+                        ],
+                        "color": "white",
+                    },
+                },
+            }
+        }
+
+        return dmc.Stack(
+            [
+                dmc.ChipGroup(
+                    [
+                        dmc.Chip(
+                            "Locked",
+                            value="locked",
+                            color="dark",
+                            styles=styles_locked,
+                        ),
+                        dmc.Chip(
+                            "Onboarded",
+                            value="onboarded",
+                            color="green",
+                            styles=styles_onboarded,
+                        ),
+                        dmc.Chip("Invoice", value="invoice", color="gray"),
+                        dmc.Chip("Not Done", value="not_done", color="red"),
+                    ],
+                    value=checkout.billing.get("status"),
+                    id={
+                        "type": "case-status-select",
+                        "index": checkout.get("id"),
+                    },
+                ),
+                dmc.Group(
+                    [
+                        dmc.Button(
+                            "Attach to case",
+                            color="dark",
+                            size="xs",
+                            id={
+                                "type": "case-attach-button",
+                                "index": checkout.get("id"),
+                            },
+                            disabled=checkout.billing.get("status")
+                            == "locked",
+                        ),
+                    ]
+                ),
+                html.Div(
+                    id={
+                        "type": "case-status-select-output",
+                        "index": checkout.get("id"),
+                    }
+                ),
+            ]
+        )
+
+    def get_case_information(self, case_id, cases_information):
+        if case_id is None or case_id == "":
+            return dmc.Text("No case", size="sm")
+        city = cases_information.get(case_id, {}).get("city")
+        court_date = cases_information.get(case_id, {}).get("court_date")
+        court_time = cases_information.get(case_id, {}).get("court_time")
+
+        court_date_dt = pd.to_datetime(court_date)
+
+        color = "gray"
+
+        suggested_motion_for_continuance = None
+
+        if court_date_dt is not None:
+            if court_date_dt > pd.to_datetime("today") + pd.Timedelta(
+                "30 day"
+            ):
+                color = "dark"
+            elif court_date_dt > pd.to_datetime("today") + pd.Timedelta(
+                "7 day"
+            ):
+                color = "yellow"
+                # Same day of the following month
+                suggested_motion_for_continuance = (
+                    court_date_dt + pd.DateOffset(months=1)
+                )
+            elif court_date_dt >= pd.to_datetime("today"):
+                color = "red"
+                suggested_motion_for_continuance = (
+                    court_date_dt + pd.DateOffset(months=1)
+                )
+            else:
+                color = "gray"
+        if suggested_motion_for_continuance is None:
+            return dmc.Text(
+                f"{city} - Court: {court_date} at {court_time}",
+                size="sm",
+                color=color,
+            )
+        else:
+            return dmc.Stack(
+                [
+                    dmc.Text(
+                        f"{city} - Court: {court_date} at {court_time}",
+                        size="sm",
+                        color=color,
+                    ),
+                    dmc.Text(
+                        f"Suggested Continuance: {suggested_motion_for_continuance.strftime('%m/%d/%Y')} at {court_time}",
+                        size="sm",
+                        color="dark",
+                    ),
+                ]
+            )
+
+    def render_cases(self, checkout, cases_information):
+        cases_list = get_custom_fields(checkout, "tickets")
+        if cases_list is None:
+            return dmc.Text("No cases", size="sm")
+
+        if len(cases_list) == 0:
+            return dmc.Text("No cases", size="sm")
+
+        cases_list = cases_list.replace(" ", "").replace("#", "").split(",")
+
+        return dmc.Stack(
+            [
+                dmc.Group(
+                    [
+                        html.A(
+                            dmc.Text(
+                                case,
+                                size="sm",
+                                weight=600,
+                            ),
+                            href=f"/manage/cases/{case}",
+                            target="_blank",
+                        ),
+                        dmc.Text(
+                            self.get_case_information(case, cases_information),
+                            size="sm",
+                            weight=600,
+                        ),
+                    ]
+                )
+                for case in cases_list
+            ]
+        )
+
+    def render_participants(self, checkout):
+        return dmc.Stack(
+            [
+                dmc.Text("Cases", size="sm"),
+                dmc.Group(
+                    [
+                        dmc.Text(
+                            size="sm",
+                        ),
+                    ]
+                ),
+            ]
+        )
+
+    def render_row(self, checkout, cases_information):
+        return dmc.Grid(
+            [
+                dmc.Col(
+                    self.render_billing_info(checkout),
+                    span=3,
+                ),
+                dmc.Col(
+                    self.render_checkout_info(checkout),
+                    span=3,
+                ),
+                dmc.Col(
+                    self.render_cases(checkout, cases_information),
+                    span=3,
+                ),
+                dmc.Col(
+                    self.render_actions(checkout),
+                    span=3,
+                ),
+            ],
+            style={"border-bottom": "1px solid #e1e1e1"},
+        )
+
+    def render(self, checkouts, cases_information):
+        return dmc.Stack(
+            [
+                self.render_header(),
+            ]
+            + [
+                self.render_row(checkout, cases_information)
+                for checkout in checkouts
+            ]
+        )
+
+
 def layout(payment_id):
     payment_service = PaymentService()
     if payment_id is not None and payment_id != "none":
         payment = payment_service.get_item(payment_id)
 
     else:
-        payments = payment_service.get_last_payments()
+        checkouts = payment_service.get_last_checkouts()
 
-        def int_to_date(timestamp):
-            date = datetime.fromtimestamp(timestamp)
-            # Convert to Chicago timezone
-            date = date.astimezone(pytz.timezone("America/Chicago"))
-            return date.strftime("%Y-%m-%d %H:%M:%S")
+        cases_service = CasesService()
+        billings_service = BillingsService()
+        cases_details = []
 
-        header = dmc.Grid(
-            [
-                dmc.Col(
-                    dmc.Text("Email", color="dark"),
-                    span=2,
-                ),
-                dmc.Col(
-                    dmc.Text("Amount", color="dark"),
-                    span=1,
-                ),
-                dmc.Col(
-                    dmc.Text("Date", color="dark"),
-                    span=2,
-                ),
-                dmc.Col(
-                    dmc.Text("Status", color="dark"),
-                    span=2,
-                ),
-                dmc.Col(
-                    dmc.Text("Actions", color="dark"),
-                    span=5,
-                ),
-            ]
-        )
+        for checkout_single in checkouts:
+            cases = cases_service.get_items(payment_id=checkout_single.id)
+            billing = billings_service.get_single_item(checkout_single.id)
+            if billing is not None:
+                checkout_single["billing"] = billing.model_dump()
+            else:
+                checkout_single["billing"] = {}
+            if len(cases) > 0:
+                checkout_single["cases"] = cases
+            else:
+                checkout_single["cases"] = []
 
+            cases_details += (
+                get_custom_fields(checkout_single, "tickets")
+                .replace(" ", "")
+                .replace("#", "")
+                .split(",")
+                if get_custom_fields(checkout_single, "tickets") is not None
+                else []
+            )
+
+        # Split cases into 30 cases per request
+        cases_list = []
+        for i in range(0, len(cases_details), 30):
+            cases_list += get_many_cases(cases_details[i : i + 30])
+
+        cases_information = {
+            case.case_id: CaseDynamicFields().update(case, {})
+            for case in cases_list
+        }
+
+        payments_table = PaymentsTable()
         return dmc.Card(
             dmc.Stack(
                 [
@@ -62,66 +460,39 @@ def layout(payment_id):
                             dmc.Text("Last payments", size="sm"),
                         ]
                     ),
-                    header,
-                ]
-                + [
-                    dmc.Grid(
-                        [
-                            dmc.Col(
-                                dmc.Text(payment.receipt_email),
-                                span=2,
-                            ),
-                            dmc.Col(
-                                dmc.Text(f"{payment.amount / 100} $"),
-                                span=1,
-                            ),
-                            dmc.Col(
-                                dmc.Text(int_to_date(payment.created)),
-                                span=2,
-                            ),
-                            dmc.Col(
-                                dmc.Badge(
-                                    payment.status,
-                                    size="sm",
-                                    color=(
-                                        "green"
-                                        if payment.status == "succeeded"
-                                        else "red"
+                    dmc.Drawer(
+                        children=[
+                            dmc.Stack(
+                                [
+                                    dmc.Text("Attach this payment to a case"),
+                                    dmc.Text("Select case"),
+                                    dmc.LoadingOverlay(
+                                        id="case-attach-select-details",
                                     ),
-                                ),
-                                span=2,
+                                    dmc.LoadingOverlay(
+                                        dmc.MultiSelect(
+                                            id="case-attach-select",
+                                        ),
+                                    ),
+                                    html.Div(
+                                        id="case-attach-select-output",
+                                    ),
+                                    dmc.Button(
+                                        "Attach",
+                                        color="dark",
+                                        id="case-attach-payment-button",
+                                    ),
+                                ],
+                                spacing="xs",
                             ),
-                            dmc.Col(
-                                dmc.Group(
-                                    [
-                                        dmc.Select(
-                                            data=[
-                                                {
-                                                    "label": "123456789",
-                                                    "value": "123456789",
-                                                },
-                                            ],
-                                            size="xs",
-                                        ),
-                                        dmc.Button(
-                                            "View",
-                                            color="dark",
-                                            size="xs",
-                                            id="payment-view-button",
-                                        ),
-                                        dmc.Button(
-                                            "Attach to case",
-                                            color="dark",
-                                            size="xs",
-                                            id="payment-attach-button",
-                                        ),
-                                    ]
-                                ),
-                                span=5,
-                            ),
-                        ]
-                    )
-                    for payment in payments
+                        ],
+                        id="case-attach-modal",
+                        zIndex=10000,
+                        position="right",
+                        padding="md",
+                        size="55%",
+                    ),
+                    payments_table.render(checkouts, cases_information),
                 ]
             )
         )

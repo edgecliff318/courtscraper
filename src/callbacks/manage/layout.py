@@ -1,11 +1,28 @@
 import logging
+from calendar import c
 
 import dash
+import dash_mantine_components as dmc
 from dash import Input, Output, State, callback
 
+from src.core.dynamic_fields import CaseDynamicFields
 from src.services import cases, templates
 
 logger = logging.Logger(__name__)
+
+
+def get_case_text(case):
+    charges = case.charges
+    charges_text = ""
+    for charge in charges:
+        charges_text += f"{charge.get('charge_filingdate')} - {charge.get('charge_description')}"
+
+    case_data = case.model_dump()
+    case_data = CaseDynamicFields().update(case, case_data)
+    return (
+        f"{case.case_id} {case.first_name} {case.middle_name} {case.last_name} - {case.birth_date} -"
+        f" {charges_text} - Court: {case_data.get('court_date')} at {case_data.get('court_time')} "
+    )
 
 
 @callback(
@@ -27,8 +44,7 @@ def case_select_data(value):
         ], "No cases found"
     return [
         {
-            "label": f"{c.case_id}# "
-            f"{c.first_name} {c.last_name} {c.court_code}",
+            "label": get_case_text(c),
             "value": c.case_id,
         }
         for c in search_cases

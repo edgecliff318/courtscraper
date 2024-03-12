@@ -5,6 +5,7 @@ from typing import MutableMapping
 from google.cloud.firestore_v1.base_query import And, FieldFilter, Or
 from pydantic import ValidationError
 
+from src.core.base import BaseService
 from src.core.dynamic_fields import CaseDynamicFields
 from src.db import db
 from src.models import cases
@@ -166,3 +167,8 @@ def get_context_data(case_id, default_value="!!!TO_FILL!!!") -> defaultdict:
     case_data = defaultdict(lambda: default_value, case_data)
 
     return case_data
+
+
+class CasesService(BaseService):
+    collection_name = "cases"
+    serializer = cases.Case
