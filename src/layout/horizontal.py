@@ -3,6 +3,7 @@ from datetime import datetime
 import dash
 import dash.html as html
 import dash_bootstrap_components as dbc
+import dash_mantine_components as dmc
 from dash import dcc
 
 
@@ -18,9 +19,7 @@ class Layout:
                         # Use row and col to control vertical alignment of logo / brand
                         dbc.Row(
                             [
-                                dbc.Col(
-                                    dbc.NavbarBrand("App", className="ms-2")
-                                ),
+                                dbc.Col(dbc.NavbarBrand("App", className="ms-2")),
                             ],
                             align="center",
                             className="g-0",
@@ -52,7 +51,7 @@ class Layout:
                             "Fubloo",
                             href="https://app.fubloo.com",
                             target="_blank",
-                            className="fw-semibold",
+                            className="fw-semibold text-primary",
                         ),
                     ],
                     className="",
@@ -106,8 +105,16 @@ class Layout:
             ],
             className="layout-container",
         )
-        layout = html.Div(
-            layout_container,
-            className="layout-wrapper layout-navbar-full layout-horizontal layout-without-menu",
+        layout = dmc.MantineProvider(
+            html.Div(
+                layout_container,
+                className="layout-wrapper layout-navbar-full layout-horizontal layout-without-menu",
+            ),
+            theme={
+                "primaryColor": "dark",
+                "colorScheme": "light",
+                "successColor": "#4CAF50",
+                "backgroundColor": "#F5F5F7",
+            },
         )
         return layout

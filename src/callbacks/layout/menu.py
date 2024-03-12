@@ -94,7 +94,7 @@ def generate_menu(navbar):
                 ),
             ]
         ),
-        color="light",
+        color="white",
         sticky=True,
     )
 

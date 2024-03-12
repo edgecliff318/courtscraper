@@ -6,7 +6,7 @@ from pydantic import BaseModel, validator
 
 class Template(BaseModel):
     id: Optional[str] = None
-    name: str
+    name: Optional[str] = None
     creation_date: Optional[datetime] = None
     update_date: Optional[datetime] = None
     enabled: Optional[bool] = True

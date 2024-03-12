@@ -1,5 +1,6 @@
 import dash
 import dash_bootstrap_components as dbc
+import dash_mantine_components as dmc
 from dash import html
 
 from src.components.inputs import generate_form_group
@@ -82,10 +83,10 @@ def layout(data=None):
                     className="mb-1",
                 ),
                 html.P(
-                    dbc.Button(
+                    dmc.Button(
                         "Look up",
-                        color="primary",
-                        class_name="mt-1",
+                        className="m-1",
+        
                         id="search-button",
                     ),
                     className="lead",
