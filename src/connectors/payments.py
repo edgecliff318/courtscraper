@@ -133,7 +133,7 @@ class PaymentService:
         )
         return payments.data
 
-    def get_last_checkouts(self, limit=30):
+    def get_last_checkouts(self, limit=60):
         checkout_sessions = stripe.checkout.Session.list(
             limit=limit,
             status="complete",
