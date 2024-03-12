@@ -40,3 +40,4 @@ stripe
 
 #scraper
 playwright
+selenium
