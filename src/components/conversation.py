@@ -101,7 +101,7 @@ def create_chat(df: pd.DataFrame, phone=None):
                         from_user=(
                             False
                             if message["direction"] == "outbound"
-                            else False
+                            else True
                         ),
                         date=message["creation_date"],
                     )

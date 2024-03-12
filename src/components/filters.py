@@ -34,9 +34,7 @@ leads_controls = dbc.Row(
                 type="DateRangePicker",
                 persistence_type="session",
                 persistence=True,
-                start_date=(datetime.now() - timedelta(days=1)).strftime(
-                    "%Y-%m-%d"
-                ),
+                start_date=(datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d"),
                 end_date=datetime.now().strftime("%Y-%m-%d"),
             ),
             width=3,
@@ -112,9 +110,7 @@ def create_scrapper_form_group():
 
 def create_button(label, id, width, lg, xs):
     return dbc.Col(
-        dmc.Button(
-            label, id=id, color="dark", size="sm", className="mt-auto "
-        ),
+        dmc.Button(label, id=id, color="dark", size="sm", className="mt-auto "),
         width=width,
         lg=lg,
         xs=xs,
@@ -147,26 +143,43 @@ def create_switch():
     )
 
 
-monitoring_controls = dbc.Row(
-    [
-        dbc.Col(
+monitoring_controls = dmc.Grid(
+    children=[
+        dmc.Col(
             create_date_form_group("monitoring-date-selector"),
-            width=3,
-            xs=12,
-            lg=3,
+            span="content",
+            style={
+                "minWidth": "250px",
+            },
         ),
-        dbc.Col(create_interaction_form_group(), width=2, xs=12, lg=2),
-        create_button("Monitoring", "monitoring-button", 1, 1, 6),
-        create_button("Refresh", "monitoring-refresh-button", 1, 1, 6),
-        dbc.Col(
-            create_switch(),
-            width=2,
-            lg=2,
-            xs=12,
-            className="d-flex align-items-left",
+        dmc.Col(
+            create_interaction_form_group(),
+            span="content",
+            style={
+                "minWidth": "250px",
+            },
         ),
+        dmc.Col(
+            dmc.Button(
+                "Monitoring",
+                id="monitoring-button",
+                color="dark",
+            ),
+            span="content",
+        ),
+        dmc.Col(
+            dmc.Button(
+                "Refresh",
+                id="monitoring-refresh-button",
+                color="dark",
+            ),
+            span="content",
+        ),
+        dmc.Col(create_switch(), span="content"),
     ],
-    justify="left",
+    justify="flex-start",
+    align="flex-end",
+    gutter="xl",
 )
 
 

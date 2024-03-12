@@ -479,7 +479,7 @@ def render_status_msg(dates, direction):
                     "resizable": True,
                     "flex": 1,
                 }
-                for col in ["Direction", "Status", "SID", "Message"]
+                for col in ["Direction", "Message"]
             ],
         },
     ]

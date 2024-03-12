@@ -1,0 +1,131 @@
+{
+    "enabled": {
+        "label": "Enabled",
+        "type": "Switch",
+        "checked": false
+    },
+    "repeat": {
+        "label": "Repeat",
+        "type": "Switch",
+        "checked": false
+    },
+    "sms": {
+        "label": "Sms",
+        "type": "Switch",
+        "checked": false
+    },
+    "name": {
+        "label": "Name",
+        "type": "TextInput",
+        "placeholder": "Name",
+        "value": ""
+    },
+    "category": {
+        "label": "Category",
+        "type": "TextInput",
+        "placeholder": "Category",
+        "value": ""
+    },
+    "type": {
+        "label": "Type",
+        "type": "Select",
+        "placeholder": "Type",
+        "value": "file",
+        "data": [
+            {
+                "label": "File",
+                "value": "file"
+            },
+            {
+                "label": "Html",
+                "value": "html"
+            },
+            {
+                "label": "Text",
+                "value": "text"
+            },
+            {
+                "label": "Form",
+                "value": "form"
+            }
+        ]
+    },
+    "creator": {
+        "label": "Creator",
+        "type": "TextInput",
+        "placeholder": "Creator",
+        "value": ""
+    },
+    "subject": {
+        "label": "Subject",
+        "type": "TextInput",
+        "placeholder": "Subject",
+        "value": ""
+    },
+    "filepath": {
+        "label": "File path",
+        "type": "TextInput",
+        "placeholder": "Filepath",
+        "value": ""
+    },
+    "state": {
+        "label": "State",
+        "type": "Select",
+        "placeholder": "State",
+        "value": "",
+        "data": [
+            {
+                "label": "Draft",
+                "value": "draft"
+            },
+            {
+                "label": "Active",
+                "value": "active"
+            },
+            {
+                "label": "Inactive",
+                "value": "inactive"
+            }
+        ]
+    },
+    "user": {
+        "label": "User",
+        "type": "TextInput",
+        "placeholder": "User",
+        "value": ""
+    },
+    "trigger": {
+        "label": "Trigger",
+        "type": "TextInput",
+        "placeholder": "Trigger",
+        "value": ""
+    },
+    "sms_message": {
+        "label": "Sms message",
+        "type": "TextInput",
+        "placeholder": "Sms message",
+        "value": ""
+    },
+    "next_case_status": {
+        "label": "Next case status",
+        "type": "TextInput",
+        "placeholder": "Next case status",
+        "value": ""
+    },
+    "parameters": {
+        "label": "Parameters",
+        "type": "JsonInput",
+        "placeholder": "Parameters",
+        "value": "",
+        "validationError": "Invalid json",
+        "formatOnBlur": true,
+        "autosize": true,
+        "minRows": 4
+    },
+    "text": {
+        "label": "Text",
+        "type": "Textarea",
+        "placeholder": "Text",
+        "value": ""
+    }
+}

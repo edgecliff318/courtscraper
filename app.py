@@ -110,7 +110,8 @@ def init_app():
     app.title = settings.PROJECT_NAME
 
     # Set the layout
-    app.layout = dmc.NotificationsProvider(Layout().render())
+    # app.layout = dmc.NotificationsProvider(Layout().render())
+    app.layout = Layout().render()
 
     # Set the server
     server = app.server
