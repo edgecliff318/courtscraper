@@ -4,6 +4,9 @@ RUN apt-get -y update \
     && apt-get -y install curl gfortran wget gnupg2 \
     && rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update
+RUN apt-get install poppler-utils -y
+RUN apt-get clean
 
 WORKDIR /app
 COPY . .
