@@ -74,9 +74,13 @@ class CaseNet:
         case_details = scrapper.get_case_info(case)
         case_detail = scrapper.rename_keys(case_details)
 
-        case["charges_description"] = case_detail.get(
-            "charges", [{"charge_description": ""}]
-        )[0].get("charge_description", "")
+        charges = case_detail.get("charges", [{"charge_description": ""}])
+        if charges:
+            case["charges_description"] = charges[0].get(
+                "charge_description", ""
+            )
+        else:
+            case["charges_description"] = ""
         case["case_date"] = case_detail.get("filing_date", "")
         case.update(case_detail)
         return case
