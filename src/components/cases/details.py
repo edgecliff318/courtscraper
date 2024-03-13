@@ -84,13 +84,19 @@ def get_case_details(case: Case):
             dmc.Group(
                 [
                     dmc.Button(
-                        "Sync with Casenet",
+                        "Upload to Mycase",
                         color="dark",
-                        id="case-manage-refresh",
+                        id="case-upload-to-mycase-button",
                         leftIcon=DashIconify(icon="material-symbols:save"),
                     ),
                     dmc.Button(
-                        "Insert Participants from Case",
+                        "Refresh from Casenet",
+                        color="dark",
+                        id="case-refresh-button",
+                        leftIcon=DashIconify(icon="material-symbols:save"),
+                    ),
+                    dmc.Button(
+                        "Insert Participants",
                         color="dark",
                         id="case-manage-insert-participants",
                         leftIcon=DashIconify(icon="mdi:arrow-up-bold"),
@@ -102,8 +108,10 @@ def get_case_details(case: Case):
             html.Div(id="case-details-output"),
             dmc.Divider(),
             participants_select,
-            html.Div(id="case-details-participants-selected-output",
-                        children=participants_selected),    
+            html.Div(
+                id="case-details-participants-selected-output",
+                children=participants_selected,
+            ),
             dmc.Divider(),
             get_case_edit(case),
         ],

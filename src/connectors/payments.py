@@ -87,6 +87,8 @@ class PaymentService:
 
     def get_payment_history(self, customer_id):
         # Get payment history from Stripe
+        if customer_id is None:
+            return []
         payments = stripe.PaymentIntent.list(customer=customer_id)
         return payments.data
 

@@ -3,6 +3,7 @@ import logging
 import dash
 import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
+from dash import html
 from dash_iconify import DashIconify
 
 from src.components.cases.communications import get_case_communications
@@ -131,7 +132,32 @@ def layout(case_id):
                 dbc.Col(
                     dmc.Paper(
                         children=[
-                            dmc.Alert("Case not found", color="red"),
+                            dmc.Alert(
+                                [
+                                    dmc.Text("Case not found", mb="xs"),
+                                    html.Div(
+                                        hidden=True,
+                                        children=case_id,
+                                        id="case-id",
+                                    ),
+                                    dmc.Button(
+                                        "Refresh from Casenet",
+                                        color="dark",
+                                        id="case-refresh-button",
+                                        leftIcon=DashIconify(
+                                            icon="material-symbols:save"
+                                        ),
+                                    ),
+                                    dbc.Col(
+                                        [
+                                            html.Div(
+                                                id="case-refresh-button-status"
+                                            )
+                                        ]
+                                    ),
+                                ],
+                                color="red",
+                            )
                         ],
                         shadow="xs",
                         p="md",
@@ -187,6 +213,12 @@ def layout(case_id):
                 ),
                 width=3,
                 class_name="mb-2",
+            ),
+            dbc.Col(
+                [
+                    html.Div(id="case-refresh-button-status"),
+                    html.Div(id="case-upload-to-mycase-button-status"),
+                ]
             ),
         ]
     )

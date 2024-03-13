@@ -91,7 +91,7 @@ def refresh_case(btn, case_id, court_code, first_name, middle_name, last_name):
                 console.log(f"Failed to parse lead {case} - {e}")
 
             toast = build_toast(
-                "The case was retrieved successfully" "Case refreshed ✅",
+                "The case was retrieved successfully ✅",
             )
             return toast
         except Exception as e:
