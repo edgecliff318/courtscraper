@@ -5,7 +5,7 @@ import dash
 import dash_mantine_components as dmc
 import pandas as pd
 import pytz
-from dash import html
+from dash import dcc, html
 
 from src.connectors.payments import PaymentService, get_custom_fields
 from src.core.dynamic_fields import CaseDynamicFields
@@ -466,12 +466,13 @@ def layout(payment_id):
                                 [
                                     dmc.Text("Attach this payment to a case"),
                                     dmc.Text("Select case"),
-                                    dmc.LoadingOverlay(
-                                        id="case-attach-select-details",
+                                    dcc.Store(
+                                        id="case-attach-select-details-store",
                                     ),
                                     dmc.LoadingOverlay(
                                         dmc.MultiSelect(
                                             id="case-attach-select",
+                                            searchable=True,
                                         ),
                                     ),
                                     html.Div(
@@ -481,6 +482,9 @@ def layout(payment_id):
                                         "Attach",
                                         color="dark",
                                         id="case-attach-payment-button",
+                                    ),
+                                    dmc.LoadingOverlay(
+                                        id="case-attach-select-details",
                                     ),
                                 ],
                                 spacing="xs",
