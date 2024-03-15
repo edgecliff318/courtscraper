@@ -5,7 +5,7 @@ import dash
 import dash_mantine_components as dmc
 from dash import ALL, MATCH, Input, Output, State, callback, html
 
-from src.components.cases import status
+from src.components.cases import search, status
 from src.connectors.payments import PaymentService, get_custom_fields
 from src.core.config import get_settings
 from src.core.dynamic_fields import CaseDynamicFields
@@ -82,17 +82,19 @@ def attach_button_click(n_clicks):
     Input("case-attach-select", "value"),
 )
 def case_select_data(search_value, value):
-    if value is None or value == "":
-        return dash.no_update, dash.no_update
-
     trigger = dash.callback_context.triggered[0]["prop_id"]
+
     search_cases = []
     if trigger == "case-attach-select.value":
+        if value is None or value == "":
+            return dash.no_update, dash.no_update
         if isinstance(value, str):
             value = [value]
         if value:
             search_cases = cases.get_many_cases(value)
     elif trigger == "case-attach-select.searchValue":
+        if search_value is None or search_value == "":
+            return dash.no_update, dash.no_update
         search_cases = cases.search_cases(search_value)
 
     if len(search_cases) == 0:
