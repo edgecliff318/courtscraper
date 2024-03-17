@@ -1,15 +1,83 @@
 import logging
+from email import message
 
 import dash_mantine_components as dmc
 from dash import html
 from dash_iconify import DashIconify
 
+from src.loader.mycase import MyCase
+from src.services.participants import ParticipantsService
+
 logger = logging.Logger(__name__)
 
 
-def get_client_section():
+def get_client_section(case):
+    participants_service = ParticipantsService()
+
+    if case.participants is None or len(case.participants) == 0:
+        return dmc.Alert(
+            "No participants found ! Please add participants to the case",
+            color="red",
+            title="No participants found",
+        )
+
+    participants_list = participants_service.get_items(
+        id=case.participants, role="defendant"
+    )
+
+    if len(participants_list) == 0:
+        return dmc.Alert(
+            "No defendant selected for this case",
+            color="red",
+            title="No participants found",
+        )
+
+    for participant in participants_list:
+        if participant.mycase_id is None:
+            mycase = MyCase(url="", password="", username="")
+            mycase.login()
+            client_id = mycase.get_contact(
+                first_name=participant.first_name,
+                last_name=participant.last_name,
+                email=participant.email,
+            )
+            if client_id is None:
+                return dmc.Alert(
+                    f"No client found in MyCase with first name {participant.first_name}, last name {participant.last_name} and email {participant.email}. Please add the client to MyCase and update the participant details.",
+                    color="red",
+                    title="No client found",
+                )
+            participant.mycase_id = client_id
+            participants_service.patch_item(
+                participant.id, {"mycase_id": client_id}
+            )
+        customer_mycase_button = dmc.Button(
+            "Open in MyCase",
+            leftIcon=DashIconify(icon="fluent:open-folder-20-filled"),
+            id="modal-client-preview-mycase",
+            variant="filled",
+            color="dark",
+            size="xs",
+            mt="xs",
+        )
+        message = dmc.Alert(
+            [
+                dmc.Text(
+                    "Select on the email templates to preview and submit the document/request to the client."
+                ),
+                html.A(
+                    customer_mycase_button,
+                    href=f"https://meyer-attorney-services.mycase.com/contacts/clients/{participant.mycase_id}",
+                    target="_blank",
+                ),
+            ],
+            color="blue",
+            title="Communicate with the client",
+        )
+
     stack = dmc.Stack(
         children=[
+            message,
             dmc.Modal(
                 children=[
                     dmc.Grid(
@@ -110,6 +178,7 @@ def get_client_section():
                 icon=DashIconify(icon="radix-icons:magnifying-glass"),
                 rightSection=DashIconify(icon="radix-icons:chevron-down"),
                 id="section-client-select-template",
+                searchable=True,
             ),
             dmc.Button(
                 "Preview & Submit",
@@ -119,7 +188,6 @@ def get_client_section():
                 color="dark",
             ),
         ],
-        style={"maxWidth": "400px"},
     )
 
     return stack

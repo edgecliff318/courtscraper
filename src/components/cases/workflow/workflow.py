@@ -26,7 +26,7 @@ def get_case_workflow(case):
                         "Work with the Court",
                         icon=DashIconify(
                             icon="tabler:gavel",
-                            color=dmc.theme.DEFAULT_COLORS["blue"][6],
+                            color="dark",
                             width=20,
                         ),
                     ),
@@ -40,12 +40,12 @@ def get_case_workflow(case):
                         "Work with the Prosecutor",
                         icon=DashIconify(
                             icon="tabler:analyze",
-                            color=dmc.theme.DEFAULT_COLORS["blue"][6],
+                            color="dark",
                             width=20,
                         ),
                     ),
                     dmc.AccordionPanel(
-                        get_prosecutor_section(),
+                        get_prosecutor_section(case),
                     ),
                 ],
                 value="prosecutor",
@@ -56,12 +56,12 @@ def get_case_workflow(case):
                         "Work with the Client",
                         icon=DashIconify(
                             icon="tabler:user",
-                            color=dmc.theme.DEFAULT_COLORS["blue"][6],
+                            color="dark",
                             width=20,
                         ),
                     ),
                     dmc.AccordionPanel(
-                        get_client_section(),
+                        get_client_section(case),
                     ),
                 ],
                 value="client",
