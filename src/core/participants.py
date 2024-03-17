@@ -3,12 +3,14 @@ from dash import dcc
 
 import src.models as models
 import src.services.cases as cases_service
+from src.core.dynamic_fields import CaseDynamicFields
 from src.services.participants import ParticipantsService
 
 
 def attach_participants(case_id):
     participants_service = ParticipantsService()
     case = cases_service.get_single_case(case_id)
+    computed_fields = CaseDynamicFields().update(case, {})
 
     participants = case.parties
     if participants is None:
@@ -48,6 +50,16 @@ def attach_participants(case_id):
         )
 
         participant_instance = models.Participant(**participant_single)
+
+        if participant_instance.role == "prosecutor":
+            participant_instance.first_name = "Prosecutor"
+            location = computed_fields.get(
+                "location", participant_instance.last_name
+            )
+            city = computed_fields.get("city", participant_instance.city)
+            participant_instance.last_name = f"{location} Court - {city}"
+            participant_instance.date_of_birth = None
+            participant_instance.organization = f"{location} Court - {city}"
 
         # Check if another participan instance exists
         participant_exists = participants_service.get_items(

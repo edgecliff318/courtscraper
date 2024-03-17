@@ -131,7 +131,15 @@ class MyCase:
         response_client = response_json.get("client", {}).get("id")
 
         if response_status is not True:
+            contacts = self.get_similar_contacts(
+                lead.first_name, lead.last_name
+            )
+            for contact in contacts:
+                if contact.get("email") == lead.email:
+                    return contact.get("id")
+
             logger.error(response.text)
+
             raise Exception(
                 f"Could not add contact to MyCase"
                 f" {response_status} - {response_json.get('object_errors', {}).get('full_messages', '')}"
@@ -344,3 +352,120 @@ class MyCase:
         if response.status_code != 200:
             logger.error(response.text)
             raise Exception(f"Couldn't create case on mycase {response.text}")
+
+    def get_similar_contacts(self, first_name, last_name):
+        url = "https://meyer-attorney-services.mycase.com/users/similar.json"
+        params = {
+            "first_name": first_name,
+            "last_name": last_name,
+            "type": "Client",
+        }
+        response = self.session.request("GET", url, params=params)
+        return response.json().get("similar_users", [])
+
+    def search_contacts(self, query):
+        # https://meyer-attorney-services.mycase.com/search?search_term=ayoub.ennassiri%40neoinvest.ai&search_filter=%5B%22all%22%5D
+
+        url = "https://meyer-attorney-services.mycase.com/search"
+        params = {
+            "search_term": query,
+            "search_filter": '["all"]',
+        }
+
+        response = self.session.request("POST", url, params=params)
+
+        return response.json()
+
+    def reload_sharing(self, mycase_case_id):
+        url = "https://meyer-attorney-services.mycase.com/appointments/reload_sharing.json"
+
+        payload = json.dumps(
+            {"case_id": mycase_case_id, "no_case_link": False}
+        )
+
+        response = self.session.request("POST", url, data=payload)
+
+        return response.json()
+
+    def get_contact(self, first_name, last_name, email):
+        contacts = self.get_similar_contacts(first_name, last_name)
+        for contact in contacts:
+            if contact.get("email") == email:
+                return contact.get("id")
+        return None
+
+    def add_event(self, case_details, reminders=None):
+        court_date = ""
+        court_time = ""
+        court_address = ""
+
+        if case_details.mycase_case_id is None:
+            raise Exception("Case is not uploaded to MyCase")
+
+        mycase_case_id = case_details.mycase_case_id
+
+        sharing_rules = self.reload_sharing(case_details.get("id"))
+
+        url = (
+            "https://meyer-attorney-services.mycase.com/appointment_rules.json"
+        )
+
+        payload = json.dumps(
+            {
+                "appointment_rule": {
+                    "item_category_id": None,
+                    "court_case_id": mycase_case_id,
+                    "name": "EVENT_NAME",
+                    "start_date": "03/09/2024",
+                    "start_time": "06:00 PM",
+                    "end_date": "03/09/2024",
+                    "end_time": "07:00 PM",
+                    "location_id": None,
+                    "description": "DESCRIPTION",
+                    "private": False,
+                },
+                "google_sync": False,
+                "new_record": True,
+                "creating_new_location": True,
+                "location": {
+                    "name": "LOCATION_NAME",
+                    "reusable": False,
+                    "address_attributes": {
+                        "street": "LOCATION_ADDRESS",
+                        "street2": "LOCATION_ADDRESS_2",
+                        "city": "CITY",
+                        "state": "MO",
+                        "zip_code": "ZIP",
+                        "country": "US",
+                    },
+                },
+                "appointment_id": None,
+                "sharing": [27310503, 27081302, 27294644],
+                "attendance": [],
+                "format_workflow_application": False,
+                "reminders": [
+                    {
+                        "user_type": "client",
+                        "type": "text",
+                        "number": "1",
+                        "duration": "week",
+                    },
+                    {
+                        "user_type": "client",
+                        "type": "client",
+                        "number": "4",
+                        "duration": "week",
+                    },
+                    {
+                        "user_type": "client",
+                        "type": "text",
+                        "number": "1",
+                        "duration": "day",
+                    },
+                ],
+                "non_linked_sharing": {"shared": [], "required": []},
+            }
+        )
+
+        response = self.session.request("POST", url, data=payload)
+        return response.json()

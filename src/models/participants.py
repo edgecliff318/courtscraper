@@ -1,5 +1,6 @@
 from typing import Optional, Union
-from pydantic import BaseModel
+
+from pydantic import BaseModel, validator
 
 
 class Participant(BaseModel):
@@ -16,9 +17,15 @@ class Participant(BaseModel):
     zip_code: Optional[Union[int, str]] = None
     state: Optional[str] = None
     user_id: Optional[str] = None
+    mycase_id: Optional[str] = None
     stripe_id: Optional[str] = None
     intercom_id: Optional[str] = None
     date_of_birth: Optional[str] = None
     gender: Optional[str] = None
     occupation: Optional[str] = None
     organization: Optional[str] = None
+
+    # Mycase id as string or none
+    @validator("mycase_id", pre=True)
+    def mycase_id_as_string(cls, v):
+        return str(v) or None
