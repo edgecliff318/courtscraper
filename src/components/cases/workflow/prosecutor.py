@@ -4,12 +4,53 @@ import dash_mantine_components as dmc
 from dash import html
 from dash_iconify import DashIconify
 
+from src.services.participants import ParticipantsService
+
 logger = logging.Logger(__name__)
 
 
-def get_prosecutor_section():
+def get_prosecutor_section(case):
+    participants_service = ParticipantsService()
+
+    if case.participants is None or len(case.participants) == 0:
+        return dmc.Alert(
+            "No participants found ! Please add participants to the case",
+            color="red",
+            title="No participants found",
+        )
+
+    participants_list = participants_service.get_items(
+        id=case.participants, role="prosecutor"
+    )
+    message = dmc.Alert(
+        "Select on the email templates to preview and submit the document/request to the prosecutor.",
+        color="blue",
+        title="Communicate with the prosecutor",
+    )
+    if len(participants_list) == 0:
+        message = dmc.Alert(
+            "No prosecutor selected for this case",
+            color="red",
+            title="No prosecutor found",
+        )
+
+    for participant in participants_list:
+        if participant.communication_preference is None:
+            message = dmc.Alert(
+                f"No communication preference found for the prosecutor {participant.last_name}",
+                color="red",
+                title="No communication preference found",
+            )
+        else:
+            message = dmc.Alert(
+                participant.communication_preference,
+                color="blue",
+                title=f"Process with the prosecutor {participant.last_name}",
+            )
+
     stack = dmc.Stack(
         children=[
+            message,
             dmc.Modal(
                 children=[
                     dmc.Grid(
@@ -119,6 +160,5 @@ def get_prosecutor_section():
                 color="dark",
             ),
         ],
-        style={"maxWidth": "400px"},
     )
     return stack

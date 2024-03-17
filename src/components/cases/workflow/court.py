@@ -110,6 +110,7 @@ def get_court_section():
                 icon=DashIconify(icon="radix-icons:magnifying-glass"),
                 rightSection=DashIconify(icon="radix-icons:chevron-down"),
                 id="section-court-select-template",
+                searchable=True,
             ),
             dmc.Button(
                 "Preview & Submit to Court",
@@ -119,7 +120,6 @@ def get_court_section():
                 color="dark",
             ),
         ],
-        style={"maxWidth": "400px"},
     )
 
     return stack
