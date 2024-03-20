@@ -1,6 +1,8 @@
+import asyncio
 import datetime
 import json
 import logging
+import os
 import random
 import time
 
@@ -12,7 +14,7 @@ from twilio.rest import Client
 from src.core.config import get_settings
 from src.models import leads as leads_model
 from src.models import messages as messages_model
-from src.scrapers.beenverified import BeenVerifiedScrapper, CaptchaException
+from src.scrapers.beenverified import BeenVerifiedScrapper
 from src.services import cases as cases_service
 from src.services import leads as leads_service
 from src.services import messages as messages_service
@@ -96,7 +98,11 @@ def retrieve_leads():
         [x.case_id for x in leads_processing], "new"
     )
 
-    scrapper = BeenVerifiedScrapper(cache=False)
+    storage_state = os.path.join(
+        settings.ROOT_PATH, "notebooks/playwright/.auth/state.json"
+    )
+
+    scrapper = BeenVerifiedScrapper(storage_state=storage_state)
     client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
     console.print("Logged to BeenVerified")
 
@@ -118,6 +124,8 @@ def retrieve_leads():
             leads_service.update_lead_status(lead.case_id, "not_prioritized")
             continue
 
+        console.log(f"Found lead {lead.case_id}")
+
         leads_service.update_lead_status(lead.case_id, "processing")
         case = cases_service.get_single_case(lead.case_id)
 
@@ -136,47 +144,33 @@ def retrieve_leads():
                 last_name = last_name.split(" ")[1]
 
             state = lead.state if lead.state is not None else "MO"
-            link = scrapper.get_beenverified_link(
-                first_name=first_name,
-                last_name=last_name,
-                middle_name=middle_name,
-                year=lead.year_of_birth,
-                city=city,
-                state=state,
-            )
             try:
-                data = scrapper.retrieve_information(link)
-            except CaptchaException:
-                continue
+                data = asyncio.run(
+                    scrapper.search_person(
+                        first_name=first_name,
+                        last_name=last_name,
+                        middle_name=middle_name,
+                        age=case.age,
+                        city=city,
+                        state=state,
+                    )
+                )
+            except Exception as e:
+                console.log("An issue happened with the scraper")
+                raise e
             if data is None:
                 console.log(
-                    f"Error processing lead {lead.case_id} on BeenVerified"
+                    f"No lead for {lead.case_id} found on BeenVerified"
                 )
-                waiting_time = random.randint(15, 30)
-                console.log(f"Waiting {waiting_time} seconds before next lead")
-                lead_data["status"] = "processing_error"
-                leads_service.insert_lead(leads_model.Lead(**lead_data))
-                time.sleep(waiting_time)
-                continue
-            if data.get("exact_match") is False:
-                console.log(f"Lead {lead.case_id} not found in BeenVerified")
-                waiting_time = random.randint(15, 30)
-                console.log(f"Waiting {waiting_time} seconds before next lead")
                 lead_data["status"] = "not_found"
-                leads_service.insert_lead(leads_model.Lead(**lead_data))
-                time.sleep(waiting_time)
+                leads_service.patch_lead(
+                    case_id=lead.case_id, status="not_found"
+                )
                 continue
-
-            lead_data["phone"] = data.get("phone")
-            lead_data["details"] = data.get("details")
-            lead_data["email"] = json.loads(json.dumps(data.get("email")))
-            lead_data["address"] = json.loads(json.dumps(data.get("address")))
+            lead_data.update(data)
             lead_data["status"] = (
-                "not_contacted"
-                if not prioritized
-                else "not_contacted_prioritized"
+                "not_contacted" if not prioritized else "not_contacted"
             )
-            lead_data["report"] = json.loads(json.dumps(data.get("report")))
 
             if lead_data["phone"] is None or len(lead_data["phone"]) == 0:
                 phone_transformed = {}
@@ -184,11 +178,15 @@ def retrieve_leads():
             else:
                 phone_transformed = {}
                 for lead_phone_id, lead_phone in lead_data["phone"].items():
-                    if lead_phone.get("meta", {}).get("confidence", 0) < 70:
+                    try:
+                        phone = client.lookups.phone_numbers(
+                            lead_phone.get("phone")
+                        ).fetch(type="carrier")
+                    except Exception as e:
+                        logger.error(
+                            f"Error retrieving phone {lead_phone.get('phone')}"
+                        )
                         continue
-                    phone = client.lookups.phone_numbers(
-                        lead_phone.get("number")
-                    ).fetch(type="carrier")
                     phone_transformed[lead_phone_id] = lead_phone
                     phone_transformed[lead_phone_id][
                         "phone"
@@ -244,13 +242,6 @@ def retrieve_leads():
             logger.error(f"Error retrieving lead {lead.case_id} - {e}")
             console.log(f"Error retrieving lead {lead.case_id} - {e}")
             error_count += 1
-            # Sleep 60s
-            try:
-                scrapper.driver.save_screenshot(f"error_{lead.case_id}.png")
-            except Exception:
-                # Restarting the driver
-                console.log("Restarting the driver")
-                scrapper = BeenVerifiedScrapper(cache=False)
 
             if error_count > 20:
                 console.log("Too many consecutive errors, exiting")

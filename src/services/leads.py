@@ -123,7 +123,7 @@ def get_last_lead(
     end_date=None,
     status=None,
     limit=1,
-    search_limit=2000,
+    search_limit=1000,
 ):
     search_limit = int(search_limit)
     limit = int(limit)
@@ -160,7 +160,7 @@ def get_last_lead(
 
     leads_list = [l for l in leads_list if l.charges_description is not None]
 
-    if status == "not_contacted_prioritized":
+    if status == "prioritized":
         leads_list = [l for l in leads_list]
         if leads_list:
             if limit == 1:
@@ -244,10 +244,11 @@ def get_last_lead(
             if len(returned_list) >= limit:
                 return returned_list
 
-        # returned_list += leads_list
-        # if limit == 1:
-        # return returned_list[0]
-        return None
+        returned_list += leads_list
+        if limit == 1:
+            return returned_list[0]
+        return returned_list
+
     else:
         return None
 
@@ -357,7 +358,7 @@ class LeadsService(BaseService):
 if __name__ == "__main__":
     today = datetime.now()
     lead = get_last_lead(
-        start_date=today - timedelta(days=14),
+        start_date=today - timedelta(days=7),
         end_date=today + timedelta(days=1),
         status="new",
         limit=1,

@@ -1,402 +1,309 @@
-import json
 import logging
+
+# Update python path to include the parent directory
 import os
-import urllib.parse
-from datetime import datetime
-from time import sleep
-from urllib.parse import parse_qs, urlparse
+from urllib import parse
 
-import selenium.common.exceptions
-from rich.console import Console
-from selenium import webdriver
+from playwright.async_api import async_playwright
 
-#  from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.support import expected_conditions
-from selenium.webdriver.support.wait import WebDriverWait
-from twilio.rest import Client
-
-from src.core import tools
-from src.core.config import get_settings
-
-settings = get_settings()
-
-logger = logging.Logger(__name__)
-console = Console()
-
-
-class CaptchaException(Exception):
-    pass
+logger = logging.getLogger(__name__)
 
 
 class BeenVerifiedScrapper:
-    def __init__(self, cache=False):
-        self.options = Options()
-        self.options.add_argument("--no-sandbox")
+    LOGIN_PAGE_URL = "https://www.beenverified.com/app/login"
+    HOME_PAGE_URL = "https://www.beenverified.com/rf/dashboard"
+    REPORT_PAGE_URL = "https://www.beenverified.com/api/v5/reports"
+    SEARCH_PAGE_URL = "https://www.beenverified.com/rf/search/person"
 
-        # self.options.add_argument("--headless")
-        self.options.add_argument("enable-automation")
-        self.options.add_argument("--disable-infobars")
-        self.options.add_argument("--disable-dev-shm-usage")
-        self.options.add_argument("--window-size=1920,1080")
-
-        # Selenium with
-        self.vars = {}
-        self.cache = cache
-        self.magic_link = None
-        self.email_sensor = None
-        if not cache:
-            # self.driver = webdriver.Firefox(options=self.options)
-            self.driver = webdriver.Chrome(options=self.options)
-            # self.driver = webdriver.Remote(
-            #     command_executor=settings.SELENIUM_STANDALONE_URL,
-            #     options=self.options,
-            # )
-            self.login()
-
-    def __hash__(self):
-        return 1
-
-    def teardown(self):
-        if self.driver is not None:
-            self.driver.quit()
-
-    def login(self):
-        self.driver.get("https://www.beenverified.com/app/login")
-        # 2 | setWindowSize | 1680x1005 |
-        # self.driver.set_window_size(1680, 1005)
-        # 3 | click | css=.nav__utils-btn:nth-child(2) > .nav__utils-link |
-        try:
-            # 4 | type | click on the magic link
-            self.driver.find_element(By.ID, "magic_link").click()
-
-            sleep(5)
-
-            # 5 | type | id=magic-link-email-field |
-            self.driver.find_element(By.ID, "magic-link-email-field").click()
-
-            # 5 | type | id=login-password | Marcus1995!
-            self.driver.find_element(
-                By.ID, "magic-link-email-field"
-            ).send_keys(
-                os.environ.get("BEEN_VERIFIED_EMAIL", "fublooman@gmail.com")
+    def __init__(self, storage_state) -> None:
+        self.storage_state = storage_state
+        if not os.path.exists(storage_state):
+            raise FileNotFoundError(
+                f"Storage state file not found: {storage_state}"
             )
-            # 6 | click on connect
-            self.driver.find_element(
-                By.CSS_SELECTOR, "#send-magic-link-form > .btn"
-            ).click()
-            console.log("Waiting 60 seconds")
-            sleep(5)
+        self.consecutive_timeouts = 0
+        self.page = None
 
-            # get the magic link
-            sns = tools.SensorEmail()
-            console.log("Waiting for the magic link")
-            magic_link = sns()
+    async def init_browser(self):
+        pw = await async_playwright().start()
+        self.browser = await pw.chromium.launch(headless=False)
+        self.context = await self.browser.new_context(
+            storage_state=self.storage_state
+        )
+        page = await self.context.new_page()
+        await page.goto(self.HOME_PAGE_URL)
+        return page
 
-            # 7 | open | magic link
-            self.magic_link = magic_link
-            self.email_sensor = sns
-            self.driver.get(magic_link)
-            sleep(60)
-        except Exception as e:
-            self.driver.save_screenshot(
-                f"beenverified-{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.png"
-            )
-            logger.warning(
-                "Continuing with the session as probably the user is already logged in"
-            )
+    def build_search_url(
+        self,
+        first_name,
+        last_name,
+        middle_name: str | None,
+        city: str | None = None,
+        state: str | None = None,
+        age: int | None = None,
+    ):
+        params = {}
+        if city:
+            params["city"] = city
+        if state:
+            params["state"] = state
+        if age:
+            params["age"] = age
+        if first_name:
+            params["fname"] = first_name
+        if last_name:
+            params["ln"] = last_name
+        if middle_name:
+            params["mn"] = middle_name
 
-            logger.debug(f"Issue with Beenverified {e}")
+        url = parse.urlencode(params)
+        url = f"{self.SEARCH_PAGE_URL}?{url}"
 
-    def get_score(self, result, search_query):
+        return url
+
+    def score_of_leads(self, result, search_query):
         score = 0
 
-        if search_query.get("first_name") not in result.text.lower():
+        if (
+            search_query.get("first_name").lower() not in result.lower()
+            or search_query.get("last_name").lower() not in result.lower()
+            or "deceased" in result.lower()
+        ):
             score = -1
             return score
-        if search_query.get("last_name") not in result.text.lower():
-            score = -1
-            return score
-        if "deceased" in result.text.lower():
-            score = -1
-            return score
-        score = 0
 
-        if "alias" in result.text.lower():
-            score += 1
-
-        if "relatives" in result.text.lower():
-            score += 1
-
-        if search_query.get("city") in result.text.lower():
-            score += 1
-
-        if f"{search_query.get('state')}\n" in result.text.lower():
-            score += 1
-
-        if search_query.get("age") in result.text.lower():
-            score += 1
-
-        if search_query.get("middle_name") in result.text.lower():
-            score += 1
+        score += result.lower().count("alias")
+        score += result.lower().count("relatives")
+        score += result.lower().count(
+            search_query.get("city").lower()
+            if search_query.get("city")
+            else ""
+        )
+        score += result.lower().count(
+            search_query.get("state").lower()
+            if search_query.get("state")
+            else ""
+        )
+        score += result.lower().count(
+            search_query.get("age").lower() if search_query.get("age") else ""
+        )
+        score += result.lower().count(
+            search_query.get("middle_name").lower()
+            if search_query.get("middle_name")
+            else ""
+        )
 
         return score
 
-    def retrieve_information(self, link):
-        if self.cache:
-            self.driver = webdriver.Chrome(options=self.options)
-            # self.driver = webdriver.Remote(
-            #     command_executor=settings.SELENIUM_STANDALONE_URL,
-            #     options=self.options,
-            # )
-            self.login()
+    async def open_report_popup(self, page, container_user):
+        async with page.expect_popup() as popup_info:
+            view_report = await container_user.query_selector(".css-gnnc3j")
+            await view_report.click()
+            new_page = await popup_info.value
+            return new_page
 
-        output = {
-            "name": "",
-            "details": "",
-            "phone": "",
-            "exact_match": True,
-            "error": True,
-        }
-        # 7 | open the search screen
-        self.driver.get(link)
-        # 8 | waitForElementPresent | css=.recent-reports__report | 30000
-        try:
-            WebDriverWait(self.driver, 30).until(
-                expected_conditions.presence_of_element_located(
-                    (By.CSS_SELECTOR, ".person-search-result-card")
-                ),
-                "No results found",
-            )
-        except selenium.common.exceptions.TimeoutException:
-            logger.error(f"An issue happened for {link}")
-            # Take screenshot
-            self.driver.save_screenshot(
-                f"beenverified-{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.png"
-            )
-            return None
+    async def open_report_page(self, page, container_user):
+        async with page.expect_popup() as popup_info:
+            view_report = await container_user.query_selector(".css-gnnc3j")
+            await view_report.click()
+            new_page = await popup_info.value
+            return new_page
 
-        # Check the results:
-        try:
-            results_count = self.driver.find_element(
-                By.CSS_SELECTOR, ".results-count"
-            ).text
-        except selenium.common.exceptions.NoSuchElementException:
-            logger.error(f"No results found for {link}")
-            results_count = "Error"
-
-        if "no exact match" in results_count.lower():
-            output["exact_match"] = False  # TODO: return output
-            return output
-
-        # Go through the results:
-        try:
-            results = self.driver.find_elements(
-                By.CSS_SELECTOR, ".person-search-result-card"
-            )
-        except selenium.common.exceptions.NoSuchElementException:
-            logger.error(f"No approximate results found for {link}")
-            return output
-
-        # Focus on the first element:
-        # Example of the results.text results[0].text
-        # 'NAME MATCH\nJoseph Ruvin\nDeceased\nBrooklyn, NY\nBorn\nJul 1892\nKnown locations\nBrooklyn, NY\nView person report'
-
-        # Extract the params from the link
-        parsed_url = urlparse(link)
-        params = parse_qs(parsed_url.query)
-
-        def get_param(params, key):
-            if params.get(key):
-                return params.get(key)[0].lower()
-            else:
-                return ""
-
-        query = {
-            "first_name": get_param(params, "fname"),
-            "last_name": get_param(params, "ln"),
-            "middle_name": get_param(params, "mn"),
-            "state": get_param(params, "state"),
-            "city": get_param(params, "city"),
-            "age": get_param(params, "age"),
-        }
-
-        console.log(query)
-
-        attribute_id = None
-
-        search_score = [self.get_score(result, query) for result in results]
-
-        # Get the index and value of the max score
-        max_score = max(search_score)
-        index_max_score = search_score.index(max_score)
-
-        if max_score == -1:
-            output["exact_match"] = False
-            logger.error(f"No relevant results found for {link}")
-            return output
-
-        # Get the attribute id of the element with the max score
-        attribute_id = results[index_max_score].get_attribute("id")
-
-        # Initial window handle
-        window_handles = self.driver.window_handles.copy()
-
-        self.driver.find_element(
-            By.CSS_SELECTOR, f"#{attribute_id} .btn"
-        ).click()
-
-        # Check if blocked here by the captcha
-        try:
-            # Find the element that has the captcha warning with class whoops-body-sub-title
-            WebDriverWait(self.driver, 5).until(
-                expected_conditions.presence_of_element_located(
-                    (By.CSS_SELECTOR, ".whoops-body-sub-title")
-                )
-            )
-            logger.error("Blocked by captcha")
-
-            # Send a message to me and Shawn to check
-            client = Client(
-                settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN
-            )
-
-            sms_message = f"Connect to solve the captcha for the BeenVerified Scraper {link}"
-
-            phone_ayoub = "+33674952271"
-            phone_shawn = "+1816518-8838"
-
-            client.messages.create(
-                messaging_service_sid=settings.TWILIO_MESSAGE_SERVICE_SID,
-                body=sms_message,
-                to=phone_ayoub,
-            )
-            client.messages.create(
-                messaging_service_sid=settings.TWILIO_MESSAGE_SERVICE_SID,
-                body=sms_message,
-                to=phone_shawn,
-            )
-
-            raise CaptchaException("Blocked by captcha")
-        except selenium.common.exceptions.TimeoutException:
-            pass
-
-        sleep(5)
-
-        # Close the previous tabs
-        for w in window_handles:
-            self.driver.switch_to.window(w)
-            self.driver.close()
-
-        self.driver.switch_to.window(self.driver.window_handles[-1])
-
-        WebDriverWait(self.driver, 60).until(
-            expected_conditions.presence_of_element_located(
-                (By.CSS_SELECTOR, ".report-header__title")
-            )
+    async def extract_phone_numbers(self, page):
+        container_phone = await page.query_selector("#phone-numbers-section")
+        phone_numbers = await container_phone.query_selector_all(
+            ".css-1vugsqn"
         )
-        # 12 | click | css=.report_section__label_title |
+        phone_numbers = [
+            await phone_number.text_content() for phone_number in phone_numbers
+        ]
+        # Limit to the first 4 numbers
+        if len(phone_numbers) > 4:
+            phone_numbers = phone_numbers[:4]
 
-        # Parse the url to get the permalink
-        parsed_url = urllib.parse.urlparse(self.driver.current_url)
+        return phone_numbers
 
-        # Get the permalink from the params of the url
-        permalink = urllib.parse.parse_qs(parsed_url.query)["permalink"][0]
+    async def extract_addresses(self, page):
+        addresses_list = []
+        container_address = await page.query_selector(
+            "#address-history-section"
+        )
+        addresses = await container_address.query_selector_all(".css-1q4wjho")
+        for address in addresses:
+            address_fields = await address.query_selector_all(".css-zv7ju9")
+            addresses_txt = [
+                await address_field.text_content()
+                for address_field in address_fields
+            ]
+            addresses_list.append(" ".join(addresses_txt))
 
-        # Get the report in Json format from the API endpoint
-        # e.g https://www.beenverified.com/api/v5/reports/40d4f669eb79ad6d46d79eca80c5699bcee9a34e7f5d4e3edddbc2
-        api_url = f"https://www.beenverified.com/api/v5/reports/{permalink}"
+        return addresses_list
 
-        # Get the report using Selenium and parse it to Json
-        report = self.driver.execute_script(
-            f"return fetch('{api_url}').then(response => response.json());"
+    async def extract_email_list(self, page):
+
+        email_container = await page.query_selector("#email-section")
+        email_elements = await email_container.query_selector_all(
+            ".css-1vugsqn"
+        )
+        email_list = [
+            await email_element.text_content()
+            for email_element in email_elements
+        ]
+        return email_list
+
+    async def get_lead_info(self, new_page):
+        extra_phone_numbers = await self.extract_phone_numbers(new_page)
+        extra_addresses = await self.extract_addresses(new_page)
+        extra_emails = await self.extract_email_list(new_page)
+        return extra_phone_numbers, extra_addresses, extra_emails
+
+    # current from (314) 691-4319 to +13146914319
+    def format_phone_number(self, phone_number):
+        output = (
+            phone_number.replace("(", "")
+            .replace(")", "")
+            .replace(" ", "")
+            .replace("-", "")
         )
 
-        output["report"] = report
-
-        people = report.get("entities").get("people")
-
-        if people:
-            contact_details = people[0].get("contact", {})
-
-            if contact_details is None:
-                logger.error(f"No contact details found for {link}")
-                output["exact_match"] = False
-                return output
-            mapping = {
-                "addresses": "address",
-                "emails": "email",
-                "phones": "phone",
-            }
-            for e in ("addresses", "emails", "phones"):
-                value = contact_details.get(e)
-                if value:
-                    # Transform the value list to a dict
-                    value = {i: v for i, v in enumerate(value)}
-                    output[mapping[e]] = value
-
-        try:
-            summary = self.driver.find_element(
-                By.CSS_SELECTOR, ".report-header__container__info"
-            ).text
-            output["details"] = summary
-        except selenium.common.exceptions.NoSuchElementException:
-            logger.error(f"No details found for {link}")
+        if len(output) == 10:
+            return f"+1{output}"
+        else:
             return output
 
-        age = report.get("meta", {}).get("search_data").get("age")
+    consecutive_timeouts = 0
 
-        if query.get("age") is not None:
-            try:
-                if abs(int(age) - int(query.get("age", 0))) > 5:
-                    output["exact_match"] = False
-            except Exception as e:
-                logger.error(f"Error parsing the age. Exception{e} ")
-        output["error"] = False
-        return output
-
-    def get_beenverified_link(
+    async def search_person(
         self,
-        first_name=None,
-        last_name=None,
-        middle_name=None,
-        year=None,
-        state="MO",
-        city=None,
+        first_name,
+        last_name,
+        middle_name,
+        age,
+        city="",
+        state="",
+        zip="",
+        addressLine1="",
+        addressLine2="",
     ):
-        # state = "MO"
-        url = f"https://www.beenverified.com/rf/search/person?"
-        if first_name is not None:
-            url += f"fname={first_name}&"
-        if last_name is not None:
-            url += f"ln={last_name}&"
-        if middle_name is not None:
-            url += f"mn={middle_name}&"
-        if state is not None:
-            url += f"state={state}&"
-        if city is not None:
-            url += f"city={city}&"
-        if year is not None:
+        try:
+
+            search_query = {
+                "first_name": str(first_name),
+                "last_name": str(last_name),
+                "middle_name": str(middle_name),
+                "age": str(age),
+                "city": str(city),
+                "state": str(state),
+                "zip": str(zip),
+                "addressLine1": str(addressLine1),
+                "addressLine2": str(addressLine2),
+            }
+            # Triggering the search
+            url = self.build_search_url(
+                first_name, last_name, middle_name, city, state, age
+            )
+
+            if self.page is None or True:
+                self.page = await self.init_browser()
+            elif len(self.context.pages) > 0:
+                self.page = self.context.pages[0]
+                for p in self.context.pages[1:]:
+                    await p.close()
+
+            await self.page.goto(url)
+
+            # Getting results
             try:
-                age = datetime.now().year - year
-                url += f"age={age}"
-            except Exception as e:
-                year = None
-                logger.error(f"Error parsing the year. Exception{e} ")
-        return url
+                await self.page.wait_for_selector(".css-ts1zsd")
+            except Exception:
+                print("Timeout")
+                self.consecutive_timeouts += 1
+                if self.consecutive_timeouts > 20:
+                    print("Too many timeouts")
+                    return
+                print("No leads found")
+                return
+            container_results = await self.page.query_selector(".css-ts1zsd")
 
+            if container_results is None:
+                print("No leads found")
+                return
 
-if __name__ == "__main__":
-    link = (
-        "https://www.beenverified.com/app/search/person?fname=ETHAN&ln"
-        "=NEARY&mn=NATHANIEL&state=MO&age=18"
-    )
+            try:
+                await container_results.wait_for_selector(".css-1mvdt3q")
+            except Exception:
+                print("Timeout")
+                self.consecutive_timeouts += 1
+                if self.consecutive_timeouts > 10:
+                    print("Too many timeouts")
+                    return
+                print("No leads found")
+                return
 
-    scrapper = BeenVerifiedScrapper()
-    try:
-        data = scrapper.retrieve_information(link)
-    except Exception as e:
-        print(e)
-    finally:
-        scrapper.teardown()
+            container_users = await container_results.query_selector_all(
+                ".css-1mvdt3q"
+            )
+
+            self.consecutive_timeouts = 0
+
+            # Measure the score for each lead
+            max_score = -1
+            max_score_id = -1
+            for i, lead in enumerate(container_users):
+                results = await lead.text_content()
+                score = self.score_of_leads(results, search_query)
+                print(f"Score of lead {i} is {score}")
+                if score > max_score:
+                    max_score = score
+                    max_score_id = i
+
+            logger.info(f"Max score is {max_score} for lead {max_score_id}")
+
+            if max_score < 0:
+                logger.info("No leads found")
+                return
+
+            # Extracting the leads
+            selected_lead = container_users[max_score_id]
+
+            # Opening the report page
+            new_page = await self.open_report_page(self.page, selected_lead)
+            await new_page.wait_for_selector("#person-overview", timeout=60000)
+
+            # Extracting the extra info
+            extra_phone_numbers, extra_addresses, extra_emails = (
+                await self.get_lead_info(new_page)
+            )
+
+            results = {
+                "phone_numbers": extra_phone_numbers,
+                "addresses": extra_addresses,
+                "emails": extra_emails,
+            }
+
+            details = {
+                "phones": [
+                    self.format_phone_number(p)
+                    for p in results["phone_numbers"]
+                ],
+                "phone": {
+                    str(k): {
+                        "phone": self.format_phone_number(p),
+                    }
+                    for k, p in enumerate(results["phone_numbers"])
+                },
+                "emails": results["emails"],
+                "report": {
+                    "addresses": results["addresses"],
+                },
+                "lead_source": "beenverified",
+            }
+            for p in self.context.pages[1:]:
+                await p.close()
+        except Exception as e:
+            logger.error(f"Error in beenverified: {e}")
+        finally:
+            await self.browser.close()
+
+        return details
