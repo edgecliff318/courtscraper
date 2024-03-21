@@ -135,7 +135,9 @@ class PaymentService:
         )
         return payments.data
 
-    def get_last_checkouts(self, limit=60):
+    def get_last_checkouts(
+        self, limit=30, starting_after=None, ending_before=None
+    ):
         checkout_sessions = stripe.checkout.Session.list(
             limit=limit,
             status="complete",
@@ -143,6 +145,8 @@ class PaymentService:
                 "data.customer",
                 "data.invoice",
             ],
+            starting_after=starting_after,
+            ending_before=ending_before,
         )
         return checkout_sessions.data
 

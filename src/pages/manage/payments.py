@@ -6,8 +6,10 @@ import dash_mantine_components as dmc
 import pandas as pd
 import pytz
 from dash import dcc, html
+from dash_iconify import DashIconify
 
 from src.connectors.payments import PaymentService, get_custom_fields
+from src.core.dates import get_continuance_date
 from src.core.dynamic_fields import CaseDynamicFields
 from src.services.billings import BillingsService
 from src.services.cases import CasesService, get_many_cases
@@ -292,13 +294,13 @@ class PaymentsTable:
             ):
                 color = "yellow"
                 # Same day of the following month
-                suggested_motion_for_continuance = (
-                    court_date_dt + pd.DateOffset(months=1)
+                suggested_motion_for_continuance = get_continuance_date(
+                    court_date_dt
                 )
             elif court_date_dt >= pd.to_datetime("today"):
                 color = "red"
-                suggested_motion_for_continuance = (
-                    court_date_dt + pd.DateOffset(months=1)
+                suggested_motion_for_continuance = get_continuance_date(
+                    court_date_dt
                 )
             else:
                 color = "gray"
@@ -407,13 +409,17 @@ class PaymentsTable:
         )
 
 
-def layout(payment_id):
+def layout(payment_id, **kwargs):
     payment_service = PaymentService()
     if payment_id is not None and payment_id != "none":
         payment = payment_service.get_item(payment_id)
 
     else:
-        checkouts = payment_service.get_last_checkouts()
+        starting_after = kwargs.get("starting_after")
+        ending_before = kwargs.get("ending_before")
+        checkouts = payment_service.get_last_checkouts(
+            starting_after=starting_after, ending_before=ending_before
+        )
 
         cases_service = CasesService()
         billings_service = BillingsService()
@@ -451,13 +457,16 @@ def layout(payment_id):
         }
 
         payments_table = PaymentsTable()
+        if checkouts:
+            starting_after_link = checkouts[-1].id
+            ending_before_link = checkouts[0].id
         return dmc.Card(
             dmc.Stack(
                 [
                     dmc.Group(
                         [
                             dmc.Text("Payments", size="xl"),
-                            dmc.Text("Last payments", size="sm"),
+                            dmc.Text("Recent Payments", size="sm"),
                         ]
                     ),
                     dmc.Drawer(
@@ -497,6 +506,48 @@ def layout(payment_id):
                         size="55%",
                     ),
                     payments_table.render(checkouts, cases_information),
+                    dmc.Group(
+                        [
+                            html.A(
+                                dmc.Button(
+                                    "Load previous",
+                                    leftIcon=DashIconify(
+                                        icon="teenyicons:arrow-left-outline"
+                                    ),
+                                    color="dark",
+                                    size="sm",
+                                ),
+                                hidden=(
+                                    True
+                                    if (
+                                        starting_after is None
+                                        and ending_before is None
+                                    )
+                                    or (
+                                        starting_after == checkouts[-1].id
+                                        and ending_before == checkouts[0].id
+                                    )
+                                    else False
+                                ),
+                                href=f"/manage/payments/none?ending_before={ending_before_link}",
+                            ),
+                            html.A(
+                                dmc.Button(
+                                    "Load more",
+                                    leftIcon=DashIconify(
+                                        icon="teenyicons:arrow-right-outline"
+                                    ),
+                                    color="dark",
+                                    size="sm",
+                                ),
+                                href=f"/manage/payments/none?starting_after={starting_after_link}",
+                                hidden=(
+                                    True if len(checkouts) < 30 else False
+                                ),
+                            ),
+                        ],
+                        position="left",
+                    ),
                 ]
             )
         )
