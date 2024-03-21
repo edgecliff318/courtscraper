@@ -420,6 +420,7 @@ def layout(payment_id, **kwargs):
         checkouts = payment_service.get_last_checkouts(
             starting_after=starting_after, ending_before=ending_before
         )
+        first_checkout = payment_service.get_last_checkouts(limit=1)
 
         cases_service = CasesService()
         billings_service = BillingsService()
@@ -519,14 +520,8 @@ def layout(payment_id, **kwargs):
                                 ),
                                 hidden=(
                                     True
-                                    if (
-                                        starting_after is None
-                                        and ending_before is None
-                                    )
-                                    or (
-                                        starting_after == checkouts[-1].id
-                                        and ending_before == checkouts[0].id
-                                    )
+                                    if ending_before_link
+                                    == first_checkout[0].id
                                     else False
                                 ),
                                 href=f"/manage/payments/none?ending_before={ending_before_link}",
@@ -534,7 +529,7 @@ def layout(payment_id, **kwargs):
                             html.A(
                                 dmc.Button(
                                     "Load more",
-                                    leftIcon=DashIconify(
+                                    rightIcon=DashIconify(
                                         icon="teenyicons:arrow-right-outline"
                                     ),
                                     color="dark",
