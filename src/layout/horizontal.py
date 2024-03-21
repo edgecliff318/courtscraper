@@ -19,7 +19,9 @@ class Layout:
                         # Use row and col to control vertical alignment of logo / brand
                         dbc.Row(
                             [
-                                dbc.Col(dbc.NavbarBrand("App", className="ms-2")),
+                                dbc.Col(
+                                    dbc.NavbarBrand("App", className="ms-2")
+                                ),
                             ],
                             align="center",
                             className="g-0",
@@ -78,7 +80,7 @@ class Layout:
     def render(self):
         content = html.Div(
             dash.page_container,
-            className="container-xxl flex-grow-1 container-p-y",
+            className="container-fluid flex-grow-1 container-p-y",
             id="content",
         )
         content_backdrop = html.Div(className="content-backdrop fade")
