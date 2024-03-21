@@ -20,7 +20,10 @@ def add_lead_cloud_talk(lead):
     }
 
     case = cases_service.get_single_case(lead.case_id)
+
     tag = mapping(lead.charges_description)
+    if lead.status == "not_contacted_prioritized":
+        tag = "prioritized"
 
     for phone_id, phone in enumerate(lead.phones):
         source = lead.source if lead.source is not None else case.location
@@ -130,9 +133,11 @@ def add_website_lead(lead: dict, tag=None):
         "ContactAttribute": [
             {
                 "attribute_id": 5725,
-                "value": lead.get("violation", "")[:254]
-                if lead.get("violation") is not None
-                else "",
+                "value": (
+                    lead.get("violation", "")[:254]
+                    if lead.get("violation") is not None
+                    else ""
+                ),
             },
             {
                 "attribute_id": 5739,
@@ -212,6 +217,7 @@ def process_redudant_numbers():
         contacts_by_phone[phone].append(contact)
 
     contacts_by_tag_order = {
+        "prioritized": 7,  # "prioritized": 7,
         "website": 6,
         "dwi": 5,
         "major": 4,
@@ -239,7 +245,8 @@ def process_redudant_numbers():
             for contact in contacts_items:
                 contact_full = http.request(
                     "GET",
-                    url + f"contacts/show/{contact.get('Contact').get('id')}.json",
+                    url
+                    + f"contacts/show/{contact.get('Contact').get('id')}.json",
                     headers=headers,
                     auth=(
                         settings.CLOUDTALK_API_KEY,
@@ -253,7 +260,9 @@ def process_redudant_numbers():
                 for tag in tags:
                     if tag.get("name") in contacts_by_tag_order.keys():
                         contact_order[contact.get("Contact").get("id")] = {
-                            "order": contacts_by_tag_order.get(tag.get("name")),
+                            "order": contacts_by_tag_order.get(
+                                tag.get("name")
+                            ),
                             "tag": tag.get("name"),
                         }
 
@@ -370,7 +379,8 @@ def fetch_call_history(date_from, date_to):
         )
         calls_json = response.json()
         calls_list += [
-            call.get("Cdr") for call in calls_json.get("responseData").get("data")
+            call.get("Cdr")
+            for call in calls_json.get("responseData").get("data")
         ]
 
     return calls_list
