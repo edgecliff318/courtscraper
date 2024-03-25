@@ -1,10 +1,12 @@
 import datetime
 import json
 import logging
+from urllib.parse import urlencode
 
 import requests
 from bs4 import BeautifulSoup
 
+from src.components import conversation
 from src.models.cases import Case
 from src.models.leads import Lead
 
@@ -468,4 +470,225 @@ class MyCase:
         )
 
         response = self.session.request("POST", url, data=payload)
+        return response.json()
+
+    def get_cases(self, client_id):
+        url = "https://meyer-attorney-services.mycase.com/autocomplete/cases.json"
+        params = {"term": "", "scoped_by_user_id": client_id}
+        response = self.session.request("GET", url, params=params)
+
+        """
+        output = [
+            {
+                "id": 31946235,
+                "name": "TTD23 Abby M. Ross  - Carthage Municipal - 190203419"
+            }
+        ]
+        """
+        return response.json()
+
+    def get_converation(self, mycase_case_id):
+        # https://meyer-attorney-services.mycase.com/text_messages.json?search_term=&court_case_id=31946235&include_unjoined=true&include_archived=true&unread_only=false&page_number=1
+        url = "https://meyer-attorney-services.mycase.com/text_messages.json"
+        params = {
+            "search_term": "",
+            "court_case_id": mycase_case_id,
+            "include_unjoined": True,
+            "include_archived": True,
+            "unread_only": False,
+            "page_number": 1,
+        }
+        response = self.session.request("GET", url, params=params)
+        """
+        {
+            "conversations": [
+                {
+                    "id": 831383,
+                    "client": {
+                        "id": 27294644,
+                        "display_name": "Abby Ross (Client)",
+                        "initials": "",
+                        "avatar_url": null,
+                        "type": "Client"
+                    },
+                    "external_phone_number": "+18165188838",
+                    "archived_at": null,
+                    "archived_by": null,
+                    "last_text_message": {
+                        "id": 37480397,
+                        "body": "What's up ?",
+                        "timestamp": "2024-03-17T16:56:36-05:00"
+                    },
+                    "unread_count": 0,
+                    "mute_for_current_user": false,
+                    "joined_for_current_user": true
+                }
+            ],
+            "has_more": false
+        }
+        """
+        conversations = response.json().get("conversations", [])
+        conversation_id = conversations[0].get("id")
+        return conversation_id
+
+    def get_text_messages(self, conversation_id):
+        # https://meyer-attorney-services.mycase.com/text_messages/831383/messages.json
+        url = f"https://meyer-attorney-services.mycase.com/text_messages/{conversation_id}/messages.json"
+
+        response = self.session.request("GET", url)
+        """
+        {
+        "messages": [
+            {
+                "id": 8499680,
+                "type": "outgoing",
+                "body": "Hi Shawn, this is a test text message. Let me know if you receive this and reply back.",
+                "sent_by": {
+                    "id": 27310503,
+                    "display_name": "Sam Mahmud (Attorney)",
+                    "initials": "SM",
+                    "avatar_url": "https://s3.amazonaws.com/com.mycase.prod3-main/sharded/user_avatar/b3fa2f4c-c25c-4da4-be2a-b8229af974f3/small_sam_ttd.jpeg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIA3V65YTC5BSAW6VXY%2F20240317%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240317T214244Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEL3%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJIMEYCIQDWNmchMeIl3LzW4yjKcsCeV7oPGbR8ECjlUWfKd50cTgIhAKwlH0chiWwbjKjVYFZF0cJuOM3DMhS9wqYNv3c5v2BZKsUCCMb%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEQABoMODAzMDg3MDk1OTk0IgyF9IFTSX%2BvpSkfY%2BgqmQIc9ocJ1jawKIvwR7lNF9U4%2BGBSC4tjhKEZXiFaQv6WFBdiqWKUiimjGnn%2FQKxAU0lzEpXjM%2FTHjOaHTj1p2J0oBxy2IkYjJIVNnuz6ASSYPNXpHK1kXoJSD%2FYLKUDMmrtqPZyPBPluNPM7lUCaIU0gyd6igracbQTiMAHX13R2P9%2FJBMOyEG%2FdbmlCuO2xuKi4sSniZv2zz2owuTaAHJCL1S00i0RjFLJOIu63S4xJkUNOUDhEjxGLpHMVqaBTAFiCtbA0yVjDKpmA03fOoyOZEFFPq5ojIp76C8pDK9ynU0hqwrb%2FMakL3sHrZkhokIQxSuW0bq0dyb1zzR3wE45xgFfpqrFwH7rOoMDqaqYG2qTErmP8YrT3UjD6qt2vBjqcAXiSuFEwiNVbSN5COnWQi9SVxq6mq%2Bafv0Wjz0D90hmWpVZvcim0isOl%2BggvMOnvgNVmj64Gbu74MPdtP2yCCooarV07aDXuF71SxRlag1mHQ%2FU8VdMuQMcOy2ep%2B7RgP7172wqjCd3FFAX16uLA4k%2BtetjOq9YmomgkidWp%2BlTuPXhhgYqSMH%2Fz988Qw5%2BgCSyzeuAdKk2lrNiuKA%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=102b2b0c2f0ba8c5155aadd74236a2849022d12e74abd3a7225269f770ae6b40",
+                    "type": "Lawyer"
+                },
+                "timestamp": "2021-12-30T11:21:29-06:00",
+                "status": "delivered",
+                "error_message": null,
+                "has_media": null,
+                "mms_attachments": null
+            },
+            {
+                "id": 8499687,
+                "type": "incoming",
+                "body": "Hello ",
+                "sent_by": {
+                    "id": 27294644,
+                    "display_name": "Abby Ross (Client)",
+                    "initials": "AR",
+                    "avatar_url": null,
+                    "type": "Client"
+                },
+                "timestamp": "2021-12-30T11:21:43-06:00",
+                "status": "received",
+                "error_message": null,
+                "has_media": null,
+                "mms_attachments": null
+            },
+            {
+                "id": 37480397,
+                "type": "outgoing",
+                "body": "What's up ?",
+                "sent_by": {
+                    "id": 45937206,
+                    "display_name": "Team Ticket Takedown (Staff)",
+                    "initials": "TT",
+                    "avatar_url": null,
+                    "type": "Lawyer"
+                },
+                "timestamp": "2024-03-17T16:56:36-05:00",
+                "status": "delivered",
+                "error_message": null,
+                "has_media": null,
+                "mms_attachments": null
+            }
+        ]
+        }
+        """
+        messages = response.json().get("messages", [])
+        return messages
+
+    def create_text_message(self, mycase_case_id, message):
+        conversation_id = self.get_converation(mycase_case_id)
+        url = f"https://meyer-attorney-services.mycase.com/text_messages/{conversation_id}/send_message.json"
+
+        payload = json.dumps(
+            {"message_body": message, "court_case_id": mycase_case_id}
+        )
+
+        response = self.session.request("POST", url, data=payload)
+        """
+        {
+            "text_message": {
+                "id": 37480531,
+                "type": "outgoing",
+                "body": "MESSAGE TEST",
+                "sent_by": {
+                    "id": 45937206,
+                    "display_name": "Team Ticket Takedown (Staff)",
+                    "initials": "TT",
+                    "avatar_url": null,
+                    "type": "Lawyer"
+                },
+                "timestamp": "2024-03-17T17:23:49-05:00",
+                "status": "accepted",
+                "error_message": null,
+                "has_media": null,
+                "mms_attachments": null
+            },
+            "time_trackable_item_id": 159114488
+        }
+        """
+        return response.json()
+
+    def create_mycase_message(
+        self,
+        mycase_case_id,
+        client_id,
+        subject,
+        message,
+        attachments,
+        case_name,
+    ):
+        current_timestamp = int(datetime.datetime.now().timestamp() * 1000)
+        url = f"https://meyer-attorney-services.mycase.com/messages/new?court_case={mycase_case_id}&_={current_timestamp}"
+
+        response = self.session.request("GET", url)
+
+        # Get the following data-id
+        # <form class="calico_lightbox" id="message_form" data-id="21431553" action="/messages/21431553" accept-charset="UTF-8"
+        # <input name="utf8" type="hidden" value="&#x2713;" autocomplete="off" /><input type="hidden" name="_method" value="patch" autocomplete="off" /><input type="hidden" name="authenticity_token" value="ESUbP5xswZCAkRVMFi5jWgtymBYk6a52jO11azNSWGwI8-oHh51GljHUc53ooOPdrAx3lHfDsoLg9Zc7gsFvyA" autocomplete="off" />
+        soup = BeautifulSoup(response.text, "html.parser")
+        message_form = soup.find("form", {"id": "message_form"})
+        message_id = message_form.get("data-id")
+        authenticity_token = message_form.find(
+            "input", {"name": "authenticity_token"}
+        ).get("value")
+
+        # Prepare the form data
+        form_data = {
+            "utf8": "✓",
+            "_method": "patch",
+            "authenticity_token": authenticity_token,
+            "message[court_case_id]": mycase_case_id,
+            "adding_time_entry": "false",
+            "to_user": "",
+            "to_selected_id": f"client_{client_id}",
+            "message[global_clients]": "0",
+            "message[global_lawyers]": "0",
+            "to[]": f"{client_id}",
+            "message[private_reply]": "false",
+            "courtcase_search_name": case_name,
+            "message[subject]": subject,
+            "message[initial_message]": message,
+        }
+        form_data = urlencode(form_data)
+
+        # Update the headers to include the content type
+        self.session.headers.update(
+            {
+                "content-type": "application/x-www-form-urlencoded",
+            }
+        )
+
+        # Post the message
+        message_url = (
+            f"https://meyer-attorney-services.mycase.com/messages/{message_id}"
+        )
+
+        response = self.session.request("POST", message_url, data=form_data)
+
+        # Send the message
+        message_send_url = f"https://meyer-attorney-services.mycase.com/messages/{message_id}/send_message"
+        response = self.session.request(
+            "POST", message_send_url, data=form_data
+        )
         return response.json()

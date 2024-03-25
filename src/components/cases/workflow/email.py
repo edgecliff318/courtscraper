@@ -72,7 +72,6 @@ def get_email_params(
     logger.info(f"Getting the context data for {template}")
 
     documents = get_documents(case_id)
-    
 
     # Attachments form
     attachments = dmc.Stack(
@@ -234,9 +233,12 @@ def get_email_params(
 
     return params
 
+
 def get_documents(case_id):
     case = cases.get_single_case(case_id)
-    document_blobs = bucket.list_blobs(prefix=f"cases/{case_id}/", delimiter="/")
+    document_blobs = bucket.list_blobs(
+        prefix=f"cases/{case_id}/", delimiter="/"
+    )
 
     documents = []
     for blob in document_blobs:
@@ -249,12 +251,27 @@ def get_documents(case_id):
                 case_path = case_path.replace("?", "_")
             if case_path in file_path:
                 source = case_document.get("source", "Casenet")
-                documents.append({"label": f"{file_path.split('/')[-1]} ({source})", "value": file_path})
+                documents.append(
+                    {
+                        "label": f"{file_path.split('/')[-1]} ({source})",
+                        "value": file_path,
+                    }
+                )
             else:
-                documents.append({"label": f"{file_path.split('/')[-1]} ({source})", "value": file_path})
+                documents.append(
+                    {
+                        "label": f"{file_path.split('/')[-1]} ({source})",
+                        "value": file_path,
+                    }
+                )
         else:
-            documents.append({"label": f"{file_path.split('/')[-1]} ({source})", "value": file_path})
-    
+            documents.append(
+                {
+                    "label": f"{file_path.split('/')[-1]} ({source})",
+                    "value": file_path,
+                }
+            )
+
     return documents
 
 
@@ -415,6 +432,7 @@ def send_email(
 
     # If the event is already in the list, raise an error$
     template_details = templates.get_single_template(template)
+    template_details.repeat = True
     if not template_details.repeat and event.get("template") in [
         e.get("template") for e in events if e.get("template") is not None
     ]:
@@ -445,7 +463,11 @@ def send_email(
     # Upload the document to the client
     try:
         output = send_function(
-            email=email, subject=subject, message=body, attachments=attachments
+            email=email,
+            subject=subject,
+            message=body,
+            attachments=attachments,
+            case_id=case_id,
         )
     except Exception as e:
         logger.error(f"Error sending the email: {e}")
@@ -475,7 +497,7 @@ def send_email(
     return event, html.Div(
         [
             dmc.Alert(
-                f"Message successfully sent to the {role} through Intercom",
+                f"Message successfully sent to the {role}",
                 color="teal",
                 title="Success",
             )
