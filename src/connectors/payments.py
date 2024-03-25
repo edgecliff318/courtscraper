@@ -69,7 +69,7 @@ class PaymentService:
         invoice = stripe.Invoice.create(
             customer=customer_id,
             collection_method="send_invoice",
-            days_until_due=30,
+            days_until_due=0,
         )
 
         # Add the product to the invoice
