@@ -9,6 +9,7 @@ from src.core.base import BaseService
 from src.core.dynamic_fields import CaseDynamicFields
 from src.db import db
 from src.models import cases
+from src.services.participants import ParticipantsService
 
 
 def get_cases(
@@ -167,6 +168,24 @@ def get_context_data(case_id, default_value="!!!TO_FILL!!!") -> defaultdict:
     case_data = defaultdict(lambda: default_value, case_data)
 
     return case_data
+
+
+def get_mycase_id(case_id):
+    case = get_single_case(case_id)
+    participants_service = ParticipantsService()
+
+    participants_list = participants_service.get_items(
+        id=case.participants, role="defendant"
+    )
+
+    if len(participants_list) == 0:
+        raise Exception("No defendant selected for this case")
+
+    participant = participants_list[0]
+
+    client_id = participant.mycase_id
+
+    return participant, client_id
 
 
 class CasesService(BaseService):

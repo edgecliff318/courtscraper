@@ -10,10 +10,8 @@ from src.components.cases.workflow.email import (
 )
 from src.connectors.intercom import IntercomConnector
 from src.core.config import get_settings
-from src.loader.mycase import MyCase
-from src.services import cases
+from src.services import mycase as mycase_service
 from src.services import templates as templates_service
-from src.services.participants import ParticipantsService
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -48,49 +46,6 @@ def send_to_client_intercom(
     )
 
     return output
-
-
-def send_to_client_mycase(email, subject, message, attachments, case_id=None):
-    mycase = MyCase(url="", password="", username="")
-    mycase.login()
-
-    case = cases.get_single_case(case_id)
-    participants_service = ParticipantsService()
-
-    participants_list = participants_service.get_items(
-        id=case.participants, role="defendant"
-    )
-
-    if len(participants_list) == 0:
-        raise Exception("No defendant selected for this case")
-
-    participant = participants_list[0]
-
-    client_id = participant.mycase_id
-
-    mycase_cases = mycase.get_cases(client_id)
-
-    if len(mycase_cases) == 0:
-        raise Exception(
-            f"No case found in MyCase with first name {participant.first_name}, last name {participant.last_name} and email {participant.email}. Please add the case to MyCase and update the participant details."
-        )
-
-    for case in mycase_cases:
-        if case_id in case["name"]:
-            mycase_id = case["id"]
-            case_name = case["name"]
-            break
-
-    response = mycase.create_mycase_message(
-        mycase_case_id=mycase_id,
-        client_id=client_id,
-        subject=subject,
-        message=message,
-        attachments=attachments,
-        case_name=case_name,
-    )
-
-    return response
 
 
 @callback(
@@ -208,7 +163,7 @@ def modal_client_submit(n_clicks, pars, case_id, template):
             states=ctx.states,
             inputs=ctx.inputs,
             attachments=attachments,
-            send_function=send_to_client_mycase,
+            send_function=mycase_service.send_to_client_mycase,
             role="client",
             include_invoice=True,
         )
