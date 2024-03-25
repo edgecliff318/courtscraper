@@ -378,6 +378,40 @@ class MyCase:
 
         return response.json()
 
+    def search_case(self, case_id):
+        url = f"https://meyer-attorney-services.mycase.com/search/auto_complete.json?term={case_id}&filter_type=cases"
+
+        response = self.session.request("GET", url)
+
+        """
+        [
+            {
+                "record_type": "court_case",
+                "record_id": 31946235,
+                "label": "TTD23 Abby M. Ross  - Carthage Municipal - 190203419",
+                "category": "Cases",
+                "archived": false
+            }
+        ]
+        """
+
+        for case in response.json():
+            record_id = case.get("record_id")
+            label = case.get("label")
+
+            if case_id in label:
+                break
+
+        url = f"https://meyer-attorney-services.mycase.com/court_cases/{record_id}/case_contacts_data.json"
+
+        response = self.session.request("GET", url)
+
+        return {
+            "clients": response.json().get("clients", []),
+            "staff": response.json().get("staff", []),
+            "record_id": record_id,
+        }
+
     def reload_sharing(self, mycase_case_id):
         url = "https://meyer-attorney-services.mycase.com/appointments/reload_sharing.json"
 

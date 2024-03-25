@@ -432,7 +432,6 @@ def send_email(
 
     # If the event is already in the list, raise an error$
     template_details = templates.get_single_template(template)
-    template_details.repeat = True
     if not template_details.repeat and event.get("template") in [
         e.get("template") for e in events if e.get("template") is not None
     ]:

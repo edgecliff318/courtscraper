@@ -66,11 +66,7 @@ def send_to_client_mycase(email, subject, message, attachments, case_id=None):
 
     participant = participants_list[0]
 
-    client_id = mycase.get_contact(
-        first_name=participant.first_name,
-        last_name=participant.last_name,
-        email=participant.email,
-    )
+    client_id = participant.mycase_id
 
     mycase_cases = mycase.get_cases(client_id)
 

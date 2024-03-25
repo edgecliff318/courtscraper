@@ -33,14 +33,30 @@ def get_client_section(case):
         )
 
     for participant in participants_list:
-        if participant.mycase_id is None:
+        if participant.mycase_id is None or participant.mycase_id == "None":
             mycase = MyCase(url="", password="", username="")
             mycase.login()
-            client_id = mycase.get_contact(
-                first_name=participant.first_name,
-                last_name=participant.last_name,
-                email=participant.email,
+            mycase_details = mycase.search_case(
+                case_id=case.case_id,
             )
+
+            if mycase_details is None:
+                return dmc.Alert(
+                    f"No case found in MyCase with case id {case.case_id}. Please add the case to MyCase and update the participant details.",
+                    color="red",
+                    title="No case found",
+                )
+
+            clients = mycase_details.get("clients")
+            if clients is None or len(clients) == 0:
+                return dmc.Alert(
+                    f"No client found in MyCase with case id {case.case_id}. Please add the client to MyCase and update the participant details.",
+                    color="red",
+                    title="No client found",
+                )
+
+            client_id = clients[0]["id"]
+
             if client_id is None:
                 return dmc.Alert(
                     f"No client found in MyCase with first name {participant.first_name}, last name {participant.last_name} and email {participant.email}. Please add the client to MyCase and update the participant details.",
@@ -48,6 +64,10 @@ def get_client_section(case):
                     title="No client found",
                 )
             participant.mycase_id = client_id
+            if participant.email is None:
+                participant.email = clients[0]["email"]
+            if participant.phone is None or participant.phone == "":
+                participant.phone = clients[0]["phone"]
             participants_service.patch_item(
                 participant.id, {"mycase_id": client_id}
             )
