@@ -1,6 +1,7 @@
 import datetime
 import json
 import logging
+from urllib.parse import urlencode
 
 import requests
 from bs4 import BeautifulSoup
@@ -486,12 +487,12 @@ class MyCase:
         """
         return response.json()
 
-    def get_converation(self, case_id):
+    def get_converation(self, mycase_case_id):
         # https://meyer-attorney-services.mycase.com/text_messages.json?search_term=&court_case_id=31946235&include_unjoined=true&include_archived=true&unread_only=false&page_number=1
         url = "https://meyer-attorney-services.mycase.com/text_messages.json"
         params = {
             "search_term": "",
-            "court_case_id": case_id,
+            "court_case_id": mycase_case_id,
             "include_unjoined": True,
             "include_archived": True,
             "unread_only": False,
@@ -595,12 +596,12 @@ class MyCase:
         messages = response.json().get("messages", [])
         return messages
 
-    def create_text_message(self, case_id, message):
-        conversation_id = self.get_converation(case_id)
+    def create_text_message(self, mycase_case_id, message):
+        conversation_id = self.get_converation(mycase_case_id)
         url = f"https://meyer-attorney-services.mycase.com/text_messages/{conversation_id}/send_message.json"
 
         payload = json.dumps(
-            {"message_body": message, "court_case_id": case_id}
+            {"message_body": message, "court_case_id": mycase_case_id}
         )
 
         response = self.session.request("POST", url, data=payload)
@@ -628,8 +629,17 @@ class MyCase:
         """
         return response.json()
 
-    def create_mycase_message(self, case_id, message):
-        url = f"https://meyer-attorney-services.mycase.com/messages/new?court_case={case_id}&_=1710713128795"
+    def create_mycase_message(
+        self,
+        mycase_case_id,
+        client_id,
+        subject,
+        message,
+        attachments,
+        case_name,
+    ):
+        current_timestamp = int(datetime.datetime.now().timestamp() * 1000)
+        url = f"https://meyer-attorney-services.mycase.com/messages/new?court_case={mycase_case_id}&_={current_timestamp}"
 
         response = self.session.request("GET", url)
 
@@ -642,3 +652,43 @@ class MyCase:
         authenticity_token = message_form.find(
             "input", {"name": "authenticity_token"}
         ).get("value")
+
+        # Prepare the form data
+        form_data = {
+            "utf8": "✓",
+            "_method": "patch",
+            "authenticity_token": authenticity_token,
+            "message[court_case_id]": mycase_case_id,
+            "adding_time_entry": "false",
+            "to_user": "",
+            "to_selected_id": f"client_{client_id}",
+            "message[global_clients]": "0",
+            "message[global_lawyers]": "0",
+            "to[]": f"{client_id}",
+            "message[private_reply]": "false",
+            "courtcase_search_name": case_name,
+            "message[subject]": subject,
+            "message[initial_message]": message,
+        }
+        form_data = urlencode(form_data)
+
+        # Update the headers to include the content type
+        self.session.headers.update(
+            {
+                "content-type": "application/x-www-form-urlencoded",
+            }
+        )
+
+        # Post the message
+        message_url = (
+            f"https://meyer-attorney-services.mycase.com/messages/{message_id}"
+        )
+
+        response = self.session.request("POST", message_url, data=form_data)
+
+        # Send the message
+        message_send_url = f"https://meyer-attorney-services.mycase.com/messages/{message_id}/send_message"
+        response = self.session.request(
+            "POST", message_send_url, data=form_data
+        )
+        return response.json()

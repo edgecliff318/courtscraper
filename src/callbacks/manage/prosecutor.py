@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 settings = get_settings()
 
 
-def send_to_prosecutor(email, subject, message, attachments):
+def send_to_prosecutor(email, subject, message, attachments, case_id=None):
     user_id = session.get("profile", {}).get("name", None)
 
     if user_id is None:
