@@ -27,7 +27,7 @@ def send_to_client_mycase(email, subject, message, attachments, case_id=None):
         mycase_case_id=mycase_id,
         client_id=client_id,
         subject=subject,
-        message=message,
+        message=message.replace("\n", "<br>"),
         attachments=attachments,
         case_name=case_name,
     )
