@@ -401,7 +401,8 @@ class MyCase:
 
             if case_id in label:
                 break
-
+        if not response.json():
+            return None
         url = f"https://meyer-attorney-services.mycase.com/court_cases/{record_id}/case_contacts_data.json"
 
         response = self.session.request("GET", url)
