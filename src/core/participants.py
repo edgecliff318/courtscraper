@@ -33,7 +33,6 @@ def attach_participants(case_id):
             "addr_statcode": "state",
             "addr_zip": "zip_code",
             "birth_date": "date_of_birth",
-            "formatted_telephone": "phone",
         }
 
         role_mapping = {
@@ -60,6 +59,9 @@ def attach_participants(case_id):
             participant_instance.last_name = f"{location} Court - {city}"
             participant_instance.date_of_birth = None
             participant_instance.organization = f"{location} Court - {city}"
+        elif participant_instance.role == "defendant":
+            participant_instance.email = case.email
+            participant_instance.phone = case.phone
 
         # Check if another participan instance exists
         participant_exists = participants_service.get_items(
