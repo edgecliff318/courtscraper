@@ -94,6 +94,8 @@ class Case(BaseModel):
     source: Optional[str] = None
     custom: Optional[Dict] = None
     raw: Optional[Dict] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
 
     # Ignore parsing errors for now
     @validator("charges", pre=True, always=True)

@@ -6,7 +6,6 @@ from urllib.parse import urlencode
 import requests
 from bs4 import BeautifulSoup
 
-from src.components import conversation
 from src.models.cases import Case
 from src.models.leads import Lead
 
@@ -383,18 +382,6 @@ class MyCase:
 
         response = self.session.request("GET", url)
 
-        """
-        [
-            {
-                "record_type": "court_case",
-                "record_id": 31946235,
-                "label": "TTD23 Abby M. Ross  - Carthage Municipal - 190203419",
-                "category": "Cases",
-                "archived": false
-            }
-        ]
-        """
-
         for case in response.json():
             record_id = case.get("record_id")
             label = case.get("label")
@@ -431,75 +418,49 @@ class MyCase:
                 return contact.get("id")
         return None
 
-    def add_event(self, case_details, reminders=None):
-        court_date = ""
-        court_time = ""
-        court_address = ""
-
-        if case_details.mycase_case_id is None:
-            raise Exception("Case is not uploaded to MyCase")
-
-        mycase_case_id = case_details.mycase_case_id
-
-        sharing_rules = self.reload_sharing(case_details.get("id"))
+    def add_event(self, mycase_case_id, reminders=None, event_details=None):
 
         url = (
             "https://meyer-attorney-services.mycase.com/appointment_rules.json"
         )
+
+        if event_details is None:
+            raise Exception("Event details are required")
 
         payload = json.dumps(
             {
                 "appointment_rule": {
                     "item_category_id": None,
                     "court_case_id": mycase_case_id,
-                    "name": "EVENT_NAME",
-                    "start_date": "03/09/2024",
-                    "start_time": "06:00 PM",
-                    "end_date": "03/09/2024",
-                    "end_time": "07:00 PM",
+                    "name": event_details.get("name"),
+                    "start_date": event_details.get("start_date"),
+                    "start_time": event_details.get("start_time"),
+                    "end_date": event_details.get("end_date"),
+                    "end_time": event_details.get("end_time"),
                     "location_id": None,
-                    "description": "DESCRIPTION",
+                    "description": event_details.get("description"),
                     "private": False,
                 },
                 "google_sync": False,
                 "new_record": True,
                 "creating_new_location": True,
                 "location": {
-                    "name": "LOCATION_NAME",
+                    "name": event_details.get("location_name"),
                     "reusable": False,
                     "address_attributes": {
-                        "street": "LOCATION_ADDRESS",
-                        "street2": "LOCATION_ADDRESS_2",
-                        "city": "CITY",
-                        "state": "MO",
-                        "zip_code": "ZIP",
+                        "street": event_details.get("location_address"),
+                        "street2": event_details.get("location_address_2"),
+                        "city": event_details.get("location_city"),
+                        "state": event_details.get("location_state"),
+                        "zip_code": event_details.get("location_zip"),
                         "country": "US",
                     },
                 },
                 "appointment_id": None,
-                "sharing": [27310503, 27081302, 27294644],
+                # "sharing": [27310503, 27081302, 27294644],
+                "sharing": event_details.get("sharing_rules"),
                 "attendance": [],
                 "format_workflow_application": False,
-                "reminders": [
-                    {
-                        "user_type": "client",
-                        "type": "text",
-                        "number": "1",
-                        "duration": "week",
-                    },
-                    {
-                        "user_type": "client",
-                        "type": "client",
-                        "number": "4",
-                        "duration": "week",
-                    },
-                    {
-                        "user_type": "client",
-                        "type": "text",
-                        "number": "1",
-                        "duration": "day",
-                    },
-                ],
                 "non_linked_sharing": {"shared": [], "required": []},
             }
         )
