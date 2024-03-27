@@ -11,7 +11,11 @@ class Participant(BaseModel):
     role: Optional[str] = None
     phone: Optional[str] = None
     email: Optional[str] = None
+    fax: Optional[str] = None
+    website: Optional[str] = None
     communication_preference: Optional[str] = None
+    communication_preference_rfr: Optional[str] = None
+    communication_preference_disco: Optional[str] = None
     address: Optional[str] = None
     city: Optional[str] = None
     zip_code: Optional[Union[int, str]] = None
