@@ -16,6 +16,7 @@ class Participant(BaseModel):
     communication_preference: Optional[str] = None
     communication_preference_rfr: Optional[str] = None
     communication_preference_disco: Optional[str] = None
+    communication_preference_plea: Optional[str] = None
     address: Optional[str] = None
     city: Optional[str] = None
     zip_code: Optional[Union[int, str]] = None
