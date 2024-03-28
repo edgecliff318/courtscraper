@@ -12,7 +12,7 @@ from src.services.templates import (
     get_single_template,
     get_templates,
     insert_template,
-    update_template,
+    patch_template,
 )
 
 logger = logging.getLogger(__name__)
@@ -43,32 +43,42 @@ def get_templatess_list(url):
     [
         State(f"{field}", "checked" if "bool" in str(field_info) else "value")
         for field, field_info in templates.Template.__annotations__.items()
-        if field not in ["id", "creation_date", "update_date"]
+        if field
+        not in ["id", "creation_date", "update_date", "creator", "user"]
     ],
     prevent_initial_call=True,
 )
-def save_edit_template(n_clicks, templates_id, *inputs):
+def save_edit_template(templates_id, n_clicks, *inputs):
     ctx = dash.callback_context
-    id = ctx.triggered[0]["prop_id"].split(".")[0]
+    id = ctx.triggered_id
     if id == "edit-template-save":
-        print(inputs)
         template_dict = dict(
             zip(
                 [
                     field
                     for field in templates.Template.__annotations__.keys()
-                    if field not in ["id", "creation_date", "update_date"]
+                    if field
+                    not in [
+                        "id",
+                        "creation_date",
+                        "update_date",
+                        "creator",
+                        "user",
+                    ]
                 ],
                 inputs,
             )
         )
         if templates_id:
-            update_template(templates.Template(**template_dict))
+            patch_template(templates_id, **template_dict)
         else:
             insert_template(templates.Template(**template_dict))
 
-        print(template_dict)
-        return "hello world"
+        return dmc.Alert(
+            "Template saved",
+            color="green",
+            duration=5000,
+        )
     return dash.no_update
 
 

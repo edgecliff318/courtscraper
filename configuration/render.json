@@ -14,17 +14,25 @@
         "type": "Switch",
         "checked": false
     },
-    "name": {
-        "label": "Name",
-        "type": "TextInput",
-        "placeholder": "Name",
-        "value": ""
-    },
     "category": {
         "label": "Category",
-        "type": "TextInput",
+        "type": "Select",
         "placeholder": "Category",
-        "value": ""
+        "value": "",
+        "data": [
+            {
+                "label": "Client",
+                "value": "client"
+            },
+            {
+                "label": "Prosecutor",
+                "value": "prosecutor"
+            },
+            {
+                "label": "Court",
+                "value": "court"
+            }
+        ]
     },
     "type": {
         "label": "Type",
@@ -50,16 +58,16 @@
             }
         ]
     },
-    "creator": {
-        "label": "Creator",
-        "type": "TextInput",
-        "placeholder": "Creator",
-        "value": ""
-    },
     "subject": {
         "label": "Subject",
         "type": "TextInput",
         "placeholder": "Subject",
+        "value": ""
+    },
+    "name": {
+        "label": "Name",
+        "type": "TextInput",
+        "placeholder": "Name",
         "value": ""
     },
     "filepath": {
@@ -88,10 +96,10 @@
             }
         ]
     },
-    "user": {
-        "label": "User",
-        "type": "TextInput",
-        "placeholder": "User",
+    "text": {
+        "label": "Text",
+        "type": "Textarea",
+        "placeholder": "Text",
         "value": ""
     },
     "trigger": {
@@ -100,16 +108,16 @@
         "placeholder": "Trigger",
         "value": ""
     },
-    "sms_message": {
-        "label": "Sms message",
-        "type": "TextInput",
-        "placeholder": "Sms message",
-        "value": ""
-    },
     "next_case_status": {
         "label": "Next case status",
         "type": "TextInput",
         "placeholder": "Next case status",
+        "value": ""
+    },
+    "sms_message": {
+        "label": "Sms message",
+        "type": "Textarea",
+        "placeholder": "Sms message",
         "value": ""
     },
     "parameters": {
@@ -121,11 +129,5 @@
         "formatOnBlur": true,
         "autosize": true,
         "minRows": 4
-    },
-    "text": {
-        "label": "Text",
-        "type": "Textarea",
-        "placeholder": "Text",
-        "value": ""
     }
 }

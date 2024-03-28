@@ -65,6 +65,10 @@ def update_template(template: templates.Template, filepath=None) -> None:
     )
 
 
+def patch_template(template_id: str, **kwargs) -> None:
+    db.collection("templates").document(template_id).update(kwargs)
+
+
 def delete_template(template_id: str) -> None:
     db.collection("templates").document(template_id).delete()
 

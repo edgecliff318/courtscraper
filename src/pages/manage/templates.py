@@ -21,6 +21,7 @@ def layout():
 
     btn = dmc.Group(
         [
+            html.Div(id="output-template"),
             dmc.Button(
                 "Save",
                 color="dark",
@@ -28,7 +29,6 @@ def layout():
                 leftIcon=DashIconify(icon="material-symbols:save"),
             ),
             dmc.Button("Cancel", color="red", variant="subtle"),
-            html.Div(id="output-template"),
         ],
         position="right",
     )
