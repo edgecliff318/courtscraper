@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 
 from src.models.cases import Case
 from src.models.leads import Lead
+from src.services.participants import ParticipantsService
 
 logger = logging.getLogger(__name__)
 
@@ -139,17 +140,27 @@ class MyCase:
                 if contact.get("email") == lead.email:
                     return contact.get("id")
 
+            # Searching for the case if it's not already in the system
             output = self.search_case(case.case_id)
 
             if output is not None:
                 for client in output.get("clients", []):
                     if client.get("email") == lead.email:
                         return client.get("id")
+            participants_service = ParticipantsService()
+            # Using the participant mycase id
+            participants_list = participants_service.get_items(
+                id=case.participants, role="defendant"
+            )
+
+            for participant in participants_list:
+                if participant.mycase_id is not None:
+                    return participant.mycase_id
 
             logger.error(response.text)
 
             raise Exception(
-                f"Could not add contact to MyCase"
+                f"Could not add contact to MyCase. Please update manually the participant mycase id"
                 f" {response_status} - {response_json.get('object_errors', {}).get('full_messages', '')}"
             )
 
