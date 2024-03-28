@@ -139,6 +139,13 @@ class MyCase:
                 if contact.get("email") == lead.email:
                     return contact.get("id")
 
+            output = self.search_case(case.case_id)
+
+            if output is not None:
+                for client in output.get("clients", []):
+                    if client.get("email") == lead.email:
+                        return client.get("id")
+
             logger.error(response.text)
 
             raise Exception(

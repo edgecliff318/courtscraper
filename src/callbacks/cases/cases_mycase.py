@@ -55,11 +55,15 @@ def upload_case_to_mycase(btn, case_id):
             # Update the lead with the mycase client id
             leads.patch_lead(case_id, mycase_client_id=client_id)
 
-            # Upload the case
-            mycase.add_case(lead_details, case_details, client_id)
-
-            # Add event to the case
+            # Search before adding
             mycase_id = mycase.search_case(case_id=case_id)
+
+            if mycase_id is None or not mycase_id.get("record_id"):
+                # Upload the case
+                mycase.add_case(lead_details, case_details, client_id)
+
+                # Add event to the case
+                mycase_id = mycase.search_case(case_id=case_id)
 
             if mycase_id is None:
                 toast = build_toast(
