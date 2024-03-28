@@ -42,8 +42,68 @@ def get_prosecutor_section(case):
                 title="No communication preference found",
             )
         else:
+            communication_details = []
+            communication_details.append(
+                dmc.Text(f"{participant.communication_preference}")
+            )
+            if participant.communication_preference_rfr is not None:
+                communication_details.append(
+                    dmc.Stack(
+                        [
+                            dmc.Text("For RFR", weight=600),
+                            dmc.Text(
+                                f"{participant.communication_preference_rfr}"
+                            ),
+                        ],
+                        spacing="5px",
+                    )
+                )
+            if participant.communication_preference_disco is not None:
+                communication_details.append(
+                    dmc.Stack(
+                        [
+                            dmc.Text("For Discovery", weight=600),
+                            dmc.Text(
+                                f"{participant.communication_preference_disco}"
+                            ),
+                        ],
+                        spacing="5px",
+                    )
+                )
+            if participant.communication_preference_plea is not None:
+                communication_details.append(
+                    dmc.Stack(
+                        [
+                            dmc.Text("For Plea", weight=600),
+                            dmc.Text(
+                                f"{participant.communication_preference_plea}"
+                            ),
+                        ],
+                        spacing="5px",
+                    )
+                )
+
+            if participant.fax is not None:
+                communication_details.append(
+                    dmc.Group(
+                        [
+                            dmc.Text("Fax", weight=600),
+                            dmc.Text(f"{participant.fax}"),
+                        ],
+                        spacing="5px",
+                    )
+                )
+
+            if participant.website is not None:
+                communication_details.append(
+                    html.A(
+                        "Website →",
+                        href=participant.website,
+                        target="_blank",
+                    )
+                )
             message = dmc.Alert(
-                participant.communication_preference,
+                dmc.Stack(communication_details, spacing="xs"),
                 color="blue",
                 title=f"Process with the prosecutor {participant.last_name}",
             )
