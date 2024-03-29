@@ -328,13 +328,18 @@ class PaymentsTable:
 
     def render_cases(self, checkout, cases_information):
         cases_list = get_custom_fields(checkout, "tickets")
+        cases_list_attached = [c.case_id for c in checkout.cases]
         if cases_list is None:
-            return dmc.Text("No cases", size="sm")
+            cases_list = []
+        else:
+            cases_list = (
+                cases_list.replace(" ", "").replace("#", "").split(",")
+            )
+
+        cases_list = list(set(cases_list + cases_list_attached))
 
         if len(cases_list) == 0:
             return dmc.Text("No cases", size="sm")
-
-        cases_list = cases_list.replace(" ", "").replace("#", "").split(",")
 
         return dmc.Stack(
             [
@@ -342,7 +347,11 @@ class PaymentsTable:
                     [
                         html.A(
                             dmc.Text(
-                                case,
+                                (
+                                    case
+                                    if case not in cases_list_attached
+                                    else f"{case} (✅ attached)"
+                                ),
                                 size="sm",
                                 weight=600,
                             ),
@@ -425,9 +434,12 @@ def layout(payment_id, **kwargs):
         cases_service = CasesService()
         billings_service = BillingsService()
         cases_details = []
+        retrieved_cases = {}
 
         for checkout_single in checkouts:
             cases = cases_service.get_items(payment_id=checkout_single.id)
+            for case in cases:
+                retrieved_cases[case.case_id] = case
             billing = billings_service.get_single_item(checkout_single.id)
             if billing is not None:
                 checkout_single["billing"] = billing.model_dump()
@@ -449,8 +461,15 @@ def layout(payment_id, **kwargs):
 
         # Split cases into 30 cases per request
         cases_list = []
+
+        # Performance optimization
+        cases_details = [
+            c for c in cases_details if c not in retrieved_cases.keys()
+        ]
         for i in range(0, len(cases_details), 30):
             cases_list += get_many_cases(cases_details[i : i + 30])
+
+        cases_list = cases_list + list(retrieved_cases.values())
 
         cases_information = {
             case.case_id: CaseDynamicFields().update(case, {})
