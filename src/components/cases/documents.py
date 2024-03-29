@@ -18,7 +18,7 @@ def get_case_documents(case: Case):
     logger.info(f"Getting the documents for case {case.case_id}")
 
     # Get the documents from the dockets on Case Net
-    if case.documents is not None:
+    if case.documents is not None and len(case.documents) > 0:
         documents = pd.DataFrame(case.documents)
     else:
         documents = pd.DataFrame(
