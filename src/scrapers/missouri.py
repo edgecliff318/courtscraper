@@ -324,7 +324,7 @@ class ScraperMOCourt(ScraperBase):
         if not documents:
             logger.error(f"No documents found for {case_number}")
             console.print(f"No documents found for {case_number}")
-            raise Exception("No documents found")
+            # raise Exception("No documents found")
 
         # Download the docket files
         parsed_ticket = {}
