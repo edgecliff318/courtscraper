@@ -41,8 +41,3 @@ stripe
 #scraper
 playwright
 selenium
-
-
-'Receipt of Submission - 704258650 - ST V GARRETT JACOB GARING, Randolph County - Circuit Court - Huntsville'
-
-'eNotice - 210900213 - KANSAS CITY V JACKSON FLYNN CONROE, Kansas City Municipal Court'
