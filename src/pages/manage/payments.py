@@ -297,13 +297,11 @@ class PaymentsTable:
                 suggested_motion_for_continuance = get_continuance_date(
                     court_date_dt
                 )
-            elif court_date_dt >= pd.to_datetime("today"):
+            else:
                 color = "red"
                 suggested_motion_for_continuance = get_continuance_date(
                     court_date_dt
                 )
-            else:
-                color = "gray"
         if suggested_motion_for_continuance is None:
             return dmc.Text(
                 f"{city} - Court: {court_date} at {court_time}",
