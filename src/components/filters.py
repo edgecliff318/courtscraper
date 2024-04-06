@@ -231,5 +231,5 @@ date_selector = generate_form_group(
 )
 
 cases_controls = dbc.Row(
-    [generate_col(court_selector, lg=5), generate_col(date_selector)]
+    [generate_col(court_selector, lg=5)]
 )
