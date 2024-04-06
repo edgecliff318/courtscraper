@@ -113,7 +113,6 @@ def layout():
             ),
         ],
         style={
-                "padding": "20px",
-               "backgroundColor": "gray",
+                "padding": "20px"
                },
     )
