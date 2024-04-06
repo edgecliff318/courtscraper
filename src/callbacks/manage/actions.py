@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+import pandas as pd
 
 import dash_mantine_components as dmc
 import pytz
@@ -118,25 +119,33 @@ def create_case_column(cases, title):
 #     )
 
 
+
+
+def parse_date_time(case):
+    date_str = case.get('court_date', '01/01/1900') or '01/01/1900'
+    time_str = case.get('court_time', '12:00 AM') or '12:00 AM'
+    sort_date_str = f'{date_str} {time_str}'
+    try:
+        return datetime.strptime(sort_date_str, '%m/%d/%Y %I:%M %p')
+    except ValueError:
+        return datetime.strptime('01/01/1900 12:00 AM', '%m/%d/%Y %I:%M %p')
+
 def create_case_div(cases):
-    case_cards = []
     updated_cases = []
   
     for case in cases:
         case = CaseDynamicFields().update(case, case.model_dump())
-        date_str = case.get('court_date', '01/01/1900') or '01/01/1900'
-        time_str = case.get('court_time', '12:00 AM') or '12:00 AM'
-        sort_date_str = f'{date_str} {time_str}'
-        case['sort_date'] = datetime.strptime(sort_date_str, '%m/%d/%Y %I:%M %p')
+        case['sort_date'] = parse_date_time(case)
         updated_cases.append(case)
         
-    updated_cases.sort(key=lambda case: case.get('sort_date'), reverse=True)
+    df = pd.DataFrame(updated_cases)
+    df['sort_date'] = pd.to_datetime(df['sort_date'])
+    df = df.sort_values('sort_date', ascending=False)
+    updated_cases = df.to_dict('records')
+    
     case_cards = [create_case_card(case) for case in updated_cases]
 
-    return html.Div(
-        case_cards,
-        style={"overflowY": "auto"},
-    )
+    return html.Div(case_cards, style={"overflowY": "auto"})
     
 @callback(
     Output("case_card_col_todo", "children"),
