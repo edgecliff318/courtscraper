@@ -13,6 +13,7 @@ logger = logging.Logger(__name__)
 
 def get_client_section(case):
     participants_service = ParticipantsService()
+    message = None
 
     if case.participants is None or len(case.participants) == 0:
         return dmc.Alert(
@@ -40,7 +41,6 @@ def get_client_section(case):
                 case_id=case.case_id,
             )
             client_id = None
-            message = None
 
             if mycase_details is not None:
                 clients = mycase_details.get("clients")
@@ -71,6 +71,8 @@ def get_client_section(case):
                 participants_service.patch_item(
                     participant.id, {"mycase_id": client_id}
                 )
+        else:
+            client_id = participant.mycase_id
         customer_mycase_button = dmc.Button(
             "Open in MyCase",
             leftIcon=DashIconify(icon="fluent:open-folder-20-filled"),
