@@ -14,7 +14,7 @@ dash.register_page(__name__, order=3, path_template="/manage/actions")
 
 
 def layout():
-    return dbc.Container(
+    return  html.Div(
         [
             dbc.Row(
                 [
@@ -112,5 +112,7 @@ def layout():
                 gutter="xl",
             ),
         ],
-        style={"padding": "20px"},
+        style={
+                "padding": "20px"
+               },
     )
