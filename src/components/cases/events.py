@@ -12,12 +12,12 @@ logger = logging.getLogger(__name__)
 settings = get_settings()
 
 
-def render_email_row(id, sender, subject, timestamp):
+def render_email_row(id, sender, subject, snippet, timestamp):
     return dmc.Grid(
         [
             dmc.Col(
                 dmc.Text(
-                    f"{sender}",
+                    sender,
                     weight=700,
                     size="sm",
                 ),
@@ -32,20 +32,17 @@ def render_email_row(id, sender, subject, timestamp):
                         children=[
                             dmc.HoverCardTarget(
                                 dmc.Text(
-                                    # Subject
-                                    f"{subject}",
+                                    snippet,
                                     weight=500,
                                     size="sm",
                                 ),
                             ),
                             dmc.HoverCardDropdown(
                                 dmc.Text(
-                                    # Subject
-                                    f"{subject}",
+                                    subject,
                                     weight=500,
                                     size="sm",
                                 ),
-                                # Return to line
                                 className="p-4 w-96 break-words",
                             ),
                         ],
@@ -55,8 +52,7 @@ def render_email_row(id, sender, subject, timestamp):
             ),
             dmc.Col(
                 dmc.Text(
-                    # Date
-                    f"{convert_date_format(timestamp)}",
+                    convert_date_format(timestamp),
                     weight=500,
                     size="sm",
                 ),
@@ -96,7 +92,11 @@ def render_emails(case):
 
     body = [
         render_email_row(
-            email["id"], email["sender"], email["subject"], email["timestamp"]
+            email["id"],
+            email["sender"],
+            email["subject"],
+            email["snippet"],
+            email["timestamp"],
         )
         for email in case.emails
     ]
