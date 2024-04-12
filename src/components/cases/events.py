@@ -1,115 +1,78 @@
 import datetime
 import logging
-import os
 
 import dash
 import dash_ag_grid as dag
 import dash_mantine_components as dmc
-import openai
-from dash import ALL, Input, Output, State, callback, html
-from dash_iconify import DashIconify
+from dash import html
 from flask import session
-import pandas as pd
 
 from src.core.config import get_settings
-from src.services.emails import GmailConnector
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
 
 
-import re
-
-def extract_number_from_string(s):
-    match = re.search(r'\b\d+\b', s)
-    if match:
-        return match.group(0)
-    return None
-
-
-def render_email_row(id,sender, subject, timestamp):
-    
- 
+def render_email_row(id, sender, subject, timestamp):
     return dmc.Grid(
-            [
-                dmc.Col(
-                    dmc.Text(
-                        f"{sender}",
-                        weight=700,
-                        size="sm",
-                    ),
-                    span=3,
+        [
+            dmc.Col(
+                dmc.Text(
+                    f"{sender}",
+                    weight=700,
+                    size="sm",
                 ),
-                dmc.Col(
-                    [
-                        dmc.HoverCard(
-                            shadow="md",
-                            openDelay=1000,
-                            width=500,
-                            children=[
-                                dmc.HoverCardTarget(
-                                    dmc.Text(
-                                        # Subject
-                                        f"{subject}",
-                                        weight=500,
-                                        size="sm",
-                                    ),
+                span=3,
+            ),
+            dmc.Col(
+                [
+                    dmc.HoverCard(
+                        shadow="md",
+                        openDelay=1000,
+                        width=500,
+                        children=[
+                            dmc.HoverCardTarget(
+                                dmc.Text(
+                                    # Subject
+                                    f"{subject}",
+                                    weight=500,
+                                    size="sm",
                                 ),
-                                dmc.HoverCardDropdown(
-                                    dmc.Text(
-                                        # Subject
-                                        f"{subject}",
-                                        weight=500,
-                                        size="sm",
-                                    ),
-                                    # Return to line
-                                    className="p-4 w-96 break-words",
+                            ),
+                            dmc.HoverCardDropdown(
+                                dmc.Text(
+                                    # Subject
+                                    f"{subject}",
+                                    weight=500,
+                                    size="sm",
                                 ),
-                            ],
-                        ),
-                    ],
-                    span=7,
-                ),
-                dmc.Col(
-                    dmc.Text(
-                        # Date
-                        f"{timestamp}",
-                        weight=500,
-                        size="sm",
+                                # Return to line
+                                className="p-4 w-96 break-words",
+                            ),
+                        ],
                     ),
-                    span=2,
+                ],
+                span=7,
+            ),
+            dmc.Col(
+                dmc.Text(
+                    # Date
+                    f"{timestamp}",
+                    weight=500,
+                    size="sm",
                 ),
-            ],
-            id={"type": "email-row", "index": id},
-        )
+                span=2,
+            ),
+        ],
+        id={"type": "email-row", "index": id},
+    )
 
-def update_emails_list(case_id=None):
+
+def update_emails_list(case):
     user_id = session.get("profile", {}).get("name", None)
 
     if user_id is None:
-        # Redirect to login page
         return dash.no_update
-
-    gmail_connector = GmailConnector(user_id=user_id)
-
-    emails = gmail_connector.get_inbox_emails()
-    emails_list = []
-
-    for email in emails:
-        case_number = extract_number_from_string(gmail_connector.get_email_subject(email))
-
-        emails_list+=[{
-            "id": email["id"],
-            "case_number": case_number,
-            "subject": gmail_connector.get_email_subject(email),
-            "sender": gmail_connector.render_email_sender(gmail_connector.get_sender(email)),
-            "timestamp": gmail_connector.get_timestamp(email).strftime("%Y-%m-%d")
-        }]
-        
-    emails_df = pd.DataFrame(emails_list)
-    emails_df = emails_df.sort_values(by="timestamp", ascending=False)
-    emails_df = emails_df[["case_number"] == "231020430"]
-    
 
     header = dmc.Grid(
         [
@@ -137,16 +100,20 @@ def update_emails_list(case_id=None):
         ],
     )
 
-    body = [render_email_row(email["id"], email["sender"], email["subject"], email["timestamp"]) for _, email in emails_df.iterrows()]
-    emails_renders = [header, dmc.Divider(variant="solid")] + body 
-   
+    body = [
+        render_email_row(
+            email["id"], email["sender"], email["subject"], email["timestamp"]
+        )
+        for email in case.emails
+    ]
+    emails_renders = [header, dmc.Divider(variant="solid")] + body
 
     return dmc.Stack(
         emails_renders,
         spacing="md",
         mt="lg",
     )
-    
+
 
 def get_case_events(case):
     # Columns : template, document, date, subject, body, email,
@@ -160,8 +127,7 @@ def get_case_events(case):
                     variant="filled",
                     sx={"width": "100%"},
                 ),
-                update_emails_list()
-                ,
+                update_emails_list(case),
             ]
         )
 
@@ -204,7 +170,6 @@ def get_case_events(case):
                     "rowMultiSelectWithClick": True,
                 },
             ),
-            update_emails_list()
-            ,
+            update_emails_list(),
         ]
     )
