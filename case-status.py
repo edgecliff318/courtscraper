@@ -17,7 +17,7 @@ case_statuses = {
         "internal_status": "Payment Received",
         "client_status": "",
         "next_case_status": "REVIEW",
-        "color": "orange",
+        "color": "pending",
     },
     "review": {
         "name": "Case Review and Consultation",
@@ -85,6 +85,39 @@ case_statuses = {
         "next_case_status": "REV_INT, CLIENT_REQUEST",
         "color": "green",
     },
+    "court_response": {
+        "name": "Court Response",
+        "owner": "Lawyer",
+        "mandatory": False,
+        "flag": "todo",
+        "short_description": "Court Response",
+        "internal_status": "Our Attorneys are Working on the Case",
+        "client_status": "",
+        "next_case_status": "REV_INT",
+        "color": "orange",
+    },
+    "case_update": {
+        "name": "Case Update",
+        "owner": "Lawyer",
+        "mandatory": False,
+        "flag": "todo",
+        "short_description": "Case Update",
+        "internal_status": "Our Attorneys are Working on the Case",
+        "client_status": "",
+        "next_case_status": "REV_INT",
+        "color": "orange",
+    },
+    "court_returned_for_filing": {
+        "name": "Court Returned for Filing",
+        "owner": "Lawyer",
+        "mandatory": False,
+        "flag": "todo",
+        "short_description": "Court Returned for Filing",
+        "internal_status": "Our Attorneys are Working on the Case",
+        "client_status": "",
+        "next_case_status": "REV_INT",
+        "color": "orange",
+    },
     "client_request": {
         "name": "Documentation Request from the Customer",
         "owner": "Client",
@@ -92,17 +125,6 @@ case_statuses = {
         "flag": "pending",
         "short_description": "Client Intake Form",
         "internal_status": "Our Attorneys have requested more information from you on your case",
-        "client_status": "",
-        "next_case_status": "REV_INT",
-        "color": "orange",
-    },
-    "court_response": {
-        "name": "Court Response",
-        "owner": "Lawyer",
-        "mandatory": False,
-        "flag": "pending",
-        "short_description": "Court Response",
-        "internal_status": "Our Attorneys are Working on the Case",
         "client_status": "",
         "next_case_status": "REV_INT",
         "color": "orange",
@@ -122,7 +144,7 @@ case_statuses = {
         "name": "Case Legal Strategy Development",
         "owner": "Lawyer",
         "mandatory": True,
-        "flag": "pending",
+        "flag": "todo",
         "short_description": "Review with the Client",
         "internal_status": "Our attorneys are elaborating a strategy to defend your cause",
         "client_status": "",
@@ -133,7 +155,7 @@ case_statuses = {
         "name": "Case Request for Recommendation",
         "owner": "Lawyer",
         "mandatory": True,
-        "flag": "todo",
+        "flag": "pending",
         "short_description": "RFR Filing",
         "internal_status": "Attorney has initiated negotiations with the Prosecutor",
         "client_status": "",
@@ -148,7 +170,6 @@ case_statuses = {
         "internal_status": "Attorney has negotiated a favorable plea offer",
         "client_status": "",
         "next_case_status": "REC_REVIEW",
-        "color": "green",
     },
     "rec_reject": {
         "name": "Case Request for Recommendation",
@@ -159,7 +180,6 @@ case_statuses = {
         "internal_status": "Case cannot be handled by our attorneys",
         "client_status": "",
         "next_case_status": "REFUND",
-        "color": "red",
     },
     "rec_delay": {
         "name": "Case Request for Recommendation",
@@ -170,7 +190,6 @@ case_statuses = {
         "internal_status": "The Prosecutor has delayed providing a plea offer. Please provide the information requested",
         "client_status": "",
         "next_case_status": "CLIENT_REQUEST, REC_RECEIVED, REC_REVIEW",
-        "color": "orange",
     },
     "rec_review": {
         "name": "Case Plea Negotiation with the Prosecutor (if applicable)",
@@ -191,7 +210,6 @@ case_statuses = {
         "internal_status": "Attorney has negotiated a favorable plea offer and would like you to review and accept the plea offer",
         "client_status": "",
         "next_case_status": "SIG_REQUIRED",
-        "color": "green",
     },
     "sig_required": {
         "name": "Case pending Signature and Payment",
@@ -202,7 +220,6 @@ case_statuses = {
         "internal_status": "Client signature and payment are required to accept the Prosecutor's Plea Offer",
         "client_status": "",
         "next_case_status": "SUB",
-        "color": "orange",
     },
     "sub": {
         "name": "Case Recommendation and Payment Submission to Court",
@@ -213,7 +230,6 @@ case_statuses = {
         "internal_status": "Attorney is submitting the signed plea and payment to the court for approval",
         "client_status": "",
         "next_case_status": "SUB_REVIEW",
-        "color": "green",
     },
     "sub_review": {
         "name": "Case Recommendation and Payment Review by the Court",
@@ -249,23 +265,20 @@ case_statuses = {
         "name": "Case Feedback",
         "owner": "Client",
         "mandatory": False,
-        "flag": "closed",
+        "flag": "pending",
         "short_description": "Client Submits Review",
         "internal_status": "Please provide us with a review and feedback from your experience",
         "client_status": "",
         "next_case_status": "CLIENT_FEEDBACK",
-        "color": "green",
+    },
+    "closed": {
+        "name": "Case Closed",
+        "owner": "Lawyer",
+        "mandatory": True,
+        "flag": "closed",
+        "short_description": "Case Closed",
+        "internal_status": "Case closed",
+        "client_status": "",
+        "next_case_status": "",
     },
 }
-
-
-def get_case_status_color(status: str | None):
-    if status is None:
-        return "gray"
-
-    status_details = case_statuses.get(status)
-
-    if status_details is None:
-        return "gray"
-
-    return status_details.get("color", "gray")

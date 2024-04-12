@@ -127,6 +127,7 @@ def modal_client_preview(
         State({"type": "modal-client-pars", "index": ALL}, "value"),
         State("case-id", "children"),
         State("section-client-select-template", "value"),
+        State("modal-client-send-email", "checked"),
     ],
     running=[
         (Output("modal-client-submit", "disabled"), True, False),
@@ -146,7 +147,7 @@ def modal_client_preview(
     prevent_initial_call=True,
     background=False,
 )
-def modal_client_submit(n_clicks, pars, case_id, template):
+def modal_client_submit(n_clicks, pars, case_id, template, send_using_email):
     ctx = dash.callback_context
     if (
         ctx.triggered[0]["prop_id"] == "modal-client-submit.n_clicks"
@@ -163,7 +164,11 @@ def modal_client_submit(n_clicks, pars, case_id, template):
             states=ctx.states,
             inputs=ctx.inputs,
             attachments=attachments,
-            send_function=mycase_service.send_to_client_mycase,
+            send_function=(
+                mycase_service.send_to_client_mycase
+                if not send_using_email
+                else send_to_client_intercom
+            ),
             role="client",
             include_invoice=True,
         )

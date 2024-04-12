@@ -13,6 +13,7 @@ logger = logging.Logger(__name__)
 
 def get_client_section(case):
     participants_service = ParticipantsService()
+    message = None
 
     if case.participants is None or len(case.participants) == 0:
         return dmc.Alert(
@@ -39,38 +40,39 @@ def get_client_section(case):
             mycase_details = mycase.search_case(
                 case_id=case.case_id,
             )
+            client_id = None
 
-            if mycase_details is None:
-                return dmc.Alert(
-                    f"No case found in MyCase with case id {case.case_id}. Please add the case to MyCase and update the participant details.",
-                    color="red",
-                    title="No case found",
-                )
+            if mycase_details is not None:
+                clients = mycase_details.get("clients")
+            else:
+                clients = None
 
-            clients = mycase_details.get("clients")
             if clients is None or len(clients) == 0:
-                return dmc.Alert(
+                message = dmc.Alert(
                     f"No client found in MyCase with case id {case.case_id}. Please add the client to MyCase and update the participant details.",
                     color="red",
                     title="No client found",
                 )
+            else:
+                client_id = clients[0]["id"]
 
-            client_id = clients[0]["id"]
-
-            if client_id is None:
-                return dmc.Alert(
+            if client_id is None and message is None:
+                message = dmc.Alert(
                     f"No client found in MyCase with first name {participant.first_name}, last name {participant.last_name} and email {participant.email}. Please add the client to MyCase and update the participant details.",
                     color="red",
                     title="No client found",
                 )
-            participant.mycase_id = client_id
-            if participant.email is None:
-                participant.email = clients[0]["email"]
-            if participant.phone is None or participant.phone == "":
-                participant.phone = clients[0]["phone"]
-            participants_service.patch_item(
-                participant.id, {"mycase_id": client_id}
-            )
+            if client_id is not None:
+                participant.mycase_id = client_id
+                if participant.email is None:
+                    participant.email = clients[0]["email"]
+                if participant.phone is None or participant.phone == "":
+                    participant.phone = clients[0]["phone"]
+                participants_service.patch_item(
+                    participant.id, {"mycase_id": client_id}
+                )
+        else:
+            client_id = participant.mycase_id
         customer_mycase_button = dmc.Button(
             "Open in MyCase",
             leftIcon=DashIconify(icon="fluent:open-folder-20-filled"),
@@ -80,20 +82,21 @@ def get_client_section(case):
             size="xs",
             mt="xs",
         )
-        message = dmc.Alert(
-            [
-                dmc.Text(
-                    "Select on the email templates to preview and submit the document/request to the client."
-                ),
-                html.A(
-                    customer_mycase_button,
-                    href=f"https://meyer-attorney-services.mycase.com/contacts/clients/{participant.mycase_id}",
-                    target="_blank",
-                ),
-            ],
-            color="blue",
-            title="Communicate with the client",
-        )
+        if message is None:
+            message = dmc.Alert(
+                [
+                    dmc.Text(
+                        "Select on the email templates to preview and submit the document/request to the client."
+                    ),
+                    html.A(
+                        customer_mycase_button,
+                        href=f"https://meyer-attorney-services.mycase.com/contacts/clients/{participant.mycase_id}",
+                        target="_blank",
+                    ),
+                ],
+                color="blue",
+                title="Communicate with the client",
+            )
 
     stack = dmc.Stack(
         children=[
@@ -177,6 +180,16 @@ def get_client_section(case):
                                                 disabled=True,
                                                 variant="filled",
                                                 color="dark",
+                                            ),
+                                            # Using normal emails
+                                            dmc.Checkbox(
+                                                label="Send email",
+                                                id="modal-client-send-email",
+                                                checked=(
+                                                    True
+                                                    if client_id is None
+                                                    else False
+                                                ),
                                             ),
                                         ]
                                     ),

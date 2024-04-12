@@ -1,11 +1,13 @@
 import logging
 
 import dash_mantine_components as dmc
+
 from dash import Input, Output, callback, html
 
 from src.components.cases.status import case_statuses, get_case_status_color
 from src.core.config import get_settings
 from src.core.tools import convert_date_format
+from src.core.dynamic_fields import CaseDynamicFields
 from src.services import cases
 
 logger = logging.Logger(__name__)
@@ -13,43 +15,41 @@ logger = logging.Logger(__name__)
 settings = get_settings()
 
 
-
 def create_case_card(case_data: dict):
+    location_name = (
+        f"{case_data.get('location')} Court of {case_data.get('city')}"
+    )
+    date_str_or_obj_time = case_data.get("court_time", "")
+    date_str_or_obj = case_data.get("court_date", "")
+    case_date = "No Court Date"
+    if date_str_or_obj:
+        date_obj = datetime.strptime(date_str_or_obj, "%m/%d/%Y")
+        case_date = (
+            f"{convert_date_format(date_obj)} at {date_str_or_obj_time}"
+        )
+        # Red if in less than 7 days from now
+        # Orange if in less than 30 days from now
+        # Green if in more than 30 days from now
+        court_date_color = "green"
+
+        if (date_obj - datetime.now()).days < 7:
+            court_date_color = "red"
+        elif (date_obj - datetime.now()).days < 30:
+            court_date_color = "orange"
+    else:
+        court_date_color = "red"
+
+    charges_description = case_data.get("charges_description", "")
     case_id = case_data.get("case_id", "N/A")
-    status = (
-        "filed"
-        if case_data.get("status") == "" or case_data.get("status") is None
-        else case_data.get("status")
-    )
-    priority = case_data.get("priority", False)
-
-    first_name = case_data.get("first_name", "")
-    last_name = case_data.get("last_name", "")
-    full_name = f"{first_name} {last_name}"
-
-    case_date = convert_date_format(case_data.get("case_date", ""))
-    next_action = case_data.get("next_action", "N/A")
-    next_action = (
-        "filed"
-        if case_data.get("status") == "" or case_data.get("status") is None
-        else case_data.get("status")
-    )
-
-    last_updated = convert_date_format(
-        case_data.get("last_updated", case_data.get("case_date", ""))
+    status = case_data.get("status") or "filed"
+    full_name = (
+        f'{case_data.get("first_name", "")} {case_data.get("last_name", "")}'
     )
 
     card_layout = [
         dmc.Group(
             [
                 dmc.Text(f"Case#{case_id}", weight=500),
-                dmc.Text(full_name, weight=500),
-            ],
-            position="apart",
-        ),
-        dmc.Group(
-            [
-                dmc.Text("Status"),
                 dmc.Badge(
                     case_statuses.get(status, {}).get(
                         "short_description", status
@@ -59,44 +59,33 @@ def create_case_card(case_data: dict):
                 ),
             ],
             position="apart",
+            spacing="xs",
         ),
-        dmc.Text(f"Case Date: {case_date}", size="sm", color="dimmed"),
-        dmc.Text(f"Last Updated: {last_updated}", size="sm", color="dimmed"),
-        dmc.Text("Suggested Action"),
-        dmc.Group(
-            [
-                dmc.Badge(
-                    next_action,
-                    color=get_case_status_color(status),
-                    variant="light",
-                ),
-            ]
+        dmc.Text(
+            f"{full_name.lower().capitalize()}",
+            size="sm",
+            color="dark",
         ),
         dmc.Group(
             [
-                html.A(
-                    dmc.Button(
-                        "Suggested Action",
-                        variant="light",
-                        color="dark",
-                        fullWidth=True,
-                        mt="md",
-                        radius="md",
-                    ),
-                    href=f"/manage/cases/{case_id}",
+                dmc.Text(
+                    f"{case_date.lower().capitalize()}",
+                    size="sm",
+                    color=court_date_color,
                 ),
-                html.A(
-                    dmc.Button(
-                        "Send Reminder",
-                        variant="light",
-                        color="dark",
-                        fullWidth=True,
-                        mt="md",
-                        radius="md",
-                    ),
-                    href=f"/manage/cases/{case_id}",
+                dmc.Text(
+                    f"{location_name.lower().capitalize()}",
+                    size="sm",
+                    color="dimmed",
                 ),
-            ]
+            ],
+            position="apart",
+            spacing="xs",
+        ),
+        dmc.Text(
+            f"{charges_description.lower().capitalize()}",
+            size="sm",
+            color="dark",
         ),
     ]
 
@@ -135,12 +124,34 @@ def create_case_column(cases, title):
         xs=12,
     )
 
+def parse_date_time(case):
+    date_str = case.get("court_date", "01/01/1900") or "01/01/1900"
+    time_str = case.get("court_time", "12:00 AM") or "12:00 AM"
+    sort_date_str = f"{date_str} {time_str}"
+    try:
+        return datetime.strptime(sort_date_str, "%m/%d/%Y %I:%M %p")
+    except ValueError:
+        return datetime.strptime("01/01/1900 12:00 AM", "%m/%d/%Y %I:%M %p")
+
 
 def create_case_div(cases):
-    return html.Div(
-        [create_case_card(case.model_dump()) for case in cases],
-        style={"overflowY": "auto"},
-    )
+    updated_cases = []
+
+    for case in cases:
+        case = CaseDynamicFields().update(case, case.model_dump())
+        case["sort_date"] = parse_date_time(case)
+        updated_cases.append(case)
+
+    df = pd.DataFrame(updated_cases)
+    if df.empty:
+        return html.Div(style={"overflowY": "auto"})
+    df["sort_date"] = pd.to_datetime(df["sort_date"])
+    df = df.sort_values("sort_date", ascending=True)
+    updated_cases = df.to_dict("records")
+
+    case_cards = [create_case_card(case) for case in updated_cases]
+
+    return html.Div(case_cards, style={"overflowY": "auto"})
 
 
 @callback(

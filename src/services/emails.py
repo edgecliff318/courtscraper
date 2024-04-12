@@ -4,6 +4,7 @@ import logging
 import mimetypes
 from datetime import datetime
 from email.message import EmailMessage
+from time import sleep
 
 from bs4 import BeautifulSoup
 from googleapiclient.discovery import build
@@ -48,45 +49,65 @@ class GmailConnector(object):
         service = build("gmail", "v1", credentials=self.credentials)
         return service
 
-    def get_inbox_emails(self):
-        try:
-            emails = (
-                self.service.users().messages().list(userId="me").execute()
+    def get_inbox_emails(self, total_results=None):
+        if total_results is None:
+            # Get all the emails in the inbox
+            total_results = (
+                self.service.users()
+                .getProfile(userId="me")
+                .execute()
+                .get("messagesTotal")
             )
-
-            messages = []
-
-            def add(id, msg, err):
-                # id is given because this will not be called in the same order
-                if err:
-                    print(err)
-                else:
-                    messages.append(msg)
-
-            batch = self.service.new_batch_http_request()
-            for message in emails.get("messages", []):
-                batch.add(
+        messages = []
+        total = 0
+        next_page_token = None
+        while True:
+            try:
+                emails = (
                     self.service.users()
                     .messages()
-                    .get(userId="me", id=message["id"]),
-                    callback=add,
+                    .list(
+                        userId="me", maxResults=20, pageToken=next_page_token
+                    )
+                    .execute()
                 )
 
-            batch.execute()
+                def add(id, msg, err):
+                    # id is given because this will not be called in the same order
+                    if err:
+                        print(err)
+                    else:
+                        messages.append(msg)
 
-            return [
-                {
-                    "id": message["id"],
-                    "snippet": message["snippet"],
-                    "payload": message["payload"],
-                    "internalDate": message["internalDate"],
-                }
-                for message in messages
-            ]
+                batch = self.service.new_batch_http_request()
+                for message in emails.get("messages", []):
+                    batch.add(
+                        self.service.users()
+                        .messages()
+                        .get(userId="me", id=message["id"]),
+                        callback=add,
+                    )
 
-        except Exception as error:
-            print("An error occurred: %s" % error)
-            raise error
+                batch.execute()
+                total += len(emails.get("messages", []))
+                sleep(0.5)
+                print(f"Got the first {total} emails")
+                next_page_token = emails.get("nextPageToken")
+                if total >= total_results:
+                    break
+            except Exception as error:
+                print("An error occurred: %s" % error)
+                raise error
+
+        return [
+            {
+                "id": message["id"],
+                "snippet": message["snippet"],
+                "payload": message["payload"],
+                "internalDate": message["internalDate"],
+            }
+            for message in messages
+        ]
 
     def get_message(self, message_id):
         try:
@@ -126,7 +147,7 @@ class GmailConnector(object):
             email = (
                 self.service.users()
                 .messages()
-                .get(userId="me", id=email_id)
+                .get(userId="me", id=email_id, format="full")
                 .execute()
             )
             return email
@@ -197,6 +218,14 @@ class GmailConnector(object):
     @staticmethod
     def get_email_html_body(email):
         body = email.get("payload", {}).get("body", {})
+
+        if body.get("data") is None:
+            multipart = email.get("payload", {}).get("parts", [])
+
+            for part in multipart:
+                if part.get("mimeType") == "text/html":
+                    body = part.get("body", {})
+                    break
 
         final_body = base64.urlsafe_b64decode(
             body["data"].encode("utf-8")
