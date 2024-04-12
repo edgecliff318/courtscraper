@@ -1,13 +1,12 @@
 import datetime
 import logging
 
-import dash
 import dash_ag_grid as dag
 import dash_mantine_components as dmc
 from dash import html
-from flask import session
 
 from src.core.config import get_settings
+from src.core.tools import convert_date_format
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -57,7 +56,7 @@ def render_email_row(id, sender, subject, timestamp):
             dmc.Col(
                 dmc.Text(
                     # Date
-                    f"{timestamp}",
+                    f"{convert_date_format(timestamp)}",
                     weight=500,
                     size="sm",
                 ),
@@ -69,10 +68,6 @@ def render_email_row(id, sender, subject, timestamp):
 
 
 def update_emails_list(case):
-    user_id = session.get("profile", {}).get("name", None)
-
-    if user_id is None:
-        return dash.no_update
 
     header = dmc.Grid(
         [
@@ -88,14 +83,14 @@ def update_emails_list(case):
                     "Subject",
                     weight=700,
                 ),
-                span=6,
+                span=7,
             ),
             dmc.Col(
                 dmc.Text(
                     "Date",
                     weight=700,
                 ),
-                span=3,
+                span=2,
             ),
         ],
     )

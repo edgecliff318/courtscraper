@@ -118,9 +118,7 @@ class SensorEmail:
 
     def __init__(self) -> None:
         # TODO: add the email and password to the env file
-        self.user = (
-            settings.BEEN_VERIFIED_EMAIL
-        )  # Input your gmail address here
+        self.user = settings.BEEN_VERIFIED_EMAIL  # Input your gmail address here
         self.password = settings.BEEN_VERIFIED_PASSWORD
         self.imap_url = "imap.gmail.com"
         # self.threshold_time =  (datetime.datetime.now() - datetime.timedelta(days=1)).strftime('%d-%b-%Y')
@@ -135,9 +133,7 @@ class SensorEmail:
 
     def get_my_mail(self):
         my_mail = imaplib.IMAP4_SSL(self.imap_url)  # connect to gmail
-        my_mail.login(
-            self.user, self.password
-        )  # sign in with your credentials
+        my_mail.login(self.user, self.password)  # sign in with your credentials
         my_mail.select("Inbox")  # select the folder that you want to retrieve
         return my_mail
 
@@ -169,12 +165,8 @@ class SensorEmail:
         return list_ids
 
     def get_boy_magic_link(self, my_mail, email_id):
-        status, email_data = my_mail.uid(
-            "fetch", email_id, "(BODY[HEADER] BODY[TEXT])"
-        )
-        header = email_data[0][1].decode(
-            "utf-8"
-        )  # Decode the header bytes to a string
+        status, email_data = my_mail.uid("fetch", email_id, "(BODY[HEADER] BODY[TEXT])")
+        header = email_data[0][1].decode("utf-8")  # Decode the header bytes to a string
         return header
 
     def get_link(self, email_txt):
@@ -183,25 +175,20 @@ class SensorEmail:
         )
         link_match = link_pattern.search(email_txt)
         text = link_match.group()
-        link_pattern = re.compile(
-            r"https://click\.email\.beenverified\.com/\?qs=\S*"
-        )
+        link_pattern = re.compile(r"https://click\.email\.beenverified\.com/\?qs=\S*")
         link_match = link_pattern.search(text)
         link = link_match.group()
         return link.replace('"', "")
 
     def get_magic_link(self):
         my_mail = self.get_my_mail()
-        result, data = my_mail.uid(
-            "search", None, f"(SENTON {self.threshold_time})"
-        )
+        result, data = my_mail.uid("search", None, f"(SENTON {self.threshold_time})")
         list_ids = self.wait_for_magic_link(data, my_mail)
         if len(list_ids) == 0:
             raise Exception("No magic link found")
         email_txt = self.get_boy_magic_link(my_mail, list_ids[-1])
         link = self.get_link(email_txt)
         return link
-
 
 
 def convert_date_format(date_str_or_obj, timezone="Etc/GMT-1") -> str:
