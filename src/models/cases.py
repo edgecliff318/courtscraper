@@ -58,6 +58,7 @@ class Case(BaseModel):
     age: Optional[int] = None
     case_desc: Optional[str] = None
     court_desc: Optional[str] = None
+    case_dispositiondetail: Optional[str] = None
     location: Optional[str] = None
     filing_date: Optional[datetime] = None
     case_date: Optional[datetime] = None
@@ -96,7 +97,7 @@ class Case(BaseModel):
     raw: Optional[Dict] = None
     email: Optional[str] = None
     phone: Optional[str] = None
-    case_dispositiondetail: Optional[str] = None
+    emails: Optional[List[dict]] = None
 
     # Ignore parsing errors for now
     @validator("charges", pre=True, always=True)
