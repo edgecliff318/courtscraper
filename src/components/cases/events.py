@@ -119,7 +119,7 @@ def render_emails(case):
     return dmc.Stack(
         emails_renders,
         spacing="md",
-        mt="xl",
+        mt="md",
     )
 
 
