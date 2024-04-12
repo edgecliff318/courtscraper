@@ -4,6 +4,7 @@ import logging
 import dash_ag_grid as dag
 import dash_mantine_components as dmc
 from dash import html
+from dash_iconify import DashIconify
 
 from src.core.config import get_settings
 from src.core.tools import convert_date_format
@@ -48,7 +49,7 @@ def render_email_row(id, sender, subject, snippet, timestamp):
                         ],
                     ),
                 ],
-                span=7,
+                span=6,
             ),
             dmc.Col(
                 dmc.Text(
@@ -57,6 +58,19 @@ def render_email_row(id, sender, subject, snippet, timestamp):
                     size="sm",
                 ),
                 span=2,
+            ),
+            dmc.Col(
+                html.A(
+                    dmc.ActionIcon(
+                        DashIconify(
+                            icon="mdi:email",
+                        ),
+                        color="gray",
+                        variant="transparent",
+                    ),
+                    href=f"/manage/emails/{id}",
+                ),
+                span=1,
             ),
         ],
         id={"type": "email-row", "index": id},
@@ -78,7 +92,7 @@ def render_emails(case):
                     "Subject",
                     weight=700,
                 ),
-                span=7,
+                span=6,
             ),
             dmc.Col(
                 dmc.Text(
@@ -105,7 +119,7 @@ def render_emails(case):
     return dmc.Stack(
         emails_renders,
         spacing="md",
-        mt="lg",
+        mt="xl",
     )
 
 
@@ -113,7 +127,7 @@ def get_case_events(case):
     # Columns : template, document, date, subject, body, email,
 
     if case.events is None:
-        return html.Div(
+        return dmc.Stack(
             children=[
                 dmc.Alert(
                     "No events found on this case.",
@@ -121,8 +135,15 @@ def get_case_events(case):
                     variant="filled",
                     sx={"width": "100%"},
                 ),
+                dmc.Text(
+                    "Emails related to this case",
+                    weight=700,
+                    size="lg",
+                ),
+                dmc.Divider(variant="solid", size="lg"),
                 render_emails(case),
-            ]
+            ],
+            spacing="md",
         )
 
     events = case.events
@@ -134,7 +155,7 @@ def get_case_events(case):
             else e["date"]
         )
 
-    return html.Div(
+    return dmc.Stack(
         children=[
             dag.AgGrid(
                 id="case-events",
@@ -164,6 +185,13 @@ def get_case_events(case):
                     "rowMultiSelectWithClick": True,
                 },
             ),
-            update_emails_list(),
-        ]
+            dmc.Text(
+                "Emails related to this case",
+                weight=700,
+                size="lg",
+            ),
+            dmc.Divider(variant="solid", size="lg"),
+            render_emails(case),
+        ],
+        spacing="md",
     )
