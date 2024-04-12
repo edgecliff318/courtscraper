@@ -9,6 +9,7 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
+import pytz
 import requests
 from rich.console import Console
 
@@ -200,3 +201,21 @@ class SensorEmail:
         email_txt = self.get_boy_magic_link(my_mail, list_ids[-1])
         link = self.get_link(email_txt)
         return link
+
+
+
+def convert_date_format(date_str_or_obj, timezone="Etc/GMT-1") -> str:
+    if isinstance(date_str_or_obj, datetime.datetime):
+        date_obj = date_str_or_obj
+    else:
+        date_obj = datetime.datetime.fromisoformat(date_str_or_obj)
+
+    tz = pytz.timezone(timezone)
+    date_obj = date_obj.astimezone(tz)
+
+    formatted_date = date_obj.strftime("%B %d, %Y")
+    formatted_date = (
+        formatted_date[:-2] + ":" + formatted_date[-2:]
+    )  # Convert +0100 to +01:00
+
+    return formatted_date
