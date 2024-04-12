@@ -67,8 +67,7 @@ def render_email_row(id, sender, subject, timestamp):
     )
 
 
-def update_emails_list(case):
-
+def render_emails(case):
     header = dmc.Grid(
         [
             dmc.Col(
@@ -122,7 +121,7 @@ def get_case_events(case):
                     variant="filled",
                     sx={"width": "100%"},
                 ),
-                update_emails_list(case),
+                render_emails(case),
             ]
         )
 
