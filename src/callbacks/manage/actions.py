@@ -1,34 +1,17 @@
 import logging
-from datetime import datetime
 
 import dash_mantine_components as dmc
-import pytz
 from dash import Input, Output, callback, html
 
 from src.components.cases.status import case_statuses, get_case_status_color
 from src.core.config import get_settings
+from src.core.tools import convert_date_format
 from src.services import cases
 
 logger = logging.Logger(__name__)
 
 settings = get_settings()
 
-
-def convert_date_format(date_str_or_obj, timezone="Etc/GMT-1") -> str:
-    if isinstance(date_str_or_obj, datetime):
-        date_obj = date_str_or_obj
-    else:
-        date_obj = datetime.fromisoformat(date_str_or_obj)
-
-    tz = pytz.timezone(timezone)
-    date_obj = date_obj.astimezone(tz)
-
-    formatted_date = date_obj.strftime("%B %d, %Y")
-    formatted_date = (
-        formatted_date[:-2] + ":" + formatted_date[-2:]
-    )  # Convert +0100 to +01:00
-
-    return formatted_date
 
 
 def create_case_card(case_data: dict):
