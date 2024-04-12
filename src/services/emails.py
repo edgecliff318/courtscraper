@@ -66,9 +66,7 @@ class GmailConnector(object):
                 emails = (
                     self.service.users()
                     .messages()
-                    .list(
-                        userId="me", maxResults=20, pageToken=next_page_token
-                    )
+                    .list(userId="me", maxResults=20, pageToken=next_page_token)
                     .execute()
                 )
 
@@ -124,17 +122,13 @@ class GmailConnector(object):
             )
 
             subject = [
-                header["value"]
-                for header in headers
-                if header["name"] == "Subject"
+                header["value"] for header in headers if header["name"] == "Subject"
             ][0]
 
             return {
                 "subject": subject,
                 "sender": [
-                    header["value"]
-                    for header in headers
-                    if header["name"] == "From"
+                    header["value"] for header in headers if header["name"] == "From"
                 ][0],
                 "time": message_time,
             }
@@ -153,9 +147,7 @@ class GmailConnector(object):
             return email
 
         except Exception as error:
-            logger.error(
-                f"An error occurred while retrieving {email_id}: {error}"
-            )
+            logger.error(f"An error occurred while retrieving {email_id}: {error}")
 
     def text_to_html(self, text):
         return text.replace("\n", "<br>")
@@ -198,9 +190,7 @@ class GmailConnector(object):
                     attachment_data, maintype, subtype, filename=filename
                 )
 
-            encoded_message = base64.urlsafe_b64encode(
-                mime_message.as_bytes()
-            ).decode()
+            encoded_message = base64.urlsafe_b64encode(mime_message.as_bytes()).decode()
 
             create_message = {"raw": encoded_message}
             send_message = (
@@ -228,7 +218,7 @@ class GmailConnector(object):
                     break
 
         final_body = base64.urlsafe_b64decode(
-            body["data"].encode("utf-8")
+            body.get("data", "").encode("utf-8")
         ).decode("utf-8")
 
         # Remove all the style
@@ -252,9 +242,9 @@ class GmailConnector(object):
     def get_email_plain_text_body(email):
         body = email.get("payload", {}).get("body", {})
 
-        final_body = base64.urlsafe_b64decode(
-            body["data"].encode("utf-8")
-        ).decode("utf-8")
+        final_body = base64.urlsafe_b64decode(body["data"].encode("utf-8")).decode(
+            "utf-8"
+        )
 
         return final_body
 
