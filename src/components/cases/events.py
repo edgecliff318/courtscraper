@@ -33,14 +33,14 @@ def render_email_row(id, sender, subject, snippet, timestamp):
                         children=[
                             dmc.HoverCardTarget(
                                 dmc.Text(
-                                    snippet,
+                                    subject,
                                     weight=500,
                                     size="sm",
                                 ),
                             ),
                             dmc.HoverCardDropdown(
                                 dmc.Text(
-                                    subject,
+                                    snippet,
                                     weight=500,
                                     size="sm",
                                 ),
@@ -151,7 +151,8 @@ def get_case_events(case):
     for e in events:
         e["date"] = (
             e["date"].strftime("%Y-%m-%d - %H:%M:%S")
-            if e["date"] is not None and isinstance(e["date"], datetime.datetime)
+            if e["date"] is not None
+            and isinstance(e["date"], datetime.datetime)
             else e["date"]
         )
 
