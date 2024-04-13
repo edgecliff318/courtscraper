@@ -47,6 +47,30 @@ def create_case_card(case_data: dict):
         f'{case_data.get("first_name", "")} {case_data.get("last_name", "")}'
     )
 
+    history = (
+        set(
+            e.get("action")
+            for e in case_data.get("emails", [])
+            if pd.notna(e.get("action"))
+        )
+        if case_data.get("emails", []) is not None
+        else set()
+    )
+
+    history_details = [
+        dmc.Badge(
+            h.replace("_", " ").capitalize(),
+            color=get_case_status_color(status),
+            variant="dot",
+            size="xs",
+            radius="md",
+        )
+        for h in history
+        if h != "court_response"
+    ]
+
+    badges = dmc.Group(history_details) if history_details else html.Div()
+
     card_layout = [
         dmc.Group(
             [
@@ -62,6 +86,7 @@ def create_case_card(case_data: dict):
             position="apart",
             spacing="xs",
         ),
+        badges,
         dmc.Text(
             f"{full_name.lower().capitalize()}",
             size="sm",
