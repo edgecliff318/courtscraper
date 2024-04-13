@@ -1,13 +1,14 @@
 import logging
+from datetime import datetime
 
 import dash_mantine_components as dmc
-
+import pandas as pd
 from dash import Input, Output, callback, html
 
 from src.components.cases.status import case_statuses, get_case_status_color
 from src.core.config import get_settings
-from src.core.tools import convert_date_format
 from src.core.dynamic_fields import CaseDynamicFields
+from src.core.tools import convert_date_format
 from src.services import cases
 
 logger = logging.Logger(__name__)
@@ -123,6 +124,7 @@ def create_case_column(cases, title):
         sm=12,
         xs=12,
     )
+
 
 def parse_date_time(case):
     date_str = case.get("court_date", "01/01/1900") or "01/01/1900"
