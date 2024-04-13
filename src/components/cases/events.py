@@ -78,6 +78,13 @@ def render_email_row(id, sender, subject, snippet, timestamp):
 
 
 def render_emails(case):
+    if case.emails is None:
+        return dmc.Alert(
+            "No emails found on this case.",
+            color="gray",
+            variant="filled",
+            sx={"width": "100%"},
+        )
     header = dmc.Grid(
         [
             dmc.Col(
