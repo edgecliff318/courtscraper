@@ -1,23 +1,73 @@
+import base64
 import logging
 
 import dash
 import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
+from dash_iconify import DashIconify
 from flask import session
 
-from src.services.emails import GmailConnector
+from src.services.emails import GmailConnector, ParserMessage
 
 logger = logging.Logger(__name__)
 
-dash.register_page(
-    __name__, order=4, path_template="/manage/emails/<email_id>"
-)
+dash.register_page(__name__, order=4, path_template="/manage/emails/<email_id>")
+
+
+def render_file_attachment(attachment):
+    filename = attachment[0]
+    content = attachment[1]
+    b64 = base64.b64encode(content).decode()
+    href = f"data:text/plain;base64,{b64}"
+    btn = dbc.Button(
+        [DashIconify(icon="ph:file-thin", width=20, className="mr-2"), attachment[0]],
+        id=f"btn-download-{filename}",
+        color="dark",
+        className="m-2",
+        href=href,
+        download=filename,
+    )
+    return btn
 
 
 def render_single_email(email):
-    gmail_connector = GmailConnector(user_id="xxx")
+    user_id = session.get("profile", {}).get("name", None)
+    gmail_connector = GmailConnector(user_id=user_id)
+    parser = ParserMessage(gmail_connector, email)
+    text_parts, attachments = parser.parse_msg(email)
+    for part in text_parts:
+        if part.get("text/plain"):
+            text_body = part.get("text/plain")
+        if part.get("text/html"):
+            html_body_render = part.get("text/html")
 
-    html_body_render, text_body = gmail_connector.get_email_html_body(email)
+    if len(attachments):
+        attachments_content = dmc.Stack(
+            [
+                dmc.Text(
+                    "Attachments",
+                    weight=700,
+                ),
+                dmc.Divider(),
+                dmc.Grid(
+                    [
+                        dmc.Col(
+                            render_file_attachment(attachment),
+                        )
+                        for attachment in attachments
+                    ]
+                ),
+            ]
+        )
+    else:
+        attachments_content = dmc.Stack(
+            [
+                dmc.Text(
+                    "No Attachments",
+                    weight=700,
+                ),
+            ]
+        )
 
     header = dmc.Grid(
         [
@@ -69,6 +119,8 @@ def render_single_email(email):
                 id="email-text-body",
                 style={"display": "none"},
             ),
+            attachments_content,
+            dmc.Divider(),
         ],
     )
 

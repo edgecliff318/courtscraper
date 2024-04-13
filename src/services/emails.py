@@ -5,6 +5,7 @@ import mimetypes
 from datetime import datetime
 from email.message import EmailMessage
 from time import sleep
+from typing import Any, Dict, List, Optional, Tuple
 
 from bs4 import BeautifulSoup
 from googleapiclient.discovery import build
@@ -33,6 +34,94 @@ def html_to_text(html):
     s = HTMLTextExtractor()
     s.feed(html)
     return s.get_text()
+
+
+class ParserMessage:
+    def __init__(self, connector, msg: dict) -> None:
+        self.msg = msg
+        self.connector = connector
+
+    def decode_base64(self, data: str) -> bytes:
+        return base64.urlsafe_b64decode(data.encode("ASCII"))
+
+    def fetch_attachment(
+        self, part: dict, message_id: str
+    ) -> Optional[Tuple[str, bytes]]:
+        filename = part.get("filename", "")
+        attachment_id = part.get("body", {}).get("attachmentId")
+        if not attachment_id:
+            return None
+
+        result = (
+            self.connector.service.users()
+            .messages()
+            .attachments()
+            .get(userId="me", messageId=message_id, id=attachment_id)
+            .execute()
+        )
+        data = result["data"]
+        file_data = base64.urlsafe_b64decode(data.encode("ASCII"))
+        logger.info(f"Attachment {filename} fetched")
+
+        return filename, file_data
+
+    def get_text_part(
+        self, parts: List[Dict[str, Any]], message_id: str
+    ) -> Tuple[List[dict[str, str]], List[Tuple[str, bytes]]]:
+        text_parts = []
+        attachments = []
+
+        for part in parts:
+            content_type = part.get("mimeType", "")
+            body_data = part.get("body", {}).get("data", "")
+            filename = part.get("filename", "")
+
+            if "parts" in part:
+                sub_parts = part["parts"]
+                sub_text_parts, sub_attachments = self.get_text_part(
+                    sub_parts, message_id
+                )
+                text_parts.extend(sub_text_parts)
+                attachments.extend(sub_attachments)
+
+            if filename:
+                filename, body_data = self.fetch_attachment(part, message_id)
+                attachments.append((filename, body_data))
+
+            if (
+                content_type == "text/plain" or content_type == "text/html"
+            ) and body_data:
+                content = self.decode_base64(body_data).decode("utf-8")
+                text_parts.append({content_type: content})
+
+        return text_parts, attachments
+
+    def parse_msg(
+        self, msg: Dict[str, Any]
+    ) -> Tuple[List[dict[str, str]], List[Tuple[str, bytes]]]:
+        if "parts" in msg["payload"]:
+            return self.get_text_part(msg["payload"]["parts"], msg["id"])
+        else:
+            content_type = msg["payload"].get("mimeType", "")
+            body_data = msg["payload"].get("body", {}).get("data", "")
+            if content_type == "text/plain" and body_data:
+                return [
+                    {
+                        content_type: self.decode_base64(body_data).decode(
+                            "utf-8"
+                        )
+                    }
+                ], []
+            elif content_type == "text/html" and body_data:
+                return [
+                    {
+                        content_type: self.decode_base64(body_data).decode(
+                            "utf-8"
+                        )
+                    }
+                ], []
+            else:
+                return [], []
 
 
 class GmailConnector(object):
@@ -66,7 +155,9 @@ class GmailConnector(object):
                 emails = (
                     self.service.users()
                     .messages()
-                    .list(userId="me", maxResults=20, pageToken=next_page_token)
+                    .list(
+                        userId="me", maxResults=20, pageToken=next_page_token
+                    )
                     .execute()
                 )
 
@@ -122,13 +213,17 @@ class GmailConnector(object):
             )
 
             subject = [
-                header["value"] for header in headers if header["name"] == "Subject"
+                header["value"]
+                for header in headers
+                if header["name"] == "Subject"
             ][0]
 
             return {
                 "subject": subject,
                 "sender": [
-                    header["value"] for header in headers if header["name"] == "From"
+                    header["value"]
+                    for header in headers
+                    if header["name"] == "From"
                 ][0],
                 "time": message_time,
             }
@@ -147,7 +242,9 @@ class GmailConnector(object):
             return email
 
         except Exception as error:
-            logger.error(f"An error occurred while retrieving {email_id}: {error}")
+            logger.error(
+                f"An error occurred while retrieving {email_id}: {error}"
+            )
 
     def text_to_html(self, text):
         return text.replace("\n", "<br>")
@@ -190,7 +287,9 @@ class GmailConnector(object):
                     attachment_data, maintype, subtype, filename=filename
                 )
 
-            encoded_message = base64.urlsafe_b64encode(mime_message.as_bytes()).decode()
+            encoded_message = base64.urlsafe_b64encode(
+                mime_message.as_bytes()
+            ).decode()
 
             create_message = {"raw": encoded_message}
             send_message = (
@@ -242,9 +341,9 @@ class GmailConnector(object):
     def get_email_plain_text_body(email):
         body = email.get("payload", {}).get("body", {})
 
-        final_body = base64.urlsafe_b64decode(body["data"].encode("utf-8")).decode(
-            "utf-8"
-        )
+        final_body = base64.urlsafe_b64decode(
+            body["data"].encode("utf-8")
+        ).decode("utf-8")
 
         return final_body
 

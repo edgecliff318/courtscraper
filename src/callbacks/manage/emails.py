@@ -1,10 +1,9 @@
 import logging
-import os
 
 import dash
 import dash_mantine_components as dmc
 import openai
-from dash import ALL, Input, Output, State, callback, html
+from dash import Input, Output, State, callback, html
 from dash_iconify import DashIconify
 from flask import session
 
