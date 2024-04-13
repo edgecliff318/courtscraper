@@ -1,33 +1,18 @@
 import logging
-from datetime import datetime
 
 import dash_mantine_components as dmc
-import pandas as pd
-import pytz
+
 from dash import Input, Output, callback, html
 
 from src.components.cases.status import case_statuses, get_case_status_color
 from src.core.config import get_settings
+from src.core.tools import convert_date_format
 from src.core.dynamic_fields import CaseDynamicFields
 from src.services import cases
 
 logger = logging.Logger(__name__)
 
 settings = get_settings()
-
-
-def convert_date_format(date_str_or_obj, timezone="Etc/GMT-1") -> str:
-    if isinstance(date_str_or_obj, datetime):
-        date_obj = date_str_or_obj
-    else:
-        date_obj = datetime.fromisoformat(date_str_or_obj)
-
-    tz = pytz.timezone(timezone)
-    date_obj = date_obj.astimezone(tz)
-
-    formatted_date = date_obj.strftime("%B %d, %Y")
-
-    return formatted_date
 
 
 def create_case_card(case_data: dict):
@@ -138,25 +123,6 @@ def create_case_column(cases, title):
         sm=12,
         xs=12,
     )
-
-
-# def create_case_div(cases):
-#     ## should enrich the case data with the dynamic fields
-#     ## should be sorted by court_date
-#     # from src.models import cases
-#     # case_data = CaseDynamicFields().update(cases.Case(**case_details), case_details)
-
-#     cases = [
-#         CaseDynamicFields().update(case, case.model_dump()) for case in cases
-#     ]
-#     # date_str_or_obj_time = case_data.get("court_time", "") 11:00 AM
-#     # date_str_or_obj = case_data.get("court_date", "") 22/12/2021
-#     cases.sort(key=lambda case: (case.get('court_date', ''), case.get('court_time', '')))
-#     return html.Div(
-#         [create_case_card(case) for case in cases],
-#         style={"overflowY": "auto"},
-#     )
-
 
 def parse_date_time(case):
     date_str = case.get("court_date", "01/01/1900") or "01/01/1900"
