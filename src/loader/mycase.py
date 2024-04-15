@@ -418,6 +418,11 @@ class MyCase:
             "record_id": record_id,
         }
 
+    def get_case_feed(self, mycase_case_id):
+        url = f"https://meyer-attorney-services.mycase.com/notifications/feed.json?court_case_id={mycase_case_id}&data_only=true&feed=all"
+        response = self.session.request("GET", url)
+        return response.json()
+
     def reload_sharing(self, mycase_case_id):
         url = "https://meyer-attorney-services.mycase.com/appointments/reload_sharing.json"
 
@@ -501,7 +506,7 @@ class MyCase:
         """
         return response.json()
 
-    def get_converation(self, mycase_case_id):
+    def get_conversation(self, mycase_case_id):
         # https://meyer-attorney-services.mycase.com/text_messages.json?search_term=&court_case_id=31946235&include_unjoined=true&include_archived=true&unread_only=false&page_number=1
         url = "https://meyer-attorney-services.mycase.com/text_messages.json"
         params = {
@@ -611,7 +616,7 @@ class MyCase:
         return messages
 
     def create_text_message(self, mycase_case_id, message):
-        conversation_id = self.get_converation(mycase_case_id)
+        conversation_id = self.get_conversation(mycase_case_id)
         url = f"https://meyer-attorney-services.mycase.com/text_messages/{conversation_id}/send_message.json"
 
         payload = json.dumps(
