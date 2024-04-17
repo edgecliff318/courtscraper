@@ -13,10 +13,11 @@ from src.models import cases as cases_model
 from src.models import leads as leads_model
 from src.scrapers.il_cook import IlCook
 from src.scrapers.mo_mshp import MOHighwayPatrol
+from src.scrapers.tx_harris import TXHarrisCountyScraper
 from src.services import cases as cases_service
 from src.services import leads as leads_service
 from src.services.courts import get_courts
-from src.services.settings import get_account, get_settings
+from src.services.settings import ScrapersService, get_account, get_settings
 
 console = Console()
 
@@ -200,6 +201,30 @@ def retrieve_cases_il_cook(refresh_courts=None) -> None:
         asyncio.run(scraper.main())
 
 
+def retrieve_cases_tx_harris():
+    console.log("TX Harris County Scraper")
+    txscraper = TXHarrisCountyScraper()
+
+    console.log("Retrieving the configuration from Firebase")
+    txscraper_config = ScrapersService().get_single_item("TXHarrisCounty")
+
+    start_date = datetime.datetime.now() + datetime.timedelta(
+        days=txscraper_config.start_date
+    )
+    end_date = datetime.datetime.now() + datetime.timedelta(
+        days=txscraper_config.end_date
+    )
+
+    console.log(f"Start date: {start_date}, End date: {end_date}")
+
+    txscraper.scrape(
+        {
+            "start_date": start_date.strftime("%m/%d/%Y"),
+            "end_date": end_date.strftime("%m/%d/%Y"),
+        }
+    )
+
+
 def retrieve_cases(source="mo_case_net"):
     """
     Scrap the casenet website
@@ -216,6 +241,9 @@ def retrieve_cases(source="mo_case_net"):
     elif source == "mo_case_net_criminal":
         console.log("MO Case Net Scraper - Criminal")
         retrieve_cases_mo_casenet("Criminal")
+    elif source == "tx_harris":
+        console.log("TX Harris County Scraper")
+        retrieve_cases_tx_harris()
 
 
 if __name__ == "__main__":
