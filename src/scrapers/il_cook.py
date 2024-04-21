@@ -176,6 +176,8 @@ class IlCook(ScraperBase):
         
         console.log("waiting for login form")
         await page.wait_for_selector("input[name='UserName']")
+        await page.wait_for_selector("input[name='Password']")
+        await page.wait_for_selector("input[id='TOSCheckBox']")
         console.log("login form found")
         await page.fill('input[name="UserName"]', self.email)
         await page.fill('input[name="Password"]', self.password)
