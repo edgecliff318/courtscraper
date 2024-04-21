@@ -59,6 +59,8 @@ class IlCook(ScraperBase):
         self.search_filter = search_filter or None
 
         super().__init__(email, password)
+        console.log(f" we are starting from {self.start_date} to {self.end_date}")
+
 
     async def get_case_details(self, page, url: str) -> dict:
         id = self._get_id(url)
