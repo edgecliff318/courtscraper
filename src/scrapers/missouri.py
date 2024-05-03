@@ -26,14 +26,19 @@ class ScraperMOCourt(ScraperBase):
     HEADERS = {
         "Accept": "application/json, text/javascript, */*; q=0.01",
         "Accept-Language": "en-US,en;q=0.9",
+        "Cache-Control": "no-cache",
         "Connection": "keep-alive",
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "Cookie": "JSESSIONID=0001xDx5JIZm3DwDRLRsNTSZOAn:-22P55D; UJID=540e1b6b-483b-40a1-8029-0d1d2bb6387f; visitorid=20230506105547481548; visid_incap_1276241=Ge/9RPYCQoGPMRvbDa2n/iUNgmQAAAAAQUIPAAAAAAC5YNLDDGM2kQoI+XusVdVM; _ga=GA1.1.1638297028.1690574877; _ga_DSVJ8DTRVZ=GS1.1.1690574876.1.1.1690574891.0.0.0; JSESSIONID=0001LDEnCXeHAbauBaVxQhpgwkQ:-850S3K; visid_incap_1276232=snCAyo/HSmmVP1XiFEiDad50J2YAAAAAQUIPAAAAAAAp26aC3CQomBOjHrXXJ7FW; incap_ses_1776_1276232=hVovX/MIbh0/sWbMm56lGN50J2YAAAAAgDNKdw0dz3OYTCqHNpBmnA==; UJIA=-1179896343; UJIA=-1807178282; UJID=540e1b6b-483b-40a1-8029-0d1d2bb6387f",
         "DNT": "1",
+        "Origin": "https://www.courts.mo.gov",
+        "Pragma": "no-cache",
         "Sec-Fetch-Dest": "empty",
         "Sec-Fetch-Mode": "cors",
         "Sec-Fetch-Site": "same-origin",
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
         "X-Requested-With": "XMLHttpRequest",
-        "sec-ch-ua": '"Chromium";v="113", "Not-A.Brand";v="24"',
+        "sec-ch-ua": '"Not-A.Brand";v="99", "Chromium";v="124"',
         "sec-ch-ua-mobile": "?0",
         "sec-ch-ua-platform": '"macOS"',
     }
@@ -45,45 +50,40 @@ class ScraperMOCourt(ScraperBase):
     DOCKETS_URL = "https://www.courts.mo.gov/cnet/cases/docketEntriesSearch.do"
     SERVICE_URL = "https://www.courts.mo.gov/casenet/cases/service.do"
 
+    def get_referer(self, case_number, court_code):
+        return f"https://www.courts.mo.gov/cnet/cases/newHeader.do?inputVO.caseNumber={case_number}&inputVO.courtId={court_code}&inputVO.isTicket=false"
+
     @property
     def GLOBAL_SESSION(self):
         if self._GLOBAL_SESSION is None:
-            payload = (
-                f"username={self.username}"
-                f"&password={self.password}&logon=logon"
-            )
             url = "https://www.courts.mo.gov/cnet/login"
 
             payload = f"backUrl=%2Fwelcome.do&username={self.username}&password={self.password}&logon=logon"
-            url = "https://www.courts.mo.gov/cnet/login"
-
-            payload = "backUrl=%2Fwelcome.do&username=smeyer4040&password=MASdorm1993!MAS&logon=logon"
             headers = {
                 "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
                 "Accept-Language": "en-US,en;q=0.9",
-                "Cache-Control": "max-age=0",
+                "Cache-Control": "no-cache",
                 "Connection": "keep-alive",
                 "Content-Type": "application/x-www-form-urlencoded",
-                "Cookie": "JSESSIONID=0001a0QfuVBVrJDGc1eZumLA4In:TPUEUV338; UJID=540e1b6b-483b-40a1-8029-0d1d2bb6387f; visitorid=20230506105547481548; UJIA=-1807178272; UJIA=-1807178272; UJID=540e1b6b-483b-40a1-8029-0d1d2bb6387f; crowd.token_key=6XO1aoasNZ5WnxwBkmKrtg00",
+                "Cookie": "JSESSIONID=00015UfAySwtWC_Nyvt3Gi08y89:-22P55D; UJID=540e1b6b-483b-40a1-8029-0d1d2bb6387f; visitorid=20230506105547481548; visid_incap_1276241=Ge/9RPYCQoGPMRvbDa2n/iUNgmQAAAAAQUIPAAAAAAC5YNLDDGM2kQoI+XusVdVM; _ga=GA1.1.1638297028.1690574877; _ga_DSVJ8DTRVZ=GS1.1.1690574876.1.1.1690574891.0.0.0; JSESSIONID=0001LDEnCXeHAbauBaVxQhpgwkQ:-850S3K; visid_incap_1276232=snCAyo/HSmmVP1XiFEiDad50J2YAAAAAQUIPAAAAAAAp26aC3CQomBOjHrXXJ7FW; incap_ses_1776_1276232=hVovX/MIbh0/sWbMm56lGN50J2YAAAAAgDNKdw0dz3OYTCqHNpBmnA==; UJIA=-1179896343; UJIA=-1807178282; UJID=540e1b6b-483b-40a1-8029-0d1d2bb6387f",
                 "DNT": "1",
                 "Origin": "https://www.courts.mo.gov",
+                "Pragma": "no-cache",
                 "Referer": "https://www.courts.mo.gov/cnet/logon.do?backUrl=/welcome.do",
                 "Sec-Fetch-Dest": "document",
                 "Sec-Fetch-Mode": "navigate",
                 "Sec-Fetch-Site": "same-origin",
                 "Sec-Fetch-User": "?1",
                 "Upgrade-Insecure-Requests": "1",
-                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
-                "sec-ch-ua": '"Chromium";v="113", "Not-A.Brand";v="24"',
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+                "sec-ch-ua": '"Not-A.Brand";v="99", "Chromium";v="124"',
                 "sec-ch-ua-mobile": "?0",
                 "sec-ch-ua-platform": '"macOS"',
             }
 
             self._GLOBAL_SESSION = InitializedSession()
-            response = self._GLOBAL_SESSION.post(
-                url,
-                data=payload,
-                headers=headers,
+            response = self._GLOBAL_SESSION.request(
+                "POST", url, headers=headers, data=payload
             )
             # TODO: #13 Should login at the beginning !
             retries = Retry(total=0, backoff_factor=5)
@@ -144,24 +144,28 @@ class ScraperMOCourt(ScraperBase):
 
     def get_case_details(self, case_number, court_code):
         params = {"caseNumber": case_number, "courtId": court_code}
-        response = self.GLOBAL_SESSION.get(
-            self.CASE_NO_SEARCH_URL, headers=self.HEADERS, params=params
+        params_parsed = urlencode(params)
+        response = self.GLOBAL_SESSION.post(
+            self.CASE_NO_SEARCH_URL, headers=self.HEADERS, data=params_parsed
         )
         results = response.json()
         return results
 
     def get_case_charges(self, case_number, court_code):
         params = {"caseNumber": case_number, "courtId": court_code}
-        response = self.GLOBAL_SESSION.get(
-            self.CHARGES_URL, headers=self.HEADERS, params=params
+        params_parsed = urlencode(params)
+        response = self.GLOBAL_SESSION.post(
+            self.CHARGES_URL, headers=self.HEADERS, data=params_parsed
         )
         results = response.json()
         return results
 
     def get_case_parties(self, case_number, court_code):
         params = {"caseNumber": case_number, "courtId": court_code}
-        response = self.GLOBAL_SESSION.get(
-            self.PARTIES_URL, headers=self.HEADERS, params=params
+        params_parsed = urlencode(params)
+        self.HEADERS["Referer"] = self.get_referer(case_number, court_code)
+        response = self.GLOBAL_SESSION.post(
+            self.PARTIES_URL, headers=self.HEADERS, data=params_parsed
         )
         results = response.json()
         return results
@@ -177,8 +181,9 @@ class ScraperMOCourt(ScraperBase):
             "courtId": court_code,
             "isTicket": "",
         }
-        response = self.GLOBAL_SESSION.get(
-            self.DOCKETS_URL, headers=self.HEADERS, params=params
+        params_parsed = urlencode(params)
+        response = self.GLOBAL_SESSION.post(
+            self.DOCKETS_URL, headers=self.HEADERS, data=params_parsed
         )
         results = response.json()
         return results
@@ -339,7 +344,7 @@ class ScraperMOCourt(ScraperBase):
             self.sleep()
             file_path = self.upload_file(docket_file_path)
             doc["file_path"] = file_path
-            if "citation" in doc.get("docketDesc", "").lower():
+            if "citation" in doc.get("docketDesc", "").lower() and False:
                 docker_image_path = self.convert_to_png(
                     docket_file_path, case_number
                 )

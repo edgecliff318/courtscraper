@@ -17,7 +17,7 @@ case_statuses = {
         "internal_status": "Payment Received",
         "client_status": "",
         "next_case_status": "REVIEW",
-        "color": "pending",
+        "color": "orange",
     },
     "review": {
         "name": "Case Review and Consultation",
@@ -96,6 +96,17 @@ case_statuses = {
         "next_case_status": "REV_INT",
         "color": "orange",
     },
+    "court_response": {
+        "name": "Court Response",
+        "owner": "Lawyer",
+        "mandatory": False,
+        "flag": "pending",
+        "short_description": "Court Response",
+        "internal_status": "Our Attorneys are Working on the Case",
+        "client_status": "",
+        "next_case_status": "REV_INT",
+        "color": "orange",
+    },
     "rev_int": {
         "name": "Case Documentation & Information Gathering",
         "owner": "Lawyer",
@@ -137,6 +148,7 @@ case_statuses = {
         "internal_status": "Attorney has negotiated a favorable plea offer",
         "client_status": "",
         "next_case_status": "REC_REVIEW",
+        "color": "green",
     },
     "rec_reject": {
         "name": "Case Request for Recommendation",
@@ -147,6 +159,7 @@ case_statuses = {
         "internal_status": "Case cannot be handled by our attorneys",
         "client_status": "",
         "next_case_status": "REFUND",
+        "color": "red",
     },
     "rec_delay": {
         "name": "Case Request for Recommendation",
@@ -157,6 +170,7 @@ case_statuses = {
         "internal_status": "The Prosecutor has delayed providing a plea offer. Please provide the information requested",
         "client_status": "",
         "next_case_status": "CLIENT_REQUEST, REC_RECEIVED, REC_REVIEW",
+        "color": "orange",
     },
     "rec_review": {
         "name": "Case Plea Negotiation with the Prosecutor (if applicable)",
@@ -177,6 +191,7 @@ case_statuses = {
         "internal_status": "Attorney has negotiated a favorable plea offer and would like you to review and accept the plea offer",
         "client_status": "",
         "next_case_status": "SIG_REQUIRED",
+        "color": "green",
     },
     "sig_required": {
         "name": "Case pending Signature and Payment",
@@ -187,6 +202,7 @@ case_statuses = {
         "internal_status": "Client signature and payment are required to accept the Prosecutor's Plea Offer",
         "client_status": "",
         "next_case_status": "SUB",
+        "color": "orange",
     },
     "sub": {
         "name": "Case Recommendation and Payment Submission to Court",
@@ -197,6 +213,7 @@ case_statuses = {
         "internal_status": "Attorney is submitting the signed plea and payment to the court for approval",
         "client_status": "",
         "next_case_status": "SUB_REVIEW",
+        "color": "green",
     },
     "sub_review": {
         "name": "Case Recommendation and Payment Review by the Court",
@@ -237,6 +254,7 @@ case_statuses = {
         "internal_status": "Please provide us with a review and feedback from your experience",
         "client_status": "",
         "next_case_status": "CLIENT_FEEDBACK",
+        "color": "green",
     },
 }
 

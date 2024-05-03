@@ -13,7 +13,10 @@ class CaseDynamicFields:
 
         if case.dockets is not None:
             for docket in case.dockets:
-                if "initial" in docket.get("docket_desc", "").lower():
+                if (
+                    docket.get("docket_code") == "SCHR"
+                    or docket.get("docket_code") == "SCIR"
+                ):
                     # Get the associated_docketscheduledinfo
                     schedule = docket.get("associated_docketscheduledinfo", {})
                     if isinstance(schedule, list) and len(schedule) > 0:

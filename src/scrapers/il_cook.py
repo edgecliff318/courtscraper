@@ -59,6 +59,8 @@ class IlCook(ScraperBase):
         self.search_filter = search_filter or None
 
         super().__init__(email, password)
+        console.log(f" we are starting from {self.start_date} to {self.end_date}")
+
 
     async def get_case_details(self, page, url: str) -> dict:
         id = self._get_id(url)
@@ -171,7 +173,12 @@ class IlCook(ScraperBase):
             await sign_in_link.click()
         else:
             console.log("Sign In link not found")
-
+        
+        console.log("waiting for login form")
+        await page.wait_for_selector("input[name='UserName']")
+        await page.wait_for_selector("input[name='Password']")
+        await page.wait_for_selector("input[id='TOSCheckBox']")
+        console.log("login form found")
         await page.fill('input[name="UserName"]', self.email)
         await page.fill('input[name="Password"]', self.password)
         await page.check('input[id="TOSCheckBox"]')
