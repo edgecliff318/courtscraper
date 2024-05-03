@@ -372,3 +372,18 @@ class GmailConnector(object):
             if header.get("name", "") == "Subject":
                 return header.get("value", "No Subject")
         return "No Subject"
+
+    def move_email(self, email_id, destination):
+        try:
+            self.service.users().messages().modify(
+                userId="me",
+                id=email_id,
+                body={
+                    "addLabelIds": [destination],
+                    "removeLabelIds": ["INBOX"],
+                },
+            ).execute()
+        except Exception as error:
+            logger.error(
+                f"An error occurred while moving {email_id} to {destination}: {error}"
+            )
