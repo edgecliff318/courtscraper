@@ -186,7 +186,9 @@ class MyCase:
 
         today = datetime.datetime.now()
         # Format in US date format
-        today = today.strftime("%m/%d/%Y")
+        today = today.strftime(
+            "%m/%d/%Y"
+        )  # TODO: Use the new dynamic fields here
         court_date = ""
         court_time = ""
         if case.dockets is not None:
@@ -372,6 +374,12 @@ class MyCase:
             logger.error(response.text)
             raise Exception(f"Couldn't create case on mycase {response.text}")
 
+        response_json = response.json()
+
+        mycase_id = response_json.get("court_case", {}).get("id")
+
+        return mycase_id
+
     def get_similar_contacts(self, first_name, last_name):
         url = "https://meyer-attorney-services.mycase.com/users/similar.json"
         params = {
@@ -399,6 +407,9 @@ class MyCase:
         url = f"https://meyer-attorney-services.mycase.com/search/auto_complete.json?term={case_id}&filter_type=cases"
 
         response = self.session.request("GET", url)
+
+        if response.status_code == 401:
+            raise Exception("Unable to communicate with Mycase")
 
         for case in response.json():
             record_id = case.get("record_id")

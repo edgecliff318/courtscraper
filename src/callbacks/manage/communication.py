@@ -24,9 +24,12 @@ settings = get_settings()
 def get_participants_list(url, case_id):
     case = cases_service.get_single_case(case_id)
     participants_service = ParticipantsService()
-    participants_list = participants_service.get_items(
-        id=case.participants, role="defendant"
-    )
+
+    participants_list = None
+    if case.participants:
+        participants_list = participants_service.get_items(
+            id=case.participants, role="defendant"
+        )
 
     if participants_list is None or len(participants_list) == 0:
         return dash.no_update, dash.no_update
