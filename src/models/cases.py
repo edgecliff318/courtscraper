@@ -58,7 +58,7 @@ class Case(BaseModel):
     age: Optional[int] = None
     case_desc: Optional[str] = None
     court_desc: Optional[str] = None
-    case_dispositiondetail: Optional[str] = None
+    # case_dispositiondetail: Optional[str] = None
     location: Optional[str] = None
     filing_date: Optional[datetime] = None
     case_date: Optional[datetime] = None

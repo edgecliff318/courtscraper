@@ -5,10 +5,13 @@ from urllib.parse import urlencode
 
 import requests
 from bs4 import BeautifulSoup
+from requests.utils import cookiejar_from_dict, dict_from_cookiejar
 
 from src.models.cases import Case
 from src.models.leads import Lead
+from src.models.settings import Account
 from src.services.participants import ParticipantsService
+from src.services.settings import get_account, update_account
 
 logger = logging.getLogger(__name__)
 
@@ -21,10 +24,54 @@ class MyCase:
         self.session = requests.Session()
 
     def login(self):
+        account = get_account("mycase")
+
+        if (
+            account is not None
+            and account.details is not None
+            and account.details.get("headers") is not None
+        ):
+            headers = account.details.get("headers", {})
+            cookies = account.details.get("cookies", {})
+            self.session.cookies = cookiejar_from_dict(cookies)
+            self.session.headers.update(headers)
+
+        # Test if the connection is valid
+        response = self.session.request("GET", "https://www.mycase.com/")
+
+        if response.status_code == 200:
+            logger.info("Already logged into MyCase")
+            return
+
+        username = "team@tickettakedown.com"
+        password = "TTDpro24!"
+        client_id = "tCEM8hNY7GaC2c8P"
+        response_type = "code"
+
+        if account is None:
+            account = Account(
+                username=username,
+                password=password,
+                details={
+                    "headers": {},
+                    "client_id": client_id,
+                },
+            )
+
+        logger.info("Logging into MyCase")
         # Refresh the headers
-        url = "https://auth.mycase.com/login_sessions?client_id=tCEM8hNY7GaC2c8P&response_type=code"
-        # TODO: #17 Move the login details to Firebase
-        payload = "utf8=%E2%9C%93&login_session%5Bemail%5D=team%40tickettakedown.com&login_session%5Bpassword%5D=TTDpro24!"
+        url = "https://auth.mycase.com/login_sessions"
+
+        pars = {"client_id": client_id, "response_type": response_type}
+
+        payload_dict = {
+            "utf8": "✓",
+            "login_session[email]": username,
+            "login_session[password]": password,
+        }
+
+        payload = urlencode(payload_dict)
+
         headers = {
             "authority": "auth.mycase.com",
             "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
@@ -46,7 +93,7 @@ class MyCase:
             "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
         }
         response = self.session.request(
-            "POST", url, headers=headers, data=payload
+            "POST", url, headers=headers, data=payload, params=pars
         )
 
         if response.status_code != 200:
@@ -83,6 +130,15 @@ class MyCase:
             }
         )
         self.session.headers.update(headers)
+
+        if account.details is None:
+            account.details = {}
+        # Save the headers
+        account.details["headers"] = dict(self.session.headers)
+        # Save the cookies
+        account.details["cookies"] = dict_from_cookiejar(self.session.cookies)
+
+        update_account("mycase", account)
 
     def add_contact(self, lead: Lead, case: Case):
         url = (
@@ -722,3 +778,71 @@ class MyCase:
             "POST", message_send_url, data=form_data
         )
         return response.json()
+
+    def get_cases_report(
+        self, start_date, end_date, case_status_type="closed"
+    ):
+        url = "https://meyer-attorney-services.mycase.com/reporting/case_list_report"
+
+        start_date_formatted = start_date.strftime("%m/%d/%Y")
+        end_date_formatted = end_date.strftime("%m/%d/%Y")
+
+        payload_dict = {
+            "firm_user_id": "all",
+            "lead_lawyer_id": "all",
+            "originating_lawyer_id": "all",
+            "practice_area_id": "all",
+            "case_stage_id": "all",
+            "office_id": "all",
+            "case_status": case_status_type,
+            "group_cases_by": "none",
+            "page_limit": 100,
+            "page_number": 1,
+            "sort_by": None,
+            "sort_asc": True,
+            "start_date": start_date_formatted,
+            "end_date": end_date_formatted,
+            "case_status_date_type": case_status_type,
+            "use_date_range": True,
+            "custom_filters": "[]",
+        }
+
+        payload = json.dumps(payload_dict)
+
+        response = self.session.request("POST", url, data=payload)
+        report = response.json()
+
+        cases = report["report_data"]["All"]
+
+        total_cases = report["total_cases"]
+        total_pages = total_cases // 100
+        if total_pages > 1:
+            for page in range(2, total_pages + 1):
+                payload_dict["page_number"] = page
+                payload = json.dumps(payload_dict)
+                response = self.session.request("POST", url, data=payload)
+                report = response.json()
+                cases += report["report_data"]["All"]
+
+        return cases
+
+
+if __name__ == "__main__":
+    from src.services.cases import patch_case
+
+    logging.basicConfig(level=logging.INFO)
+
+    mycase = MyCase("https://www.mycase.com/", "", "")
+
+    mycase.login()
+
+    start_date = datetime.datetime.now() - datetime.timedelta(days=30)
+    end_date = datetime.datetime.now()
+
+    report = mycase.get_cases_report(start_date=start_date, end_date=end_date)
+
+    for case in report:
+        case_id = case.get("case_number")
+        case_status = case.get("status")
+        case_name = case.get("name")
+        patch_case(case_id, {"status": "closed", "flag": "closed"})
