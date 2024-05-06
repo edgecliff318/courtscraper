@@ -14,6 +14,7 @@ class Account(BaseModel):
     system: Optional[str] = None
     start_date: Optional[int] = None
     end_date: Optional[int] = None
+    details: Optional[dict] = None
 
 
 class Settings(BaseModel):
