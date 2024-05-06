@@ -84,6 +84,7 @@ class Case(BaseModel):
     status: Optional[str] = None
     case_status: Optional[str] = None
     events: Optional[List[Dict]] = None
+    court_events: Optional[List[Dict]] = None
     court_date: Optional[datetime] = None
     court_time: Optional[str] = None
     court_link: Optional[str] = None

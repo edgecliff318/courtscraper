@@ -8,6 +8,7 @@ import requests
 from requests.adapters import HTTPAdapter, Retry
 from rich.console import Console
 
+from src.components.cases.events import get_case_events
 from src.core.config import get_settings
 from src.models.courts import Court
 from src.scrapers.base import InitializedSession, ScraperBase
@@ -49,6 +50,7 @@ class ScraperMOCourt(ScraperBase):
     CHARGES_URL = "https://www.courts.mo.gov/cnet/cases/charges.do"
     DOCKETS_URL = "https://www.courts.mo.gov/cnet/cases/docketEntriesSearch.do"
     SERVICE_URL = "https://www.courts.mo.gov/casenet/cases/service.do"
+    EVENT_URL = "https://www.courts.mo.gov/cnet/cases/event.do"
 
     def get_referer(self, case_number, court_code):
         return f"https://www.courts.mo.gov/cnet/cases/newHeader.do?inputVO.caseNumber={case_number}&inputVO.courtId={court_code}&inputVO.isTicket=false"
@@ -168,6 +170,43 @@ class ScraperMOCourt(ScraperBase):
             self.PARTIES_URL, headers=self.HEADERS, data=params_parsed
         )
         results = response.json()
+        return results
+
+    def get_case_events(self, case_number, court_code):
+        params = {
+            "inputVO.caseNumber": case_number,
+            "inputVO.courtId": court_code,
+        }
+        payload = '{"draw":1,"columns":[{"data":"formattedScheduledDate","name":"","searchable":true,"orderable":true,"search":{"value":"","regex":false}},{"data":"caseNumber","name":"","searchable":true,"orderable":true,"search":{"value":"","regex":false}}],"order":[{"column":0,"dir":"asc"}],"start":0,"length":10,"search":{"value":"","regex":false}}'
+
+        cookies = self.GLOBAL_SESSION.cookies.get_dict()
+        cookie_str = "; ".join([f"{k}={v}" for k, v in cookies.items()])
+
+        headers = {
+            "Accept": "application/json, text/javascript, */*; q=0.01",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "Content-Type": "application/json;charset=UTF-8",
+            "Cookie": cookie_str,
+            "DNT": "1",
+            "Origin": "https://www.courts.mo.gov",
+            "Pragma": "no-cache",
+            "Referer": f"https://www.courts.mo.gov/cnet/cases/newHeader.do?inputVO.caseNumber={case_number}&inputVO.courtId={court_code}&inputVO.isTicket=false",
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-origin",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            "X-Requested-With": "XMLHttpRequest",
+            "sec-ch-ua": '"Not-A.Brand";v="99", "Chromium";v="124"',
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": '"macOS"',
+        }
+
+        response = self.GLOBAL_SESSION.post(
+            self.EVENT_URL, headers=headers, params=params, data=payload
+        )
+        results = response.json().get("data")
         return results
 
     def get_case_dockets(self, case_number, court_code):
@@ -309,6 +348,17 @@ class ScraperMOCourt(ScraperBase):
             logger.error(f"No case details found for {case_number}")
             console.print(f"No case details found for {case_number}")
             raise Exception("No case details found")
+
+        # Retrive the events of the case
+        try:
+            console.print(f"Getting case events : {case_number}")
+            events = self.get_case_events(case_number, court_id)
+            case_detail["court_events"] = events
+        except Exception as e:
+            logger.error(f"Connection failure : {str(e)}")
+            console.print(f"Retrieval of case events failed {case_number}")
+
+        self.sleep()
 
         # Retrieve the defendant
         case_detail.update(self.get_defendant(case_detail))

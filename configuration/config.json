@@ -1103,6 +1103,11 @@
       "value": "Hola {first_name}! 👋,\nIt's Shawn from TicketTakedown.com. We're an innovative startup from KC and St. Louis, using cutting-edge tech to simplify the traffic ticket process for fellow Missourians like us. Noticed your ticket on the Missouri Courts site? Let's handle it efficiently! 🚀\nIn addition to helping with your ticket, we've got some great hacks and tips to navigate the traffic ticket world. Would you like a free consultation to learn about your options and these insights? Reply with \"YES\" and we'll give you a call. \nAlternatively, you can check us out or call us directly at 816.226.0351. \nNot your ticket? Reply “WRONG”. Just not into these texts? Reply \"STOP\" anytime."
     },
     {
+      "id": "marketing_sms_v4",
+      "label": "Initial marketing SMS v4",
+      "value": "Good afternoon, this is Attorney Shawn Meyer. I hope you're having a great day. My apologies for the delay. I wanted to see if you still wanted to discuss keeping your traffic citation off your record. Please feel free to call me back at your earliest convenience at my direct line, 816.226.0351. Looking forward to helping you on this!\nShawn A. Meyer Attorney at Law TicketTakedown.com"
+    },
+    {
       "id": "marketing_sms_reply_yes",
       "label": "Reply to “YES” response to initial marketing SMS",
       "value": "Thank you for your response, {first_name}! 🌟\nWe're thrilled to assist you. A representative from TicketTakedown.com will be reaching out to you shortly for your free consultation. In the meantime, if you have any immediate questions or concerns, feel free to call us at 816.226.0351.\nThanks for trusting us with your traffic ticket needs. Talk to you soon!"
