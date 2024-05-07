@@ -19,6 +19,7 @@ def get_cases(
     disposition=None,
     source=None,
     flag=None,
+    limit=None,
 ):
     cases_list = db.collection("cases")
 
@@ -53,6 +54,11 @@ def get_cases(
         cases_list = cases_list.where(
             field_path="flag", op_string="==", value=flag
         )
+
+    if limit is not None:
+        # sort by update_time
+        cases_list = cases_list.order_by("update_time", direction="DESCENDING")
+        cases_list = cases_list.limit(limit)
 
     cases_list = cases_list.stream()
 

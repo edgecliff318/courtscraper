@@ -204,5 +204,7 @@ def render_actions_pending(court_code_list):
     Input("court-selector", "value"),
 )
 def render_actions_closed(court_code_list):
-    cases_list_closed = cases.get_cases(court_code_list, flag="closed")
+    cases_list_closed = cases.get_cases(
+        court_code_list, flag="closed", limit=30
+    )
     return create_case_div(cases_list_closed)
