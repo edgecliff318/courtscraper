@@ -1,9 +1,10 @@
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 
 import dash_mantine_components as dmc
 import pandas as pd
 from dash import Input, Output, callback, html
+from humanize import naturaldelta
 
 from src.components.cases.status import case_statuses, get_case_status_color
 from src.core.config import get_settings
@@ -46,6 +47,17 @@ def create_case_card(case_data: dict):
     full_name = (
         f'{case_data.get("first_name", "")} {case_data.get("last_name", "")}'
     )
+
+    last_updated = case_data.get("update_time")
+    if last_updated is None:
+        last_updated = case_data.get("create_time", datetime.now(UTC))
+    current_date = datetime.now(UTC)
+
+    # TO CST
+    last_updated = current_date - last_updated
+
+    # Humanize the last updated date
+    last_updated_str = naturaldelta(last_updated)
 
     history = (
         set(
@@ -112,6 +124,11 @@ def create_case_card(case_data: dict):
             f"{charges_description.lower().capitalize()}",
             size="sm",
             color="dark",
+        ),
+        dmc.Text(
+            f"Updated {last_updated_str} ago",
+            size="xs",
+            color="dimmed",
         ),
     ]
 

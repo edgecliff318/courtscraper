@@ -65,7 +65,7 @@ def get_cases(
     return [
         cases.Case(
             **m.to_dict(),
-            update_date=m.update_time,
+            update_time=m.update_time,
             create_time=m.create_time,
         )
         for m in cases_list
@@ -90,7 +90,7 @@ def get_many_cases(case_ids: list) -> list:
     return [
         cases.Case(
             **m.to_dict(),
-            update_date=m.update_time,
+            update_time=m.update_time,
             create_time=m.create_time,
         )
         for m in cases_list
@@ -155,7 +155,7 @@ def search_cases(search_term: str) -> list:
 
     outputs = [
         cases.Case(
-            **m.to_dict(), update_date=m.update_time, create_time=m.create_time
+            **m.to_dict(), update_time=m.update_time, create_time=m.create_time
         )
         for m in cases_list
     ]
