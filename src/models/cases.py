@@ -100,6 +100,9 @@ class Case(BaseModel):
     phone: Optional[str] = None
     emails: Optional[List[dict]] = None
 
+    update_time: Optional[datetime] = None
+    create_time: Optional[datetime] = None
+
     # Ignore parsing errors for now
     @validator("charges", pre=True, always=True)
     def set_charges(cls, v):

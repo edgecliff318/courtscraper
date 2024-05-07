@@ -56,21 +56,39 @@ def get_cases(
 
     cases_list = cases_list.stream()
 
-    return [cases.Case(**m.to_dict()) for m in cases_list]
+    return [
+        cases.Case(
+            **m.to_dict(),
+            update_date=m.update_time,
+            create_time=m.create_time,
+        )
+        for m in cases_list
+    ]
 
 
 def get_single_case(case_id) -> cases.Case:
     case = db.collection("cases").document(case_id).get()
     if not case.exists:
         return None
-    return cases.Case(**case.to_dict())
+    return cases.Case(
+        **case.to_dict(),
+        update_time=case.update_time,
+        create_time=case.create_time,
+    )
 
 
 def get_many_cases(case_ids: list) -> list:
     cases_list = (
         db.collection("cases").where("case_id", "in", case_ids).stream()
     )
-    return [cases.Case(**m.to_dict()) for m in cases_list]
+    return [
+        cases.Case(
+            **m.to_dict(),
+            update_date=m.update_time,
+            create_time=m.create_time,
+        )
+        for m in cases_list
+    ]
 
 
 def insert_case(case: cases.Case) -> None:
@@ -129,7 +147,12 @@ def search_cases(search_term: str) -> list:
         except ValidationError:
             return None
 
-    outputs = [cases.Case(**m.to_dict()) for m in cases_list]
+    outputs = [
+        cases.Case(
+            **m.to_dict(), update_date=m.update_time, create_time=m.create_time
+        )
+        for m in cases_list
+    ]
     return [o for o in outputs if o is not None]
 
 
