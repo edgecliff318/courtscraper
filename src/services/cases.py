@@ -12,6 +12,16 @@ from src.models import cases
 from src.services.participants import ParticipantsService
 
 
+def get_case_dict(case) -> dict:
+    case_dict = case.to_dict()
+
+    # Exclude the update_time and create_time
+    case_dict["update_time"] = case.update_time
+    case_dict["create_time"] = case.create_time
+
+    return case_dict
+
+
 def get_cases(
     court_code_list=None,
     start_date=None,
@@ -62,39 +72,22 @@ def get_cases(
 
     cases_list = cases_list.stream()
 
-    return [
-        cases.Case(
-            **m.to_dict(),
-            update_time=m.update_time,
-            create_time=m.create_time,
-        )
-        for m in cases_list
-    ]
+    return [cases.Case(**get_case_dict(m)) for m in cases_list]
 
 
 def get_single_case(case_id) -> cases.Case:
     case = db.collection("cases").document(case_id).get()
     if not case.exists:
         return None
-    return cases.Case(
-        **case.to_dict(),
-        update_time=case.update_time,
-        create_time=case.create_time,
-    )
+    return cases.Case(**get_case_dict(case))
 
 
 def get_many_cases(case_ids: list) -> list:
     cases_list = (
         db.collection("cases").where("case_id", "in", case_ids).stream()
     )
-    return [
-        cases.Case(
-            **m.to_dict(),
-            update_time=m.update_time,
-            create_time=m.create_time,
-        )
-        for m in cases_list
-    ]
+
+    return [cases.Case(**get_case_dict(m)) for m in cases_list]
 
 
 def insert_case(case: cases.Case) -> None:
@@ -153,12 +146,7 @@ def search_cases(search_term: str) -> list:
         except ValidationError:
             return None
 
-    outputs = [
-        cases.Case(
-            **m.to_dict(), update_time=m.update_time, create_time=m.create_time
-        )
-        for m in cases_list
-    ]
+    outputs = [cases.Case(**get_case_dict(m)) for m in cases_list]
     return [o for o in outputs if o is not None]
 
 
