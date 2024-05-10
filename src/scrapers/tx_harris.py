@@ -212,4 +212,4 @@ class TXHarrisCountyScraper(ScraperBase):
 
 if __name__ == "__main__":
     txscraper = TXHarrisCountyScraper()
-    txscraper.scrape({"start_date": "04/16/2024", "end_date": "04/18/2024"})
+    txscraper.scrape({"start_date": "05/09/2024", "end_date": "05/10/2024"})
