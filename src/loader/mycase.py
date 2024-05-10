@@ -23,7 +23,7 @@ class MyCase:
         self.password = password
         self.session = requests.Session()
 
-    def login(self):
+    def login(self, force=False):
         account = get_account("mycase")
 
         if (
@@ -31,10 +31,14 @@ class MyCase:
             and account.details is not None
             and account.details.get("headers") is not None
         ):
-            headers = account.details.get("headers", {})
-            cookies = account.details.get("cookies", {})
-            self.session.cookies = cookiejar_from_dict(cookies)
-            self.session.headers.update(headers)
+            if not force:
+                headers = account.details.get("headers", {})
+                cookies = account.details.get("cookies", {})
+                self.session.cookies = cookiejar_from_dict(cookies)
+                self.session.headers.update(headers)
+            else:
+                self.session.headers = {}
+                self.session.cookies = cookiejar_from_dict({})
 
         # Test if the connection is valid
         response = self.session.request("GET", "https://www.mycase.com/")
@@ -182,7 +186,7 @@ class MyCase:
             }
         )
 
-        response = self.session.request("POST", url, data=payload)
+        response = self.request("POST", url, data=payload)
 
         response_json = response.json()
         response_status = response_json.get("success")
@@ -224,7 +228,7 @@ class MyCase:
 
     def get_case_custom_fields(self):
         url = "https://meyer-attorney-services.mycase.com/custom_fields.json?filter=court_case"
-        response = self.session.request("GET", url)
+        response = self.request("GET", url)
         return response.json()
 
     def validate_case(self, payload_dict):
@@ -232,7 +236,7 @@ class MyCase:
 
         payload = json.dumps(payload_dict)
 
-        response = self.session.request("POST", url, data=payload)
+        response = self.request("POST", url, data=payload)
 
         return response.status_code, response.text
 
@@ -424,7 +428,7 @@ class MyCase:
                 f" mycase {validate_case_response}"
             )
 
-        response = self.session.request("POST", url, data=payload)
+        response = self.request("POST", url, data=payload)
 
         if response.status_code != 200:
             logger.error(response.text)
@@ -443,7 +447,7 @@ class MyCase:
             "last_name": last_name,
             "type": "Client",
         }
-        response = self.session.request("GET", url, params=params)
+        response = self.request("GET", url, params=params)
         return response.json().get("similar_users", [])
 
     def search_contacts(self, query):
@@ -455,17 +459,27 @@ class MyCase:
             "search_filter": '["all"]',
         }
 
-        response = self.session.request("POST", url, params=params)
+        response = self.request("POST", url, data=params)
 
         return response.json()
+
+    def request(self, method, url, **kwargs):
+        response = self.session.request(method, url, **kwargs)
+
+        if response.status_code == 401:
+            logger.warning("Refreshing MyCase session")
+            self.login(force=True)
+            response = self.session.request(method, url, **kwargs)
+            if response.status_code == 401:
+                logger.error(response.text)
+                raise Exception(f"Couldn't request on mycase {response.text}")
+
+        return response
 
     def search_case(self, case_id):
         url = f"https://meyer-attorney-services.mycase.com/search/auto_complete.json?term={case_id}&filter_type=cases"
 
-        response = self.session.request("GET", url)
-
-        if response.status_code == 401:
-            raise Exception("Unable to communicate with Mycase")
+        response = self.request("GET", url)
 
         for case in response.json():
             record_id = case.get("record_id")
@@ -477,7 +491,7 @@ class MyCase:
             return None
         url = f"https://meyer-attorney-services.mycase.com/court_cases/{record_id}/case_contacts_data.json"
 
-        response = self.session.request("GET", url)
+        response = self.request("GET", url)
 
         return {
             "clients": response.json().get("clients", []),
@@ -487,7 +501,7 @@ class MyCase:
 
     def get_case_feed(self, mycase_case_id):
         url = f"https://meyer-attorney-services.mycase.com/notifications/feed.json?court_case_id={mycase_case_id}&data_only=true&feed=all"
-        response = self.session.request("GET", url)
+        response = self.request("GET", url)
         return response.json()
 
     def reload_sharing(self, mycase_case_id):
@@ -497,7 +511,7 @@ class MyCase:
             {"case_id": mycase_case_id, "no_case_link": False}
         )
 
-        response = self.session.request("POST", url, data=payload)
+        response = self.request("POST", url, data=payload)
 
         return response.json()
 
@@ -555,13 +569,13 @@ class MyCase:
             }
         )
 
-        response = self.session.request("POST", url, data=payload)
+        response = self.request("POST", url, data=payload)
         return response.json()
 
     def get_cases(self, client_id):
         url = "https://meyer-attorney-services.mycase.com/autocomplete/cases.json"
         params = {"term": "", "scoped_by_user_id": client_id}
-        response = self.session.request("GET", url, params=params)
+        response = self.request("GET", url, params=params)
 
         """
         output = [
@@ -584,7 +598,7 @@ class MyCase:
             "unread_only": False,
             "page_number": 1,
         }
-        response = self.session.request("GET", url, params=params)
+        response = self.request("GET", url, params=params)
         """
         {
             "conversations": [
@@ -621,7 +635,7 @@ class MyCase:
         # https://meyer-attorney-services.mycase.com/text_messages/831383/messages.json
         url = f"https://meyer-attorney-services.mycase.com/text_messages/{conversation_id}/messages.json"
 
-        response = self.session.request("GET", url)
+        response = self.request("GET", url)
         """
         {
         "messages": [
@@ -690,7 +704,7 @@ class MyCase:
             {"message_body": message, "court_case_id": mycase_case_id}
         )
 
-        response = self.session.request("POST", url, data=payload)
+        response = self.request("POST", url, data=payload)
         """
         {
             "text_message": {
@@ -727,7 +741,7 @@ class MyCase:
         current_timestamp = int(datetime.datetime.now().timestamp() * 1000)
         url = f"https://meyer-attorney-services.mycase.com/messages/new?court_case={mycase_case_id}&_={current_timestamp}"
 
-        response = self.session.request("GET", url)
+        response = self.request("GET", url)
 
         # Get the following data-id
         # <form class="calico_lightbox" id="message_form" data-id="21431553" action="/messages/21431553" accept-charset="UTF-8"
@@ -770,13 +784,11 @@ class MyCase:
             f"https://meyer-attorney-services.mycase.com/messages/{message_id}"
         )
 
-        response = self.session.request("POST", message_url, data=form_data)
+        response = self.request("POST", message_url, data=form_data)
 
         # Send the message
         message_send_url = f"https://meyer-attorney-services.mycase.com/messages/{message_id}/send_message"
-        response = self.session.request(
-            "POST", message_send_url, data=form_data
-        )
+        response = self.request("POST", message_send_url, data=form_data)
         return response.json()
 
     def get_cases_report(
@@ -809,7 +821,7 @@ class MyCase:
 
         payload = json.dumps(payload_dict)
 
-        response = self.session.request("POST", url, data=payload)
+        response = self.request("POST", url, data=payload)
         report = response.json()
 
         cases = report["report_data"]["All"]
@@ -820,7 +832,7 @@ class MyCase:
             for page in range(2, total_pages + 1):
                 payload_dict["page_number"] = page
                 payload = json.dumps(payload_dict)
-                response = self.session.request("POST", url, data=payload)
+                response = self.request("POST", url, data=payload)
                 report = response.json()
                 cases += report["report_data"]["All"]
 
