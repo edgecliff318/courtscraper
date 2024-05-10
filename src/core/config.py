@@ -265,6 +265,16 @@ class Settings(BaseSettings):
         "CLOUDTALK_API_SECRET", "ebsKYEo,Lt9GjAMIp3hx0miUZCuS8nBygNcqXkT1F24_R"
     )
 
+    SENTRY_ENV: str = os.getenv(
+        "SENTRY_ENV",
+        "local",
+    )
+
+    SENTRY_DSN: str = os.getenv(
+        "SENTRY_DSN",
+        "https://ec102608c1c364997fb5e984240b8127@o4506412785795072.ingest.us.sentry.io/4507226899546112",
+    )
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
     colors_mapping: Dict = COLORS_MAPPING
 

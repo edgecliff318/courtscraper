@@ -5,8 +5,10 @@ from logging.config import dictConfig
 import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
 import diskcache
+import sentry_sdk
 from dash import Dash, DiskcacheManager
 from flask_cors import CORS
+from sentry_sdk.integrations.flask import FlaskIntegration
 
 import src.callbacks as callbacks  # noqa
 from src.core.auth import AdvancedAuth
@@ -105,6 +107,16 @@ def init_app():
         suppress_callback_exceptions=True,
         background_callback_manager=background_callback_manager,
     )
+
+    # sentry
+    if settings.SENTRY_ENV != "local":
+        sentry_sdk.init(
+            dsn=settings.SENTRY_DSN,
+            environment=settings.SENTRY_ENV,
+            integrations=[FlaskIntegration()],
+            traces_sample_rate=1.0,
+            profiles_sample_rate=1.0,
+        )
 
     # Set the app title
     app.title = settings.PROJECT_NAME
