@@ -11,9 +11,27 @@ class CaseDynamicFields:
         court_date = None
         court_time = None
 
+        if case.court_events is not None:
+            if len(case.court_events) > 0:
+                court_date = case.court_events[0].get("scheduled_date", "")
+                court_time = case.court_events[0].get("time", "")
+
+            if len(case.court_events) > 1:
+                print("Multiple court events found for case: ", case.case_id)
+
+            if court_date is not None:
+                case_data["court_date"] = court_date
+                case_data["court_time"] = court_time
+                return case_data
+
+        print("No court events found for case: ", case.case_id)
+
         if case.dockets is not None:
             for docket in case.dockets:
-                if "initial" in docket.get("docket_desc", "").lower():
+                if (
+                    docket.get("docket_code") == "SCHR"
+                    or docket.get("docket_code") == "SCIR"
+                ):
                     # Get the associated_docketscheduledinfo
                     schedule = docket.get("associated_docketscheduledinfo", {})
                     if isinstance(schedule, list) and len(schedule) > 0:

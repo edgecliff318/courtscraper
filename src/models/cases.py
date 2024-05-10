@@ -58,6 +58,7 @@ class Case(BaseModel):
     age: Optional[int] = None
     case_desc: Optional[str] = None
     court_desc: Optional[str] = None
+    # case_dispositiondetail: Optional[str] = None
     location: Optional[str] = None
     filing_date: Optional[datetime] = None
     case_date: Optional[datetime] = None
@@ -83,6 +84,7 @@ class Case(BaseModel):
     status: Optional[str] = None
     case_status: Optional[str] = None
     events: Optional[List[Dict]] = None
+    court_events: Optional[List[Dict]] = None
     court_date: Optional[datetime] = None
     court_time: Optional[str] = None
     court_link: Optional[str] = None
@@ -96,7 +98,10 @@ class Case(BaseModel):
     raw: Optional[Dict] = None
     email: Optional[str] = None
     phone: Optional[str] = None
-    emails: Optional[List[Dict]] = None
+    emails: Optional[List[dict]] = None
+
+    update_time: Optional[datetime] = None
+    create_time: Optional[datetime] = None
 
     # Ignore parsing errors for now
     @validator("charges", pre=True, always=True)

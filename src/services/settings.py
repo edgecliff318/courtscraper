@@ -14,7 +14,14 @@ def get_account(account_name: str):
     account_single = (
         db.collection("accounts").document(account_name).get().to_dict()
     )
+
+    if account_single is None:
+        return None
     return settings.Account(**account_single)
+
+
+def update_account(account_name: str, account: settings.Account):
+    db.collection("accounts").document(account_name).set(account.model_dump())
 
 
 class UserSettingsService(BaseService):

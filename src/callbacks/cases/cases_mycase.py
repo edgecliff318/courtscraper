@@ -32,7 +32,7 @@ def upload_case_to_mycase(btn, case_id):
 
             mycase = MyCase(url="", password="", username="")
 
-            mycase.login()
+            mycase.login()  # TODO: Improve the login
 
             if case_details is None:
                 toast = build_toast(
@@ -52,6 +52,11 @@ def upload_case_to_mycase(btn, case_id):
 
             client_id = mycase.add_contact(lead_details, case_details)
 
+            if client_id == "None":
+                raise Exception(
+                    "Please set manually the mycase id for this participant. The system is unable to find this contact."
+                )
+
             # Update the lead with the mycase client id
             leads.patch_lead(case_id, mycase_client_id=client_id)
 
@@ -60,10 +65,9 @@ def upload_case_to_mycase(btn, case_id):
 
             if mycase_id is None or not mycase_id.get("record_id"):
                 # Upload the case
-                mycase.add_case(lead_details, case_details, client_id)
-
-                # Add event to the case
-                mycase_id = mycase.search_case(case_id=case_id)
+                mycase_id = mycase.add_case(
+                    lead_details, case_details, client_id
+                )
 
             if mycase_id is None:
                 toast = build_toast(
@@ -73,9 +77,11 @@ def upload_case_to_mycase(btn, case_id):
                 )
                 return toast
 
-            mycase_id = mycase_id.get("record_id")
+            if isinstance(mycase_id, dict):
+                mycase_id = mycase_id.get("record_id")
 
             case_data = {}
+            case_details = cases.get_single_case(case_id)
             case_data = CaseDynamicFields().update(case_details, case_data)
 
             event_time = case_data.get("court_time", "")
