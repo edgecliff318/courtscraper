@@ -168,6 +168,24 @@ def layout(case_id):
             ]
         )
 
+    first_name = (
+        case.first_name.capitalize() if case.first_name is not None else ""
+    )
+    middle_name = (
+        f"{case.middle_name.capitalize()[:1]}."
+        if case.middle_name is not None and len(case.middle_name) > 0
+        else ""
+    )
+    last_name = (
+        case.last_name.capitalize() if case.last_name is not None else ""
+    )
+
+    title = (
+        f"{first_name} {middle_name}"
+        f" {last_name}  - {case.location}"
+        f" - {case.case_id}"
+    )
+
     return dbc.Row(
         [
             dbc.Col(
@@ -177,6 +195,11 @@ def layout(case_id):
                     p="md",
                     radius="md",
                 ),
+                width=12,
+                class_name="mb-2",
+            ),
+            dbc.Col(
+                dmc.Title(title, order=1, mb="md"),
                 width=12,
                 class_name="mb-2",
             ),
