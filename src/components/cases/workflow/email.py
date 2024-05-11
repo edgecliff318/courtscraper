@@ -405,6 +405,7 @@ def send_email(
     send_function,
     role="client",
     include_invoice=False,
+    force_send=False,
 ):
     # Check the event on the case events
     email = states.get(f'{{"index":"email","type":"modal-{role}-pars"}}.value')
@@ -432,9 +433,11 @@ def send_email(
 
     # If the event is already in the list, raise an error$
     template_details = templates.get_single_template(template)
-    if not template_details.repeat and event.get("template") in [
-        e.get("template") for e in events if e.get("template") is not None
-    ]:
+    if (
+        not template_details.repeat
+        and event.get("template")
+        in [e.get("template") for e in events if e.get("template") is not None]
+    ) and not force_send:
         return False, html.Div(
             [
                 dmc.Alert(

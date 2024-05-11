@@ -263,6 +263,7 @@ def modal_court_preview(opened, update, template, pars, case_id):
         Input("modal-court-submit", "n_clicks"),
         State("case-id", "children"),
         State("section-court-select-template", "value"),
+        State("modal-court-force-send", "checked"),
     ],
     running=[
         (Output("modal-court-submit", "disabled"), True, False),
@@ -282,7 +283,7 @@ def modal_court_preview(opened, update, template, pars, case_id):
     prevent_initial_call=True,
     background=False,
 )
-def modal_court_submit(n_clicks, case_id, template):
+def modal_court_submit(n_clicks, case_id, template, force_send):
     ctx = dash.callback_context
     if (
         ctx.triggered[0]["prop_id"] == "modal-court-submit.n_clicks"
@@ -304,9 +305,15 @@ def modal_court_submit(n_clicks, case_id, template):
         if events is None:
             events = []
         # If the event is already in the list, raise an error$
-        if event.get("template") in [
-            e.get("template") for e in events if e.get("template") is not None
-        ]:
+        if (
+            event.get("template")
+            in [
+                e.get("template")
+                for e in events
+                if e.get("template") is not None
+            ]
+            and not force_send
+        ):
             return (
                 html.Div(
                     [
