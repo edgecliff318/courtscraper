@@ -132,8 +132,10 @@ class PennsylvaniaScraper(ScraperBase):
                                 cases.insert_case(case_details)
                                 leads.insert_lead_from_case(case_details)
                                 console.log(f"inseted case {case_details.case_id}")
-                            else: 
-                                console.log(f"Case {case_details.case_id} already exists.")
+                            else:
+                                console.log(
+                                    f"Case {case_details.case_id} already exists."
+                                )
 
                 except Exception as e:
                     console.print(
@@ -141,7 +143,7 @@ class PennsylvaniaScraper(ScraperBase):
                     )
                 finally:
                     try:
-                        if case_file_path and  os.path.exists(case_file_path):
+                        if case_file_path and os.path.exists(case_file_path):
                             os.remove(case_file_path)
                             console.log(f"File {case_file_path} removed successfully")
                     except Exception as e:
