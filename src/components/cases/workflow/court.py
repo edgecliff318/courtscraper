@@ -58,6 +58,16 @@ def get_court_section():
                                         ]
                                     ),
                                     dmc.Group(
+                                        # Using normal emails
+                                        [
+                                            dmc.Checkbox(
+                                                label="Force send",
+                                                id="modal-court-force-send",
+                                                checked=False,
+                                            ),
+                                        ]
+                                    ),
+                                    dmc.Group(
                                         [
                                             dmc.Button(
                                                 "Update",

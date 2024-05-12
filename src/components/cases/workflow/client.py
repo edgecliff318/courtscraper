@@ -149,6 +149,25 @@ def get_client_section(case):
                                         ]
                                     ),
                                     dmc.Group(
+                                        # Using normal emails
+                                        [
+                                            dmc.Checkbox(
+                                                label="Send email",
+                                                id="modal-client-send-email",
+                                                checked=(
+                                                    True
+                                                    if client_id is None
+                                                    else False
+                                                ),
+                                            ),
+                                            dmc.Checkbox(
+                                                label="Force send",
+                                                id="modal-client-force-send",
+                                                checked=False,
+                                            ),
+                                        ]
+                                    ),
+                                    dmc.Group(
                                         [
                                             dmc.Button(
                                                 "Generate using AI",
@@ -180,16 +199,6 @@ def get_client_section(case):
                                                 disabled=True,
                                                 variant="filled",
                                                 color="dark",
-                                            ),
-                                            # Using normal emails
-                                            dmc.Checkbox(
-                                                label="Send email",
-                                                id="modal-client-send-email",
-                                                checked=(
-                                                    True
-                                                    if client_id is None
-                                                    else False
-                                                ),
                                             ),
                                         ]
                                     ),

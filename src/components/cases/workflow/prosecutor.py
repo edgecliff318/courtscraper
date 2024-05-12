@@ -159,6 +159,16 @@ def get_prosecutor_section(case):
                                         ]
                                     ),
                                     dmc.Group(
+                                        # Using normal emails
+                                        [
+                                            dmc.Checkbox(
+                                                label="Force send",
+                                                id="modal-prosecutor-force-send",
+                                                checked=False,
+                                            ),
+                                        ]
+                                    ),
+                                    dmc.Group(
                                         [
                                             dmc.Button(
                                                 "Generate using AI",

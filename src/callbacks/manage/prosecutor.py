@@ -134,6 +134,7 @@ def modal_prosecutor_preview(
         State({"type": "modal-prosecutor-pars", "index": ALL}, "value"),
         State("case-id", "children"),
         State("section-prosecutor-select-template", "value"),
+        State("modal-prosecutor-force-send", "checked"),
     ],
     running=[
         (Output("modal-prosecutor-submit", "disabled"), True, False),
@@ -153,14 +154,14 @@ def modal_prosecutor_preview(
     prevent_initial_call=True,
     background=False,
 )
-def modal_prosecutor_submit(n_clicks, pars, case_id, template):
+def modal_prosecutor_submit(n_clicks, pars, case_id, template, force_send):
     ctx = dash.callback_context
     if (
         ctx.triggered[0]["prop_id"] == "modal-prosecutor-submit.n_clicks"
         and template is not None
     ):
         attachments = ctx.states.get(
-            f'{{"index":"attachments","type":"modal-prosecutor-pars"}}.value',
+            '{{"index":"attachments","type":"modal-prosecutor-pars"}}.value',
             [],
         )
         output, message = send_email(
@@ -172,6 +173,7 @@ def modal_prosecutor_submit(n_clicks, pars, case_id, template):
             send_function=send_to_prosecutor,
             attachments=attachments,
             role="prosecutor",
+            force_send=force_send,
         )
         return message, {"next_step": "modal-prosecutor-submit"}
 
