@@ -11,7 +11,17 @@ def get_courts(enabled: bool = True):
 
 def get_single_court(court_id: str):
     court = db.collection("courts").document(court_id).get()
-    return courts.Court(**court.to_dict())
+    if court.exists:
+        return courts.Court(id=court.id, **court.to_dict())
+    return None
+
+
+def insert_court(court: courts.Court):
+    court_dict = court.model_dump()
+    court_dict["enabled"] = True
+    db.collection("courts").document(court.code).set(
+        {k: v for k, v in court_dict.items() if k != "id"}
+    )
 
 
 if __name__ == "__main__":

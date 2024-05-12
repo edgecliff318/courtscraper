@@ -12,8 +12,10 @@ from src.core.config import get_settings
 from src.db import bucket
 from src.loader.tickets import TicketParser
 from src.models import cases as cases_model
+from src.models import courts as courts_model
 from src.models import leads as leads_model
 from src.services import cases as cases_service
+from src.services import courts as courts_service
 from src.services import leads as leads_service
 from src.services import settings as settings_service
 
@@ -191,4 +193,17 @@ class ScraperBase:
             console.log(f"Succeeded to insert lead for {case.get('case_id')}")
         except Exception as e:
             console.log(f"Failed to parse lead {case} - {e}")
+            raise e
+
+    def insert_court(self, court: dict):
+        """Insert the court into the database."""
+        try:
+            court_parsed = courts_model.Court.model_validate(court)
+            if courts_service.get_single_court(court_parsed.code) is not None:
+                console.log(f"Court {court_parsed.code} already exists")
+                return
+            courts_service.insert_court(court_parsed)
+            console.log(f"Succeeded to insert court {court_parsed.code}")
+        except Exception as e:
+            console.log(f"Failed to parse court {court} - {e}")
             raise e

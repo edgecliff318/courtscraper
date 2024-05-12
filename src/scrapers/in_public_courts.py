@@ -9,6 +9,7 @@ from rich.progress import Progress
 from twocaptcha import TwoCaptcha
 
 from src.models.cases import Case
+from src.models.courts import Court
 from src.models.leads import Lead
 from src.scrapers.base.scraper_base import ScraperBase
 
@@ -176,6 +177,10 @@ class IndianaScraper(ScraperBase):
             "birth_date": birth_date,
             "address_line_1": address_line_1,
             "address_city": address_city,
+            "address": address_line_1,
+            "city": address_city,
+            "zip_code": address_zip,
+            "state": "IN",
             "address_state_code": address_state_code,
             "address_zip": address_zip,
             **case_dict,
@@ -225,6 +230,7 @@ class IndianaScraper(ScraperBase):
     def scrape(self, search_parameters):
         filed_date = search_parameters["filed_date"]
         case_tokens = self.get_cases(filed_date)
+        courts = {}
         console.log(f"Found {len(case_tokens)} cases")
         with Progress() as progress:
             task = progress.add_task(
@@ -233,12 +239,22 @@ class IndianaScraper(ScraperBase):
             for case_token in case_tokens:
                 case_detail = self.get_case_detail(case_token)
                 if case_detail:
+                    court_code = f"IN_{case_detail.get('CountyCode')}_{case_detail.get('CourtCode')}"
+                    if court_code not in courts.keys():
+                        courts[court_code] = {
+                            "code": court_code,
+                            "county_code": case_detail.get("CountyCode"),
+                            "enabled": True,
+                            "name": f"Indiana, {case_detail.get('Court')}",
+                            "state": "IN",
+                            "type": "CT",
+                        }
+                        self.insert_court(courts[court_code])
+
                     case_dict = self.extract_case_info(case_detail)
-                    case_dict["id"] = case_dict["case_id"]
-                    case = Case(**case_dict)
-                    lead = Lead(**case_dict)
-                    self.insert_case(case)
-                    self.insert_lead(lead)
+                    case_dict["court_code"] = court_code
+                    self.insert_case(case_dict)
+                    self.insert_lead(case_dict)
                 else:
                     console.log(case_token)
                 time.sleep(
@@ -249,4 +265,4 @@ class IndianaScraper(ScraperBase):
 
 if __name__ == "__main__":
     indiana_scraper = IndianaScraper()
-    indiana_scraper.scrape({"filed_date": "04/20/2024"})
+    indiana_scraper.scrape({"filed_date": "04/25/2024"})
