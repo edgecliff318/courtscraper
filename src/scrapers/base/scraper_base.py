@@ -103,8 +103,11 @@ class ScraperBase:
             logger.error(e)
             return {"error": "Failed to parse ticket"}
 
-    def upload_file(self, filepath):
-        filename = filepath.split("/")[-1]
+    def upload_file(self, filepath, blob_path=None):
+        if blob_path is not None:
+            filename = blob_path
+        else:
+            filename = filepath.split("/")[-1]
         blob = bucket.blob(filename)
         blob.upload_from_filename(filepath)
         return filename

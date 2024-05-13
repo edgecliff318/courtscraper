@@ -193,10 +193,21 @@ def get_case_events(case):
                     "rowMultiSelectWithClick": True,
                 },
             ),
-            dmc.Text(
-                "Emails related to this case",
-                weight=700,
-                size="lg",
+            dmc.Group(
+                [
+                    dmc.Text(
+                        "Emails related to this case",
+                        weight=700,
+                        size="lg",
+                    ),
+                    dmc.Button(
+                        "Tag as Processed",
+                        color="dark",
+                        leftIcon=DashIconify(icon="mdi:check"),
+                        size="sm",
+                        id="case-tag-emails-processed",
+                    ),
+                ]
             ),
             dmc.Divider(variant="solid", size="lg"),
             render_emails(case),
