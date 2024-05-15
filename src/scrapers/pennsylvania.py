@@ -26,12 +26,12 @@ TIMEOUT = 120000
 WAIT_TIMEOUT = 7000
 PDF_EXTENSION = ".pdf"
 REGEX_PATTERNS = {
-    "case_id": r"Docket Number: (MJ-\d+-TR-\d+-(\d+))",
     "first_name": r"Name:----.*?, (.*?)----",
     "last_name": r"Name:----(.*?),",
     "city": r"Address\(es\):----Home (.*?),",
     "state": r"Address\(es\):----Home .*?, (.*?)\s",
     "charges_description": r"Grade Description S----(.*?)----",
+    "zip": r"Address\(es\):----Home .*?, .*? (\d{5})",
     "dob": r"Date of Birth:----(.*?)----",
     "address": r"Address\(es\):----Home (.*?)----",
     "case_date": r"Offense Dt\. (.*?)----",
@@ -156,14 +156,18 @@ class PennsylvaniaScraper(ScraperBase):
 
         # Define year_of_birth
         try:
-            case_details["year_of_birth"] = pd.to_datetime(
-                case_details["birth_date"]
-            ).year
+            if case_details.get("birth_date") != "":
+                case_details["year_of_birth"] = pd.to_datetime(
+                    case_details["birth_date"], format="%m/%d/%Y"
+                ).year
 
-            # Age vs now
-            case_details["age"] = (
-                pd.to_datetime("now").year - case_details["year_of_birth"]
-            )
+                # Age vs now
+                case_details["age"] = (
+                    pd.to_datetime("now").year - case_details["year_of_birth"]
+                )
+            else:
+                case_details["year_of_birth"] = None
+                case_details["age"] = None
 
         except Exception as e:
             console.print(
@@ -192,6 +196,21 @@ class PennsylvaniaScraper(ScraperBase):
                 case_details = await self.get_case_details_from_row(
                     row, columns
                 )
+
+                if "tr" not in case_details["case_id"].lower():
+                    console.log(
+                        f"Skipping row with case_id: {case_details['case_id']} as it's not a traffic case"
+                    )
+                    continue
+
+                if self.check_if_exists(case_details["case_id"]):
+                    console.log(
+                        f"Case {case_details['case_id']} already exists"
+                    )
+                    continue
+
+                console.log(f"Processing case {case_details['case_id']}")
+
                 case_file_path = await self.download_case_file(page, case_url)
                 try:
                     if case_file_path:
@@ -210,7 +229,9 @@ class PennsylvaniaScraper(ScraperBase):
                                     "file_path": blob_filepath,
                                 }
                             ]
-                            court_code = f"PA_{case_details.get('county')}"
+                            court_code = (
+                                f"PA_{case_details.get('county').upper()}"
+                            )
                             if court_code not in courts.keys():
                                 courts[court_code] = {
                                     "code": court_code,
@@ -221,6 +242,17 @@ class PennsylvaniaScraper(ScraperBase):
                                     "type": "CT",
                                 }
                                 self.insert_court(courts[court_code])
+                            case_details["court_id"] = court_code
+                            case_details["court_code"] = court_code
+                            # Transfor case_date to datetime
+                            if (
+                                case_details.get("case_date") is not None
+                                and case_details.get("case_date") != ""
+                            ):
+                                case_details["case_date"] = pd.to_datetime(
+                                    case_details.get("case_date", ""),
+                                    format="%m/%d/%Y",
+                                )
                             self.insert_case(case_details)
                             self.insert_lead(case_details)
 
@@ -241,6 +273,10 @@ class PennsylvaniaScraper(ScraperBase):
                             style="bold red",
                         )
 
+                # Wait 10 seconds
+                console.log("Waiting 10 seconds...")
+                await page.wait_for_timeout(10000)
+
         except Exception as e:
             console.print(
                 f"An error occurred while processing case rows: {str(e)}"
@@ -250,7 +286,7 @@ class PennsylvaniaScraper(ScraperBase):
         browser = None
         try:
             console.log("Launching browser...")
-            browser = await pw.chromium.launch(headless=False)
+            browser = await pw.chromium.launch(headless=True)
             page = await browser.new_page()
             console.log("Browser launched successfully.")
 
@@ -303,7 +339,7 @@ if __name__ == "__main__":
     try:
         console.log("Initializing Pennsylvania Scraper...")
         scraper = PennsylvaniaScraper(
-            start_date="2024-05-10", end_date="2024-05-12"
+            start_date="2024-05-13", end_date="2024-05-14"
         )
         console.log("Pennsylvania Scraper initialized successfully.")
 
