@@ -108,6 +108,11 @@ class Case(BaseModel):
     def set_charges(cls, v):
         return v or []
 
+    @validator("year_of_birth", pre=True, always=True)
+    def set_year_of_birth(cls, v):
+        # convert to string
+        return str(v) if v is not None else v
+
     @validator("case_date", pre=True)
     def set_case_date(cls, v):
         try:

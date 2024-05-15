@@ -1,14 +1,13 @@
 import json
 import logging
 
-
 import dash
 import dash_mantine_components as dmc
 from dash import ALL, Input, Output, State, callback, dcc
 
+import src.models as models
 from src.core.base import BaseService
 from src.core.config import get_settings
-import src.models as models
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -33,7 +32,9 @@ def edit_component(save, reset, new, collection, item_id, fields):
     if not ctx.triggered:
         return dash.no_update, dash.no_update
 
-    serializer_mapping = {"participants": models.Participant}
+    serializer_mapping = {
+        "participants": models.Participant,
+    }
     serializer_model = serializer_mapping.get(collection)
 
     if serializer_model is None:
