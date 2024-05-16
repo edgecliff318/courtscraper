@@ -10,6 +10,7 @@ from google.cloud.storage.retry import DEFAULT_RETRY
 
 from src.connectors.casenet import CaseNetWebConnector
 from src.core.config import get_settings
+from src.core.dates import get_continuance_date
 from src.core.document import DocumentGenerator, convert_doc_to_pdf
 from src.core.dynamic_fields import CaseDynamicFields
 from src.db import bucket
@@ -212,21 +213,79 @@ def modal_court_preview(opened, update, template, pars, case_id):
         if update_custom:
             cases.patch_case(case_id, {"custom": custom_dict})
 
+    # Get the continuance dates
+    if "case_new_court_date" in context_data.keys():
+        case_data = cases.get_single_case(case_id)
+        court_data = CaseDynamicFields().update_court_date(case_data, {})
+        continuance_date_1 = get_continuance_date(court_data.get("court_date"))
+        continuance_date_2 = get_continuance_date(continuance_date_1)
+        continuance_date_3 = get_continuance_date(continuance_date_2)
+
+        details = dmc.Alert(
+            dmc.Stack(
+                [
+                    dmc.Text(
+                        f"1. in one month    {continuance_date_1.strftime('%B %d, %Y')}"
+                    ),
+                    dmc.Text(
+                        f"2. in two months   {continuance_date_2.strftime('%B %d, %Y')}"
+                    ),
+                    dmc.Text(
+                        f"3. in three months {continuance_date_3.strftime('%B %d, %Y')}"
+                    ),
+                ],
+                spacing="xs",
+            ),
+            color="blue",
+            title="Possible Continuance Dates",
+        )
+
     media_url, output_filepath_pdf = generate_document(
         case_id, template, context_data
     )
 
-    # Add a download button and an upload button
-    params = dmc.Stack(
-        [
-            dmc.TextInput(
-                label=k.replace("_", " ").title(),
-                id={"type": "modal-court-pars", "index": k},
-                value=v,
+    def generate_field(id, type, label, value):
+        if type == "text":
+            return dmc.TextInput(
+                label=label,
+                id=id,
+                value=value,
             )
-            for k, v in context_data.items()
-        ]
-    )
+        elif type == "date":
+            return dmc.DatePicker(
+                label=label,
+                id=id,
+                value=value,
+            )
+        elif type == "number":
+            return dmc.NumberInput(
+                label=label,
+                id=id,
+                value=value,
+            )
+        elif type == "select":
+            return dmc.Select(
+                label=label,
+                id=id,
+                value=value,
+                options=[{"label": k, "value": k} for k in value.split(",")],
+            )
+
+    # Add a download button and an upload button
+    params = []
+
+    if "case_new_court_date" in context_data.keys():
+        params.append(details)
+
+    params += [
+        generate_field(
+            id={"type": "modal-court-pars", "index": k},
+            type="text" if "date" not in k else "date",
+            label=k.replace("_", " ").title(),
+            value=v,
+        )
+        for k, v in context_data.items()
+    ]
 
     document_preview = dmc.Card(
         children=[
