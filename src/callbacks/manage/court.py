@@ -217,28 +217,37 @@ def modal_court_preview(opened, update, template, pars, case_id):
     if "case_new_court_date" in context_data.keys():
         case_data = cases.get_single_case(case_id)
         court_data = CaseDynamicFields().update_court_date(case_data, {})
-        continuance_date_1 = get_continuance_date(court_data.get("court_date"))
-        continuance_date_2 = get_continuance_date(continuance_date_1)
-        continuance_date_3 = get_continuance_date(continuance_date_2)
+        if court_data.get("court_date") is None:
+            details = dmc.Alert(
+                "Court date is not set. Please set the court date first.",
+                color="red",
+                title="Error",
+            )
+        else:
+            continuance_date_1 = get_continuance_date(
+                court_data.get("court_date")
+            )
+            continuance_date_2 = get_continuance_date(continuance_date_1)
+            continuance_date_3 = get_continuance_date(continuance_date_2)
 
-        details = dmc.Alert(
-            dmc.Stack(
-                [
-                    dmc.Text(
-                        f"1. in one month    {continuance_date_1.strftime('%B %d, %Y')}"
-                    ),
-                    dmc.Text(
-                        f"2. in two months   {continuance_date_2.strftime('%B %d, %Y')}"
-                    ),
-                    dmc.Text(
-                        f"3. in three months {continuance_date_3.strftime('%B %d, %Y')}"
-                    ),
-                ],
-                spacing="xs",
-            ),
-            color="blue",
-            title="Possible Continuance Dates",
-        )
+            details = dmc.Alert(
+                dmc.Stack(
+                    [
+                        dmc.Text(
+                            f"1. in one month    {continuance_date_1.strftime('%B %d, %Y')}"
+                        ),
+                        dmc.Text(
+                            f"2. in two months   {continuance_date_2.strftime('%B %d, %Y')}"
+                        ),
+                        dmc.Text(
+                            f"3. in three months {continuance_date_3.strftime('%B %d, %Y')}"
+                        ),
+                    ],
+                    spacing="xs",
+                ),
+                color="blue",
+                title="Possible Continuance Dates",
+            )
 
     media_url, output_filepath_pdf = generate_document(
         case_id, template, context_data
