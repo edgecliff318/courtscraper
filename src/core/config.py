@@ -191,9 +191,9 @@ class Settings(BaseSettings):
     # firebase configuration
     GOOGLE_APPLICATION_CREDENTIALS: str = os.getenv(
         "GOOGLE_APPLICATION_CREDENTIALS",
-        CONFIG_PATH.joinpath(
+        str(CONFIG_PATH.joinpath(
             "fubloo-1b0e8-firebase-adminsdk-5j6zr-6b8d8d1c0b.json"
-        ).name,
+        )),
     )
 
     # llm

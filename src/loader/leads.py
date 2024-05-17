@@ -1,9 +1,9 @@
 import json
 import logging
 import os
-
+import sys
 import requests
-
+sys.path.append('..')
 from src.scrapers.missouri import ScraperMOCourt
 
 logger = logging.getLogger(__name__)
