@@ -265,6 +265,8 @@ def modal_court_preview(opened, update, template, pars, case_id):
                 label=label,
                 id=id,
                 value=value,
+                allowFreeInput=True,
+                clearable=True,
             )
         elif type == "number":
             return dmc.NumberInput(

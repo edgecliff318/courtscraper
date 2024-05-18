@@ -47,6 +47,8 @@ def get_court_section():
                                             ),
                                         ],
                                         id="modal-court-preview-parameters",
+                                        # Overflow visible to show the loader
+                                        style={"overflowY": "auto"},
                                     ),
                                     dmc.Stack(
                                         [
