@@ -5,7 +5,6 @@ import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
 from dash import Input, Output, callback
 from dash_iconify import DashIconify
-import dash
 
 from src.components.cases.communications import get_case_communications
 from src.components.cases.details import get_case_details
@@ -234,8 +233,7 @@ def create_case_title(case):
     Output("case-manage-summary", "children"),
     Output("case-manage-timeline", "children"),
     [
-        #TODO add all the inputs , you want to use in update case info on screen
-        
+        # TODO add all the inputs , you want to use in update case info on screen
         Input("url", "pathname"),
         Input("url", "search"),
         Input("case-manage-participants", "value"),
@@ -245,10 +243,8 @@ def create_case_title(case):
         Input("case-details-id", "data"),
         Input("case-manage-payments-create-invoice", "n_clicks"),
         Input("case-manage-insert-participants", "n_clicks"),
-
     ],
     prevent_initial_call=True,
-    
 )
 def render_update_case(pathname, search, *args, **kwargs):
     case_id = get_case_id_from_path(pathname)
