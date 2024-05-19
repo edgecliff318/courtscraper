@@ -22,5 +22,6 @@
     "python.linting.enabled": true,
     "cSpell.words": [
         "diskcache"
-    ]
+    ],
+    "taipyStudio.gUI.elementsFilePaths": []
 }
