@@ -16,7 +16,6 @@ settings = get_settings()
     Input("lead-single-message-modal", "value"),
 )
 def render_message_selector(*args):
-    print("render_message_selector")
     triggered_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
     if triggered_id.endswith("-modal"):
