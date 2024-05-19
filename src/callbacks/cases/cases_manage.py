@@ -234,16 +234,24 @@ def create_case_title(case):
     Output("case-manage-summary", "children"),
     Output("case-manage-timeline", "children"),
     [
+        #TODO add all the inputs , you want to use in update case info on screen
+        
         Input("url", "pathname"),
         Input("url", "search"),
-        Input("btn-refresh-lolo", "n_clicks"),
+        Input("case-manage-participants", "value"),
+        Input("case-upload-to-mycase-button", "n_clicks"),
+        Input("case-refresh-button", "n_clicks"),
+        Input("case-manage-insert-participants", "n_clicks"),
+        Input("case-details-id", "data"),
+        Input("case-manage-payments-create-invoice", "n_clicks"),
+        Input("case-manage-insert-participants", "n_clicks"),
+
     ],
+    prevent_initial_call=True,
+    
 )
-def render_navigation_components(pathname, search, n_clicks):
+def render_update_case(pathname, search, *args, **kwargs):
     case_id = get_case_id_from_path(pathname)
-    print(case_id, n_clicks)
-    if case_id is None or n_clicks < 1:
-        return dash.no_update, dash.no_update
 
     case = cases.get_single_case(case_id)
 
