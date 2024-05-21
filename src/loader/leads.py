@@ -3,7 +3,9 @@ import logging
 import os
 import sys
 import requests
-sys.path.append('..')
+from dotenv import load_dotenv
+load_dotenv()
+sys.path.append(os.getenv('PYTHONPATH'))
 from src.scrapers.missouri import ScraperMOCourt
 
 logger = logging.getLogger(__name__)
