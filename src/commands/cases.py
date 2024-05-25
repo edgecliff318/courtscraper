@@ -14,6 +14,9 @@ from src.models import leads as leads_model
 from src.scrapers.il_cook import IlCook
 from src.scrapers.mo_mshp import MOHighwayPatrol
 from src.scrapers.tx_harris import TXHarrisCountyScraper
+from src.scrapers.arkansas import ArkansasScraper
+from src.scrapers.west_virginia import WestVirginiaScraper
+
 from src.services import cases as cases_service
 from src.services import leads as leads_service
 from src.services.courts import get_courts
@@ -224,6 +227,27 @@ def retrieve_cases_tx_harris():
         }
     )
 
+def retrieve_cases_arkansas():
+    console.log("Arkansas Scraper")
+    arkansasscraper = ArkansasScraper()
+    console.log("Retrieving the configuration from Firebase")
+    filing_date = datetime.datetime.now()
+    arkansasscraper.scrape(
+        {
+            "filing_date": filing_date.strftime("%m/%d/%Y")
+        }
+    )
+
+async def retrieve_cases_west_virginia():
+    console.log("West Virginia Scraper")
+    westvirginiascraper = WestVirginiaScraper()
+    console.log("Retrieving the configuration from Firebase")
+    name = "AB"
+    await westvirginiascraper.scrape(
+        {
+            "name": name
+        }
+    )
 
 def retrieve_cases(source="mo_case_net"):
     """
@@ -241,6 +265,15 @@ def retrieve_cases(source="mo_case_net"):
     elif source == "mo_case_net_criminal":
         console.log("MO Case Net Scraper - Criminal")
         retrieve_cases_mo_casenet("Criminal")
+    elif source == "tx_harris":
+        console.log("Harris County, Texas Scraper")
+        retrieve_cases_tx_harris()
+    elif source == "arkansas":
+        console.log("Arkansas State Scraper")
+        retrieve_cases_arkansas()
+    elif source == "west_virginia":
+        console.log("West_Virginia State Scraper")
+        asyncio.run(retrieve_cases_west_virginia())
 
 
 if __name__ == "__main__":
