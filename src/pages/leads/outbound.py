@@ -5,7 +5,7 @@ import dash_bootstrap_components as dbc
 from dash import html
 
 from src.components.conversation import many_response_model
-from src.components.filters import leads_controls
+from src.components.filters import generate_leads_control
 
 logger = logging.Logger(__name__)
 
@@ -25,7 +25,7 @@ def layout():
                         dbc.Card(
                             dbc.CardBody(
                                 [
-                                    leads_controls,
+                                    generate_leads_control(),
                                 ]
                             ),
                         ),

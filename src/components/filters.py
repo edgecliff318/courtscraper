@@ -8,59 +8,64 @@ from dash_iconify import DashIconify
 from src.components.inputs import generate_form_group
 from src.models import leads as leads_model
 
-leads_controls = dbc.Row(
-    [
-        dbc.Col(
-            generate_form_group(
-                label="Courts",
-                id="court-selector",
-                placeholder="Select a Court",
-                type="Dropdown",
-                options=[],
-                value=None,
-                multi=True,
-                persistence_type="session",
-                persistence=True,
+
+def get_court_selector():
+    return dmc.MultiSelect(
+        id="court-selector",
+        label="Courts",
+        data=[],
+        searchable=True,
+        placeholder="Select a Court",
+        nothingFoundMessage="No court found",
+        clearable=True,
+    )
+
+
+def generate_leads_control():
+    leads_controls = dbc.Row(
+        [
+            dbc.Col(
+                get_court_selector(),
+                width=5,
+                xs=12,
+                lg=6,
             ),
-            width=5,
-            xs=12,
-            lg=6,
-        ),
-        dbc.Col(
-            generate_form_group(
-                label="Date",
-                id="date-selector",
-                placeholder="Select a Date",
-                type="DateRangePicker",
-                persistence_type="session",
-                persistence=True,
-                start_date=(datetime.now() - timedelta(days=1)).strftime(
-                    "%Y-%m-%d"
+            dbc.Col(
+                generate_form_group(
+                    label="Date",
+                    id="date-selector",
+                    placeholder="Select a Date",
+                    type="DateRangePicker",
+                    persistence_type="session",
+                    persistence=True,
+                    start_date=(datetime.now() - timedelta(days=1)).strftime(
+                        "%Y-%m-%d"
+                    ),
+                    end_date=datetime.now().strftime("%Y-%m-%d"),
                 ),
-                end_date=datetime.now().strftime("%Y-%m-%d"),
+                width=3,
+                xs=12,
+                lg=3,
             ),
-            width=3,
-            xs=12,
-            lg=3,
-        ),
-        dbc.Col(
-            generate_form_group(
-                label="Interaction",
-                id="lead-status-selector",
-                placeholder="Select the type",
-                type="Select",
-                persistence_type="session",
-                persistence=True,
-                value="not_contacted",
-                options=leads_model.leads_statuses,
+            dbc.Col(
+                generate_form_group(
+                    label="Interaction",
+                    id="lead-status-selector",
+                    placeholder="Select the type",
+                    type="Select",
+                    persistence_type="session",
+                    persistence=True,
+                    value="not_contacted",
+                    options=leads_model.leads_statuses,
+                ),
+                width=2,
+                xs=12,
+                lg=2,
             ),
-            width=2,
-            xs=12,
-            lg=2,
-        ),
-        # dbc.Col(dbc.Button("Leads", id="leads-button"), width=1, lg=1, xs=12),
-    ]
-)
+            # dbc.Col(dbc.Button("Leads", id="leads-button"), width=1, lg=1, xs=12),
+        ]
+    )
+    return leads_controls
 
 
 def create_date_form_group(id: str):
@@ -211,18 +216,6 @@ def generate_col(content, **kwargs):
     return dbc.Col(content, **width_config)
 
 
-court_selector = generate_form_group(
-    label="Courts",
-    id="court-selector",
-    placeholder="Select a Court",
-    type="Dropdown",
-    options=[],
-    value=None,
-    multi=True,
-    persistence_type="session",
-    persistence=True,
-)
-
 date_selector = generate_form_group(
     label="Date",
     id="date-selector",
@@ -234,4 +227,10 @@ date_selector = generate_form_group(
     end_date=datetime.now().strftime("%Y-%m-%d"),
 )
 
-cases_controls = dbc.Row([generate_col(court_selector, lg=5)])
+
+def get_cases_control():
+
+    court_selector = get_court_selector()
+
+    cases_controls = dbc.Row([generate_col(court_selector, lg=5)])
+    return cases_controls

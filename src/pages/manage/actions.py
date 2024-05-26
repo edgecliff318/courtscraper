@@ -6,7 +6,7 @@ import dash_mantine_components as dmc
 from dash import html
 from dash_iconify import DashIconify
 
-from src.components.filters import cases_controls
+from src.components.filters import get_cases_control
 
 logger = logging.Logger(__name__)
 
@@ -22,7 +22,7 @@ def layout():
                         dbc.Card(
                             dbc.CardBody(
                                 [
-                                    cases_controls,
+                                    get_cases_control(),
                                 ]
                             ),
                         ),
