@@ -22,16 +22,23 @@ def format_table_row(row, column):
 
 
 def generate_table(data, columns):
-    header = [html.Thead(html.Tr([html.Th(c.capitalize()) for c in columns]))]
+    header = [
+        dmc.TableThead(
+            dmc.TableTr([dmc.TableTh(c.capitalize()) for c in columns])
+        )
+    ]
 
     rows = [
-        html.Tr(
-            [html.Td(format_table_row(e.get(c), column=c)) for c in columns]
+        dmc.TableTr(
+            [
+                dmc.TableTd(format_table_row(e.get(c), column=c))
+                for c in columns
+            ]
         )
         for e in data
     ]
 
-    body = [html.Tbody(rows)]
+    body = [dmc.TableTbody(rows)]
 
     return dmc.Table(
         header + body,
@@ -46,6 +53,12 @@ def get_invoice_form():
     # Get the list of products
     products = payments_service.get_products()
 
+    # Select the product with court costs and fine as the name
+    product = None
+    for product in products:
+        if product["name"] == "Court Costs and Fine":
+            break
+
     # Create a multi select with the products
     products_select = dmc.Select(
         data=[
@@ -57,8 +70,7 @@ def get_invoice_form():
         searchable=True,
         description="You can select the products here. ",
         id="case-manage-payments-products",
-        creatable=True,
-        value=products[0]["id"] if len(products) > 0 else None,
+        value=product["id"] if product is not None else None,
     )
 
     # Create an input money field for the price
@@ -67,8 +79,15 @@ def get_invoice_form():
         placeholder="Price",
         description="You can enter the price here. ",
         id="case-manage-payments-price",
-        creatable=True,
         searchable=True,
+    )
+
+    # Button to create the price
+    price_create_button = dmc.Button(
+        "Create Price",
+        color="dark",
+        variant="outline",
+        leftSection=DashIconify(icon="mdi:cash"),
     )
 
     # Create an invoice button
@@ -77,7 +96,33 @@ def get_invoice_form():
         color="dark",
         variant="outline",
         id="case-manage-payments-create-invoice",
-        leftIcon=DashIconify(icon="mdi:invoice-add"),
+        leftSection=DashIconify(icon="mdi:invoice-add"),
+    )
+
+    # Popover
+    popover = dmc.Popover(
+        [
+            dmc.PopoverTarget(price_create_button),
+            dmc.PopoverDropdown(
+                dmc.Stack(
+                    [
+                        dmc.Text("Create a new price for the product"),
+                        dmc.NumberInput(
+                            label="Amount",
+                            placeholder="Enter the amount",
+                            id="case-manage-payments-price-amount",
+                            type="number",
+                        ),
+                        dmc.Button(
+                            "Submit",
+                            color="dark",
+                            variant="filled",
+                            id="case-manage-payments-price-submit",
+                        ),
+                    ],
+                )
+            ),
+        ]
     )
 
     invoice_form = dmc.Stack(
@@ -86,7 +131,9 @@ def get_invoice_form():
                 [
                     products_select,
                     price_input,
-                ]
+                    popover,
+                ],
+                align="end",
             ),
             dmc.Group(
                 [
