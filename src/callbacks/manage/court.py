@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 
 import dash
 import dash_mantine_components as dmc
+import pandas as pd
 from dash import ALL, Input, Output, State, callback, html
 from dash_iconify import DashIconify
 from google.cloud.storage.retry import DEFAULT_RETRY
@@ -14,7 +15,6 @@ from src.core.dates import get_continuance_date
 from src.core.document import DocumentGenerator, convert_doc_to_pdf
 from src.core.dynamic_fields import CaseDynamicFields
 from src.db import bucket
-from src.models.cases import Case
 from src.services import cases, templates
 
 logger = logging.getLogger(__name__)
@@ -205,6 +205,16 @@ def modal_court_preview(opened, update, template, pars, case_id):
     if ctx.triggered[0]["prop_id"] == "modal-court-preview-update.n_clicks":
         update_custom = False
         for k, v in zip(context_data.keys(), pars):
+            if "date" in k:
+                # Transform the value to "MM/DD/YYYY"
+                try:
+                    # Try with the first format "MM/DD/YYYY"
+                    v = pd.to_datetime(
+                        v, format="%m/%d/%Y", infer_datetime_format=True
+                    ).strftime("%m/%d/%Y")
+                except Exception:
+                    pass  # Do nothing
+
             if context_data[k] != v:
                 update_custom = True
                 custom_dict[k] = v
@@ -243,7 +253,7 @@ def modal_court_preview(opened, update, template, pars, case_id):
                             f"3. in three months {continuance_date_3.strftime('%B %d, %Y')}"
                         ),
                     ],
-                    spacing="xs",
+                    gap="xs",
                 ),
                 color="blue",
                 title="Possible Continuance Dates",
@@ -312,7 +322,7 @@ def modal_court_preview(opened, update, template, pars, case_id):
                 dmc.Button(
                     "Download",
                     variant="outline",
-                    leftIcon=DashIconify(icon="mdi:download"),
+                    leftSection=DashIconify(icon="mdi:download"),
                     color="dark",
                 ),
                 href=media_url,

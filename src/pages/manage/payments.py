@@ -28,35 +28,35 @@ class PaymentsTable:
     def render_header(self):
         return dmc.Grid(
             [
-                dmc.Col(
+                dmc.GridCol(
                     dmc.Text(
                         "Billing",
-                        color="dark",
-                        weight=600,
+                        c="dark",
+                        fw=600,
                     ),
                     span=3,
                 ),
-                dmc.Col(
+                dmc.GridCol(
                     dmc.Text(
                         "Payment",
-                        color="dark",
-                        weight=600,
+                        c="dark",
+                        fw=600,
                     ),
                     span=3,
                 ),
-                dmc.Col(
+                dmc.GridCol(
                     dmc.Text(
                         "Cases",
-                        color="dark",
-                        weight=600,
+                        c="dark",
+                        fw=600,
                     ),
                     span=3,
                 ),
-                dmc.Col(
+                dmc.GridCol(
                     dmc.Text(
                         "Actions",
-                        color="dark",
-                        weight=600,
+                        c="dark",
+                        fw=600,
                     ),
                     span=3,
                 ),
@@ -105,28 +105,28 @@ class PaymentsTable:
                         dmc.Text(
                             f"{customer_details.get('name')}",
                             size="sm",
-                            weight=600,
-                            color="dark",
+                            fw=600,
+                            c="dark",
                         ),
                         dmc.Text(
                             get_custom_fields(checkout, "birthdate"),
                             size="sm",
-                            weight=600,
-                            color="dark",
+                            fw=600,
+                            c="dark",
                         ),
                     ],
-                    position="apart",
+                    justify="apart",
                 ),
                 dmc.Group(
                     [
                         dmc.Text(customer_details.get("email"), size="xs"),
                         dmc.Text(customer_details.get("phone"), size="xs"),
                     ],
-                    position="apart",
+                    justify="apart",
                 ),
             ]
             + address_render,
-            spacing="xs",
+            gap="xs",
         )
 
     def render_checkout_info(self, checkout):
@@ -134,29 +134,29 @@ class PaymentsTable:
             [
                 dmc.Group(
                     [
-                        dmc.Text("Amount", size="sm", weight=600),
+                        dmc.Text("Amount", size="sm", fw=600),
                         dmc.Text(
                             f"{checkout.get('amount_total') / 100} $",
                             size="sm",
                         ),
                     ],
-                    position="apart",
-                    spacing="xs",
+                    justify="apart",
+                    gap="xs",
                 ),
                 dmc.Group(
                     [
-                        dmc.Text("Date", size="sm", weight=600),
+                        dmc.Text("Date", size="sm", fw=600),
                         dmc.Text(
                             self.int_to_date(checkout.get("created")),
                             size="sm",
                         ),
                     ],
-                    position="apart",
-                    spacing="xs",
+                    justify="apart",
+                    gap="xs",
                 ),
                 dmc.Group(
                     [
-                        dmc.Text("Status", size="sm", weight=600),
+                        dmc.Text("Status", size="sm", fw=600),
                         dmc.Badge(
                             checkout.get("status"),
                             size="sm",
@@ -167,12 +167,12 @@ class PaymentsTable:
                             ),
                         ),
                     ],
-                    position="apart",
-                    spacing="xs",
+                    justify="apart",
+                    gap="xs",
                 ),
                 dmc.Group(
                     [
-                        dmc.Text("Driver Name", size="sm", weight=600),
+                        dmc.Text("Driver Name", size="sm", fw=600),
                         dmc.Text(
                             get_custom_fields(
                                 checkout, "nameofdriverifdifferentthanpayment"
@@ -180,22 +180,22 @@ class PaymentsTable:
                             size="sm",
                         ),
                     ],
-                    position="apart",
-                    spacing="xs",
+                    justify="apart",
+                    gap="xs",
                 ),
                 dmc.Group(
                     [
-                        dmc.Text("Tickets", size="sm", weight=600),
+                        dmc.Text("Tickets", size="sm", fw=600),
                         dmc.Text(
                             get_custom_fields(checkout, "tickets"),
                             size="sm",
                         ),
                     ],
-                    position="apart",
-                    spacing="xs",
+                    justify="apart",
+                    gap="xs",
                 ),
             ],
-            spacing="xs",
+            gap="xs",
         )
 
     def render_actions(self, checkout):
@@ -203,7 +203,9 @@ class PaymentsTable:
             "label": {
                 "&[data-checked]": {
                     "&, &:hover": {
-                        "backgroundColor": dmc.theme.DEFAULT_COLORS["dark"][9],
+                        "backgroundColor": dmc.DEFAULT_THEME["colors"]["dark"][
+                            9
+                        ],
                         "color": "white",
                     },
                 },
@@ -213,9 +215,9 @@ class PaymentsTable:
             "label": {
                 "&[data-checked]": {
                     "&, &:hover": {
-                        "backgroundColor": dmc.theme.DEFAULT_COLORS["green"][
-                            9
-                        ],
+                        "backgroundColor": dmc.DEFAULT_THEME["colors"][
+                            "green"
+                        ][9],
                         "color": "white",
                     },
                 },
@@ -306,7 +308,7 @@ class PaymentsTable:
             return dmc.Text(
                 f"{city} - Court: {court_date} at {court_time}",
                 size="sm",
-                color=color,
+                c=color,
             )
         else:
             return dmc.Stack(
@@ -314,12 +316,12 @@ class PaymentsTable:
                     dmc.Text(
                         f"{city} - Court: {court_date} at {court_time}",
                         size="sm",
-                        color=color,
+                        c=color,
                     ),
                     dmc.Text(
                         f"Suggested Continuance: {suggested_motion_for_continuance.strftime('%m/%d/%Y')} at {court_time}",
                         size="sm",
-                        color="dark",
+                        c="dark",
                     ),
                 ]
             )
@@ -351,7 +353,7 @@ class PaymentsTable:
                                     else f"{case} (✅ attached)"
                                 ),
                                 size="sm",
-                                weight=600,
+                                fw=600,
                             ),
                             href=f"/manage/cases/{case}",
                             target="_blank",
@@ -359,7 +361,7 @@ class PaymentsTable:
                         dmc.Text(
                             self.get_case_information(case, cases_information),
                             size="sm",
-                            weight=600,
+                            fw=600,
                         ),
                     ]
                 )
@@ -384,19 +386,19 @@ class PaymentsTable:
     def render_row(self, checkout, cases_information):
         return dmc.Grid(
             [
-                dmc.Col(
+                dmc.GridCol(
                     self.render_billing_info(checkout),
                     span=3,
                 ),
-                dmc.Col(
+                dmc.GridCol(
                     self.render_checkout_info(checkout),
                     span=3,
                 ),
-                dmc.Col(
+                dmc.GridCol(
                     self.render_cases(checkout, cases_information),
                     span=3,
                 ),
-                dmc.Col(
+                dmc.GridCol(
                     self.render_actions(checkout),
                     span=3,
                 ),
@@ -496,11 +498,9 @@ def layout(payment_id, **kwargs):
                                     dcc.Store(
                                         id="case-attach-select-details-store",
                                     ),
-                                    dmc.LoadingOverlay(
-                                        dmc.MultiSelect(
-                                            id="case-attach-select",
-                                            searchable=True,
-                                        ),
+                                    dmc.MultiSelect(
+                                        id="case-attach-select",
+                                        searchable=True,
                                     ),
                                     html.Div(
                                         id="case-attach-select-output",
@@ -510,11 +510,12 @@ def layout(payment_id, **kwargs):
                                         color="dark",
                                         id="case-attach-payment-button",
                                     ),
-                                    dmc.LoadingOverlay(
+                                    html.Div(
+                                        dmc.LoadingOverlay(),
                                         id="case-attach-select-details",
                                     ),
                                 ],
-                                spacing="xs",
+                                gap="xs",
                             ),
                         ],
                         id="case-attach-modal",
@@ -529,7 +530,7 @@ def layout(payment_id, **kwargs):
                             html.A(
                                 dmc.Button(
                                     "Load previous",
-                                    leftIcon=DashIconify(
+                                    leftSection=DashIconify(
                                         icon="teenyicons:arrow-left-outline"
                                     ),
                                     color="dark",
@@ -546,7 +547,7 @@ def layout(payment_id, **kwargs):
                             html.A(
                                 dmc.Button(
                                     "Load more",
-                                    rightIcon=DashIconify(
+                                    rightSection=DashIconify(
                                         icon="teenyicons:arrow-right-outline"
                                     ),
                                     color="dark",
@@ -558,7 +559,7 @@ def layout(payment_id, **kwargs):
                                 ),
                             ),
                         ],
-                        position="left",
+                        justify="left",
                     ),
                 ]
             )

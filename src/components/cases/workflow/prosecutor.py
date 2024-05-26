@@ -50,36 +50,36 @@ def get_prosecutor_section(case):
                 communication_details.append(
                     dmc.Stack(
                         [
-                            dmc.Text("For RFR", weight=600),
+                            dmc.Text("For RFR", fw=600),
                             dmc.Text(
                                 f"{participant.communication_preference_rfr}"
                             ),
                         ],
-                        spacing="5px",
+                        gap="5px",
                     )
                 )
             if participant.communication_preference_disco is not None:
                 communication_details.append(
                     dmc.Stack(
                         [
-                            dmc.Text("For Discovery", weight=600),
+                            dmc.Text("For Discovery", fw=600),
                             dmc.Text(
                                 f"{participant.communication_preference_disco}"
                             ),
                         ],
-                        spacing="5px",
+                        gap="5px",
                     )
                 )
             if participant.communication_preference_plea is not None:
                 communication_details.append(
                     dmc.Stack(
                         [
-                            dmc.Text("For Plea", weight=600),
+                            dmc.Text("For Plea", fw=600),
                             dmc.Text(
                                 f"{participant.communication_preference_plea}"
                             ),
                         ],
-                        spacing="5px",
+                        gap="5px",
                     )
                 )
 
@@ -87,10 +87,10 @@ def get_prosecutor_section(case):
                 communication_details.append(
                     dmc.Group(
                         [
-                            dmc.Text("Fax", weight=600),
+                            dmc.Text("Fax", fw=600),
                             dmc.Text(f"{participant.fax}"),
                         ],
-                        spacing="5px",
+                        gap="5px",
                     )
                 )
 
@@ -103,7 +103,7 @@ def get_prosecutor_section(case):
                     )
                 )
             message = dmc.Alert(
-                dmc.Stack(communication_details, spacing="xs"),
+                dmc.Stack(communication_details, gap="xs"),
                 color="blue",
                 title=f"Process with the prosecutor {participant.last_name}",
             )
@@ -115,7 +115,7 @@ def get_prosecutor_section(case):
                 children=[
                     dmc.Grid(
                         children=[
-                            dmc.Col(
+                            dmc.GridCol(
                                 html.Div(
                                     dmc.Loader(
                                         color="blue", size="md", variant="dots"
@@ -124,7 +124,7 @@ def get_prosecutor_section(case):
                                 ),
                                 span=6,
                             ),
-                            dmc.Col(
+                            dmc.GridCol(
                                 [
                                     dmc.Stack(
                                         [
@@ -174,7 +174,7 @@ def get_prosecutor_section(case):
                                                 "Generate using AI",
                                                 id="modal-prosecutor-preview-generate",
                                                 className="m-2",
-                                                leftIcon=DashIconify(
+                                                leftSection=DashIconify(
                                                     icon="fluent:database-plug-connected-20-filled"
                                                 ),
                                                 variant="filled",
@@ -184,7 +184,7 @@ def get_prosecutor_section(case):
                                                 "Submit to prosecutor",
                                                 id="modal-prosecutor-submit",
                                                 className="m-2",
-                                                leftIcon=DashIconify(
+                                                leftSection=DashIconify(
                                                     icon="formkit:submit"
                                                 ),
                                                 variant="filled",
@@ -194,7 +194,7 @@ def get_prosecutor_section(case):
                                                 "Cancel Submission",
                                                 id="modal-prosecutor-cancel",
                                                 className="m-2",
-                                                leftIcon=DashIconify(
+                                                leftSection=DashIconify(
                                                     icon="fluent:delete-20-filled"
                                                 ),
                                                 disabled=True,
@@ -215,16 +215,17 @@ def get_prosecutor_section(case):
                 id="modal-prosecutor-preview",
                 size="100%",
                 zIndex=10000,
+                keepMounted=True,
             ),
             dmc.Select(
                 label="Email Template",
-                icon=DashIconify(icon="radix-icons:magnifying-glass"),
+                leftSection=DashIconify(icon="radix-icons:magnifying-glass"),
                 rightSection=DashIconify(icon="radix-icons:chevron-down"),
                 id="section-prosecutor-select-template",
             ),
             dmc.Button(
                 "Preview & Submit",
-                leftIcon=DashIconify(icon="fluent:preview-link-20-filled"),
+                leftSection=DashIconify(icon="fluent:preview-link-20-filled"),
                 id="modal-prosecutor-preview-button",
                 variant="filled",
                 color="dark",

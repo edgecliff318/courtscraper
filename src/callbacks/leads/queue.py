@@ -45,7 +45,9 @@ def render_leads(court_code_list, _, status):
         return no_update
 
     return [
-        dmc.Col(get_lead_card(lead), span=12, xs=12, sm=6, md=4, lg=4, xl=3)
+        dmc.GridCol(
+            get_lead_card(lead), span={"base": 12, "md": 4, "lg": 4, "xl": 3}
+        )
         for lead in leads_list
     ]
 

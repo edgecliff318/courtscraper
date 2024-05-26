@@ -38,7 +38,7 @@ app = typer.Typer()
 console = Console()
 console.print(":rocket: [bold]TTD Utilities[/bold] :rocket:")
 
-retrieve_cases = app.command(help="Scrap the casenet website")(
+retrieve_cases = app.command(help="Scrap the cases websites")(
     retrieve_cases_fct
 )
 retrieve_leads = app.command(help="Retrieve leads information")(

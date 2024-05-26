@@ -1,7 +1,7 @@
 import logging
 
-from dash import Input, Output, callback, ctx
 import dash
+from dash import Input, Output, callback, ctx
 
 from src.core.config import get_settings
 from src.services import messages
@@ -21,7 +21,8 @@ def render_message_selector(*args):
     if triggered_id.endswith("-modal"):
         messages_list = messages.get_messages_templates()
         options = [
-            {"label": c.template_name, "value": c.template_id} for c in messages_list
+            {"label": c.template_name, "value": c.template_id}
+            for c in messages_list
         ]
         return options
 

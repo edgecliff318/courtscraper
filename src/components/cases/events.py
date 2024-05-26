@@ -16,15 +16,15 @@ settings = get_settings()
 def render_email_row(id, sender, subject, snippet, timestamp):
     return dmc.Grid(
         [
-            dmc.Col(
+            dmc.GridCol(
                 dmc.Text(
                     sender,
-                    weight=700,
+                    fw=700,
                     size="sm",
                 ),
                 span=3,
             ),
-            dmc.Col(
+            dmc.GridCol(
                 [
                     dmc.HoverCard(
                         shadow="md",
@@ -34,14 +34,14 @@ def render_email_row(id, sender, subject, snippet, timestamp):
                             dmc.HoverCardTarget(
                                 dmc.Text(
                                     subject,
-                                    weight=500,
+                                    fw=500,
                                     size="sm",
                                 ),
                             ),
                             dmc.HoverCardDropdown(
                                 dmc.Text(
                                     snippet,
-                                    weight=500,
+                                    fw=500,
                                     size="sm",
                                 ),
                                 className="p-4 w-96 break-words",
@@ -51,15 +51,15 @@ def render_email_row(id, sender, subject, snippet, timestamp):
                 ],
                 span=6,
             ),
-            dmc.Col(
+            dmc.GridCol(
                 dmc.Text(
                     convert_date_format(timestamp),
-                    weight=500,
+                    fw=500,
                     size="sm",
                 ),
                 span=2,
             ),
-            dmc.Col(
+            dmc.GridCol(
                 html.A(
                     dmc.ActionIcon(
                         DashIconify(
@@ -83,28 +83,28 @@ def render_emails(case):
             "No emails found on this case.",
             color="gray",
             variant="filled",
-            sx={"width": "100%"},
+            styles={"width": "100%"},
         )
     header = dmc.Grid(
         [
-            dmc.Col(
+            dmc.GridCol(
                 dmc.Text(
                     "Sender",
-                    weight=700,
+                    fw=700,
                 ),
                 span=3,
             ),
-            dmc.Col(
+            dmc.GridCol(
                 dmc.Text(
                     "Subject",
-                    weight=700,
+                    fw=700,
                 ),
                 span=6,
             ),
-            dmc.Col(
+            dmc.GridCol(
                 dmc.Text(
                     "Date",
-                    weight=700,
+                    fw=700,
                 ),
                 span=2,
             ),
@@ -125,7 +125,7 @@ def render_emails(case):
 
     return dmc.Stack(
         emails_renders,
-        spacing="md",
+        gap="md",
         mt="md",
     )
 
@@ -140,17 +140,17 @@ def get_case_events(case):
                     "No events found on this case.",
                     color="gray",
                     variant="filled",
-                    sx={"width": "100%"},
+                    styles={"width": "100%"},
                 ),
                 dmc.Text(
                     "Emails related to this case",
-                    weight=700,
+                    fw=700,
                     size="lg",
                 ),
                 dmc.Divider(variant="solid", size="lg"),
                 render_emails(case),
             ],
-            spacing="md",
+            gap="md",
         )
 
     events = case.events
@@ -197,13 +197,13 @@ def get_case_events(case):
                 [
                     dmc.Text(
                         "Emails related to this case",
-                        weight=700,
+                        fw=700,
                         size="lg",
                     ),
                     dmc.Button(
                         "Tag as Processed",
                         color="dark",
-                        leftIcon=DashIconify(icon="mdi:check"),
+                        leftSection=DashIconify(icon="mdi:check"),
                         size="sm",
                         id="case-tag-emails-processed",
                     ),
@@ -212,5 +212,5 @@ def get_case_events(case):
             dmc.Divider(variant="solid", size="lg"),
             render_emails(case),
         ],
-        spacing="md",
+        gap="md",
     )

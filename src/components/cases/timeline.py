@@ -70,7 +70,7 @@ def get_case_timeline(case: Case):
     )
     return dmc.Stack(
         [
-            dmc.Text("Case Timeline", weight=600, size="lg"),
+            dmc.Text("Case Timeline", fw=600, size="lg"),
             button,
             timeline,
         ]

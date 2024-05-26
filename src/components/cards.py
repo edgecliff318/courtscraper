@@ -8,26 +8,26 @@ def render_stats_card(kpi_name, kpi_value_formatted, kpi_unit):
                 dmc.Text(
                     kpi_name,
                     size="md",
-                    weight=600,
-                    color="dark",
+                    fw=600,
+                    c="dark",
                 ),
                 dmc.Group(
                     [
                         dmc.Title(
                             kpi_value_formatted,
                             order=1,
-                            color="indigo",
+                            c="indigo",
                         ),
                         dmc.Text(
                             kpi_unit,
-                            weight=500,
-                            color="dark",
+                            fw=500,
+                            c="dark",
                             mb=4,
                         ),
                     ],
                     align="flex-end",
                 ),
             ],
-            spacing="sm",
+            gap="sm",
         ),
     )

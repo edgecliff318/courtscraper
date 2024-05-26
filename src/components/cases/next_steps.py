@@ -50,7 +50,7 @@ def get_next_step_modal_content(
                         id="modal-next-step-close-button",
                     ),
                 ],
-                position="right",
+                justify="right",
             ),
         ]
     )
@@ -62,4 +62,5 @@ def get_next_step_modal():
         size="lg",
         zIndex=10000,
         children=get_next_step_modal_content(),
+        keepMounted=True,
     )

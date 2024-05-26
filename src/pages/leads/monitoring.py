@@ -16,12 +16,12 @@ dash.register_page(__name__, class_icon="ti ti-phone", order=3)
 def layout():
     skeleton_cards = dmc.Grid(
         children=[
-            dmc.Col(
+            dmc.GridCol(
                 dmc.Skeleton(
                     height="150px",
                     width="23vw",
                 ),
-                md=3,
+                span={"base": 12, "md": 3},
             )
             for i in range(4)
         ],

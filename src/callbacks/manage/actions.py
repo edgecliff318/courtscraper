@@ -86,7 +86,7 @@ def create_case_card(case_data: dict):
     card_layout = [
         dmc.Group(
             [
-                dmc.Text(f"Case#{case_id}", weight=500),
+                dmc.Text(f"Case#{case_id}", fw=500),
                 dmc.Badge(
                     case_statuses.get(status, {}).get(
                         "short_description", status
@@ -95,40 +95,40 @@ def create_case_card(case_data: dict):
                     variant="light",
                 ),
             ],
-            position="apart",
-            spacing="xs",
+            justify="apart",
+            gap="xs",
         ),
         badges,
         dmc.Text(
             f"{full_name.lower().capitalize()}",
             size="sm",
-            color="dark",
+            c="dark",
         ),
         dmc.Group(
             [
                 dmc.Text(
                     f"{case_date.lower().capitalize()}",
                     size="sm",
-                    color=court_date_color,
+                    c=court_date_color,
                 ),
                 dmc.Text(
                     f"{location_name.lower().capitalize()}",
                     size="sm",
-                    color="dimmed",
+                    c="dimmed",
                 ),
             ],
-            position="apart",
-            spacing="xs",
+            justify="apart",
+            gap="xs",
         ),
         dmc.Text(
             f"{charges_description.lower().capitalize()}",
             size="sm",
-            color="dark",
+            c="dark",
         ),
         dmc.Text(
             f"Updated {last_updated_str} ago",
             size="xs",
-            color="dimmed",
+            c="dimmed",
         ),
     ]
 
@@ -146,8 +146,8 @@ def create_case_card(case_data: dict):
 
 def create_case_column(cases, title):
     """Generate a column of case cards with a title."""
-    return dmc.Col(
-        dmc.Navbar(
+    return dmc.GridCol(
+        dmc.Stack(
             p="md",
             children=[
                 html.H4(
@@ -160,11 +160,7 @@ def create_case_column(cases, title):
                 ),
             ],
         ),
-        xl=4,
-        lg=4,
-        md=12,
-        sm=12,
-        xs=12,
+        span={"base": 12, "xs": 12, "sm": 12, "md": 12, "lg": 4, "xl": 4},
     )
 
 

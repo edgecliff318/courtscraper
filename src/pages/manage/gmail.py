@@ -25,7 +25,7 @@ def layout(*args, **kwargs):
             html.A(
                 dmc.Button(
                     "Revoke Gmail Access",
-                    leftIcon=DashIconify(icon="mdi:email-outline"),
+                    leftSection=DashIconify(icon="mdi:email-outline"),
                     color="red",
                     variant="filled",
                     className="mt-2",
@@ -43,7 +43,7 @@ def layout(*args, **kwargs):
             html.A(
                 dmc.Button(
                     "Authorize Gmail",
-                    leftIcon=DashIconify(icon="mdi:email-outline"),
+                    leftSection=DashIconify(icon="mdi:email-outline"),
                     variant="filled",
                     color="dark",
                     className="mt-2",

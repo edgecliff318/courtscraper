@@ -45,7 +45,7 @@ def get_lead_card(lead):
                     children=[
                         dmc.Text(
                             f"{lead.first_name} {lead.middle_name} {lead.last_name}",
-                            weight=500,
+                            fw=500,
                         ),
                         dmc.ActionIcon(
                             DashIconify(
@@ -55,7 +55,7 @@ def get_lead_card(lead):
                             variant="transparent",
                         ),
                     ],
-                    position="apart",
+                    justify="apart",
                 ),
                 withBorder=True,
                 inheritPadding=True,
@@ -63,14 +63,14 @@ def get_lead_card(lead):
             ),
             dmc.Group(
                 [
-                    dmc.Text(f"Case#{lead.case_id}", weight=500),
+                    dmc.Text(f"Case#{lead.case_id}", fw=500),
                     html.Div(hidden=True, children=lead.case_id, id="case-id"),
                     dmc.Badge(
                         lead.status.capitalize(),
                         variant="light",
                     ),
                 ],
-                position="apart",
+                justify="apart",
                 mt="md",
                 mb="xs",
             ),
@@ -114,19 +114,19 @@ def get_lead_card(lead):
                             "type": "won-button",
                             "index": lead.case_id,
                         },
-                        leftIcon=DashIconify(icon="healthicons:yes"),
+                        leftSection=DashIconify(icon="healthicons:yes"),
                         color="dark",
-                        variant="filled"
-                        if lead.status == "won"
-                        else "outline",
+                        variant=(
+                            "filled" if lead.status == "won" else "outline"
+                        ),
                     ),
                     dmc.Button(
                         "Lost",
-                        leftIcon=DashIconify(icon="healthicons:no"),
+                        leftSection=DashIconify(icon="healthicons:no"),
                         color="red",
-                        variant="filled"
-                        if lead.status == "lost"
-                        else "outline",
+                        variant=(
+                            "filled" if lead.status == "lost" else "outline"
+                        ),
                         id={
                             "type": "lost-button",
                             "index": lead.case_id,
@@ -134,11 +134,11 @@ def get_lead_card(lead):
                     ),
                     dmc.Button(
                         "Wait",
-                        leftIcon=DashIconify(icon="solar:menu-dots-broken"),
+                        leftSection=DashIconify(icon="solar:menu-dots-broken"),
                         color="yellow",
-                        variant="filled"
-                        if lead.status == "wait"
-                        else "outline",
+                        variant=(
+                            "filled" if lead.status == "wait" else "outline"
+                        ),
                         id={
                             "type": "wait-button",
                             "index": lead.case_id,
@@ -146,7 +146,7 @@ def get_lead_card(lead):
                     ),
                 ],
                 className="mt-2",
-                position="center",
+                justify="center",
             ),
         ],
         withBorder=True,

@@ -25,7 +25,7 @@ def layout():
             dmc.CardSection(
                 dmc.Group(
                     [
-                        dmc.DateRangePicker(
+                        dmc.DatePicker(
                             id="leads-inbound-date-picker",
                             label="Select a date range",
                             minDate=date(2023, 12, 20),
@@ -33,8 +33,9 @@ def layout():
                                 datetime.now().date() - timedelta(days=1),
                                 datetime.now().date(),
                             ],
-                            dropdownPosition="bottom",
+                            # dropdownPosition="bottom",
                             style={"width": "300px"},
+                            type="range",
                         ),
                         dmc.MultiSelect(
                             label="Select leads with status",
@@ -44,7 +45,7 @@ def layout():
                             data=[
                                 {"value": "all", "label": "All"},
                             ],
-                            dropdownPosition="bottom",
+                            # dropdownPosition="bottom",
                         ),
                         dmc.Button(
                             id="leads-inbound-apply-filters",
@@ -68,7 +69,7 @@ def layout():
     leads_card = dmc.Card(
         [
             dmc.CardSection(
-                dmc.Text("Leads List", weight=500),
+                dmc.Text("Leads List", fw=500),
                 withBorder=True,
                 inheritPadding=True,
                 py="xs",
@@ -88,12 +89,12 @@ def layout():
     # Add the card
     output = dmc.Grid(
         children=[
-            dmc.Col(html.Div("leads-inbound-alerts"), span=12),
-            dmc.Col(filters_card, span=12),
-            dmc.Col(summary_card, span=12),
-            dmc.Col(leads_card, span=12),
+            dmc.GridCol(html.Div(id="leads-inbound-alerts"), span=12),
+            dmc.GridCol(filters_card, span=12),
+            dmc.GridCol(summary_card, span=12),
+            dmc.GridCol(leads_card, span=12),
         ],
-        gutter="xl",
+        gutter="xs",
     )
 
     return output

@@ -1,6 +1,8 @@
 import dash.html as html
 import dash_bootstrap_components as dbc
+import dash_mantine_components as dmc
 
+from src.components.filters import get_court_selector
 from src.components.inputs import generate_form_group
 
 
@@ -24,17 +26,7 @@ def layout(data=None):
                         ),
                         dbc.Col(
                             [
-                                generate_form_group(
-                                    label="Measure",
-                                    id="court-selector",
-                                    placeholder="Select a Court",
-                                    type="Dropdown",
-                                    options=[],
-                                    value=None,
-                                    multi=True,
-                                    persistence_type="session",
-                                    persistence=True,
-                                ),
+                                get_court_selector(),
                             ],
                             width=3,
                         ),

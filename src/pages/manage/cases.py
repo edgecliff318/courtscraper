@@ -21,9 +21,7 @@ from src.services import cases
 logger = logging.Logger(__name__)
 
 dash.register_page(__name__, order=3, path_template="/manage/cases/<case_id>")
-
-
-
+  
 
 def layout(case_id):
     if case_id is None or case_id == "#" or case_id == "none":

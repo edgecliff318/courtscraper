@@ -24,11 +24,11 @@ def get_case_summary(case: Case):
 
     case_data = dynamic_fields.CaseDynamicFields().update(case, {})
 
-    return dmc.Paper(
+    return dmc.Stack(
         [
             dmc.Group(
                 [
-                    dmc.Text(f"Case#{case.case_id}", weight=500),
+                    dmc.Text(f"Case#{case.case_id}", fw=500),
                     html.Div(hidden=True, children=case.case_id, id="case-id"),
                     dmc.Badge(
                         (
@@ -43,7 +43,7 @@ def get_case_summary(case: Case):
                         size="sm",
                     ),
                 ],
-                position="apart",
+                justify="apart",
                 mt="md",
                 mb="xs",
             ),
@@ -98,7 +98,7 @@ def get_case_summary(case: Case):
             dmc.Text(
                 case.formatted_party_address,
                 size="sm",
-                color="dimmed",
+                c="dimmed",
                 # Right align
             ),
             create_group_item(
@@ -143,7 +143,7 @@ def get_case_summary(case: Case):
                                 dmc.Text(
                                     party.get("formatted_partyaddress", ""),
                                     size="sm",
-                                    color="dimmed",
+                                    c="dimmed",
                                     # Right align
                                 ),
                             ]
@@ -154,5 +154,6 @@ def get_case_summary(case: Case):
                 if case.parties is not None
                 else ""
             ),
-        ]
+        ],
+        gap="0px",
     )
