@@ -103,7 +103,7 @@ def render_template(templates_id):
     for key, value in data.items():
         if value["type"] == "Switch":
             grid.append(
-                dmc.Col(
+                dmc.GridCol(
                     dmc.Switch(
                         label=value["label"],
                         checked=getattr(template, key),
@@ -115,7 +115,7 @@ def render_template(templates_id):
 
         elif value["type"] == "Select":
             grid.append(
-                dmc.Col(
+                dmc.GridCol(
                     dmc.Select(
                         label=value["label"],
                         data=value["data"],
@@ -128,14 +128,14 @@ def render_template(templates_id):
 
         elif value["type"] == "Textarea":
             grid.append(
-                dmc.Col(
+                dmc.GridCol(
                     dmc.Textarea(
                         label=value["label"],
                         value=getattr(template, key),
                         id=key,
                         style={"minWidth": 500},
                         autosize=True,
-                        minRows=4,
+                        minRows=20,
                     ),
                     span=6,
                 )
@@ -143,7 +143,7 @@ def render_template(templates_id):
 
         elif value["type"] == "JsonInput":
             grid.append(
-                dmc.Col(
+                dmc.GridCol(
                     dmc.JsonInput(
                         label=value["label"],
                         value=getattr(template, key),
@@ -155,7 +155,7 @@ def render_template(templates_id):
 
         else:
             grid.append(
-                dmc.Col(
+                dmc.GridCol(
                     dmc.TextInput(
                         label=value["label"],
                         placeholder=value["placeholder"],

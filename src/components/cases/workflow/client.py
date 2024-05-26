@@ -75,7 +75,7 @@ def get_client_section(case):
             client_id = participant.mycase_id
         customer_mycase_button = dmc.Button(
             "Open in MyCase",
-            leftIcon=DashIconify(icon="fluent:open-folder-20-filled"),
+            leftSection=DashIconify(icon="fluent:open-folder-20-filled"),
             id="modal-client-preview-mycase",
             variant="filled",
             color="dark",
@@ -105,7 +105,7 @@ def get_client_section(case):
                 children=[
                     dmc.Grid(
                         children=[
-                            dmc.Col(
+                            dmc.GridCol(
                                 html.Div(
                                     dmc.Loader(
                                         color="blue", size="md", variant="dots"
@@ -114,7 +114,7 @@ def get_client_section(case):
                                 ),
                                 span=6,
                             ),
-                            dmc.Col(
+                            dmc.GridCol(
                                 [
                                     dmc.Stack(
                                         [
@@ -173,7 +173,7 @@ def get_client_section(case):
                                                 "Generate using AI",
                                                 id="modal-client-preview-generate",
                                                 className="m-2",
-                                                leftIcon=DashIconify(
+                                                leftSection=DashIconify(
                                                     icon="fluent:database-plug-connected-20-filled"
                                                 ),
                                                 variant="filled",
@@ -183,7 +183,7 @@ def get_client_section(case):
                                                 "Submit to client",
                                                 id="modal-client-submit",
                                                 className="m-2",
-                                                leftIcon=DashIconify(
+                                                leftSection=DashIconify(
                                                     icon="formkit:submit"
                                                 ),
                                                 variant="filled",
@@ -193,7 +193,7 @@ def get_client_section(case):
                                                 "Cancel Submission",
                                                 id="modal-client-cancel",
                                                 className="m-2",
-                                                leftIcon=DashIconify(
+                                                leftSection=DashIconify(
                                                     icon="fluent:delete-20-filled"
                                                 ),
                                                 disabled=True,
@@ -214,17 +214,18 @@ def get_client_section(case):
                 id="modal-client-preview",
                 size="95%",
                 zIndex=10000,
+                keepMounted=True,
             ),
             dmc.Select(
                 label="Document Template",
-                icon=DashIconify(icon="radix-icons:magnifying-glass"),
+                leftSection=DashIconify(icon="radix-icons:magnifying-glass"),
                 rightSection=DashIconify(icon="radix-icons:chevron-down"),
                 id="section-client-select-template",
                 searchable=True,
             ),
             dmc.Button(
                 "Preview & Submit",
-                leftIcon=DashIconify(icon="fluent:preview-link-20-filled"),
+                leftSection=DashIconify(icon="fluent:preview-link-20-filled"),
                 id="modal-client-preview-button",
                 variant="filled",
                 color="dark",

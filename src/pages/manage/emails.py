@@ -11,7 +11,9 @@ from src.services.emails import GmailConnector, ParserMessage
 
 logger = logging.Logger(__name__)
 
-dash.register_page(__name__, order=4, path_template="/manage/emails/<email_id>")
+dash.register_page(
+    __name__, order=4, path_template="/manage/emails/<email_id>"
+)
 
 
 def render_file_attachment(attachment):
@@ -20,7 +22,10 @@ def render_file_attachment(attachment):
     b64 = base64.b64encode(content).decode()
     href = f"data:text/plain;base64,{b64}"
     btn = dbc.Button(
-        [DashIconify(icon="ph:file-thin", width=20, className="mr-2"), attachment[0]],
+        [
+            DashIconify(icon="ph:file-thin", width=20, className="mr-2"),
+            attachment[0],
+        ],
         id=f"btn-download-{filename}",
         color="dark",
         className="m-2",
@@ -46,12 +51,12 @@ def render_single_email(email):
             [
                 dmc.Text(
                     "Attachments",
-                    weight=700,
+                    fw=700,
                 ),
                 dmc.Divider(),
                 dmc.Grid(
                     [
-                        dmc.Col(
+                        dmc.GridCol(
                             render_file_attachment(attachment),
                         )
                         for attachment in attachments
@@ -64,34 +69,34 @@ def render_single_email(email):
             [
                 dmc.Text(
                     "No Attachments",
-                    weight=700,
+                    fw=700,
                 ),
             ]
         )
 
     header = dmc.Grid(
         [
-            dmc.Col(
+            dmc.GridCol(
                 dmc.Text(
                     # Sender
                     gmail_connector.get_sender(email),
-                    weight=700,
+                    fw=700,
                 ),
                 span=3,
             ),
-            dmc.Col(
+            dmc.GridCol(
                 dmc.Text(
                     # Subject
                     f"{gmail_connector.get_email_subject(email)}",
-                    weight=700,
+                    fw=700,
                 ),
                 span=7,
             ),
-            dmc.Col(
+            dmc.GridCol(
                 dmc.Text(
                     # Date
                     f"{gmail_connector.get_timestamp(email)}",
-                    weight=700,
+                    fw=700,
                 ),
                 span=2,
             ),
@@ -130,17 +135,17 @@ def render_reply_section():
         [
             dmc.Text(
                 "Reply",
-                weight=700,
+                fw=700,
             ),
             dmc.Divider(),
             dmc.Grid(
                 [
-                    dmc.Col(
+                    dmc.GridCol(
                         dmc.Text(
                             "AI Reply",
                         )
                     ),
-                    dmc.Col(
+                    dmc.GridCol(
                         dmc.Select(
                             data=[
                                 {"label": "Prompt#0: Thank you", "value": "1"},

@@ -32,7 +32,7 @@ def generate_form_group(
         kwargs["value"] = [kwargs["start_date"], kwargs["end_date"]]
         kwargs.pop("start_date")
         kwargs.pop("end_date")
-        field = dmc.DateRangePicker(id=id, inputFormat="DD/MM/YYYY", **kwargs)
+        field = dmc.DatePicker(id=id, type="range", **kwargs)
     elif type == "DatePickerSingle":
         kwargs["value"] = kwargs.get("date", datetime.date.today())
         kwargs.pop("date")

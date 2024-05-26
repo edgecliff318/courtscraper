@@ -26,11 +26,11 @@ def layout():
                 "Save",
                 color="dark",
                 id="edit-template-save",
-                leftIcon=DashIconify(icon="material-symbols:save"),
+                leftSection=DashIconify(icon="material-symbols:save"),
             ),
             dmc.Button("Cancel", color="red", variant="subtle"),
         ],
-        position="right",
+        justify="right",
     )
 
     return [

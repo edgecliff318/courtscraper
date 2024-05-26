@@ -44,7 +44,7 @@ def layout():
                         persistence=True,
                     ),
                 ],
-                position="center",
+                justify="center",
                 grow=True,
             ),
             html.Div(

@@ -13,8 +13,9 @@ settings = get_settings()
 
 
 def handle_modal(prefix):
+
     @callback(
-        Output(f"{prefix}-modal", "is_open"),
+        Output(f"{prefix}-modal", "opened"),
         Output(f"{prefix}-modal-content", "children"),
         Output(f"{prefix}-memory", "data"),
         State(f"{prefix}-memory", "data"),
@@ -44,7 +45,7 @@ for prefix in ["outbound", "monitoring"]:
 
 
 @callback(
-    Output("conversation-modal", "is_open"),
+    Output("conversation-modal", "opened"),
     Output("conversation-modal-content", "children"),
     Output("conversation-memory", "data"),
     State("conversation-memory", "data"),

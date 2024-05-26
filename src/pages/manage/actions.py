@@ -14,7 +14,7 @@ dash.register_page(__name__, order=3, path_template="/manage/actions")
 
 
 def layout():
-    return  html.Div(
+    return html.Div(
         [
             dbc.Row(
                 [
@@ -35,7 +35,7 @@ def layout():
             html.Div(id="actions-data"),
             dmc.Grid(
                 children=[
-                    dmc.Col(
+                    dmc.GridCol(
                         dmc.Card(
                             children=[
                                 dmc.Group(
@@ -52,13 +52,9 @@ def layout():
                                 ),
                             ],
                         ),
-                        xl=4,
-                        lg=4,
-                        md=12,
-                        sm=12,
-                        xs=12,
+                        span={"xl": 4, "lg": 4, "md": 12, "sm": 12, "xs": 12},
                     ),
-                    dmc.Col(
+                    dmc.GridCol(
                         dmc.Card(
                             children=[
                                 dmc.Group(
@@ -76,13 +72,9 @@ def layout():
                                 ),
                             ],
                         ),
-                        xl=4,
-                        lg=4,
-                        md=12,
-                        sm=12,
-                        xs=12,
+                        span={"xl": 4, "lg": 4, "md": 12, "sm": 12, "xs": 12},
                     ),
-                    dmc.Col(
+                    dmc.GridCol(
                         dmc.Card(
                             children=[
                                 dmc.Group(
@@ -100,11 +92,7 @@ def layout():
                                 ),
                             ],
                         ),
-                        xl=4,
-                        lg=4,
-                        md=12,
-                        sm=12,
-                        xs=12,
+                        span={"xl": 4, "lg": 4, "md": 12, "sm": 12, "xs": 12},
                     ),
                 ],
                 justify="center",
@@ -112,7 +100,5 @@ def layout():
                 gutter="xl",
             ),
         ],
-        style={
-                "padding": "20px"
-               },
+        style={"padding": "20px"},
     )

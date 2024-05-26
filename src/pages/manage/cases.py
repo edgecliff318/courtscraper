@@ -29,21 +29,21 @@ def get_case_tabs(case):
         [
             dmc.TabsList(
                 [
-                    dmc.Tab(
+                    dmc.TabsTab(
                         "Case Workflow",
                         rightSection=DashIconify(
                             icon="tabler:alert-circle", width=16
                         ),
                         value="workflow",
                     ),
-                    dmc.Tab(
+                    dmc.TabsTab(
                         "Events",
                         rightSection=dmc.Badge(
                             events_number,
                             size="xs",
                             p=0,
                             variant="filled",
-                            sx={
+                            styles={
                                 "width": 16,
                                 "height": 16,
                                 "pointerEvents": "none",
@@ -51,28 +51,28 @@ def get_case_tabs(case):
                         ),
                         value="events",
                     ),
-                    dmc.Tab(
+                    dmc.TabsTab(
                         "Communications",
                         rightSection=DashIconify(
                             icon="material-symbols:comment-outline", width=16
                         ),
                         value="communications",
                     ),
-                    dmc.Tab(
+                    dmc.TabsTab(
                         "Documents",
                         rightSection=DashIconify(
                             icon="et:documents", width=16
                         ),
                         value="documents",
                     ),
-                    dmc.Tab(
+                    dmc.TabsTab(
                         "Payments",
                         rightSection=DashIconify(
                             icon="fluent:payment-32-regular", width=16
                         ),
                         value="payments",
                     ),
-                    dmc.Tab(
+                    dmc.TabsTab(
                         "Details",
                         rightSection=DashIconify(
                             icon="carbon:folder-details", width=16
@@ -144,7 +144,7 @@ def layout(case_id):
                                         "Refresh from Casenet",
                                         color="dark",
                                         id="case-refresh-button",
-                                        leftIcon=DashIconify(
+                                        leftSection=DashIconify(
                                             icon="material-symbols:save"
                                         ),
                                     ),

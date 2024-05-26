@@ -34,7 +34,9 @@ leads_controls = dbc.Row(
                 type="DateRangePicker",
                 persistence_type="session",
                 persistence=True,
-                start_date=(datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d"),
+                start_date=(datetime.now() - timedelta(days=1)).strftime(
+                    "%Y-%m-%d"
+                ),
                 end_date=datetime.now().strftime("%Y-%m-%d"),
             ),
             width=3,
@@ -110,7 +112,9 @@ def create_scrapper_form_group():
 
 def create_button(label, id, width, lg, xs):
     return dbc.Col(
-        dmc.Button(label, id=id, color="dark", size="sm", className="mt-auto "),
+        dmc.Button(
+            label, id=id, color="dark", size="sm", className="mt-auto "
+        ),
         width=width,
         lg=lg,
         xs=xs,
@@ -124,8 +128,8 @@ def create_switch():
             dmc.Text(
                 "Automated Messaging",
                 id="switch-settings-txt",
-                weight=500,
-                color="dark",
+                w=500,
+                c="dark",
             ),
             dmc.Space(h=10),
             dmc.Switch(
@@ -133,7 +137,7 @@ def create_switch():
                 thumbIcon=DashIconify(
                     icon="mdi:workflow",
                     width=16,
-                    color=dmc.theme.DEFAULT_COLORS["teal"][5],
+                    color=dmc.DEFAULT_THEME["colors"]["teal"][5],
                 ),
                 size="md",
                 color="teal",
@@ -145,21 +149,21 @@ def create_switch():
 
 monitoring_controls = dmc.Grid(
     children=[
-        dmc.Col(
+        dmc.GridCol(
             create_date_form_group("monitoring-date-selector"),
             span="content",
             style={
                 "minWidth": "250px",
             },
         ),
-        dmc.Col(
+        dmc.GridCol(
             create_interaction_form_group(),
             span="content",
             style={
                 "minWidth": "250px",
             },
         ),
-        dmc.Col(
+        dmc.GridCol(
             dmc.Button(
                 "Monitoring",
                 id="monitoring-button",
@@ -167,7 +171,7 @@ monitoring_controls = dmc.Grid(
             ),
             span="content",
         ),
-        dmc.Col(
+        dmc.GridCol(
             dmc.Button(
                 "Refresh",
                 id="monitoring-refresh-button",
@@ -175,7 +179,7 @@ monitoring_controls = dmc.Grid(
             ),
             span="content",
         ),
-        dmc.Col(create_switch(), span="content"),
+        dmc.GridCol(create_switch(), span="content"),
     ],
     justify="flex-start",
     align="flex-end",
@@ -230,6 +234,4 @@ date_selector = generate_form_group(
     end_date=datetime.now().strftime("%Y-%m-%d"),
 )
 
-cases_controls = dbc.Row(
-    [generate_col(court_selector, lg=5)]
-)
+cases_controls = dbc.Row([generate_col(court_selector, lg=5)])

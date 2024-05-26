@@ -72,7 +72,7 @@ def create_chat_bubble(text, from_user=True, date=None):
             dmc.Text(
                 date.strftime("%Y-%m-%d %H:%M:%S") if date is not None else "",
                 size="xs",
-                color="gray",
+                c="gray",
             ),
         ],
         style={
@@ -129,8 +129,7 @@ def create_chat(df: pd.DataFrame, phone=None):
 
 def generate_status_options(prefix: str):
     return [
-        dbc.Col("Update the leads status", width=3),
-        dbc.Col(
+        html.Div(
             generate_form_group(
                 label="Update the leads status",
                 id=f"{prefix}-modal-lead-status",
@@ -143,8 +142,7 @@ def generate_status_options(prefix: str):
                 ],
                 persistence_type="session",
                 persistence=True,
-            ),
-            width=4,
+            )
         ),
     ]
 
@@ -153,9 +151,7 @@ def many_response_model(prefix: str) -> html.Div:
     status_options = generate_status_options(prefix)
 
     modal_footer_buttons = [
-        dmc.Button(
-            text, id=f"{prefix}-{button_id}", className="ml-auto", color=color
-        )
+        dmc.Button(text, id=f"{prefix}-{button_id}", color=color)
         for text, button_id, color in [
             ("Update Status", "modal-lead-status-update", "dark"),
             ("Generate Letters", "generate-letters", "dark"),
@@ -167,31 +163,37 @@ def many_response_model(prefix: str) -> html.Div:
     return html.Div(
         [
             dcc.Store(id=f"{prefix}-memory", storage_type="memory"),
-            dbc.Modal(
-                [
-                    dbc.ModalHeader("More information about the selected SMS"),
-                    dbc.ModalBody(
-                        messaging_template(
-                            pd.DataFrame(columns=["Phone"], data=[]),
-                            prefix=prefix,
+            dmc.Modal(
+                dmc.Stack(
+                    [
+                        dmc.Title("More information about the selected SMS"),
+                        html.Div(
+                            messaging_template(
+                                pd.DataFrame(columns=["Phone"], data=[]),
+                                prefix=prefix,
+                            ),
+                            id=f"{prefix}-modal-content",
                         ),
-                        id=f"{prefix}-modal-content",
-                    ),
-                    html.Div(
-                        id=f"{prefix}-hidden-div", style={"display": "none"}
-                    ),
-                    html.Div(id=f"{prefix}-modal-content-sending-status"),
-                    dbc.Row(status_options, className="m-2"),
-                    dbc.Row(id=f"{prefix}-modal-lead-status-update-status"),
-                    dbc.Row(
-                        id=f"{prefix}-modal-content-generate-letters-status",
-                        className="m-2",
-                    ),
-                    dbc.ModalFooter(
-                        modal_footer_buttons,
-                        className="d-flex justify-content-end",
-                    ),
-                ],
+                        html.Div(
+                            id=f"{prefix}-hidden-div",
+                            style={"display": "none"},
+                        ),
+                        html.Div(id=f"{prefix}-modal-content-sending-status"),
+                        html.Div(status_options, className="m-2"),
+                        html.Div(
+                            id=f"{prefix}-modal-lead-status-update-status"
+                        ),
+                        html.Div(
+                            id=f"{prefix}-modal-content-generate-letters-status",
+                            className="m-2",
+                        ),
+                        dmc.Group(
+                            modal_footer_buttons,
+                            justify="flex-end",
+                            gap="sm",
+                        ),
+                    ],
+                ),
                 id=f"{prefix}-modal",
                 size="xl",
             ),
@@ -286,19 +288,15 @@ def messaging_template(
                 ],
                 className="mb-1",
             ),
-            dbc.Row(
-                [
-                    dbc.Col(
-                        generate_form_group(
-                            label="Message",
-                            id="lead-single-message-modal",
-                            placeholder="Type in the message",
-                            type="Textarea",
-                            minRows=10,
-                        ),
-                        width=10,
-                    ),
-                ]
+            html.Div(
+                generate_form_group(
+                    label="Message",
+                    id="lead-single-message-modal",
+                    placeholder="Type in the message",
+                    type="Textarea",
+                    minRows=10,
+                    value="",
+                ),
             ),
         ]
     )
@@ -315,13 +313,14 @@ def conversation_model():
     return html.Div(
         [
             html.Div(
-                dbc.Modal(
+                dmc.Modal(
                     [
-                        dbc.ModalHeader("Conversation"),
-                        dbc.ModalBody(id="modal-conversation-content"),
+                        dmc.Title("Conversation"),
+                        dmc.Loader(id="modal-conversation-content"),
                     ],
                     id="modal-conversation",
                     size="xl",
+                    keepMounted=True,
                 ),
                 className="m-3",
             ),

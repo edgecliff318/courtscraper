@@ -218,7 +218,7 @@ class Settings(BaseSettings):
     )
 
     # Gotenberg Configuration
-    GOTENBERG_URL: str = os.getenv("GOTENBERG_URL", "http://localhost:3001")
+    GOTENBERG_URL: str = os.getenv("GOTENBERG_URL", "http://localhost:58864")
 
     # Selenium Service
     SELENIUM_STANDALONE_URL: str = os.getenv(

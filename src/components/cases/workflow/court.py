@@ -14,7 +14,7 @@ def get_court_section():
                 children=[
                     dmc.Grid(
                         children=[
-                            dmc.Col(
+                            dmc.GridCol(
                                 html.Div(
                                     dmc.Loader(
                                         color="blue", size="md", variant="dots"
@@ -23,7 +23,7 @@ def get_court_section():
                                 ),
                                 span=6,
                             ),
-                            dmc.Col(
+                            dmc.GridCol(
                                 [
                                     dmc.Stack(
                                         [
@@ -75,7 +75,7 @@ def get_court_section():
                                                 "Update",
                                                 id="modal-court-preview-update",
                                                 className="m-2",
-                                                leftIcon=DashIconify(
+                                                leftSection=DashIconify(
                                                     icon="fluent:database-plug-connected-20-filled"
                                                 ),
                                                 variant="filled",
@@ -85,7 +85,7 @@ def get_court_section():
                                                 "Submit to Court",
                                                 id="modal-court-submit",
                                                 className="m-2",
-                                                leftIcon=DashIconify(
+                                                leftSection=DashIconify(
                                                     icon="formkit:submit"
                                                 ),
                                                 variant="filled",
@@ -95,7 +95,7 @@ def get_court_section():
                                                 "Cancel Submission",
                                                 id="modal-court-cancel",
                                                 className="m-2",
-                                                leftIcon=DashIconify(
+                                                leftSection=DashIconify(
                                                     icon="fluent:delete-20-filled"
                                                 ),
                                                 disabled=True,
@@ -116,17 +116,18 @@ def get_court_section():
                 id="modal-court-preview",
                 size="90%",
                 zIndex=10000,
+                keepMounted=True,
             ),
             dmc.Select(
                 label="Document Template",
-                icon=DashIconify(icon="radix-icons:magnifying-glass"),
+                leftSection=DashIconify(icon="radix-icons:magnifying-glass"),
                 rightSection=DashIconify(icon="radix-icons:chevron-down"),
                 id="section-court-select-template",
                 searchable=True,
             ),
             dmc.Button(
                 "Preview & Submit to Court",
-                leftIcon=DashIconify(icon="fluent:preview-link-20-filled"),
+                leftSection=DashIconify(icon="fluent:preview-link-20-filled"),
                 id="modal-court-preview-button",
                 variant="filled",
                 color="dark",
