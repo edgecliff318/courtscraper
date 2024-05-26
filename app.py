@@ -2,8 +2,7 @@ import logging
 import os
 from logging.config import dictConfig
 
-import dash_bootstrap_components as dbc
-import dash_mantine_components as dmc
+import dash
 import diskcache
 import sentry_sdk
 from dash import Dash, DiskcacheManager
@@ -79,6 +78,8 @@ def init_app():
 
     background_callback_manager = DiskcacheManager(diskcache.Cache("./.cache"))
 
+    dash._dash_renderer._set_react_version("18.2.0")
+
     app = Dash(
         meta_tags=[
             {
@@ -87,7 +88,14 @@ def init_app():
             }
         ],
         use_pages=True,
-        external_stylesheets=[dbc.themes.BOOTSTRAP],
+        external_stylesheets=[
+            "https://unpkg.com/@mantine/dates@7/styles.css",
+            "https://unpkg.com/@mantine/code-highlight@7/styles.css",
+            "https://unpkg.com/@mantine/charts@7/styles.css",
+            "https://unpkg.com/@mantine/carousel@7/styles.css",
+            "https://unpkg.com/@mantine/notifications@7/styles.css",
+            "https://unpkg.com/@mantine/nprogress@7/styles.css",
+        ],
         pages_folder=pages_folder,
         external_scripts=[
             {
@@ -122,7 +130,6 @@ def init_app():
     app.title = settings.PROJECT_NAME
 
     # Set the layout
-    # app.layout = dmc.NotificationsProvider(Layout().render())
     app.layout = Layout().render()
 
     # Set the server
@@ -152,7 +159,7 @@ app, server, auth = init_app()
 if __name__ == "__main__":
     app.run_server(
         debug=True,
-        port=3000,
+        port=3001,
         # Run in one thread
         threaded=False,
     )
