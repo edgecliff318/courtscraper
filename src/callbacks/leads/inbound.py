@@ -56,29 +56,29 @@ def render_inbound_summary(data: pd.DataFrame):
 
     return dmc.Grid(
         [
-            dmc.Col(
+            dmc.GridCol(
                 render_stats_card(
                     "Total leads",
                     f"{total_leads:,}",
                     "leads",
                 ),
-                md=4,
+                span={"base": 12, "md": 4},
             ),
-            dmc.Col(
+            dmc.GridCol(
                 render_stats_card(
                     "New Leads",
                     f"{total_leads_by_status.get('new', 0):,}",
                     "leads",
                 ),
-                md=4,
+                span={"base": 12, "md": 4},
             ),
-            dmc.Col(
+            dmc.GridCol(
                 render_stats_card(
                     "Leads Processed",
                     f"{(total_leads - total_leads_by_status.get('new', 0)):,}",
                     "leads",
                 ),
-                md=4,
+                span={"base": 12, "md": 4},
             ),
         ]
     )
@@ -86,20 +86,20 @@ def render_inbound_summary(data: pd.DataFrame):
 
 def render_inbound_table(data: pd.DataFrame):
     header = [
-        html.Thead(
-            html.Tr(
+        dmc.TableThead(
+            dmc.TableTr(
                 [
-                    html.Th("State"),
-                    html.Th("Court"),
-                    html.Th("Violation"),
-                    html.Th("Phone"),
-                    html.Th("Date"),
-                    html.Th("Accident"),
-                    html.Th("CDL"),
-                    html.Th("Ticket"),
-                    html.Th("User"),
-                    html.Th("Status"),
-                    html.Th("Actions"),
+                    dmc.TableTh("State"),
+                    dmc.TableTh("Court"),
+                    dmc.TableTh("Violation"),
+                    dmc.TableTh("Phone"),
+                    dmc.TableTh("Date"),
+                    dmc.TableTh("Accident"),
+                    dmc.TableTh("CDL"),
+                    dmc.TableTh("Ticket"),
+                    dmc.TableTh("User"),
+                    dmc.TableTh("Status"),
+                    dmc.TableTh("Actions"),
                 ]
             )
         )
@@ -147,7 +147,7 @@ def render_inbound_table(data: pd.DataFrame):
                         children=[
                             dmc.Image(
                                 src=row.ticket_img,
-                                width="100%",
+                                w="100%",
                             ),
                         ],
                         style={"width": "300px"},
@@ -184,7 +184,7 @@ def render_inbound_table(data: pd.DataFrame):
             violation = dmc.Text(row.violation, size="sm")
 
         else:
-            violation = dmc.Text("No violation", size="sm", color="gray")
+            violation = dmc.Text("No violation", size="sm", c="gray")
 
         creation_date = dmc.Text(row.creation_date, size="sm")
 
@@ -253,19 +253,19 @@ def render_inbound_table(data: pd.DataFrame):
             )
 
         rows.append(
-            html.Tr(
+            dmc.TableTr(
                 [
-                    html.Td(state_badge),
-                    html.Td(court_badge),
-                    html.Td(violation),
-                    html.Td(humanize_phone(row.phone)),
-                    html.Td(creation_date),
-                    html.Td(accident_checkbox),
-                    html.Td(commercial_driver_licence),
-                    html.Td(ticket_hover),
-                    html.Td(user_icon),
-                    html.Td(status),
-                    html.Td(
+                    dmc.TableTd(state_badge),
+                    dmc.TableTd(court_badge),
+                    dmc.TableTd(violation),
+                    dmc.TableTd(humanize_phone(row.phone)),
+                    dmc.TableTd(creation_date),
+                    dmc.TableTd(accident_checkbox),
+                    dmc.TableTd(commercial_driver_licence),
+                    dmc.TableTd(ticket_hover),
+                    dmc.TableTd(user_icon),
+                    dmc.TableTd(status),
+                    dmc.TableTd(
                         dmc.Group(
                             [
                                 cloudtalk_icon,
@@ -277,7 +277,7 @@ def render_inbound_table(data: pd.DataFrame):
                                     }
                                 ),
                             ],
-                            spacing="xs",
+                            gap="xs",
                         )
                     ),
                 ],
@@ -289,7 +289,7 @@ def render_inbound_table(data: pd.DataFrame):
         )
 
     return dmc.Table(
-        header + [html.Tbody(rows)],
+        header + [dmc.TableTbody(rows)],
         highlightOnHover=True,
     )
 
