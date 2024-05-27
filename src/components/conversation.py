@@ -288,15 +288,18 @@ def messaging_template(
                 ],
                 className="mb-1",
             ),
-            html.Div(
-                generate_form_group(
-                    label="Message",
-                    id="lead-single-message-modal",
-                    placeholder="Type in the message",
-                    type="Textarea",
-                    minRows=10,
-                    value="",
-                ),
+            dbc.Row(
+                dbc.Col(
+                    generate_form_group(
+                        label="Message",
+                        id="lead-single-message-modal",
+                        placeholder="Type in the message",
+                        type="Textarea",
+                        minRows=10,
+                        value="",
+                        autosize=True,
+                    ),
+                )
             ),
         ]
     )
