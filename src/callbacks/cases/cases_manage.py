@@ -30,19 +30,21 @@ def get_case_tabs(case):
         [
             dmc.TabsList(
                 [
-                    dmc.Tab(
+                    dmc.TabsTab(
                         "Case Workflow",
-                        rightSection=DashIconify(icon="tabler:alert-circle", width=16),
+                        rightSection=DashIconify(
+                            icon="tabler:alert-circle", width=16
+                        ),
                         value="workflow",
                     ),
-                    dmc.Tab(
+                    dmc.TabsTab(
                         "Events",
                         rightSection=dmc.Badge(
                             events_number,
                             size="xs",
                             p=0,
                             variant="filled",
-                            sx={
+                            style={
                                 "width": 16,
                                 "height": 16,
                                 "pointerEvents": "none",
@@ -50,26 +52,28 @@ def get_case_tabs(case):
                         ),
                         value="events",
                     ),
-                    dmc.Tab(
+                    dmc.TabsTab(
                         "Communications",
                         rightSection=DashIconify(
                             icon="material-symbols:comment-outline", width=16
                         ),
                         value="communications",
                     ),
-                    dmc.Tab(
+                    dmc.TabsTab(
                         "Documents",
-                        rightSection=DashIconify(icon="et:documents", width=16),
+                        rightSection=DashIconify(
+                            icon="et:documents", width=16
+                        ),
                         value="documents",
                     ),
-                    dmc.Tab(
+                    dmc.TabsTab(
                         "Payments",
                         rightSection=DashIconify(
                             icon="fluent:payment-32-regular", width=16
                         ),
                         value="payments",
                     ),
-                    dmc.Tab(
+                    dmc.TabsTab(
                         "Details",
                         rightSection=DashIconify(
                             icon="carbon:folder-details", width=16
@@ -80,7 +84,9 @@ def get_case_tabs(case):
             ),
             dmc.TabsPanel(get_case_workflow(case), value="workflow"),
             dmc.TabsPanel(get_case_events(case), value="events"),
-            dmc.TabsPanel(get_case_communications(case), value="communications"),
+            dmc.TabsPanel(
+                get_case_communications(case), value="communications"
+            ),
             dmc.TabsPanel(get_case_documents(case), value="documents"),
             dmc.TabsPanel(get_case_payments(case), value="payments"),
             dmc.TabsPanel(get_case_details(case), value="details"),
@@ -120,9 +126,13 @@ def case_not_found():
                                     "Refresh from Casenet",
                                     color="dark",
                                     id="case-refresh-button",
-                                    leftIcon=DashIconify(icon="material-symbols:save"),
+                                    leftIcon=DashIconify(
+                                        icon="material-symbols:save"
+                                    ),
                                 ),
-                                dbc.Col([html.Div(id="case-refresh-button-status")]),
+                                dbc.Col(
+                                    [html.Div(id="case-refresh-button-status")]
+                                ),
                             ],
                             color="red",
                         )
@@ -204,7 +214,9 @@ def render_case_details(case, title):
 
 def get_case_id_from_path(pathname):
     case_id = pathname.split("/")[3] if pathname else None
-    if case_id is None or (isinstance(case_id, str) and case_id.lower() == "none"):
+    if case_id is None or (
+        isinstance(case_id, str) and case_id.lower() == "none"
+    ):
         return None
     return case_id
 
@@ -216,7 +228,9 @@ def capitalize_if_not_none(s):
 def create_case_title(case):
     first_name = capitalize_if_not_none(case.first_name)
     middle_name = (
-        capitalize_if_not_none(case.middle_name[:1]) + "." if case.middle_name else ""
+        capitalize_if_not_none(case.middle_name[:1]) + "."
+        if case.middle_name
+        else ""
     )
     last_name = capitalize_if_not_none(case.last_name)
 
