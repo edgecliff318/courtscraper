@@ -213,7 +213,6 @@ def get_client_section(case):
                 title="Preview the Communication",
                 id="modal-client-preview",
                 size="95%",
-                zIndex=10000,
                 keepMounted=True,
             ),
             dmc.Select(

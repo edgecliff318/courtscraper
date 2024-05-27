@@ -115,7 +115,6 @@ def get_court_section():
                 title="Preview the Document",
                 id="modal-court-preview",
                 size="90%",
-                zIndex=10000,
                 keepMounted=True,
             ),
             dmc.Select(

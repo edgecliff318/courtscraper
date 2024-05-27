@@ -214,7 +214,6 @@ def get_prosecutor_section(case):
                 title="Preview & Submit",
                 id="modal-prosecutor-preview",
                 size="100%",
-                zIndex=10000,
                 keepMounted=True,
             ),
             dmc.Select(
