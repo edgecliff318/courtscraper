@@ -271,12 +271,12 @@ def modal_court_preview(opened, update, template, pars, case_id):
                 value=value,
             )
         elif type == "date":
-            return dmc.DatePicker(
+            return dmc.DateInput(
                 label=label,
                 id=id,
                 value=value,
-                allowFreeInput=True,
                 clearable=True,
+                fixOnBlur=False,
             )
         elif type == "number":
             return dmc.NumberInput(
