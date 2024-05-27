@@ -15,14 +15,11 @@ def get_lead_card(lead):
                     value=humanize_phone(phone.get("phone")),
                     icon="material-symbols:phone-android-outline",
                 ),
-                dmc.ChipGroup(
-                    [
-                        dmc.Chip(x, value=x, variant="filled", size="xs")
-                        for x in [
-                            "correct",
-                            "wrong",
-                            "voicemail",
-                        ]
+                dmc.SegmentedControl(
+                    data=[
+                        {"label": "Correct", "value": "correct"},
+                        {"label": "Wrong", "value": "wrong"},
+                        {"label": "Voicemail", "value": "voicemail"},
                     ],
                     id={
                         "type": "lead-phone-status",

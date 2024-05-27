@@ -226,28 +226,19 @@ class PaymentsTable:
 
         return dmc.Stack(
             [
-                dmc.ChipGroup(
-                    [
-                        dmc.Chip(
-                            "Locked",
-                            value="locked",
-                            color="dark",
-                            styles=styles_locked,
-                        ),
-                        dmc.Chip(
-                            "Onboarded",
-                            value="onboarded",
-                            color="green",
-                            styles=styles_onboarded,
-                        ),
-                        dmc.Chip("Invoice", value="invoice", color="gray"),
-                        dmc.Chip("Not Done", value="not_done", color="red"),
+                dmc.SegmentedControl(
+                    data=[
+                        {"label": "Locked", "value": "locked"},
+                        {"label": "Onboarded", "value": "onboarded"},
+                        {"label": "Invoice", "value": "invoice"},
+                        {"label": "Not Done", "value": "not_done"},
                     ],
                     value=checkout.billing.get("status"),
                     id={
                         "type": "case-status-select",
                         "index": checkout.get("id"),
                     },
+                    color="dark",
                 ),
                 dmc.Group(
                     [
@@ -427,7 +418,9 @@ def layout(payment_id, **kwargs):
         starting_after = kwargs.get("starting_after")
         ending_before = kwargs.get("ending_before")
         checkouts = payment_service.get_last_checkouts(
-            starting_after=starting_after, ending_before=ending_before
+            starting_after=starting_after,
+            ending_before=ending_before,
+            limit=10,
         )
         first_checkout = payment_service.get_last_checkouts(limit=1)
 
