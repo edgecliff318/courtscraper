@@ -211,6 +211,7 @@ def get_email_params(
                 id={"type": f"modal-{role}-pars", "index": "body"},
                 value=body_filled,
                 minRows=20,
+                autosize=True,
             ),
             dmc.Text(
                 "Use <strong> text </strong> to bold the text", size="xs"

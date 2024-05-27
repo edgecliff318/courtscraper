@@ -100,6 +100,7 @@ def get_lead_card(lead):
                     "type": "notes",
                     "index": lead.case_id,
                 },
+                autosize=True,
             ),
             html.Div(phones),
             dmc.Divider(variant="solid", className="mt-2 mb-2"),

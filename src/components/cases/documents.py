@@ -25,6 +25,17 @@ def get_case_documents(case: Case):
             columns=["docket_desc", "file_path", "document_extension"]
         )
 
+    # Get the case dockets
+    if case.dockets is not None and len(case.dockets) > 0:
+        dockets = pd.DataFrame(case.dockets)
+        dockets = dockets[
+            ["docket_desc", "filing_partyfullname", "filing_date"]
+        ]
+    else:
+        dockets = pd.DataFrame(
+            columns=["docket_desc", "filing_partyfullname", "filing_date"]
+        )
+
     documents["source"] = "Casenet"
 
     # Get the pushed and uploaded documents
@@ -126,10 +137,28 @@ def get_case_documents(case: Case):
         multiple=True,
     )
 
+    dockets_list = dmc.Stack(
+        [
+            dmc.Group(
+                [
+                    dmc.Text(docket["docket_desc"], c="dark", fw=700),
+                    dmc.Text(
+                        f"By {docket['filing_partyfullname']} on {docket['filing_date']}"
+                    ),
+                ],
+                gap="xs",
+            )
+            for docket in dockets.to_dict("records")
+        ],
+        gap="xs",
+    )
+
     return dmc.Stack(
         [
             dmc.Title("Documents", order=3, className="mt-2"),
             documents_ag_grid,
+            dmc.Title("Dockets Timeline", order=3, className="mt-2"),
+            dockets_list,
             dmc.Title("Upload Documents", order=3, className="mt-2"),
             dmc.Stack(
                 [html.Div(id="document-upload-status"), document_upload]
