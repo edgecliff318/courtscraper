@@ -282,7 +282,7 @@ def render_leads(court_code_list, dates, status):
                                         dmc.Button(
                                             "Cases Process",
                                             id="outbound-response-many",
-                                            c="dark",
+                                            color="dark",
                                             # className="card-title",
                                         ),
                                     ]

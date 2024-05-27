@@ -33,6 +33,7 @@ def get_next_step_modal_content(
                 type="Textarea",
                 minRows=10,
                 value=message,
+                autosize=True,
             ),
             html.Div(id="modal-next-step-output"),
             dmc.Group(

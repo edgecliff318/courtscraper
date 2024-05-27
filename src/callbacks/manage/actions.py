@@ -1,5 +1,5 @@
 import logging
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 import dash_mantine_components as dmc
 import pandas as pd
@@ -50,8 +50,8 @@ def create_case_card(case_data: dict):
 
     last_updated = case_data.get("update_time")
     if last_updated is None:
-        last_updated = case_data.get("create_time", datetime.now(UTC))
-    current_date = datetime.now(UTC)
+        last_updated = case_data.get("create_time", datetime.now(timezone.utc))
+    current_date = datetime.now(timezone.utc)
 
     # TO CST
     last_updated = current_date - last_updated
