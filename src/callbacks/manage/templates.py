@@ -23,17 +23,36 @@ settings = get_settings()
     Output("template-selector", "data"),
     Input("url", "pathname"),
 )
-def get_templatess_list(url):
-    print("get_templatess_list")
+def get_templates_list(url):
 
-    templatess_all = get_templates()
+    templates_all = get_templates()
 
-    templatess_data = [
-        {"label": f"{p.id} - {p.name}".replace("_", " "), "value": p.id}
-        for p in templatess_all
-    ]
+    data = []
 
-    return templatess_data
+    for p in templates_all:
+        if p.category in [d["group"] for d in data]:
+            for d in data:
+                if d["group"] == p.category:
+                    d["items"].append(
+                        {
+                            "label": f"{p.id} - {p.name}".replace("_", " "),
+                            "value": p.id,
+                        }
+                    )
+        else:
+            data.append(
+                {
+                    "group": p.category,
+                    "items": [
+                        {
+                            "label": f"{p.id} - {p.name}".replace("_", " "),
+                            "value": p.id,
+                        }
+                    ],
+                }
+            )
+
+    return data
 
 
 @callback(
