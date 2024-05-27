@@ -420,7 +420,6 @@ def layout(payment_id, **kwargs):
         checkouts = payment_service.get_last_checkouts(
             starting_after=starting_after,
             ending_before=ending_before,
-            limit=10,
         )
         first_checkout = payment_service.get_last_checkouts(limit=1)
 
