@@ -22,7 +22,7 @@ def get_participants_section(case):
         data=participants_data,
         label="Participants",
         placeholder="Select participants",
-        value=participants,
+        value=[] if participants is None else participants,
         searchable=True,
         description="You can select the case participants here. ",
         id="case-manage-participants",
