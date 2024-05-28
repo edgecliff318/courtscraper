@@ -1,19 +1,13 @@
-import sys
-sys.path.append("..")
-
 import requests
-
 import pandas as pd
 from models.cases import Case
+from models.leads import Lead
 from src.scrapers.base import ScraperBase
 from datetime import datetime
 from tempfile import NamedTemporaryFile
 from rich.console import Console
-from models.leads import Lead
 from rich.progress import Progress
 import re
-import time
-
 import os
 from dotenv import load_dotenv
 from twocaptcha import TwoCaptcha

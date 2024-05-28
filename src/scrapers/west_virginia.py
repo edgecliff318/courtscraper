@@ -1,6 +1,3 @@
-import sys
-sys.path.append("..")
-
 from playwright.async_api import async_playwright, TimeoutError
 import requests
 from urllib.parse import urlparse, parse_qs
