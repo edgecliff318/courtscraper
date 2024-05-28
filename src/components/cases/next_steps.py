@@ -61,7 +61,6 @@ def get_next_step_modal():
     return dmc.Modal(
         id="modal-next-step",
         size="lg",
-        zIndex=10000,
         children=get_next_step_modal_content(),
         keepMounted=True,
     )
