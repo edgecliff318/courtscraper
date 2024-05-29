@@ -231,6 +231,21 @@ date_selector = generate_form_group(
 def get_cases_control():
 
     court_selector = get_court_selector()
+    data_selector = generate_form_group(
+        label="Date",
+        id="date-selector",
+        placeholder="Select a Date",
+        type="DateRangePicker",
+        persistence_type="session",
+        persistence=True,
+        start_date=(datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d"),
+        end_date=(datetime.now() + timedelta(days=15)).strftime("%Y-%m-%d"),
+    )
 
-    cases_controls = dbc.Row([generate_col(court_selector, lg=5)])
+    cases_controls = dbc.Row(
+        [
+            generate_col(court_selector, lg=5),
+            generate_col(data_selector, lg=3),
+        ]
+    )
     return cases_controls

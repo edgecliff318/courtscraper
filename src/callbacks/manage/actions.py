@@ -194,30 +194,64 @@ def create_case_div(cases):
     return html.Div(case_cards, style={"overflowY": "auto"})
 
 
+def filter_cases_by_court_date(cases, start_date, end_date):
+    if isinstance(start_date, str):
+        start_date = datetime.strptime(start_date, "%Y-%m-%d")
+    if isinstance(end_date, str):
+        end_date = datetime.strptime(end_date, "%Y-%m-%d")
+
+    filtered_cases = []
+    for case in cases:
+        court_dates = CaseDynamicFields().update_court_date(case, {})
+
+        if court_dates:
+            court_date = court_dates.get("court_date")
+            if court_date:
+                court_date = datetime.strptime(court_date, "%m/%d/%Y")
+                if start_date <= court_date <= end_date:
+                    filtered_cases.append(case)
+    return filtered_cases
+
+
 @callback(
     Output("case_card_col_todo", "children"),
     Input("court-selector", "value"),
+    Input("date-selector", "value"),
 )
-def render_actions_todo(court_code_list):
+def render_actions_todo(court_code_list, date_selector):
+    start_date, end_date = date_selector
     cases_list_todo = cases.get_cases(court_code_list, flag="todo")
+    cases_list_todo = filter_cases_by_court_date(
+        cases_list_todo, start_date, end_date
+    )
     return create_case_div(cases_list_todo)
 
 
 @callback(
     Output("case_card_col_pending", "children"),
     Input("court-selector", "value"),
+    Input("date-selector", "value"),
 )
-def render_actions_pending(court_code_list):
+def render_actions_pending(court_code_list, date_selector):
+    start_date, end_date = date_selector
     cases_list_pending = cases.get_cases(court_code_list, flag="pending")
+    cases_list_pending = filter_cases_by_court_date(
+        cases_list_pending, start_date, end_date
+    )
     return create_case_div(cases_list_pending)
 
 
 @callback(
     Output("case_card_col_closed", "children"),
     Input("court-selector", "value"),
+    Input("date-selector", "value"),
 )
-def render_actions_closed(court_code_list):
+def render_actions_closed(court_code_list, date_selector):
+    start_date, end_date = date_selector
     cases_list_closed = cases.get_cases(
         court_code_list, flag="closed", limit=30
+    )
+    cases_list_closed = filter_cases_by_court_date(
+        cases_list_closed, start_date, end_date
     )
     return create_case_div(cases_list_closed)
