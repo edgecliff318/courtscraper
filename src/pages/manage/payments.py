@@ -490,9 +490,17 @@ def layout(payment_id, **kwargs):
                                     dcc.Store(
                                         id="case-attach-select-details-store",
                                     ),
+                                    dcc.Store(
+                                        id="case-attach-select-store",
+                                    ),
                                     dmc.MultiSelect(
                                         id="case-attach-select",
                                         searchable=True,
+                                        data={
+                                            "label": "Loading...",
+                                            "value": "loading",
+                                        },
+                                        clearable=True,
                                     ),
                                     html.Div(
                                         id="case-attach-select-output",
@@ -511,7 +519,6 @@ def layout(payment_id, **kwargs):
                             ),
                         ],
                         id="case-attach-modal",
-                        zIndex=10000,
                         position="right",
                         padding="md",
                         size="55%",

@@ -10,7 +10,7 @@ def layout(data=None):
     return dmc.Card(
         dmc.CardSection(
             [
-                html.H3("Welcome to Fubloo!", className="display-3"),
+                dmc.Title("Welcome to Fubloo ! 🚀"),
             ]
         )
     )

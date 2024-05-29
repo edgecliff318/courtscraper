@@ -34,7 +34,7 @@ def get_case_text(case):
 
 @callback(
     Output("case-attach-modal", "opened"),
-    Output("case-attach-select", "value"),
+    Output("case-attach-select-store", "data"),
     Output("case-attach-select-details-store", "data"),
     Input({"type": "case-attach-button", "index": ALL}, "n_clicks"),
     prevent_initial_call=True,
@@ -64,6 +64,9 @@ def attach_button_click(n_clicks):
             if not attached_cases:
                 attached_cases = get_custom_fields(checkout_single, "tickets")
 
+            if attached_cases is None:
+                attached_cases = []
+
             return (
                 True,
                 attached_cases,
@@ -74,40 +77,56 @@ def attach_button_click(n_clicks):
 
 @callback(
     Output("case-attach-select", "data"),
+    Output("case-attach-select", "value"),
     Output("case-attach-select", "select-error"),
     Input("case-attach-select", "searchValue"),
-    Input("case-attach-select", "value"),
+    Input("case-attach-select-store", "data"),
 )
 def case_select_data(search_value, value):
     trigger = dash.callback_context.triggered[0]["prop_id"]
 
     search_cases = []
-    if trigger == "case-attach-select.value":
+    if trigger == "case-attach-select-store.data":
         if value is None or value == "":
-            return dash.no_update, dash.no_update
+            return dash.no_update, dash.no_update, dash.no_update
         if isinstance(value, str):
             value = [value]
         if value:
             search_cases = cases.get_many_cases(value)
     elif trigger == "case-attach-select.searchValue":
         if search_value is None or search_value == "":
-            return dash.no_update, dash.no_update
+            return dash.no_update, dash.no_update, dash.no_update
         search_cases = cases.search_cases(search_value)
 
+    if value is None:
+        value = []
+
     if len(search_cases) == 0:
-        return [
+        if value is None or value == "" or not value:
+            shown_value = "no-cases"
+        else:
+            shown_value = value[0]
+        return (
+            [
+                {
+                    "label": "Case not found",
+                    "value": shown_value,
+                },
+            ],
+            value,
+            "No cases found",
+        )
+    return (
+        [
             {
-                "label": "No cases found",
-                "value": "no-cases",
-            },
-        ], "No cases found"
-    return [
-        {
-            "label": get_case_text(c),
-            "value": c.case_id,
-        }
-        for c in search_cases
-    ], ""
+                "label": get_case_text(c),
+                "value": c.case_id,
+            }
+            for c in search_cases
+        ],
+        value,
+        "",
+    )
 
 
 @callback(
@@ -212,6 +231,8 @@ def attach_select_details(n_clicks, value, data):
             ]
         )
     elif ctx.triggered and ctx.triggered_id == "case-attach-select":
+        if data is None:
+            return dash.no_update
         return dmc.Stack(
             [
                 dmc.Text("Attached Cases"),
