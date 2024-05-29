@@ -210,6 +210,7 @@ def get_case_events(case):
                 ]
             ),
             dmc.Divider(variant="solid", size="lg"),
+            html.Div(id="case-tag-emails-processed-status"),
             render_emails(case),
         ],
         gap="md",

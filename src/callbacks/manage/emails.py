@@ -8,6 +8,7 @@ from dash_iconify import DashIconify
 from flask import session
 
 from src.core.config import get_settings
+from src.services import cases
 from src.services.emails import GmailConnector
 
 logger = logging.getLogger(__name__)
@@ -187,3 +188,36 @@ def generate_email_reply(n_clicks, email, value):
         )
 
         return result["choices"][0]["message"]["content"]
+
+
+@callback(
+    Output("case-tag-emails-processed-status", "children"),
+    Input("case-tag-emails-processed", "n_clicks"),
+    State("case-id", "children"),
+    prevent_initial_call=True,
+)
+def tag_emails_processed(n_clicks, case_id):
+    user_id = session.get("profile", {}).get("name", None)
+
+    if user_id is None:
+        # Redirect to login page
+        return dash.no_update
+
+    case = cases.get_single_case(case_id)
+    gmail_connector = GmailConnector(user_id=user_id)
+
+    if case.emails is None:
+        return dmc.Alert(
+            "No emails to process",
+            color="red",
+            duration=3000,
+        )
+
+    for email in case.emails:
+        gmail_connector.move_email(email["id"], "Processed")
+
+    return dmc.Alert(
+        "Emails processed",
+        color="green",
+        duration=3000,
+    )
