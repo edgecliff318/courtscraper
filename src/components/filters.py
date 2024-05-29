@@ -232,7 +232,7 @@ def get_cases_control():
 
     court_selector = get_court_selector()
     data_selector = generate_form_group(
-        label="Date",
+        label="Court Date",
         id="date-selector",
         placeholder="Select a Date",
         type="DateRangePicker",
