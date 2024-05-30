@@ -29,9 +29,7 @@ def get_invoice_text(invoices):
             invoice_data = payments_service.get_invoice(invoice)
             invoice_link = invoice_data.hosted_invoice_url
             invoice_amount = invoice_data.amount_due / 100
-            invoice_message = (
-                f"<a href='{invoice_link}'>Invoice {invoice_amount:.2f} $</a>"
-            )
+            invoice_message = f"<a href='{invoice_link}'>Invoice</a>"
 
             invoice_text.append(invoice_message)
 
