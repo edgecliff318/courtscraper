@@ -255,7 +255,6 @@ def create_case_title(case):
         Input("case-refresh-button", "n_clicks"),
         Input("case-manage-insert-participants", "n_clicks"),
         Input("case-details-id", "data"),
-        Input("case-manage-payments-create-invoice", "n_clicks"),
         Input("case-manage-insert-participants", "n_clicks"),
     ],
     prevent_initial_call=True,
