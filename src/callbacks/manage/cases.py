@@ -126,7 +126,7 @@ def case_not_found():
                                     "Refresh from Casenet",
                                     color="dark",
                                     id="case-refresh-button",
-                                    leftIcon=DashIconify(
+                                    leftSection=DashIconify(
                                         icon="material-symbols:save"
                                     ),
                                 ),
