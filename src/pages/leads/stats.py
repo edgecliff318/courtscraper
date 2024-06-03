@@ -45,6 +45,20 @@ def layout():
                     ),
                     dmc.GridCol(
                         [
+                            dmc.Title("Sales Overview", order=2),
+                            dmc.Text(
+                                "Sales summary for customers that made a purchase."
+                            ),
+                            html.Div(
+                                children=skeleton_cards,
+                                id="overview-sales-summary",
+                            ),
+                        ],
+                        span=12,
+                        className="mb-2 p-1",
+                    ),
+                    dmc.GridCol(
+                        [
                             dmc.Title("Inbound Overview", order=2),
                             dmc.Text(
                                 "Inbound leads summary for customers and leads that submitted a form on the website."
