@@ -73,7 +73,7 @@ class Lead(BaseModel):
     user_id: Optional[str] = None
 
     # Json Report from Lead Scrapers
-    report: Optional[dict] = None
+    report: Optional[dict | str | list] = None
     details: Optional[str] = None
     lead_source: Optional[str] = None
 
