@@ -17,6 +17,8 @@ from src.scrapers.tx_harris import TXHarrisCountyScraper
 from src.scrapers.arkansas import ArkansasScraper
 from src.scrapers.west_virginia import WestVirginiaScraper
 from src.scrapers.kansas import KansasScraper
+from src.scrapers.broward import BrowardScraper
+from src.scrapers.district_court import DistrictCourtScraper
 from src.services import cases as cases_service
 from src.services import leads as leads_service
 from src.services.courts import get_courts
@@ -238,6 +240,19 @@ def retrieve_cases_arkansas():
         }
     )
 
+async def retrieve_cases_broward():
+    console.log("Broward County, Florida Scraper")
+    browardscraper = BrowardScraper()
+    await browardscraper.scrape({'case_id': '24001500TI10A'})
+
+async def retrieve_cases_district_court():
+    console.log("District Court Scraper")
+    districtcourtscraper = DistrictCourtScraper()
+    search_parameters={
+        'case_number': "GT19007340-00"
+    }
+    await districtcourtscraper.scrape(search_parameters)
+
 async def retrieve_cases_west_virginia():
     console.log("West Virginia Scraper")
     westvirginiascraper = WestVirginiaScraper()
@@ -279,9 +294,16 @@ def retrieve_cases(source="mo_case_net"):
     elif source == "west_virginia":
         console.log("West_Virginia State Scraper")
         asyncio.run(retrieve_cases_west_virginia())
+    elif source == "broward":
+        console.log("Broward County Scraper")
+        asyncio.run(retrieve_cases_broward())
     elif source == "kansas":
         console.log("Kansas State Scraper")
         asyncio.run(retrieve_cases_kansas())
+    elif source == "district_court":
+        console.log("District Court Scraper")
+        asyncio.run(retrieve_cases_district_court())
 
+    
 if __name__ == "__main__":
     typer.run(retrieve_cases)
