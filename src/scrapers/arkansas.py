@@ -11,7 +11,7 @@ import re
 import os
 from dotenv import load_dotenv
 from twocaptcha import TwoCaptcha
-load_dotenv(dotenv_path='.env')
+
 TWOCAPTCHA_API_KEY = os.getenv('TWOCAPTCHA_API_KEY')
 
 console = Console()

@@ -17,9 +17,7 @@ from urllib.parse import urlparse, parse_qs
 
 import re
 import os
-from dotenv import load_dotenv
 from twocaptcha import TwoCaptcha
-load_dotenv()
 TWOCAPTCHA_API_KEY = os.getenv('TWOCAPTCHA_API_KEY')
 
 console = Console()
