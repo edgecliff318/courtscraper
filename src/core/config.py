@@ -194,7 +194,7 @@ class Settings(BaseSettings):
         CONFIG_PATH.joinpath(
             "fubloo-1b0e8-firebase-adminsdk-5j6zr-6b8d8d1c0b.json"
         ),
-    )
+    ).name
 
     # llm
     OPENAI_API_KEY: str = os.getenv(
@@ -213,6 +213,7 @@ class Settings(BaseSettings):
     BEEN_VERIFIED_EMAIL: str = os.getenv(
         "BEEN_VERIFIED_EMAIL", "ttdwoman@gmail.com"
     )
+
     BEEN_VERIFIED_PASSWORD: str = os.getenv(
         "BEEN_VERIFIED_PASSWORD", "0TTD2023!"
     )
