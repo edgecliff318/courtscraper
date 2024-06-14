@@ -12,7 +12,6 @@ from models.leads import Lead
 from src.scrapers.base.scraper_base import ScraperBase
 from dotenv import load_dotenv
 from twocaptcha import TwoCaptcha
-load_dotenv(dotenv_path='.env')
 TWOCAPTCHA_API_KEY = os.getenv('TWOCAPTCHA_API_KEY')
 print(TWOCAPTCHA_API_KEY)
 console = Console()
@@ -75,6 +74,11 @@ class IndianaScraper(ScraperBase):
         case_dict["court_date"] = datetime.strptime(case_dict["court_date"], "%m/%d/%Y") if case_dict["court_date"] else None
         
         court_id = case_detail.get("CountyCode")+case_detail.get("CourtCode")
+        case_id = case_detail.get("case_id")
+        if case_id == None:
+            case_id = "None"
+        else:
+            case_id = case_id.astype(str)
         charges = [
             {
                 "offense_date": charge.get("OffenseDate"),
@@ -110,6 +114,7 @@ class IndianaScraper(ScraperBase):
         if len(defendant) == 0:
             return {
                 "court_id": court_id,
+                "case_id": case_id,
                 "charges": charges,
                 "offense_date": offense_date,
                 "events": events,
@@ -183,7 +188,6 @@ class IndianaScraper(ScraperBase):
                 case_detail = self.get_case_detail(case_token)
                 if case_detail:
                     case_dict = self.extract_case_info(case_detail)
-                    print(case_dict)
                     self.insert_case(case_dict)
                     self.insert_lead(case_dict)
                 else:
