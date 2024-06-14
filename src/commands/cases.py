@@ -394,7 +394,7 @@ def retrieve_cases(source="mo_case_net"):
         console.log("Indiana Scraper")
         asyncio.run(retrieve_cases_indiana())
     elif source == "palm_beach":
-        console.log("Pam Beach Scraper")
+        console.log("Palm Beach Scraper")
         asyncio.run(retrieve_cases_palm_beach())
     elif source == "north_carolina":
         console.log("North Carolina Scraper")
