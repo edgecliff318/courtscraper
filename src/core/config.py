@@ -213,7 +213,6 @@ class Settings(BaseSettings):
     BEEN_VERIFIED_EMAIL: str = os.getenv(
         "BEEN_VERIFIED_EMAIL", "ttdwoman@gmail.com"
     )
-
     BEEN_VERIFIED_PASSWORD: str = os.getenv(
         "BEEN_VERIFIED_PASSWORD", "0TTD2023!"
     )

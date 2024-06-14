@@ -5,7 +5,7 @@ import sys
 
 import requests
 from bs4 import BeautifulSoup
-
+from rich.progress import Progress
 from src.scrapers.base import InitializedSession, NameNormalizer, ScraperBase
 
 sys.path.append(
@@ -45,10 +45,26 @@ class ScraperTXTravisSuperior(ScraperBase):
         last_name = search_parameters["lastName"]
         first_name = search_parameters["firstName"]
         dob = search_parameters["dob"]
-        return self.search_in_travis_tx(first_name, last_name, dob)
 
-    GLOBAL_SESSION = InitializedSession(headers=HEADERS)
+        with Progress() as progress:
+            cases_dicts = self.search_in_travis_tx(first_name, last_name, dob)
+            task = progress.add_task(
+                "[red]Inserting cases...", total=len(cases_dicts)
+            )
+            for case_dict in cases_dicts:
+                case_id = case_dict["case_id"]
+                if self.check_if_exists(case_id):
+                    progress.update(task, advance=1)
+                    continue
+                self.insert_case(case_dict)
+                self.insert_lead(case_dict)
 
+                progress.update(task, advance=1)
+    try:
+        GLOBAL_SESSION = InitializedSession(headers=HEADERS)
+    except Exception as e:
+        print(e)
+        
     def get_case_detail(self, soup):
         """Get every information of case detail by parsing rendered HTML page
 
@@ -219,6 +235,7 @@ class ScraperTXTravisSuperior(ScraperBase):
         # parse html response and get the matched cases
         result = self.parse_search_results(soup, first_name, last_name)
         # print(json.dumps(result, indent=4, sort_keys=True))
+        print(result)
         if "error" in result:
             return {"error": result["error"]}
         else:
