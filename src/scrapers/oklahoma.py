@@ -1,24 +1,20 @@
 import requests
-from bs4 import BeautifulSoup
-
+import os
 import pandas as pd
+
 from models.cases import Case
+from models.leads import Lead
+from src.scrapers.base.scraper_base import ScraperBase
+
+from bs4 import BeautifulSoup
 from datetime import datetime
 from tempfile import NamedTemporaryFile
 from rich.console import Console
-from models.leads import Lead
 from rich.console import Console
 from rich.progress import Progress
 
-from src.models.cases import Case
-from src.models.leads import Lead
-from src.scrapers.base.scraper_base import ScraperBase
-import re
-import time
-import os
-from dotenv import load_dotenv
+
 from twocaptcha import TwoCaptcha
-load_dotenv(dotenv_path='.env')
 TWOCAPTCHA_API_KEY = os.getenv('TWOCAPTCHA_API_KEY')
 
 console = Console()
