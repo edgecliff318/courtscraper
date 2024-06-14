@@ -1,20 +1,19 @@
-from playwright.async_api import async_playwright, TimeoutError
-import pandas as pd
-from models.cases import Case
-from datetime import datetime
-from tempfile import NamedTemporaryFile
-from rich.console import Console
-from models.leads import Lead
-from src.models.cases import Case
-from src.models.leads import Lead
-from src.scrapers.base import InitializedSession, NameNormalizer, ScraperBase
-from rich.progress import Progress
 import re
 import time
 import os
-from dotenv import load_dotenv
+import pandas as pd
+
+from models.cases import Case
+from models.leads import Lead
+
+from playwright.async_api import async_playwright, TimeoutError
+from datetime import datetime
+from tempfile import NamedTemporaryFile
+from rich.console import Console
+from src.scrapers.base import ScraperBase
+from rich.progress import Progress
+
 from twocaptcha import TwoCaptcha
-load_dotenv(dotenv_path='.env')
 TWOCAPTCHA_API_KEY = os.getenv('TWOCAPTCHA_API_KEY')
 
 console = Console()

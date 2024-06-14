@@ -10,7 +10,7 @@ from rich.progress import Progress
 from models.cases import Case
 from models.leads import Lead
 from src.scrapers.base.scraper_base import ScraperBase
-from dotenv import load_dotenv
+
 from twocaptcha import TwoCaptcha
 
 TWOCAPTCHA_API_KEY = os.getenv('TWOCAPTCHA_API_KEY')

@@ -9,7 +9,6 @@ from rich.console import Console
 from rich.progress import Progress
 import re
 import os
-from dotenv import load_dotenv
 from twocaptcha import TwoCaptcha
 
 TWOCAPTCHA_API_KEY = os.getenv('TWOCAPTCHA_API_KEY')
