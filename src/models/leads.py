@@ -45,10 +45,9 @@ class Lead(BaseModel):
     court_code: Optional[str] = None
     age: Optional[int] = None
     year_of_birth: Optional[int] = None
-    email: Optional[str | dict] = None
     phone: Optional[str | dict | list] = None
     phones: Optional[list] = None
-    email: Optional[str | dict] = None
+    email: Optional[str | dict | list] = None
     address: Optional[str | dict] = None
     city: Optional[str] = None
     state: Optional[str] = None
@@ -74,7 +73,7 @@ class Lead(BaseModel):
     user_id: Optional[str] = None
 
     # Json Report from Lead Scrapers
-    report: Optional[dict] = None
+    report: Optional[dict | str | list] = None
     details: Optional[str] = None
     lead_source: Optional[str] = None
 

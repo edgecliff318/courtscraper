@@ -53,9 +53,13 @@ class BaseService:
                 elif isinstance(value, list):
                     filters.append(FieldFilter(key, "in", value))
                 elif "start" in key and isinstance(value, datetime):
-                    filters.append(FieldFilter(key, ">=", value))
+                    filters.append(
+                        FieldFilter(key.replace("start_", ""), ">=", value)
+                    )
                 elif "end" in key and isinstance(value, datetime):
-                    filters.append(FieldFilter(key, "<=", value))
+                    filters.append(
+                        FieldFilter(key.replace("end_", ""), "<=", value)
+                    )
                 else:
                     filters.append(FieldFilter(key, "==", value))
 
