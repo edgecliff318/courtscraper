@@ -1,5 +1,6 @@
 import datetime
 import logging
+import random
 import textwrap
 import typing as t
 from datetime import timedelta
@@ -244,6 +245,11 @@ def get_sender_phone(case_id):
     send_from = account_settings.automated_messaging_mapping.get(
         state, account_settings.automated_messaging_mapping.get("default")
     )
+
+    if isinstance(send_from, list):
+        # Random selection
+        send_from = random.choice(send_from)
+
     logger.info(f"Using sender phone {send_from} for case {case_id} - {state}")
 
     return send_from
@@ -318,11 +324,13 @@ def send_message(
             subject=subject,
             message=sms_message,
             to=email,
-            attachments=[
-                filepath,
-            ]
-            if filepath is not None
-            else None,
+            attachments=(
+                [
+                    filepath,
+                ]
+                if filepath is not None
+                else None
+            ),
         )
         status = "sent"
         message_id = "not available"
