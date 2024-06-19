@@ -6,9 +6,9 @@ import uuid
 from pathlib import Path
 
 import pandas as pd
-from playwright.async_api import async_playwright
 from rich.console import Console
 
+from playwright.async_api import async_playwright
 from src.scrapers.base import ScraperBase
 
 sys.path.append(
