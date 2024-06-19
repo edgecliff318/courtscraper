@@ -10,10 +10,12 @@ class SalesService(BaseService):
 if __name__ == "__main__":
     import pandas as pd
 
+    from src.services.leads import get_leads
+
     sales = SalesService()
 
     # Read the dataframe
-    df = pd.read_csv("sales.csv")
+    df = pd.read_csv("sales_june.csv")
 
     # Parse and insert
     df["customer_id"] = "ttd"
@@ -22,6 +24,40 @@ if __name__ == "__main__":
 
     df["count"] = df["count"].fillna(0).astype(int)
     df["amount"] = df["amount"].fillna(0.0).astype(float)
+
+    #
+    df["date"] = pd.to_datetime(df["date"])
+    start_date = df.date.min()
+    end_date = df.date.max() + pd.Timedelta(hours=23, minutes=59, seconds=59)
+
+    # Get the leads per day
+    leads = get_leads(start_date=start_date, end_date=end_date)
+
+    leads_df = pd.DataFrame([l.model_dump() for l in leads])
+    leads_df["date"] = pd.to_datetime(leads_df["case_date"])
+
+    leads_pivot = leads_df.pivot_table(
+        index="date", columns="status", values="id", aggfunc="count"
+    ).fillna(0)
+
+    leads_pivot = leads_pivot.reset_index()
+
+    # Remove UTC
+    leads_pivot["date"] = leads_pivot["date"].dt.tz_localize(None)
+
+    # Merge the dataframes
+    df = df.merge(leads_pivot, on="date", how="left")
+
+    # Total outbound actions
+    df["outbound_actions_count"] = (
+        df["responded"] + df["won"] + df["stop"] + df["contacted"] + df["won"]
+    )
+
+    df.loc[
+        df["outbound_actions_count"] <= df["count"], "outbound_actions_count"
+    ] = df.loc[
+        df["outbound_actions_count"] > df["count"], "outbound_actions_count"
+    ].mean()
 
     for index, row in df.iterrows():
         print(row["id"])
