@@ -179,8 +179,9 @@ class BeenVerifiedScrapper:
         city="",
         state="",
         zip="",
-        addressLine1="",
-        addressLine2="",
+        dob="",
+        address_line1="",
+        address_line2="",
     ):
         try:
 

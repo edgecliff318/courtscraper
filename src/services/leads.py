@@ -123,7 +123,7 @@ def get_last_lead(
     end_date=None,
     status=None,
     limit=1,
-    search_limit=1000,
+    search_limit=1,
 ):
     search_limit = int(search_limit)
     limit = int(limit)
