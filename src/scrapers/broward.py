@@ -181,6 +181,7 @@ class BrowardScraper(ScraperBase):
                 "birth_date": birth_date,
                 "year_of_birth": year_of_birth,
             }
+        print(case_dict)
         return case_dict
 
     async def scrape(self, search_parameters):
