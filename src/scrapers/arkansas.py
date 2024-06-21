@@ -131,39 +131,68 @@ class ArkansasScraper(ScraperBase):
             page_number += 1
         
         console.log(f"Total {len(cases)} cases")
-
-
-        with Progress() as progress:
-            task = progress.add_task("[red]Inserting cases...", total=len(cases))
-            for case in cases:
-                case_dict = {
-                    value: case.get(key) for key, value in self.field_mapping.items()
+        case_dicts = []
+        for case in cases:
+            case_dict = {
+                value: case.get(key) for key, value in self.field_mapping.items()
+            }
+            case_id = case_dict["case_id"]
+            charges, parties = self.get_case_details(case_id) # type: ignore
+            courts = {}
+            court_code = (
+                            f"AR_{case_dict.get('court_id').upper()}"
+                        )
+            if court_code not in courts.keys():
+                courts[court_code] = {
+                    "code": court_code,
+                    "county_code": case_dict.get("court_id"),
+                    "enabled": True,
+                    "name": f"Pennsylvania, {case_dict.get('court_id')}",
+                    "state": "PA",
+                    "type": "CT",
                 }
-                case_id = case_dict["case_id"]
-                charges, parties = self.get_case_details(case_id) # type: ignore
-                
-                offense_date = charges[0].get("offense_date") if charges else None
-                offense_date = datetime.strptime(offense_date, "%Y-%m-%dT%H:%M:%S.%fZ") if offense_date else None
-                
-                filing_date = case_dict.get("filing_date")
-                filing_date = datetime.strptime(filing_date, "%Y-%m-%dT%H:%M:%S.%fZ") if filing_date else None
-                case_dict["filing_date"] = filing_date
+                self.insert_court(courts[court_code])
 
-                age = charges[0].get("age") if charges else None
-                first_name, middle_name, last_name = self.split_full_name(parties[0].get("name"))
-                case_dict = {
-                    **case_dict,
-                    "first_name": first_name,
-                    "middle_name": middle_name,
-                    "last_name": last_name,
-                    "offense_date": offense_date,
-                    "age": age,
-                }
+            case_dict["court_id"] = court_code
 
-                print(case_dict)
-                case = Case(**case_dict)
-                lead = Lead(**case_dict)
-                self.insert_case(case)
-                self.insert_lead(lead)
+            offense_date = charges[0].get("offense_date") if charges else None
+            offense_date = datetime.strptime(offense_date, "%Y-%m-%dT%H:%M:%S.%fZ") if offense_date else None
+            
+            filing_date = case_dict.get("filing_date")
+            filing_date = datetime.strptime(filing_date, "%Y-%m-%dT%H:%M:%S.%fZ") if filing_date else None
+            case_dict["filing_date"] = filing_date
 
-                progress.advance(task, advance=1)
+            age = charges[0].get("age") if charges else None
+            first_name, middle_name, last_name = self.split_full_name(parties[0].get("name"))
+            case_dict = {
+                **case_dict,
+                "first_name": first_name,
+                "middle_name": middle_name,
+                "last_name": last_name,
+                "offense_date": offense_date,
+                "age": age,
+            }   
+            case_dicts.append(case_dict)
+
+        with NamedTemporaryFile(delete=False, mode="w", encoding="utf-8") as f:
+            console.log(f"Extracted {len(case_dicts)} cases")
+
+            # with progress
+            with Progress() as progress:
+                task = progress.add_task(
+                    "[red]Inserting cases...", total=len(case_dicts)
+                )
+                for case_dict in case_dicts:
+                    case_id = case_dict.get("case_id")
+                    if self.check_if_exists(case_id):
+                        console.log(
+                            f"Case {case_id} already exists. Skipping..."
+                        )
+                        progress.update(task, advance=1)
+                        continue
+                    print(case_dict)
+                    self.insert_case(case_dict)
+                    self.insert_lead(case_dict)
+
+                    progress.update(task, advance=1)
+
