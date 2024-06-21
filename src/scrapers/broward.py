@@ -155,26 +155,23 @@ class BrowardScraper(ScraperBase):
             return null;  // Return null if not found
         }''')
         offense_date= datetime.strptime(offense_date, "%m/%d/%Y")
-        
-        court_id = await self.page.evaluate('''() => {
-            // Find all <td> elements
-            const tdElements = Array.from(document.querySelectorAll('td'));
-            for (let td of tdElements) {
-                // Check if the <td> contains "Citation Number:"
-                if (td.innerText.includes('Citation Number:')) {
-                    // Extract and return the citation number using a regex pattern
-                    const match = td.innerText.match(/Citation Number: (\w+)/);
-                    if (match) {
-                        return match[1];
-                    }
-                }
+        courts = {}
+        court_code = "FL_BROWARD"
+        if court_code not in courts.keys():
+            courts[court_code] = {
+                "code": court_code,
+                "county_code": "broward",
+                "enabled": True,
+                "name": "Florida, broward",
+                "state": "FL",
+                "type": "CT",
             }
-            return null;  // Return null if not found
-        }''')
+            self.insert_court(courts[court_code])
 
         case_dict = {
                 "case_id": case_id,
-                "court_id": court_id,
+                "court_id": court_code,
+                "address": address,
                 "filing_date": filing_date,
                 "offense_date": offense_date,
                 "first_name": first_name,
