@@ -26,6 +26,7 @@ from src.scrapers.minnesota import MinnesotaScraper
 from src.scrapers.north_carolina import NorthCarolinaScraper
 from src.scrapers.tx_travis import ScraperTXTravisSuperior
 from src.scrapers.north_carolina_superior import ScraperNCSuperior
+from src.scrapers.johnson import JohnsonScraper
 from src.services import cases as cases_service
 from src.services import leads as leads_service
 from src.services.courts import get_courts
@@ -347,6 +348,16 @@ async def retrieve_cases_minnesota():
     search_parameters = {"case_id": '27-VB-24-69261'}
     await minnesotascraper.scrape(search_parameters)
 
+async def retrieve_cases_johnson():
+    console.log("Johnson County, Kansas State Scraper")
+    johnsonscraper = JohnsonScraper()
+    search_parameters = {
+        "case_id": '24TC00457',
+        "user_name" : "30275",
+        "password" : "TTDpro2024TTD!"
+    }
+    await johnsonscraper.scrape(search_parameters)
+
 def retrieve_cases(source="mo_case_net"):
     """
     Scrap the casenet website
@@ -402,6 +413,9 @@ def retrieve_cases(source="mo_case_net"):
     elif source == "minnesota":
         console.log("Minnesota Scraper")
         asyncio.run(retrieve_cases_minnesota())
+    elif source == "johnson":
+        console.log("Johnson County, Kansas State Scraper")
+        asyncio.run(retrieve_cases_johnson())
     
 
 if __name__ == "__main__":
