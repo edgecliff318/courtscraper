@@ -1,24 +1,49 @@
 # Import necessary libraries
+import asyncio
+import os
+import os.path
 import sys
 import re
-from typing import Tuple
 
 # Import specific modules from libraries
 from playwright.async_api import async_playwright, TimeoutError
-from urllib.parse import urlparse, parse_qs
+from typing import Tuple
 from datetime import datetime
+from urllib.parse import parse_qs, urljoin, urlparse
+from dotenv import load_dotenv
 from rich.console import Console
-from tempfile import NamedTemporaryFile
 from rich.progress import Progress
-from models.cases import Case
-from models.leads import Lead
+from tempfile import NamedTemporaryFile
+
 from src.scrapers.base.scraper_base import ScraperBase
+
+sys.path.append(
+    os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
+    + "/libraries"
+)
+
+sys.path.append(
+    os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
+)
 
 # Initializing console for logging
 console = Console()
 
 # Define the scraper class
-class JohnsonScraper(ScraperBase):
+class KSJohnson(ScraperBase):
+    def __init__(
+        self,
+        email: str | None = None,
+        password: str | None = None,
+        case_id: str | None = None,
+    ) -> None:
+        self.email = email
+        self.password = password
+        # TODO change the values
+        self.case_id = case_id or "24TC00457"
+        super().__init__(email, password)
+        console.log(f" we are seaeching for {self.case_id}")
+
     def split_RaceSexDOB(self, RaceSexDOB):
         # Regular expression pattern to match race, sex, and DOB
         pattern = r"([A-Za-z]+)/([MF]) (\d{2}/\d{2}/\d{2})"
@@ -218,21 +243,34 @@ class JohnsonScraper(ScraperBase):
         await self.search_details(case_id)
         case_dict = await self.get_case_details()
         print(case_dict)
-        with Progress() as progress:
-            task = progress.add_task(
-                "[red]Inserting cases...", total=len(case_dict)
-            )
-            
-            case_id = case_dict.get("case_id")
-            if self.check_if_exists(case_id):
-                console.log(
-                    f"Case {case_id} already exists. Skipping..."
-                )
-                progress.update(task, advance=1)
-            else:
-                self.insert_case(case_dict)
-                self.insert_lead(case_dict)
 
-            progress.update(task, advance=1)
-       
-        await self.browser.close()
+        with NamedTemporaryFile(delete=False, mode="w", encoding="utf-8") as f:
+            with Progress() as progress:
+                task = progress.add_task(
+                    "[red]Inserting cases...", total=len(case_dict)
+                )
+                
+                case_id = case_dict.get("case_id")
+                if self.check_if_exists(case_id):
+                    console.log(
+                        f"Case {case_id} already exists. Skipping..."
+                    )
+                    progress.update(task, advance=1)
+                else:
+                    self.insert_case(case_dict)
+                    self.insert_lead(case_dict)
+
+                progress.update(task, advance=1)
+        
+            await self.browser.close()
+
+
+if __name__ == "__main__":
+    load_dotenv()
+    search_parameters = {
+        "user_name" : "30275",
+        "password" : "TTDpro2024TTD!"
+    }
+    ks_johnson_scraper = KSJohnson()
+    asyncio.run(ks_johnson_scraper.scrape(search_parameters))
+    console.log("Done running", __file__, ".")

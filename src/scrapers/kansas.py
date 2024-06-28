@@ -1,24 +1,49 @@
+# Import necessary libraries
+import asyncio
 import os
+import os.path
+import sys
 import re
 
+# Import specific modules from libraries
+from playwright.async_api import async_playwright
 from datetime import datetime
-from tempfile import NamedTemporaryFile
+from dotenv import load_dotenv
 from rich.console import Console
 from rich.progress import Progress
 from twocaptcha import TwoCaptcha
+from tempfile import NamedTemporaryFile
 
-from playwright.async_api import async_playwright, TimeoutError
-from urllib.parse import urlparse, parse_qs
-
-from models.cases import Case
-from models.leads import Lead
 from src.scrapers.base.scraper_base import ScraperBase
 
+sys.path.append(
+    os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
+    + "/libraries"
+)
+
+sys.path.append(
+    os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
+)
+
+load_dotenv()
 TWOCAPTCHA_API_KEY = os.getenv('TWOCAPTCHA_API_KEY')
 
 console = Console()
 
 class KansasScraper(ScraperBase):
+    def __init__(
+        self,
+        email: str | None = None,
+        password: str | None = None,
+        case_id: str | None = None,
+    ) -> None:
+        self.email = email
+        self.password = password
+        # TODO change the values
+        self.case_id = case_id or "WY-2024-TR-001995"
+        super().__init__(email, password)
+        console.log(f" we are seaeching for {self.case_id}")
+
     solver = TwoCaptcha(TWOCAPTCHA_API_KEY)
 
     def to_datetime(self, date_str):
@@ -182,20 +207,151 @@ class KansasScraper(ScraperBase):
         return None
     
     async def get_charges(self):
-        offense_rows = await self.page.query_selector_all('tr.hide-gt-sm')
-        content = []
-        
-        for row in offense_rows:
-            span_element = await row.query_selector('td > div > span.ng-binding')
-            if not span_element:
-                continue
-            text_content = await span_element.text_content()
-            content.append(text_content.strip())
-        list = []
-        for item in content:
-            list.append({"offense": item})
+        rows = await self.page.query_selector_all('tr.hide-sm.hide-xs.ng-scope')
+        charges = []
+        for row in rows:
+            charge_dict = {}                
+            offense_description = await row.query_selector('td:nth-child(2) .ng-binding')
+            citation_number = await row.query_selector('td:nth-child(3) div.ng-binding:nth-child(2)')
+            statute = await row.query_selector('td:nth-child(4) div.ng-binding:nth-child(2)')
+            degree = await row.query_selector('td:nth-child(5) div.ng-binding:nth-child(2)')
+            offense_date = await row.query_selector('td:nth-child(6) div.ng-binding:nth-child(2)')
+            filed_date = await row.query_selector('td:nth-child(7) div.ng-binding:nth-child(2)')
+            
+            # Extract text content and strip any extraneous whitespace
+            if offense_description:
+                charge_dict['offense_description'] = (await offense_description.text_content()).strip()
+            if citation_number:
+                charge_dict['citation_number'] = (await citation_number.text_content()).strip()
+            if statute:
+                charge_dict['statute'] = (await statute.text_content()).strip()
+            if degree:
+                charge_dict['degree'] = (await degree.text_content()).strip()
+            if offense_date:
+                charge_dict['offense_date'] = (await offense_date.text_content()).strip()
+            if filed_date:
+                charge_dict['filed_date'] = (await filed_date.text_content()).strip()
 
-        return list
+            # Append the current charge dictionary to the charges list
+            charges.append(charge_dict)
+
+        for charge in charges:
+                print(charge)
+            
+        return charges
+    
+    async def get_location(self):
+        label_text = "Location"
+        location = await self.find_date_by_label(label_text)
+        kansas_counties = {
+            "Allen County": "Iola",
+            "Anderson County": "Garnett",
+            "Atchison County": "Atchison",
+            "Barber County": "Medicine Lodge",
+            "Barton County": "Great Bend",
+            "Bourbon County": "Fort Scott",
+            "Brown County": "Hiawatha",
+            "Butler County": "El Dorado",
+            "Chase County": "Cottonwood Falls",
+            "Chautauqua County": "Sedan",
+            "Cherokee County": "Baxter Springs",
+            "Cheyenne County": "St. Francis",
+            "Clark County": "Ashland",
+            "Clay County": "Clay Center",
+            "Cloud County": "Concordia",
+            "Coffey County": "Burlington",
+            "Comanche County": "Coldwater",
+            "Cowley County": "Arkansas City",
+            "Crawford County": "Pittsburg",
+            "Decatur County": "Oberlin",
+            "Dickinson County": "Abilene",
+            "Doniphan County": "Troy",
+            "Douglas County": "Lawrence",
+            "Edwards County": "Kinsley",
+            "Elk County": "Howard",
+            "Ellis County": "Hays",
+            "Ellsworth County": "Ellsworth",
+            "Finney County": "Garden City",
+            "Ford County": "Dodge City",
+            "Franklin County": "Ottawa",
+            "Geary County": "Junction City",
+            "Gove County": "Quinter",
+            "Graham County": "Hill City",
+            "Grant County": "Ulysses",
+            "Gray County": "Cimarron",
+            "Greeley County": "Tribune",
+            "Greenwood County": "Eureka",
+            "Hamilton County": "Syracuse",
+            "Harper County": "Anthony",
+            "Harvey County": "Newton",
+            "Haskell County": "Sublette",
+            "Hodgeman County": "Jetmore",
+            "Jackson County": "Holton",
+            "Jefferson County": "Valley Falls",
+            "Jewell County": "Mankato",
+            "Johnson County": "Overland Park",
+            "Kearny County": "Lakin",
+            "Kingman County": "Kingman",
+            "Kiowa County": "Greensburg",
+            "Labette County": "Parsons",
+            "Lane County": "Dighton",
+            "Leavenworth County": "Leavenworth",
+            "Lincoln County": "Lincoln",
+            "Linn County": "Pleasanton",
+            "Logan County": "Oakley",
+            "Lyon County": "Emporia",
+            "McPherson County": "McPherson",
+            "Marion County": "Hillsboro",
+            "Marshall County": "Marysville",
+            "Meade County": "Meade",
+            "Miami County": "Paola",
+            "Mitchell County": "Beloit",
+            "Montgomery County": "Coffeyville",
+            "Morris County": "Council Grove",
+            "Morton County": "Elkhart",
+            "Nemaha County": "Seneca",
+            "Neosho County": "Chanute",
+            "Ness County": "Ness City",
+            "Norton County": "Norton",
+            "Osage County": "Osage City",
+            "Osborne County": "Osborne",
+            "Ottawa County": "Minneapolis",
+            "Pawnee County": "Larned",
+            "Phillips County": "Phillipsburg",
+            "Pottawatomie County": "Wamego",
+            "Pratt County": "Pratt",
+            "Rawlins County": "Atwood",
+            "Reno County": "Hutchinson",
+            "Republic County": "Belleville",
+            "Rice County": "Lyons",
+            "Riley County": "Manhattan",
+            "Rooks County": "Plainville",
+            "Rush County": "La Crosse",
+            "Russell County": "Russell",
+            "Saline County": "Salina",
+            "Scott County": "Scott City",
+            "Sedgwick County": "Wichita",
+            "Seward County": "Liberal",
+            "Shawnee County": "Topeka",
+            "Sheridan County": "Hoxie",
+            "Sherman County": "Goodland",
+            "Smith County": "Smith Center",
+            "Stafford County": "St. John",
+            "Stanton County": "Johnson City",
+            "Stevens County": "Hugoton",
+            "Sumner County": "Wellington",
+            "Thomas County": "Colby",
+            "Trego County": "WaKeeney",
+            "Wabaunsee County": "Alma",
+            "Wallace County": "Sharon Springs",
+            "Washington County": "Washington",
+            "Wichita County": "Leoti",
+            "Wilson County": "Neodesha",
+            "Woodson County": "Yates Center",
+            "Wyandotte County": "Kansas City"
+        }
+        location = kansas_counties[location]
+        return location
     
     async def get_court_id(self):
         # Locate the specific td element where the citation number is located
@@ -209,6 +365,7 @@ class KansasScraper(ScraperBase):
     async def get_case_detail(self, case_id):
         case_dict1 = await self.case_name_search(case_id)
 
+
         label_text = "Filed"
         try:
             filing_date = await self.find_date_by_label(label_text)
@@ -218,7 +375,7 @@ class KansasScraper(ScraperBase):
         
         label_text = "Location"
         try:
-            location = await self.find_date_by_label(label_text)
+            location = await self.get_location()
         except:
             location = None
 
@@ -277,21 +434,36 @@ class KansasScraper(ScraperBase):
         
         await self.init_browser()
         await self.singin(user_name, password)
+
         case_dict = await self.get_case_detail(case_id)
-        with Progress() as progress:
-            task = progress.add_task(
-                "[red]Inserting cases...", total=len(case_dict)
-            )
-            
-            case_id = case_dict.get("case_id")
-            if self.check_if_exists(case_id):
-                console.log(
-                    f"Case {case_id} already exists. Skipping..."
+        with NamedTemporaryFile(delete=False, mode="w", encoding="utf-8") as f:
+            with Progress() as progress:
+                task = progress.add_task(
+                    "[red]Inserting cases...", total=len(case_dict)
                 )
+                
+                case_id = case_dict.get("case_id")
+                if self.check_if_exists(case_id):
+                    console.log(
+                        f"Case {case_id} already exists. Skipping..."
+                    )
+                    progress.update(task, advance=1)
+                else:
+                    self.insert_case(case_dict)
+                    self.insert_lead(case_dict)
+
                 progress.update(task, advance=1)
-                case = Case(**case_dict)
-                lead = Lead(**case_dict)
-                self.insert_case(case)
-                self.insert_lead(lead)
         
-        return case_dict
+            await self.browser.close()
+        
+        await self.browser.close()
+
+if __name__ == "__main__":
+    load_dotenv()
+    search_parameters = {
+        "user_name": "Smahmudlaw@gmail.com", 
+        "password": "Shawn1993!",
+    }
+    kansasscraper = KansasScraper()
+    asyncio.run(kansasscraper.scrape(search_parameters))
+    console.log("Done running", __file__, ".")
