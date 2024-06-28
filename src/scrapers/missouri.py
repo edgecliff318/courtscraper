@@ -322,7 +322,7 @@ class ScraperMOCourt(ScraperBase):
             age = None
         return age
 
-    def get_case_info(self, case) -> dict:
+    def get_case_info(self, case, parties_only=False) -> dict:
         """Get every information of case detail by parsing rendered HTML page
 
         This function returns an object.
@@ -342,12 +342,16 @@ class ScraperMOCourt(ScraperBase):
         except Exception as e:
             logger.error(f"Connection failure : {str(e)}")
             console.print(f"Retrieval of case parties failed {case_number}")
+
         self.sleep()
 
         if not case_detail:
             logger.error(f"No case details found for {case_number}")
             console.print(f"No case details found for {case_number}")
             raise Exception("No case details found")
+
+        if parties_only:
+            return self.t_dict(case_detail)
 
         # Retrive the events of the case
         try:
