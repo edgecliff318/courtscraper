@@ -240,9 +240,13 @@ class KansasScraper(ScraperBase):
             
         return charges
     
-    async def get_location(self):
+    async def get_county(self):
         label_text = "Location"
-        location = await self.find_date_by_label(label_text)
+        county = await self.find_date_by_label(label_text)
+        print(county)
+        return county
+
+    async def get_location(self):
         kansas_counties = {
             "Allen County": "Iola",
             "Anderson County": "Garnett",
@@ -350,18 +354,28 @@ class KansasScraper(ScraperBase):
             "Woodson County": "Yates Center",
             "Wyandotte County": "Kansas City"
         }
-        location = kansas_counties[location]
+        county = await self.get_county()
+        location = kansas_counties[county]
         return location
     
     async def get_court_id(self):
-        # Locate the specific td element where the citation number is located
-        court_ids = await self.page.query_selector_all('roa-charge-data-column[label="Citation"]')
-        for element in court_ids:
-            court_id = await element.get_attribute('data-value')
-            if court_id:
-                return court_id.strip()
-        return None
-    
+        county_code = await self.get_county()
+        courts = {}
+        court_code = (
+            f"KS_{county_code}"
+        )
+        if court_code not in courts.keys():
+            courts[court_code] = {
+                "code": court_code,
+                "county_code": county_code,
+                "enabled": True,
+                "name": f"Kansas, {county_code}",
+                "state": "KS",
+                "type": "TR",
+            }
+            self.insert_court(courts[court_code])
+        return court_code
+
     async def get_case_detail(self, case_id):
         case_dict1 = await self.case_name_search(case_id)
 
