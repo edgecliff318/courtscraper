@@ -66,12 +66,12 @@ class CaseNet:
             cases_ignore=cases_ignore,
         )
 
-    def refresh_case(self, case: dict):
+    def refresh_case(self, case: dict, parties_only=False):
         scrapper = ScraperMOCourt(
             url=self.url, username=self.username, password=self.password
         )
         case["case_number"] = case.get("case_id")
-        case_details = scrapper.get_case_info(case)
+        case_details = scrapper.get_case_info(case, parties_only=parties_only)
         case_detail = scrapper.rename_keys(case_details)
 
         charges = case_detail.get("charges", [{"charge_description": ""}])

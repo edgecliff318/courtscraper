@@ -238,6 +238,7 @@ def get_documents(case_id):
     document_blobs = bucket.list_blobs(
         prefix=f"cases/{case_id}/", delimiter="/"
     )
+    filenames = [blob.name.split("/")[-1] for blob in document_blobs]
 
     # Get casenet documents and if not in the list, add them
     if case.documents is not None:
@@ -245,7 +246,7 @@ def get_documents(case_id):
             try:
                 file_path = document.get("file_path")
                 if file_path:
-                    if file_path not in [blob.name for blob in document_blobs]:
+                    if file_path not in filenames:
                         # Copy the file from the current path to the new path
                         blob = bucket.blob(file_path)
                         bucket.copy_blob(
