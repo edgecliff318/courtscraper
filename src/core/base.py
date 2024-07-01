@@ -111,7 +111,12 @@ class BaseService:
         )
 
     def set_item(self, item_id, item):
-        db.collection(self.collection).document(item_id).set(item.model_dump())
+        if isinstance(item, dict):
+            db.collection(self.collection).document(item_id).set(item)
+        else:
+            db.collection(self.collection).document(item_id).set(
+                item.model_dump()
+            )
 
     def patch_item(self, item_id, data):
         db.collection(self.collection).document(item_id).update(data)

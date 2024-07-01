@@ -22,6 +22,7 @@ from src.services.leads import (
     get_leads,
     patch_lead,
 )
+from src.services.settings import ScrapersService
 
 console = Console()
 
@@ -309,6 +310,28 @@ class LexisNexisPhoneFinder:
         # Extract with re phone numbers with the format 123-456-7890
 
         phones = re.findall(r"\d{3}-\d{3}-\d{4}", data)
+
+        # Generated the report
+        scraper_service = ScrapersService()
+        scraper = scraper_service.get_single_item("lexis_nexis_phone_finder")
+
+        if scraper is None:
+            current_date = datetime.datetime.now().date()
+            scraper = scraper_service.set_item(
+                "lexis_nexis_phone_finder",
+                {"count": {str(current_date): 1}},
+            )
+
+        else:
+            current_date = datetime.datetime.now().date()
+            count = scraper.count
+            if count is None:
+                count = {}
+            count[str(current_date)] = count.get(str(current_date), 0) + 1
+            scraper_service.patch_item(
+                "lexis_nexis_phone_finder",
+                {"count": count},
+            )
 
         phones = [f"+1{p.replace('-', '')}" for p in set(phones)]
 

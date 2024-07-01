@@ -355,6 +355,11 @@ class LeadsService(BaseService):
         }
 
 
+class Lock(BaseService):
+    collection_name = "locks"
+    serializer = leads.Lock
+
+
 if __name__ == "__main__":
     today = datetime.now()
     lead = get_last_lead(

@@ -15,6 +15,7 @@ from twilio.rest import Client
 from src.core.config import get_settings
 from src.models import leads as leads_model
 from src.models import messages as messages_model
+from src.scrapers import lexis
 from src.scrapers.beenverified import BeenVerifiedScrapper
 from src.scrapers.lexis import LexisNexisPhoneFinder
 from src.services import cases as cases_service
@@ -218,6 +219,24 @@ async def retrieve_leads_async(
             console.log("No new leads found")
             time.sleep(300)
             continue
+        lock_service = leads_service.Lock()
+
+        locked_items = lock_service.get_items()
+        skip = False
+        for locked_item_single in locked_items:
+            if locked_item_single.case_id == lead.case_id:
+                skip = True
+                console.log(f"Lead {lead.case_id} is already locked")
+                break
+        if skip:
+            continue
+
+        lock_service.set_item(
+            f"{source}_{username}",
+            leads_model.Lock(case_id=lead.case_id, locked=True),
+        )
+
+        leads_service.update_lead_status(lead.case_id, "processing")
 
         if not filter_leads(lead) and not prioritized:
             leads_service.update_lead_status(lead.case_id, "not_prioritized")
@@ -225,7 +244,6 @@ async def retrieve_leads_async(
 
         console.log(f"Found lead {lead.case_id}")
 
-        leads_service.update_lead_status(lead.case_id, "processing")
         case = cases_service.get_single_case(lead.case_id)
 
         try:

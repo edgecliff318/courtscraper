@@ -36,6 +36,12 @@ leads_statuses = [
 ]
 
 
+class Lock(BaseModel):
+    id: Optional[str] = None
+    case_id: Optional[str] = None
+    locked: Optional[bool] = False
+
+
 class Lead(BaseModel):
     id: Optional[str] = None
     case_id: Optional[str] = None
