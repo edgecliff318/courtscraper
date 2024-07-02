@@ -49,8 +49,11 @@ if __name__ == "__main__":
     df = df.merge(leads_pivot, on="date", how="left")
 
     # Total outbound actions
+    columns_to_sum = ["responded", "won", "stop", "contacted", "won"]
     df["outbound_actions_count"] = (
-        df["responded"] + df["won"] + df["stop"] + df["contacted"] + df["won"]
+        df[[c for c in columns_to_sum if c in df.columns]]
+        .sum(axis=1)
+        .fillna(0)
     )
 
     df.loc[
