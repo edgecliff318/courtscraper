@@ -157,3 +157,4 @@ playwright/.auth
 otr_archive
 otr
 csv
+temp/

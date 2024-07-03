@@ -1,38 +1,130 @@
-# Import necessary libraries
 import asyncio
 import os
 import os.path
 import re
-import sys
 from datetime import datetime
-from tempfile import NamedTemporaryFile
 
 from dotenv import load_dotenv
-
-# Import specific modules from libraries
-from playwright.async_api import async_playwright
 from rich.console import Console
-from rich.progress import Progress
 from twocaptcha import TwoCaptcha
 
+from playwright.async_api import async_playwright
 from src.scrapers.base.scraper_base import ScraperBase
 
-sys.path.append(
-    os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
-    + "/libraries"
-)
-
-sys.path.append(
-    os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
-)
-
-load_dotenv()
 TWOCAPTCHA_API_KEY = os.getenv("TWOCAPTCHA_API_KEY")
 
 console = Console()
 
 
 class KansasScraper(ScraperBase):
+    city_mapping = {
+        "AL": "ALLEN",
+        "AN": "ANDERSON",
+        "AT": "ATCHISON",
+        "BA": "BARBER",
+        "BT": "BARTON",
+        "BB": "BOURBON",
+        "BR": "BROWN",
+        "BU": "BUTLER",
+        "CS": "CHASE",
+        "CQ": "CHAUTAUQUA",
+        "CK": "CHEROKEE",
+        "CN": "CHEYENNE",
+        "CA": "CLARK",
+        "CY": "CLAY",
+        "CD": "CLOUD",
+        "CF": "COFFEY",
+        "CM": "COMANCHE",
+        "CL": "COWLEY",
+        "CR": "CRAWFORD",
+        "DC": "DECATUR",
+        "DK": "DICKINSON",
+        "DP": "DONIPHAN",
+        "DG": "DOUGLAS",
+        "ED": "EDWARDS",
+        "EK": "ELK",
+        "EL": "ELLIS",
+        "EW": "ELLSWORTH",
+        "FI": "FINNEY",
+        "FO": "FORD",
+        "FR": "FRANKLIN",
+        "GE": "GEARY",
+        "GO": "GOVE",
+        "GH": "GRAHAM",
+        "GT": "GRANT",
+        "GY": "GRAY",
+        "GL": "GREELEY",
+        "GW": "GREENWOOD",
+        "HM": "HAMILTON",
+        "HP": "HARPER",
+        "HV": "HARVEY",
+        "HS": "HASKELL",
+        "HG": "HODGEMAN",
+        "JA": "JACKSON",
+        "JF": "JEFFERSON",
+        "JW": "JEWELL",
+        "JO": "JOHNSON",
+        "KE": "KEARNY",
+        "KM": "KINGMAN",
+        "KW": "KIOWA",
+        "LB": "LABETTE",
+        "LE": "LANE",
+        "LV": "LEAVENWORTH",
+        "LC": "LINCOLN",
+        "LN": "LINN",
+        "LG": "LOGAN",
+        "LY": "LYON",
+        "MP": "MCPHERSON",
+        "MN": "MARION",
+        "MS": "MARSHALL",
+        "ME": "MEADE",
+        "MI": "MIAMI",
+        "MC": "MITCHELL",
+        "MG": "MONTGOMERY",
+        "MR": "MORRIS",
+        "MT": "MORTON",
+        "NM": "NEMAHA",
+        "NO": "NEOSHO",
+        "NS": "NESS",
+        "NT": "NORTON",
+        "OS": "OSAGE",
+        "OB": "OSBORNE",
+        "OT": "OTTAWA",
+        "PN": "PAWNEE",
+        "PL": "PHILLIPS",
+        "PT": "POTTAWATOMIE",
+        "PR": "PRATT",
+        "RA": "RAWLINS",
+        "RN": "RENO",
+        "RP": "REPUBLIC",
+        "RC": "RICE",
+        "RL": "RILEY",
+        "RO": "ROOKS",
+        "RH": "RUSH",
+        "RS": "RUSSELL",
+        "SA": "SALINE",
+        "SC": "SCOTT",
+        "SG": "SEDGWICK",
+        "SW": "SEWARD",
+        "SN": "SHAWNEE",
+        "SD": "SHERIDAN",
+        "SH": "SHERMAN",
+        "SM": "SMITH",
+        "SF": "STAFFORD",
+        "ST": "STANTON",
+        "SV": "STEVENS",
+        "SU": "SUMNER",
+        "TH": "THOMAS",
+        "TR": "TREGO",
+        "WB": "WABAUNSEE",
+        "WA": "WALLACE",
+        "WS": "WASHINGTON",
+        "WH": "WICHITA",
+        "WL": "WILSON",
+        "WO": "WOODSON",
+        "WY": "WYANDOTTE",
+    }
+
     def __init__(
         self,
         email: str | None = None,
@@ -45,6 +137,7 @@ class KansasScraper(ScraperBase):
         self.case_id = case_id or "WY-2024-TR-001995"
         super().__init__(email, password)
         console.log(f" we are seaeching for {self.case_id}")
+        self.courts = {}
 
     solver = TwoCaptcha(TWOCAPTCHA_API_KEY)
 
@@ -131,7 +224,8 @@ class KansasScraper(ScraperBase):
 
     async def case_name_search(self, case_id):
         # Goto https://prodportal.kscourts.org/ProdPortal/
-        await self.page.goto(self.url)
+        url = "https://prodportal.kscourts.org/ProdPortal/"
+        await self.page.goto(url)
         a_tag_selector = "a.btn.btn-lg.btn-default.portlet-buttons"
 
         # Wait for the element to be available
@@ -176,7 +270,9 @@ class KansasScraper(ScraperBase):
 
         await self.page.wait_for_load_state("networkidle")
 
-        no_match = self.page.get_by_text("No cases match your search")
+        no_match = await self.page.get_by_text(
+            "No cases match your search"
+        ).all()
 
         if no_match:
             console.log("No cases match your search")
@@ -404,23 +500,26 @@ class KansasScraper(ScraperBase):
             "Wyandotte County": "Kansas City",
         }
         county = await self.get_county()
-        location = kansas_counties[county]
+        if county is not None:
+            location = kansas_counties[county]
         return location
 
-    async def get_court_id(self):
-        county_code = await self.get_county()
-        courts = {}
-        court_code = f"KS_{county_code}"
-        if court_code not in courts.keys():
-            courts[court_code] = {
+    async def get_court_id(self, case_id):
+        # Get the first 2 characters of the case_id
+        city_code = case_id[:2]
+        city_name = self.city_mapping[city_code]
+
+        court_code = f"KS_{city_code}"
+        if court_code not in self.courts.keys():
+            self.courts[court_code] = {
                 "code": court_code,
-                "county_code": county_code,
+                "county_code": city_code,
                 "enabled": True,
-                "name": f"Kansas, {county_code}",
+                "name": f"Kansas, {city_name}",
                 "state": "KS",
                 "type": "TR",
             }
-            self.insert_court(courts[court_code])
+            self.insert_court(self.courts[court_code])
         return court_code
 
     async def get_case_detail(self, case_id):
@@ -438,16 +537,16 @@ class KansasScraper(ScraperBase):
 
         label_text = "Location"
         try:
-            location = await self.get_location()
+            city = await self.get_location()
         except Exception:
-            location = None
+            city = None
 
         try:
             charges = await self.get_charges()
         except Exception:
             charges = None
 
-        court_id = await self.get_court_id()
+        court_id = await self.get_court_id(case_id)
 
         try:
             case_type_element = self.page.locator("text='Case Type:'").first
@@ -481,7 +580,7 @@ class KansasScraper(ScraperBase):
             "court_id": court_id,
             "filing_date": filing_date,
             "offense_date": offense_date,
-            "location": location,
+            "city": city,
             "charges": charges,
             "case_type": case_type,
             "case_status": case_status,
@@ -499,14 +598,12 @@ class KansasScraper(ScraperBase):
     async def scrape(self, search_parameters):
         user_name = search_parameters["user_name"]
         password = search_parameters["password"]
-        case_id = search_parameters["case_id"]
 
         await self.init_browser()
         await self.singin(user_name, password)
 
         for city_code, last_case_id in self.state.items():
             not_found_count = 0
-            # Format "WY-2024-TR-001995"
 
             while not_found_count < 10:
                 current_date = datetime.now().strftime("%Y")
@@ -518,8 +615,13 @@ class KansasScraper(ScraperBase):
                 else:
                     not_found_count = 0
 
+                last_case_id += 1
+
+                # Wait for 1 second
+                await asyncio.sleep(1)
+
                 # Update the state
-                self.state[city_code] = last_case_id + 1
+                self.state[city_code] = last_case_id
                 self.update_state()
 
         await self.browser.close()
@@ -529,22 +631,15 @@ class KansasScraper(ScraperBase):
         if not case_dict:
             console.log(f"Case {case_id} not found.")
             return None
-        with NamedTemporaryFile(delete=False, mode="w", encoding="utf-8"):
-            with Progress() as progress:
-                task = progress.add_task(
-                    "[red]Inserting cases...", total=len(case_dict)
-                )
+        case_id = case_dict.get("case_id")
 
-                case_id = case_dict.get("case_id")
-
-                if self.check_if_exists(case_id):
-                    console.log(f"Case {case_id} already exists. Skipping...")
-                    progress.update(task, advance=1)
-                else:
-                    self.insert_case(case_dict)
-                    self.insert_lead(case_dict)
-
-                progress.update(task, advance=1)
+        if self.check_if_exists(case_id):
+            console.log(f"Case {case_id} already exists. Skipping...")
+        else:
+            console.log(f"Inserting case {case_id}...")
+            self.insert_case(case_dict)
+            self.insert_lead(case_dict)
+        return case_dict
 
 
 if __name__ == "__main__":
@@ -552,7 +647,6 @@ if __name__ == "__main__":
     search_parameters = {
         "user_name": "Smahmudlaw@gmail.com",
         "password": "Shawn1993!",
-        "case_id": "WY-2024-TR-001995",
     }
 
     kansasscraper = KansasScraper()
