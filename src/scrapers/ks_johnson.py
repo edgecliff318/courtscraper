@@ -2,6 +2,7 @@
 import asyncio
 import os
 import re
+
 from typing import Tuple
 from datetime import datetime
 from dotenv import load_dotenv
@@ -35,7 +36,7 @@ class KSJohnson(ScraperBase):
         Returns:
             Tuple[str, str, str]: A tuple containing the race, sex, and date of birth.
         """
-        pattern = r"([A-Za-z]+)/([MF]) (\d{2}/\d{2}/\d{2})"
+        pattern = r"(?:([A-Za-z]+)\s*)?/([MF]) (\d{2}/\d{2}/\d{2})"
         match = re.match(pattern, race_sex_dob)
         if match:
             return match.group(1), match.group(2), match.group(3)
@@ -175,7 +176,7 @@ class KSJohnson(ScraperBase):
             console.log(f"{court_code} already exist")
         return court_code       
 
-    async def get_case_details(self) -> dict:
+    async def get_case_details(self, case_id) -> dict:
         """
         Fetches the case details from the website.
         
@@ -183,32 +184,81 @@ class KSJohnson(ScraperBase):
             dict: A dictionary containing the case details.
         """
         try:
-            # Extract case details using locators
-            case_id = await self.page.locator("xpath=/html/body/form/table[1]/tbody/tr[2]/td[2]/input").input_value()
+            # get court_id
             court_id = await self.get_court_id(case_id)
-            judge = await self.page.locator("xpath=/html/body/form/table[1]/tbody/tr[2]/td[4]/input").input_value()
-            status = await self.page.locator("xpath=/html/body/form/table[1]/tbody/tr[2]/td[8]/input").input_value()
-            last_name = await self.page.locator("xpath=/html/body/form/table[1]/tbody/tr[3]/td[2]/input").input_value()
-            first_name = await self.page.locator("xpath=/html/body/form/table[1]/tbody/tr[3]/td[4]/input").input_value()
-            middle_name = await self.page.locator("xpath=/html/body/form/table[1]/tbody/tr[3]/td[6]/input").input_value()
-            race_sex_dob = await self.page.locator("xpath=/html/body/form/table/tbody/tr[4]/td[2]/input").input_value()
 
-            # Split race, sex, and date of birth
-            race, sex, dob = self.split_race_sex_dob(race_sex_dob)
+            #get judge
+            try:
+                judge = await self.page.locator("xpath=/html/body/form/table[1]/tbody/tr[2]/td[4]/input").input_value()
+            except Exception:
+                judge = ""
+
+            #get status
+            try:
+                status = await self.page.locator("xpath=/html/body/form/table[1]/tbody/tr[2]/td[8]/input").input_value()
+            except Exception:
+                status = ""
+
+            #get last_name
+            try:
+                last_name = await self.page.locator("xpath=/html/body/form/table[1]/tbody/tr[3]/td[2]/input").input_value()
+            except Exception:
+                last_name = ""
+
+            #get first_name
+            try:
+                first_name = await self.page.locator("xpath=/html/body/form/table[1]/tbody/tr[3]/td[4]/input").input_value()
+            except Exception:
+                first_name = ""
+
+            #get middle_name
+            try:
+                middle_name = await self.page.locator("xpath=/html/body/form/table[1]/tbody/tr[3]/td[6]/input").input_value()
+            except Exception:
+                middle_name = ""
+
+            #get race, sex, dob of defendant
+            try:
+                race_sex_dob = await self.page.locator("xpath=/html/body/form/table/tbody/tr[4]/td[2]/input").input_value()
+            except Exception:
+                race_sex_dob = ""
+                
+            try:
+                race, sex, dob = self.split_race_sex_dob(race_sex_dob)
+            except Exception:
+                race, sex, dob == ""
+
             birth_date = self.check_and_convert_date(dob)
+            
             year_of_birth = birth_date.year if birth_date else ""
-
+            
+            # Get defendant details
             # Convert case filing date
-            original_filling_date = await self.page.inner_html("#Form1 > table:nth-child(5) > tbody > tr:nth-child(2) > td:nth-child(3)")
+            try:
+                original_filling_date = await self.page.inner_html("#Form1 > table:nth-child(5) > tbody > tr:nth-child(2) > td:nth-child(3)")
+            except Exception:
+                original_filling_date = ""
             filling_date = self.check_and_convert_date(original_filling_date)
             
-            section = await self.page.inner_html("#Form1 > table:nth-child(5) > tbody > tr:nth-child(2) > td:nth-child(2)")
-            title = await self.page.inner_html("#Form1 > table:nth-child(5) > tbody > tr:nth-child(2) > td:nth-child(4)")
+            try:
+                section = await self.page.inner_html("#Form1 > table:nth-child(5) > tbody > tr:nth-child(2) > td:nth-child(2)")
+            except Exception:
+                section = ""
+
+            try:
+                title = await self.page.inner_html("#Form1 > table:nth-child(5) > tbody > tr:nth-child(2) > td:nth-child(4)")
+            except Exception:
+                title = ""
+
             charges = [{"section": section, "date": filling_date, "title": title}]
 
-            # Get defendant details
             await self.page.click("#cmdDefendentInfo")
-            address = await self.page.inner_html("body > table > tbody > tr:nth-child(2) > td:nth-child(1)")
+
+            # Get addrss details
+            try:
+                address = await self.page.inner_html("body > table > tbody > tr:nth-child(2) > td:nth-child(1)")
+            except:
+                address = ""
             address_line_1, address_city, address_state_code, address_zip = self.parse_full_address(address)
 
             # Create case details dictionary
@@ -253,7 +303,8 @@ class KSJohnson(ScraperBase):
         await self.initialize_browser(user_name, password)
 
         # Initialize counters and state
-        last_case_id_nb = self.state.get("last_case_id_nb", 500)
+        last_case_id_nb = self.state.get("last_case_id_nb", 1)
+
         case_id_nb = last_case_id_nb
         not_found_count = 0
         current_year = datetime.now().year
@@ -274,7 +325,7 @@ class KSJohnson(ScraperBase):
 
                 # Search and get case details
                 await self.search_details(case_id_full)
-                case_details = await self.get_case_details()
+                case_details = await self.get_case_details(case_id_full)
 
                 if not case_details:
                     console.log(f"Case {case_id_full} not found. Skipping ...")
