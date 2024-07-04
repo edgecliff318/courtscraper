@@ -162,7 +162,6 @@ class KSJohnson(ScraperBase):
         court_code = f"KS_{city_code}"
 
         if court_code not in self.courts.keys():
-            print("IT's in this ")
             self.courts[court_code] = {
                 "code": court_code,
                 "county_code": city_code,
@@ -173,7 +172,7 @@ class KSJohnson(ScraperBase):
             }
             self.insert_court(self.courts[court_code])
         else:
-            print(f"{court_code} already exist")
+            console.log(f"{court_code} already exist")
         return court_code       
 
     async def get_case_details(self) -> dict:
@@ -187,7 +186,6 @@ class KSJohnson(ScraperBase):
             # Extract case details using locators
             case_id = await self.page.locator("xpath=/html/body/form/table[1]/tbody/tr[2]/td[2]/input").input_value()
             court_id = await self.get_court_id(case_id)
-            print("court_id")
             judge = await self.page.locator("xpath=/html/body/form/table[1]/tbody/tr[2]/td[4]/input").input_value()
             status = await self.page.locator("xpath=/html/body/form/table[1]/tbody/tr[2]/td[8]/input").input_value()
             last_name = await self.page.locator("xpath=/html/body/form/table[1]/tbody/tr[3]/td[2]/input").input_value()
@@ -195,7 +193,6 @@ class KSJohnson(ScraperBase):
             middle_name = await self.page.locator("xpath=/html/body/form/table[1]/tbody/tr[3]/td[6]/input").input_value()
             race_sex_dob = await self.page.locator("xpath=/html/body/form/table/tbody/tr[4]/td[2]/input").input_value()
 
-            print(race_sex_dob)
             # Split race, sex, and date of birth
             race, sex, dob = self.split_race_sex_dob(race_sex_dob)
             birth_date = self.check_and_convert_date(dob)
@@ -260,7 +257,6 @@ class KSJohnson(ScraperBase):
         case_id_nb = last_case_id_nb
         not_found_count = 0
         current_year = datetime.now().year
-        print("passed here")
         while True:
             try:
                 if not_found_count > 10:
@@ -271,13 +267,11 @@ class KSJohnson(ScraperBase):
                 case_id_full = f"{str(current_year)[2:]}TC{str(case_id_nb).zfill(5)}"
                 case_id_nb += 1
 
-                print("passed here1")
                 # Check if the case already exists
                 if self.check_if_exists(case_id_full):
                     console.log(f"Case {case_id_full} already exists. Skipping ...")
                     continue
 
-                print("passed here")
                 # Search and get case details
                 await self.search_details(case_id_full)
                 case_details = await self.get_case_details()
