@@ -241,12 +241,7 @@ def retrieve_cases_arkansas():
     console.log("Arkansas Scraper")
     arkansasscraper = ArkansasScraper()
     console.log("Retrieving the configuration from Firebase")
-    filing_date = datetime.datetime.now()
-    arkansasscraper.scrape(
-        {
-            "filing_date": filing_date.strftime("%m/%d/%Y")
-        }
-    )
+    arkansasscraper.scrape()
 
 
 def retrieve_cases_indiana():
