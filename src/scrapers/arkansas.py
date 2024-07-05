@@ -105,12 +105,14 @@ class ArkansasScraper(ScraperBase):
         """ Generate or fetch court information based on case data. """
         self.courts = {}
         court_code = f"AR_{case_dict.get('court_id').upper()}"
+        county_name = case_dict.get('court_id')
+        county_code = case_dict.get('court_id')
         if court_code not in self.courts:
             self.courts[court_code] = {
                 "code": court_code,
-                "county_code": case_dict.get("court_id"),
+                "county_code": county_code,
                 "enabled": True,
-                "name": f"Arkansas, {case_dict.get('court_id')}",
+                "name": f"Arkansas, {county_name}",
                 "state": "AR",
                 "type": "CT",
             }
