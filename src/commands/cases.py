@@ -302,7 +302,7 @@ async def retrieve_cases_palm_beach():
 async def retrieve_cases_broward():
     console.log("Broward County, Florida Scraper")
     browardscraper = BrowardScraper()
-    await browardscraper.scrape({'case_id': '24001500TI10A'})
+    await browardscraper.scrape()
 
 async def retrieve_cases_district_court():
     console.log("District Court Scraper")
