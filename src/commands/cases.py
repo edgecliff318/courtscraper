@@ -307,10 +307,7 @@ async def retrieve_cases_broward():
 async def retrieve_cases_district_court():
     console.log("District Court Scraper")
     districtcourtscraper = DistrictCourtScraper()
-    search_parameters={
-        'case_number': "GT19007340-00"
-    }
-    await districtcourtscraper.scrape(search_parameters)
+    await districtcourtscraper.scrape()
 
 async def retrieve_cases_west_virginia():
     console.log("West Virginia Scraper")
