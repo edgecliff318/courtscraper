@@ -57,6 +57,9 @@ def modal_next_step(data, n_clicks_close, n_clicks_update_status):
     if data is None and trigger_id != "update-status-button":
         return dash.no_update, dash.no_update
 
+    if trigger_id == "update-status-button" and n_clicks_update_status is None:
+        return dash.no_update, dash.no_update
+
     if data is None:
         data = {}
 
