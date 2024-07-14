@@ -155,6 +155,7 @@ class TXHarrisCountyScraper(ScraperBase):
         df["case_date"] = pd.to_datetime(df["case_date"], format="%m/%d/%Y")
         df["charges_description"] = df["description"]
         df["case_desc"] = str(df["case_desc"])
+        df["source"] = "tx_harris"
 
         cases_dicts = df.to_dict(orient="records")
         cases_dicts = [

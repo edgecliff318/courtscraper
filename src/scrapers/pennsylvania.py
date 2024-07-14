@@ -244,6 +244,7 @@ class PennsylvaniaScraper(ScraperBase):
                                 self.insert_court(courts[court_code])
                             case_details["court_id"] = court_code
                             case_details["court_code"] = court_code
+                            case_details["source"] = "pennsylvania"
                             # Transfor case_date to datetime
                             if (
                                 case_details.get("case_date") is not None
