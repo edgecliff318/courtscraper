@@ -9,7 +9,7 @@ from src.components.cases.status import case_statuses
 from src.core.config import get_settings
 from src.models.cases import Case
 from src.services import cases as cases_service
-from src.services import mycase as mycase_service
+from src.services import messages
 from src.services.participants import ParticipantsService
 
 logger = logging.getLogger(__name__)
@@ -135,7 +135,12 @@ def modal_next_step_submit(
                 title="No phone number found",
             )
 
-        mycase_service.send_sms_to_client_mycase(case_id, message, phone)
+        messages.send_message(
+            case_id,
+            message,
+            phone,
+            force_send=True,
+        )
 
         alert_message = "Case updated successfully and SMS sent"
 
