@@ -154,6 +154,7 @@ class TXHarrisCountyScraper(ScraperBase):
         df["case_date"] = df["filing_date"]
         df["case_date"] = pd.to_datetime(df["case_date"], format="%m/%d/%Y")
         df["charges_description"] = df["description"]
+        df["case_desc"] = str(df["case_desc"])
 
         cases_dicts = df.to_dict(orient="records")
         cases_dicts = [
@@ -212,4 +213,4 @@ class TXHarrisCountyScraper(ScraperBase):
 
 if __name__ == "__main__":
     txscraper = TXHarrisCountyScraper()
-    txscraper.scrape({"start_date": "05/09/2024", "end_date": "05/10/2024"})
+    txscraper.scrape({"start_date": "07/14/2024", "end_date": "07/14/2024"})

@@ -6,9 +6,9 @@ import uuid
 from pathlib import Path
 
 import pandas as pd
+from playwright.async_api import async_playwright
 from rich.console import Console
 
-from playwright.async_api import async_playwright
 from src.scrapers.base import ScraperBase
 
 sys.path.append(
@@ -339,7 +339,7 @@ if __name__ == "__main__":
     try:
         console.log("Initializing Pennsylvania Scraper...")
         scraper = PennsylvaniaScraper(
-            start_date="2024-05-23", end_date="2024-05-26"
+            start_date="2024-07-12", end_date="2024-07-14"
         )
         console.log("Pennsylvania Scraper initialized successfully.")
 
