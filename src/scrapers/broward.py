@@ -1,6 +1,7 @@
-import os
 import asyncio
 import re
+import os
+
 from playwright.async_api import async_playwright, TimeoutError
 from twocaptcha import TwoCaptcha
 from urllib.parse import urlparse, parse_qs
@@ -24,15 +25,24 @@ class BrowardScraper(ScraperBase):
         self.url = "https://www.browardclerk.org/Web2"
     
     def split_full_name(self, name):
-        parts = re.split(r'[\s,\-\.]+', name)
-        first_name, middle_name, last_name = '', '', ''
-        
-        if len(parts) > 2:
-            first_name, middle_name, last_name = parts[0], ' '.join(parts[1:-1]), parts[-1]
-        elif len(parts) == 2:
-            first_name, last_name = parts[0], parts[1]
-        elif len(parts) == 1:
-            first_name = parts[0]
+        # Prepare variables for first, middle, and last names
+        first_name = middle_name = last_name = ""
+
+        # Use regular expression to split on space, comma, hyphen, or period.
+        parts = re.split(r"[,]+", name)
+        if len(parts) > 1:
+            last_name = parts[0]
+
+            # Remove the first space from the second part
+            second_part = parts[1].lstrip()
+            second_part = re.split(r"[\s]+", second_part)
+
+            if len(second_part) > 1:
+                first_name = second_part[0]
+                middle_name = second_part[1]
+
+            else:
+                first_name = second_part[0]
 
         return first_name, middle_name, last_name
 
@@ -117,7 +127,7 @@ class BrowardScraper(ScraperBase):
                 "code": court_code,
                 "county_code": county_code,
                 "enabled": True,
-                "name": f"Arkansas, {county_name}",
+                "name": f"Florida, {county_name}",
                 "state": "FL",
                 "type": "TI",
             }
