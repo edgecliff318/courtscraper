@@ -1,15 +1,23 @@
+""" Scraper for Cook County Court """
 import asyncio
 import os
 import os.path
+import re
 import sys
-from datetime import date
-from urllib.parse import parse_qs, urljoin, urlparse
+from datetime import date, datetime
 
 from dotenv import load_dotenv
-from playwright.async_api import async_playwright
 from rich.console import Console
+from urllib.parse import urlparse, parse_qs, urljoin
+from rich.console import Console
+from tempfile import NamedTemporaryFile
+from twocaptcha import TwoCaptcha
 
-from src.scrapers.base import ScraperBase
+from playwright.async_api import async_playwright, TimeoutError
+from src.scrapers.base.scraper_base import ScraperBase
+from src.services.leads import LeadsService
+
+TWOCAPTCHA_API_KEY = os.getenv("TWOCAPTCHA_API_KEY")
 
 sys.path.append(
     os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
@@ -24,6 +32,7 @@ console = Console()
 
 
 class IlCook(ScraperBase):
+    solver = TwoCaptcha(TWOCAPTCHA_API_KEY)
     BASE_URL = "https://cccportal.cookcountyclerkofcourt.org/CCCPortal/"
     SEARCH_RESULT_URL = "https://cccportal.cookcountyclerkofcourt.org/app/RegisterOfActionsService/"
 
@@ -59,8 +68,28 @@ class IlCook(ScraperBase):
         self.search_filter = search_filter or None
 
         super().__init__(email, password)
-        console.log(f" we are starting from {self.start_date} to {self.end_date}")
+        console.log(f"We are starting from {self.start_date} to {self.end_date}")
 
+    def convert_date_string(self, date_string: str) -> datetime | None:
+        """
+        Converts a date string to a datetime object using multiple formats.
+
+        Args:
+            date_string (str): The date string to be converted.
+
+        Returns:
+            datetime | None: The converted datetime object, or None if the string is not in a recognizable format.
+        """
+        date_formats = ["%Y-%m-%d %H:%M:%S", "%Y-%m-%d", "%m/%d/%y"]
+
+        for format in date_formats:
+            try:
+                return datetime.strptime(date_string, format)
+            except ValueError:
+                pass
+
+        
+        return None
 
     async def get_case_details(self, page, url: str) -> dict:
         id = self._get_id(url)
@@ -116,7 +145,6 @@ class IlCook(ScraperBase):
                         smart_search_data = await self.get_extra_data(
                             page, case_id_full
                         )
-
                         if not smart_search_data:
                             console.log(
                                 f"Case {case_id_full} not found. Skipping ..."
@@ -153,8 +181,8 @@ class IlCook(ScraperBase):
                         self.update_state()
                     except TimeoutError:
                         console.log("Timeout error")
-                        # Sleep for 5 minutes
-                        await page.wait_for_timeout(300000)
+                        # Sleep for 3 seconds and try again
+                        await page.wait_for_timeout(3000)
                     except Exception as e:
                         console.log(f"Failed to insert case - {e}")
                         continue
@@ -303,6 +331,20 @@ class IlCook(ScraperBase):
         url = "https://cccportal.cookcountyclerkofcourt.org/CCCPortal/Home/Dashboard/29"
         await page.goto(url, timeout=120000)
         await page.locator("#caseCriteria_SearchCriteria").fill(case_id)
+        recaptcha_element = await page.query_selector('div.g-recaptcha')
+        if recaptcha_element:
+            site_key = await recaptcha_element.get_attribute('data-sitekey')
+            response = self.solver.recaptcha(
+                sitekey=site_key,
+                url="https://cccportal.cookcountyclerkofcourt.org/CCCPortal/Home/Dashboard/29"
+            )
+            code = response['code']
+            response_textarea = await recaptcha_element.query_selector('textarea#g-recaptcha-response')
+            if response_textarea:
+                await response_textarea.evaluate('el => el.value = "{}"'.format(code))
+            else:
+                print("The 'g-recaptcha-response' textarea was not found.")
+                
         await page.get_by_role("button", name="Submit").click()
 
         await page.wait_for_timeout(2000)
@@ -311,42 +353,44 @@ class IlCook(ScraperBase):
         rows = await page.query_selector_all(
             "table.kgrid-card-table tbody tr.k-master-row"
         )
-
+        console.log("len rows-", len(rows))
         # Iterate through each row
-        for row in rows:
-            # Extracting data from each cell
-            cells = await row.query_selector_all("td")
+        if rows:
+            for row in rows:
+                # Extracting data from each cell
+                cells = await row.query_selector_all("td")
 
-            # Creating a dictionary for each row
-            # Case link from cells[1] get a then get data-url attribute
-            first_row = await cells[1].query_selector("a")
-            # Get a element from the first row
-            first_row_href = await first_row.get_attribute("data-url")
+                # Creating a dictionary for each row
+                # Case link from cells[1] get a then get data-url attribute
+                first_row = await cells[1].query_selector("a")
+                # Get a element from the first row
+                first_row_href = await first_row.get_attribute("data-url")
+                # Get a birth_data and convert it datetime object
+                birth_date = await cells[8].inner_text()
+                birth_date = self.convert_date_string(birth_date)
+                row_data = {
+                    "case_url": first_row_href,
+                    "filing_date": await cells[3].inner_text(),
+                    "type": await cells[4].inner_text(),
+                    "case_status": await cells[5].inner_text(),
+                    "birth_date": birth_date,
+                    "state": "IL",
+                    "court_code": "IL_COOK",
+                    "source": "il_cook",
+                    "city": "Chicago",
+                    "state": "IL",
+                    "zip_code": "60602",
+                    "county": "Cook",
+                }
 
-            row_data = {
-                "case_url": first_row_href,
-                "filing_date": await cells[3].inner_text(),
-                "type": await cells[4].inner_text(),
-                "case_status": await cells[5].inner_text(),
-                "birth_date": await cells[8].inner_text(),
-                "state": "IL",
-                "court_code": "IL_COOK",
-                "source": "il_cook",
-                "city": "Chicago",
-                "state": "IL",
-                "zip_code": "60602",
-                "county": "Cook",
-            }
+                try:  
+                    if "/" in row_data["birth_date"]:  
+                        row_data["year_of_birth"] = row_data["birth_date"].split("/")[-1]  
+                        row_data["age"] = date.today().year - int(row_data["year_of_birth"])  
+                except TypeError:  
+                    print("row_data['birth_date'] is None")
 
-            if "/" in row_data["birth_date"]:
-                row_data["year_of_birth"] = row_data["birth_date"].split("/")[
-                    -1
-                ]
-                row_data["age"] = date.today().year - int(
-                    row_data["year_of_birth"]
-                )
-
-            return row_data
+                    return row_data
 
         return {}
 
@@ -372,11 +416,12 @@ class IlCook(ScraperBase):
             .get("CaseSummaryHeader", {})
             .get("Judge")
         )
-        filed_on = (
+        filing_date = (
             content.get("CaseSummariesSlim", {})
             .get("CaseSummaryHeader", {})
             .get("FiledOn")
         )
+        filing_date = self.convert_date_string(filing_date)
         case_number = (
             content.get("CaseSummariesSlim", {})
             .get("CaseSummaryHeader", {})
@@ -528,29 +573,37 @@ class IlCook(ScraperBase):
         return {
             "case_id": str(case_id),
             "court_id": str(court_id),
+            "court_code": str(court_id),     
+            "last_name": last_name,       
+            "first_name": first_name,
+            "middle_name": middle_name,
             "court_type": court_type,
             "judge": judge,
-            "filed_on": filed_on,
-            "case_date": filed_on,
+            "status": "new",
+            "state": "IL",
+            "filing_data": filing_date,
+            "case_date": filing_date,
             "case_number": case_number,
             "case_type": case_type,
             "formatted_party_name": formatted_party_name,
             "parties": parties,
-            "first_name": first_name,
-            "middle_name": middle_name,
-            "last_name": last_name,
             "charges": charges,
             "events": events,
             "raw": content,
+            "county": "Cook",
             "charges_description": charges_description,
         }
 
 
 if __name__ == "__main__":
     load_dotenv()
+    search_parameters = {
+        "user_name": "Smahmudlaw@gmail.com",
+        "password": "Shawn1993!",
+    }
     scraper = IlCook(
-        email=os.getenv("EMAIL"),
-        password=os.getenv("PASSWORD"),
+        email=search_parameters["user_name"],
+        password=search_parameters["password"],
     )
     asyncio.run(scraper.main())
     console.log("Done running", __file__, ".")
