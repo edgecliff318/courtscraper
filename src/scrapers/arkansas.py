@@ -1,13 +1,13 @@
+""" Scraper for Arkansas Scraper"""
+
 import asyncio
 import os
 import re
-from calendar import c
 from datetime import datetime, timedelta
 
 import requests
 from rich.console import Console
 from twocaptcha import TwoCaptcha
-from zmq import has
 
 from src.scrapers.base.scraper_base import ScraperBase
 
@@ -141,7 +141,6 @@ class ArkansasScraper(ScraperBase):
             return None, []
 
         response_data = res.json()
-
         # Extract charges
         charges = [
             {
@@ -268,6 +267,7 @@ class ArkansasScraper(ScraperBase):
                 case_data = self.scrape_cases_for_filing_date(filing_date)
 
                 if case_data is None:
+                    console.log(f"Case {case_data} not found. Skipping ...")
                     not_found_count += 1
                     continue
 
@@ -280,12 +280,12 @@ class ArkansasScraper(ScraperBase):
                 case_dicts = self.process_cases(cases)
                 for case_dict in case_dicts:
                     case_id = case_dict["case_id"]
-                    # if self.check_if_exists(case_id):
-                    #     console.log(
-                    #         f"Case {case_id} already exists. Skipping..."
-                    #     )
-                    #     continue
-                    console.log(f"case_dict-{case_dict}")
+                    if self.check_if_exists(case_id):
+                        console.log(
+                            f"Case {case_id} already exists. Skipping..."
+                        )
+                        continue
+
                     console.log(f"Inserting case {case_id}...")
                     self.insert_case(case_dict)
                     console.log(f"Inserted case for {case_id})")

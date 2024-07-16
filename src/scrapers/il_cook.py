@@ -104,7 +104,11 @@ class IlCook(ScraperBase):
     async def main(self):
         async with async_playwright() as pw:
             console.log("Connecting...")
-            browser = await pw.chromium.launch(headless=True)
+            # Proxy 9090
+            browser = await pw.chromium.launch(
+                headless=True,
+                # args=["--proxy-server=socks5://localhost:9090"]
+            )
             context = await browser.new_context()
             page = await context.new_page()
 
@@ -181,8 +185,8 @@ class IlCook(ScraperBase):
                         self.update_state()
                     except TimeoutError:
                         console.log("Timeout error")
-                        # Sleep for 3 seconds and try again
-                        await page.wait_for_timeout(3000)
+                        # Sleep for 1 seconds and try again
+                        await page.wait_for_timeout(1000)
                     except Exception as e:
                         console.log(f"Failed to insert case - {e}")
                         continue
@@ -378,7 +382,6 @@ class IlCook(ScraperBase):
                     "court_code": "IL_COOK",
                     "source": "il_cook",
                     "city": "Chicago",
-                    "state": "IL",
                     "zip_code": "60602",
                     "county": "Cook",
                 }
@@ -572,8 +575,7 @@ class IlCook(ScraperBase):
 
         return {
             "case_id": str(case_id),
-            "court_id": str(court_id),
-            "court_code": str(court_id),     
+            "court_id": str(court_id),   
             "last_name": last_name,       
             "first_name": first_name,
             "middle_name": middle_name,
