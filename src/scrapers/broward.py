@@ -1,3 +1,4 @@
+""" Scraper for Broward County Court """
 import asyncio
 import re
 import os
@@ -7,11 +8,13 @@ from twocaptcha import TwoCaptcha
 from urllib.parse import urlparse, parse_qs
 from datetime import datetime
 from rich.console import Console
+from dotenv import load_dotenv
 
 from src.models.cases import Case
 from src.models.leads import Lead
 from src.scrapers.base.scraper_base import ScraperBase
 
+load_dotenv()
 TWOCAPTCHA_API_KEY = os.getenv('TWOCAPTCHA_API_KEY')
 console = Console()
 
@@ -98,24 +101,32 @@ class BrowardScraper(ScraperBase):
         await self.page.goto(self.url)
 
     async def solve_captcha(self):
-        site_key = await self.get_site_key()
-        response = self.solver.recaptcha(sitekey=site_key, url=self.url)
-        return response['code']
+        recaptcha_element = await self.page.query_selector('#RecaptchaField3')
+        if recaptcha_element:
+            site_key = await self.get_site_key()
+            response = self.solver.recaptcha(
+                sitekey=site_key,
+                url=self.url
+            )
+            code = response['code']
+            response_textarea = await recaptcha_element.query_selector('#g-recaptcha-response-2')
+            if response_textarea:
+                await response_textarea.evaluate('el => el.value = "{}"'.format(code))
+            else:
+                print("The 'g-recaptcha-response' textarea was not found.")
 
-    async def input_captcha_code(self, captcha_code):
-        recaptcha_element = await self.page.query_selector('#g-recaptcha-response')
-        await recaptcha_element.evaluate(f'el => el.value = "{captcha_code}"')
-        submit_button = await self.page.query_selector('#CaseNumberSearchResults')
-        await submit_button.click()
+            submit_button = await self.page.query_selector('#CaseNumberSearchResults')
+            if submit_button:
+                await submit_button.click()
+            else:
+                print("The 'submit' button was not found.")
 
     async def input_case_id(self, case_id):
         await self.page.goto(self.url)
         await self.page.click("a:has-text('Case Number')")
         case_number_element = await self.page.query_selector('#CaseNumber')
         await case_number_element.fill(f"{case_id}")
-
-        captcha_code = await self.solve_captcha()
-        await self.input_captcha_code(captcha_code)
+        await self.solve_captcha()
 
     async def get_court_id(self):
         court_code = "FL_Broward"
@@ -130,11 +141,18 @@ class BrowardScraper(ScraperBase):
                 "name": f"Florida, {county_name}",
                 "state": "FL",
                 "type": "TI",
+                "source": "FL_Broward county",
+                "county": "browawrd"
             }
             self.insert_court(self.courts[court_code])
 
         return court_code
 
+    async def get_charges_description(self):
+        element = await self.page.query_selector("#tblCharges tbody tr td:nth-child(4) b")  
+        charges_description = await element.inner_text()
+        return charges_description  
+    
     async def get_charges(self):
         return await self.page.evaluate('''() => {
             let results = [];
@@ -235,9 +253,21 @@ class BrowardScraper(ScraperBase):
             dob_element = await self.page.query_selector('td >> text="DOB:"')
             dob = await dob_element.evaluate('(element) => element.nextSibling.nodeValue.trim()')
             date_components = dob.split("/")
-            birth_date, year_of_birth = f"{date_components[0]}/{date_components[1]}", date_components[2]
+            birth_date, year_of_birth = dob, date_components[2]
         except Exception:
             birth_date, year_of_birth = "", ""
+        
+        try:
+            gender_element = await self.page.query_selector('td >> text="Gender:"')
+            sex = await gender_element.evaluate('(element) => element.nextSibling.nodeValue.trim()')
+        except Exception:
+            gender = ""
+
+        try:
+            race_element = await self.page.query_selector('td >> text="Race:"')
+            race = await race_element.evaluate('(element) => element.nextSibling.nodeValue.trim()')
+        except Exception:
+            race = ""
 
         try:
             address = await self.get_address()
@@ -260,14 +290,21 @@ class BrowardScraper(ScraperBase):
         except:
             charges = []
 
+        try: 
+            charges_description = await self.get_charges_description()
+        except:
+            charges_description = ""
+
         case_dict = {
                 "case_id": case_id,
                 "court_id": court_code,
+                "court_code": court_code,
                 "address_line_1": address_line_1,
                 "address_city": address_city,
                 "address_state_code": address_state_code,
                 "address_zip": address_zip,
                 "filing_date": filing_date,
+                "case_date": filing_date,
                 "offense_date": offense_date,
                 "first_name": first_name,
                 "middle_name": middle_name,
@@ -275,22 +312,33 @@ class BrowardScraper(ScraperBase):
                 "gender": gender,
                 "birth_date": birth_date,
                 "year_of_birth": year_of_birth,
-                "charges": charges
+                "charges": charges,
+                "charges_description": charges_description,
+                "race": race,
+                "sex": sex,
+                "state": "FL",
+                "status": "new"
             }
         return case_dict
 
     async def scrape(self):
         last_case_id_nb = self.state.get("last_case_id_nb", 1500)
+        last_case_id_nb = int(last_case_id_nb)
         case_id_nb = last_case_id_nb
         not_found_count = 0
         current_year = datetime.now().year
 
         await self.init_browser()  
 
-        while not_found_count <= 10:
+        while True:
             try:
+                if not_found_count > 10:
+                    console.log("Too many filing dates not found. Ending the search.")
+                    break
+
+                case_id_nb = last_case_id_nb
                 case_id_full = f"{str(current_year)[2:]}{str(case_id_nb).zfill(6)}TI10A"
-                case_id_nb += 1
+                last_case_id_nb += 1
 
                 console.log(f"Current searching case_id-{case_id_full}")
 
@@ -299,23 +347,27 @@ class BrowardScraper(ScraperBase):
                     continue
 
                 await self.input_case_id(case_id_full)
+
                 case_details = await self.detail_search(case_id_full)
                 if not case_details:
                     console.log(f"Case {case_id_full} not found. Skipping ...")
                     not_found_count += 1
                     continue
-
-                last_case_id_nb = case_id_nb
+                console.log("case_details", case_details)
+                not_found_count = 0
                 console.log(f"Inserting case {case_id_full}...")
-                self.insert_case(case_details)
+                self.insert_case(case_details)        
+                console.log(
+                    f"Inserted case {case_id_full}"
+                )
                 self.insert_lead(case_details)
+                console.log(
+                    f"Inserted lead {case_id_full}"
+                )
                 self.state["last_case_id_nb"] = last_case_id_nb
                 self.update_state()
-            except TimeoutError:
-                console.log("Timeout error. Retrying...")
-                await self.page.wait_for_timeout(2000)
             except Exception as e:
-                console.log(f"Failed to insert case - {e}")
+                console.log(f"Failed to scaraping - {e}")
                 continue
 
 if __name__ == "__main__":
