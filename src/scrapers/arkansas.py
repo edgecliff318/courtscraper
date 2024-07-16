@@ -1,3 +1,4 @@
+""" Scraper for Arkansas Scraper"""
 import asyncio
 import re
 import os
@@ -135,7 +136,6 @@ class ArkansasScraper(ScraperBase):
             return None, []
 
         response_data = res.json()
-
         # Extract charges
         charges = [{
             "description": offense.get("offenseDesc"),
@@ -150,7 +150,7 @@ class ArkansasScraper(ScraperBase):
             "name": party.get("name")
         } for party in response_data.get("caseParticipants", [])]
 
-        return charges, parties
+        return charges, parties 
 
     def scrape_cases_for_filing_date(self, filing_date):
         """ Scrape all case data for a specific filing date. """
@@ -202,6 +202,8 @@ class ArkansasScraper(ScraperBase):
                 case_dict["status"] = "new"
 
             case_dict.update({
+                "charges": charges,
+                "parties": parties,
                 "court_code": case_dict.get("court_id"),
                 "state": "AR",
                 "source": "arkansas_state",
@@ -225,6 +227,9 @@ class ArkansasScraper(ScraperBase):
                 case_data = self.scrape_cases_for_filing_date(filing_date)
 
                 if case_data is None:
+                    console.log(
+                        f"Case {case_data} not found. Skipping ..."
+                    )
                     not_found_count += 1
                     continue
 
@@ -244,7 +249,7 @@ class ArkansasScraper(ScraperBase):
                             f"Case {case_id} already exists. Skipping..."
                         )
                         continue
-                    console.log(f"case_dict-{case_dict}")
+
                     console.log(f"Inserting case {case_id}...")
                     self.insert_case(case_dict)
                     console.log(
