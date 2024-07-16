@@ -49,42 +49,43 @@ class BrowardScraper(ScraperBase):
 
         return first_name, middle_name, last_name
 
-    def parse_full_address(self, full_address):
-        pattern = re.compile(
-            r'^(?P<address_line_1>[\w\s\#,\.-]+?)[\s,]+'
-            r'(?P<address_city>[A-Za-z\s]+?)[\s,]+'
-            r'(?P<address_state_code>[A-Z]{2})?[\s,]*'
-            r'(?P<address_zip>\d{5}(-\d{4})?|[A-Z0-9 ]{6,10})?$'
-        )
-        match = pattern.match(full_address.strip())
+    def parse_full_address(self, address_string):  
+        address_info = {"address_line_1": 'N/A', "address_city": 'N/A', "address_state_code": 'N/A', "address_zip": 'N/A'}  
 
-        if match:
-            return (
-                match.group('address_line_1').strip() if match.group('address_line_1') else "",
-                match.group('address_city').strip() if match.group('address_city') else "",
-                match.group('address_state_code').strip() if match.group('address_state_code') else "",
-                match.group('address_zip').strip() if match.group('address_zip') else "",
-            )
-        
-        # Fallback parsing for non-matching addresses
-        address_line_1, address_city, address_state_code, address_zip = "", "", "", ""
-        address_part = re.match(r'^(.*?)[\s,]{2}', full_address)
-        city_part = re.search(r',\s*([A-Za-z\s]+)\s*,?\s*[A-Z0-9]*', full_address)
-        state_zip_part = re.search(r'([A-Z]{2})?\s*(\d{5}(-\d{4})?|[A-Z0-9 ]{6,10})$', full_address.strip())
+        if address_string:  
+            # Split components based on comma  
+            address_parts = [part.strip() for part in address_string.split(',')]  
 
-        if address_part:
-            address_line_1 = address_part.group(1).strip()
-        if city_part:
-            address_city = city_part.group(1).strip()
-        if state_zip_part:
-            state_part, zip_part = state_zip_part.group(1), state_zip_part.group(2)
-            if state_part:
-                address_state_code = state_part.strip()
-            if zip_part:
-                address_zip = zip_part.strip()
+            # Find zip by looking for a group of 5 digits  
+            zip_search = re.search(r'(\b\d{5}\b)', address_string)  
+            if zip_search:  
+                address_info["address_zip"] = zip_search.group(0)  
+                # remove zip from address_parts if found  
+                for i, part in enumerate(address_parts):  
+                    if address_info["address_zip"] in part:  
+                        address_parts[i] = re.sub(address_info["address_zip"], '', part).strip()  
 
-        return address_line_1, address_city, address_state_code, address_zip
+            # Find state by looking for a group of 2 letters surrounded by whitespace or at start/end of string  
+            state_search = re.search(r'(^|(?<=\s))([A-Z]{2})($|(?=\s))', address_string)  
+            if state_search:  
+                address_info["address_state_code"] = state_search.group(0)  
+                # remove state from address_parts if found  
+                for i, part in enumerate(address_parts):  
+                    if address_info["address_state_code"] in part:  
+                        address_parts[i] = re.sub(address_info["address_state_code"], '', part).strip()  
 
+            # If still we have 2 parts assume they are address and city  
+            if len(address_parts) == 2:  
+                address_info["address_line_1"], address_info["address_city"] = address_parts  
+
+            elif len(address_parts) == 1 and ' ' in address_parts[0]:  # If we are left with a single part containing a space, guess it might address line and city  
+                address_info["address_line_1"], address_info["address_city"] = address_parts[0].rsplit(' ', 1)  # separates last word assuming it might be city  
+
+            elif len(address_parts) == 1:  # assume this is the city if only one part left  
+                address_info["address_city"] = address_parts[0]  
+
+        return address_info["address_line_1"], address_info["address_city"], address_info["address_state_code"], address_info["address_zip"]
+      
     async def get_site_key(self):
         iframe = await self.page.query_selector('iframe[title="reCAPTCHA"]')
         iframe_src = await iframe.get_attribute('src')
@@ -95,7 +96,11 @@ class BrowardScraper(ScraperBase):
     async def init_browser(self):
         console.log("Initiating Browser...")
         pw = await async_playwright().start()
-        self.browser = await pw.chromium.launch(headless=False)
+        # Proxy 9090
+        self.browser = await pw.chromium.launch(
+            headless=True,
+            # args=["--proxy-server=socks5://localhost:9090"]
+        )
         context = await self.browser.new_context()
         self.page = await context.new_page()
         await self.page.goto(self.url)
@@ -333,7 +338,7 @@ class BrowardScraper(ScraperBase):
         while True:
             try:
                 if not_found_count > 10:
-                    console.log("Too many filing dates not found. Ending the search.")
+                    console.log("Too many case ids not found. Ending the search.")
                     break
 
                 case_id_nb = last_case_id_nb
