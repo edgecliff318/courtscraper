@@ -85,7 +85,8 @@ def get_context_data(case_id, template):
     data.update({f"case_{key}": value for key, value in case_data.items()})
 
     # Update the custom data
-    custom_dict = case.custom
+    # TODO: This is a workaround to avoid using the custom data
+    custom_dict = {}
     if custom_dict is None:
         custom_dict = {}
 
