@@ -13,9 +13,9 @@ from rich.progress import track
 from twilio.rest import Client
 
 from src.core.config import get_settings
+from src.core.locks import is_lead_locked, lock_lead, unlock_lead
 from src.models import leads as leads_model
 from src.models import messages as messages_model
-from src.scrapers import lexis
 from src.scrapers.beenverified import BeenVerifiedScrapper
 from src.scrapers.lexis import LexisNexisPhoneFinder
 from src.services import cases as cases_service
@@ -219,22 +219,21 @@ async def retrieve_leads_async(
             console.log("No new leads found")
             time.sleep(300)
             continue
-        lock_service = leads_service.Lock()
 
-        locked_items = lock_service.get_items()
-        skip = False
-        for locked_item_single in locked_items:
-            if locked_item_single.case_id == lead.case_id:
-                skip = True
-                console.log(f"Lead {lead.case_id} is already locked")
-                break
-        if skip:
+        case_id = lead.case_id
+
+        # Check if the lead is already locked
+        if is_lead_locked(case_id):
+            console.log(f"Lead {case_id} is already locked")
+            time.sleep(1)
             continue
 
-        lock_service.set_item(
-            f"{source}_{username}",
-            leads_model.Lock(case_id=lead.case_id, locked=True),
-        )
+        # Try to lock the lead
+        lock = lock_lead(case_id)
+        if lock is None:
+            console.log(f"Lead {case_id} is already locked by another process")
+            time.sleep(1)
+            continue
 
         leads_service.update_lead_status(lead.case_id, "processing")
 
@@ -415,6 +414,9 @@ async def retrieve_leads_async(
             if error_count > 20:
                 console.log("Too many consecutive errors, exiting")
                 return
+        finally:
+            # Unlock the lead
+            unlock_lead(lock)
 
 
 def get_default_dates():

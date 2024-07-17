@@ -28,11 +28,11 @@ console = Console()
 
 sys.path.append("..")
 
-os.environ["ROOT_PATH"] = "/Users/aennassiri/Projects/Personal/ticket-washer"
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = (
-    "/Users/aennassiri/Projects/Personal/ticket-washer/configuration/fubloo-app-1f213ca274de.json"
-)
-LEXIS_NEXIS_SESSION = "/Users/aennassiri/Projects/Personal/ticket-washer/notebooks/playwright/.auth/lexis.json"
+# # os.environ["ROOT_PATH"] = "/Users/aennassiri/Projects/Personal/ticket-washer"
+# os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = (
+#     "/Users/aennassiri/Projects/Personal/ticket-washer/configuration/fubloo-app-1f213ca274de.json"
+# )
+# LEXIS_NEXIS_SESSION = "/Users/aennassiri/Projects/Personal/ticket-washer/notebooks/playwright/.auth/lexis.json"
 
 leads_service = LeadsService()
 
@@ -227,6 +227,8 @@ class LexisNexisPhoneFinder:
         address_line1="",
         address_line2="",
     ):
+        if zip is not None:
+            zip = str(zip).replace(".0", "")
         page = await self.start()
         # Wait 5 seconds
         await page.wait_for_timeout(5000)
@@ -360,157 +362,3 @@ class LexisNexisPhoneFinder:
         if self.browser is not None:
             await self.browser.close()
             self.browser = None
-
-
-if __name__ == "__main__":
-    lex = LexisNexisPhoneFinder(LEXIS_NEXIS_SESSION)
-    asyncio.run(lex.start())
-
-    from src.commands.leads import filter_leads
-
-    today = datetime.datetime.now()
-
-    # Get all leads that have been mailed in the last 7 days
-    leads_not_found = get_last_lead(
-        start_date=today - timedelta(days=33),
-        end_date=today + timedelta(days=1),
-        status="rpr",
-        limit=3000,
-        search_limit=3000,
-    )
-
-    if leads_not_found is None:
-        console.log("No leads found")
-        # Stop executing the cell
-        raise SystemExit
-
-    df = pd.DataFrame(
-        [lead.model_dump() for lead in leads_not_found if filter_leads(lead)]
-    )
-
-    # Filter out the leads that have already been searched
-    df["middle_name"] = df["middle_name"].fillna("")
-    df["first_name"] = df["first_name"].fillna("")
-    df["last_name"] = df["last_name"].fillna("")
-
-    console.log(f"Total leads: {len(df)}")
-
-    df["state"] = df["state"].fillna("MO")
-
-    # df = df[df["state"] == "MO"]
-    df = df[df["lead_source"] != "lexis_nexis"]
-    cases_outputs = {}
-
-    for case, case_details in df.sort_index(ascending=False).iterrows():
-        # Get the case details
-        first_name = case_details["first_name"]
-        last_name = case_details["last_name"]
-        middle_name = case_details["middle_name"]
-        dob = case_details["year_of_birth"]
-        key = case_details["case_id"]
-
-        # Get the case details from casenet
-        case_info = get_single_case(case_id=key)
-        city = case_details["city"] or case_info.address_city or ""
-        state = case_details["state"] or case_info.address_state_code or "MO"
-        zip = case_details["zip_code"] or case_info.address_zip or ""
-        address_line1 = (
-            case_details["address"] or case_info.address_line_1 or ""
-        )
-        address_line2 = ""
-
-        # Function to remove special characters
-        def remove_special_characters(text):
-            if text is None:
-                return ""
-            return re.sub(r"[^a-zA-Z0-9]", " ", text)
-
-        first_name = remove_special_characters(first_name)
-        last_name = remove_special_characters(last_name)
-        middle_name = remove_special_characters(middle_name)
-        city = remove_special_characters(city)
-        address_line1 = remove_special_characters(address_line1)
-        address_line2 = remove_special_characters(address_line2)
-
-        if address_line1 == "":
-            console.log(f"Case {key} has no address")
-            cases_outputs[key] = "No Address"
-            continue
-
-        # Search if a case with first name, last name, middle name, dob, exists
-        console.log(
-            f"Searching for {first_name} {last_name} {dob} {city} {state} {zip} {address_line1} {address_line2}"
-        )
-
-        # Search for the person in Lexis Nexis
-        try:
-            details = asyncio.run(
-                lex.search_person(
-                    first_name=first_name,
-                    last_name=last_name,
-                    middle_name=middle_name,
-                    dob=dob,
-                    city=city,
-                    state=state,
-                    zip=zip,
-                    address_line1=address_line1,
-                    address_line2=address_line2,
-                )
-            )
-        except Exception as e:
-            console.log(f"Error searching for {first_name} {last_name} {dob}")
-            console.log(e)
-            asyncio.run(lex.close_pages())
-            cases_outputs[key] = "Error"
-            patch_lead(
-                case_id=key,
-                status="error",
-                lead_source="lexis_nexis_phone_finder",
-            )
-            details = None
-
-        # Update the case with the details
-        if details is not None:
-            if (
-                details.get("phones") is not None
-                and len(details.get("phones")) > 0
-            ):
-                console.log(
-                    f"Found a good record for {first_name} {last_name} {dob} - in Lexis Nexis"
-                )
-                details["status"] = "not_contacted_prioritized"
-                cases_outputs[key] = "Found in Lexis Nexis"
-            else:
-                details["status"] = "not_found"
-                console.log(
-                    f"No records found for {first_name} {last_name} {dob}. Found similar records"
-                )
-                cases_outputs[key] = "Not Found in Lexis Nexis"
-            patch_lead(case_id=key, **details)
-
-        else:
-            console.log(f"No details found for {first_name} {last_name} {dob}")
-            details = {
-                "status": "not_found",
-                "lead_source": "lexis_nexis_phone_finder",
-            }
-            cases_outputs[key] = "Not Found in Lexis Nexis"
-            patch_lead(case_id=key, **details)
-
-    df = (
-        pd.DataFrame(
-            cases_outputs.items(),
-            columns=["case_id", "status"],
-        )
-        .groupby("status")
-        .count()
-    )
-
-    lexis_nexis_phone_finder_leads = leads_service.get_items(
-        lead_source="lexis_nexis_phone_finder"
-    )
-    results = pd.DataFrame(
-        [lead.model_dump() for lead in lexis_nexis_phone_finder_leads]
-    )
-
-    results.groupby("status").count()
