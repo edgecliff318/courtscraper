@@ -45,3 +45,5 @@ selenium
 
 humanize
 2captcha-python
+
+filelock
