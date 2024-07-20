@@ -5,6 +5,7 @@ import os
 import re
 from datetime import datetime, timedelta
 
+import pandas as pd
 import requests
 from rich.console import Console
 from twocaptcha import TwoCaptcha
@@ -263,7 +264,6 @@ class ArkansasScraper(ScraperBase):
                     )
                     break
 
-                filing_date = self.increase_date_by_one_day(filing_date)
                 case_data = self.scrape_cases_for_filing_date(filing_date)
 
                 if case_data is None:
@@ -293,7 +293,14 @@ class ArkansasScraper(ScraperBase):
                     console.log(f"Inserted lead for {case_id}")
 
                 self.state["last_filing_date"] = filing_date
-                self.update_state()
+                # If date less than today update
+                if pd.to_datetime(filing_date) < pd.to_datetime("today"):
+                    self.update_state()
+                else:
+                    break
+
+                filing_date = self.increase_date_by_one_day(filing_date)
+
             except Exception as e:
                 console.log(f"Failed to insert case - {e}")
                 continue
