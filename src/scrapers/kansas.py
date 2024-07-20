@@ -618,17 +618,9 @@ class KansasScraper(ScraperBase):
         await self.init_browser()
         await self.singin(user_name, password)
 
-        start_process = False
-
         for city_code, last_case_id in sorted(
-            self.state.items(), key=lambda x: x[1], reverse=False
+            self.state.items(), key=lambda x: x[1], reverse=True
         ):
-
-            if city_code == "GY":
-                start_process = True
-
-            if not start_process:
-                continue
             not_found_count = 0
 
             if last_case_id <= 500 and last_case_id == 0:
