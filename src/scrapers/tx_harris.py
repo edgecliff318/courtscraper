@@ -7,8 +7,6 @@ from bs4 import BeautifulSoup
 from rich.console import Console
 from rich.progress import Progress
 
-from src.models.cases import Case
-from src.models.leads import Lead
 from src.scrapers.base.scraper_base import ScraperBase
 
 console = Console()
@@ -154,6 +152,7 @@ class TXHarrisCountyScraper(ScraperBase):
         df["case_date"] = df["filing_date"]
         df["case_date"] = pd.to_datetime(df["case_date"], format="%m/%d/%Y")
         df["charges_description"] = df["description"]
+        df["case_desc"] = str(df["case_desc"])
 
         cases_dicts = df.to_dict(orient="records")
         cases_dicts = [
@@ -212,4 +211,4 @@ class TXHarrisCountyScraper(ScraperBase):
 
 if __name__ == "__main__":
     txscraper = TXHarrisCountyScraper()
-    txscraper.scrape({"start_date": "05/09/2024", "end_date": "05/10/2024"})
+    txscraper.scrape({"start_date": "07/19/2024", "end_date": "07/19/2024"})
