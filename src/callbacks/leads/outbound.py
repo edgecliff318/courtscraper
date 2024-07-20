@@ -81,6 +81,7 @@ def render_leads(court_code_list, dates, status):
 
     df = df[
         [
+            "state",
             "case_id",
             "case_date",
             "first_name",
@@ -123,6 +124,7 @@ def render_leads(court_code_list, dates, status):
 
     df = df.rename(
         columns={
+            "state": "State",
             "first_name": "First Name",
             "last_name": "Last Name",
             "phone": "Phone",
@@ -140,6 +142,15 @@ def render_leads(court_code_list, dates, status):
     df["Case ID"] = df["Case ID"].map(lambda x: f"[{x}](/case/{x})")
 
     column_defs = [
+        {
+            "headerName": "State",
+            "field": "State",
+            "editable": False,
+            "filter": "agTextColumnFilter",
+            "sortable": True,
+            "resizable": True,
+            "flex": 1,
+        },
         {
             "headerName": "Case ID",
             "field": "Case ID",
