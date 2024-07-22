@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "justMyCode": true
+            "justMyCode": false
         },
         {
             "name": "Server",
@@ -18,7 +18,7 @@
             "request": "launch",
             "program": "app.py",
             "console": "integratedTerminal",
-            "justMyCode": true
+            "justMyCode": false
         },
         // Gunicorn 
         {
@@ -41,17 +41,77 @@
             "program": "main.py",
             "args": [
                 "retrieve-cases",
+                "--source=mo_case_net",
             ],
             "console": "integratedTerminal",
             "justMyCode": false
         },
         {
-            "name": "Retrieve Leads",
+            "name": "Retrieve Leads Coop",
             "type": "python",
             "request": "launch",
             "program": "main.py",
             "args": [
                 "retrieve-leads",
+                "--source=lexis_nexis_phone_finder",
+                "--username=schcoo1",
+                "--password=TTDpro2024!"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Retrieve Leads Shawn",
+            "type": "python",
+            "request": "launch",
+            "program": "main.py",
+            "args": [
+                "retrieve-leads",
+                "--source=lexis_nexis_phone_finder",
+                "--username=SMeyer24",
+                "--password=TTDpro2024!!"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Retrieve Leads Sam",
+            "type": "python",
+            "request": "launch",
+            "program": "main.py",
+            "args": [
+                "retrieve-leads",
+                "--source=lexis_nexis_phone_finder",
+                "--username=mahsam1",
+                "--password=TTDpro2024!"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Retrieve Leads Brad",
+            "type": "python",
+            "request": "launch",
+            "program": "main.py",
+            "args": [
+                "retrieve-leads",
+                "--source=lexis_nexis_phone_finder",
+                "--username=branic1",
+                "--password=TTDpro2024!"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Retrieve Leads Nick",
+            "type": "python",
+            "request": "launch",
+            "program": "main.py",
+            "args": [
+                "retrieve-leads",
+                "--source=lexis_nexis_phone_finder",
+                "--username=johnic1",
+                "--password=TTDpro2024!"
             ],
             "console": "integratedTerminal",
             "justMyCode": false
@@ -63,6 +123,17 @@
             "program": "main.py",
             "args": [
                 "sync-twilio",
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+         {
+            "name": "Upload to Cloud Talk",
+            "type": "python",
+            "request": "launch",
+            "program": "main.py",
+            "args": [
+                "upload-to-cloud-talk",
             ],
             "console": "integratedTerminal",
             "justMyCode": false
@@ -86,6 +157,19 @@
             "args": [
                 "upload-templates",
                 "templates.json"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Retrieve Quotes",
+            "type": "python",
+            "request": "launch",
+            "program": "main.py",
+            "args": [
+                "retrieve-quotes",
+                "--headers-file=headers/headers_1.json",
+                "--states=NJ,OH,GA,NY,TX"
             ],
             "console": "integratedTerminal",
             "justMyCode": false

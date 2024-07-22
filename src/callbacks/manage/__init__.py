@@ -13,3 +13,4 @@ from . import payments  # noqa F401
 from . import prosecutor  # noqa F401
 from . import billings  # noqa F401
 from . import templates  # noqa F401
+from . import cases  # noqa F401

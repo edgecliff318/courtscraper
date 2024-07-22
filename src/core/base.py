@@ -53,9 +53,13 @@ class BaseService:
                 elif isinstance(value, list):
                     filters.append(FieldFilter(key, "in", value))
                 elif "start" in key and isinstance(value, datetime):
-                    filters.append(FieldFilter(key, ">=", value))
+                    filters.append(
+                        FieldFilter(key.replace("start_", ""), ">=", value)
+                    )
                 elif "end" in key and isinstance(value, datetime):
-                    filters.append(FieldFilter(key, "<=", value))
+                    filters.append(
+                        FieldFilter(key.replace("end_", ""), "<=", value)
+                    )
                 else:
                     filters.append(FieldFilter(key, "==", value))
 
@@ -107,7 +111,12 @@ class BaseService:
         )
 
     def set_item(self, item_id, item):
-        db.collection(self.collection).document(item_id).set(item.model_dump())
+        if isinstance(item, dict):
+            db.collection(self.collection).document(item_id).set(item)
+        else:
+            db.collection(self.collection).document(item_id).set(
+                item.model_dump()
+            )
 
     def patch_item(self, item_id, data):
         db.collection(self.collection).document(item_id).update(data)

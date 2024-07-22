@@ -4,16 +4,17 @@ from datetime import datetime, timedelta
 
 import dash
 import dash_mantine_components as dmc
+import pandas as pd
 from dash import ALL, Input, Output, State, callback, html
 from dash_iconify import DashIconify
 from google.cloud.storage.retry import DEFAULT_RETRY
 
 from src.connectors.casenet import CaseNetWebConnector
 from src.core.config import get_settings
+from src.core.dates import get_continuance_date
 from src.core.document import DocumentGenerator, convert_doc_to_pdf
 from src.core.dynamic_fields import CaseDynamicFields
 from src.db import bucket
-from src.models.cases import Case
 from src.services import cases, templates
 
 logger = logging.getLogger(__name__)
@@ -84,7 +85,8 @@ def get_context_data(case_id, template):
     data.update({f"case_{key}": value for key, value in case_data.items()})
 
     # Update the custom data
-    custom_dict = case.custom
+    # TODO: This is a workaround to avoid using the custom data
+    custom_dict = {}
     if custom_dict is None:
         custom_dict = {}
 
@@ -204,6 +206,16 @@ def modal_court_preview(opened, update, template, pars, case_id):
     if ctx.triggered[0]["prop_id"] == "modal-court-preview-update.n_clicks":
         update_custom = False
         for k, v in zip(context_data.keys(), pars):
+            if "date" in k:
+                # Transform the value to "MM/DD/YYYY"
+                try:
+                    # Try with the first format "MM/DD/YYYY"
+                    v = pd.to_datetime(
+                        v, format="%m/%d/%Y", infer_datetime_format=True
+                    ).strftime("%m/%d/%Y")
+                except Exception:
+                    pass  # Do nothing
+
             if context_data[k] != v:
                 update_custom = True
                 custom_dict[k] = v
@@ -212,21 +224,90 @@ def modal_court_preview(opened, update, template, pars, case_id):
         if update_custom:
             cases.patch_case(case_id, {"custom": custom_dict})
 
+    # Get the continuance dates
+    if "case_new_court_date" in context_data.keys():
+        case_data = cases.get_single_case(case_id)
+        court_data = CaseDynamicFields().update_court_date(case_data, {})
+        if court_data.get("court_date") is None:
+            details = dmc.Alert(
+                "Court date is not set. Please set the court date first.",
+                color="red",
+                title="Error",
+            )
+        else:
+            continuance_date_1 = get_continuance_date(
+                court_data.get("court_date")
+            )
+            continuance_date_2 = get_continuance_date(continuance_date_1)
+            continuance_date_3 = get_continuance_date(continuance_date_2)
+
+            details = dmc.Alert(
+                dmc.Stack(
+                    [
+                        dmc.Text(
+                            f"1. in one month    {continuance_date_1.strftime('%B %d, %Y')}"
+                        ),
+                        dmc.Text(
+                            f"2. in two months   {continuance_date_2.strftime('%B %d, %Y')}"
+                        ),
+                        dmc.Text(
+                            f"3. in three months {continuance_date_3.strftime('%B %d, %Y')}"
+                        ),
+                    ],
+                    gap="xs",
+                ),
+                color="blue",
+                title="Possible Continuance Dates",
+            )
+
     media_url, output_filepath_pdf = generate_document(
         case_id, template, context_data
     )
 
-    # Add a download button and an upload button
-    params = dmc.Stack(
-        [
-            dmc.TextInput(
-                label=k.replace("_", " ").title(),
-                id={"type": "modal-court-pars", "index": k},
-                value=v,
+    def generate_field(id, type, label, value):
+        if type == "text":
+            return dmc.TextInput(
+                label=label,
+                id=id,
+                value=value,
             )
-            for k, v in context_data.items()
-        ]
-    )
+        elif type == "date":
+            return dmc.DateInput(
+                label=label,
+                id=id,
+                value=value,
+                clearable=True,
+                fixOnBlur=False,
+            )
+        elif type == "number":
+            return dmc.NumberInput(
+                label=label,
+                id=id,
+                value=value,
+            )
+        elif type == "select":
+            return dmc.Select(
+                label=label,
+                id=id,
+                value=value,
+                options=[{"label": k, "value": k} for k in value.split(",")],
+            )
+
+    # Add a download button and an upload button
+    params = []
+
+    if "case_new_court_date" in context_data.keys():
+        params.append(details)
+
+    params += [
+        generate_field(
+            id={"type": "modal-court-pars", "index": k},
+            type="text" if "date" not in k else "date",
+            label=k.replace("_", " ").title(),
+            value=v,
+        )
+        for k, v in context_data.items()
+    ]
 
     document_preview = dmc.Card(
         children=[
@@ -242,7 +323,7 @@ def modal_court_preview(opened, update, template, pars, case_id):
                 dmc.Button(
                     "Download",
                     variant="outline",
-                    leftIcon=DashIconify(icon="mdi:download"),
+                    leftSection=DashIconify(icon="mdi:download"),
                     color="dark",
                 ),
                 href=media_url,

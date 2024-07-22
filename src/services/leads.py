@@ -123,7 +123,7 @@ def get_last_lead(
     end_date=None,
     status=None,
     limit=1,
-    search_limit=1000,
+    search_limit=1,
 ):
     search_limit = int(search_limit)
     limit = int(limit)
@@ -353,6 +353,11 @@ class LeadsService(BaseService):
             "leads_not_contacted": leads_not_contacted,
             "leads_converted": leads_converted,
         }
+
+
+class Lock(BaseService):
+    collection_name = "locks"
+    serializer = leads.Lock
 
 
 if __name__ == "__main__":

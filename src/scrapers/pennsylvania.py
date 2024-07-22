@@ -244,6 +244,7 @@ class PennsylvaniaScraper(ScraperBase):
                                 self.insert_court(courts[court_code])
                             case_details["court_id"] = court_code
                             case_details["court_code"] = court_code
+                            case_details["source"] = "pennsylvania"
                             # Transfor case_date to datetime
                             if (
                                 case_details.get("case_date") is not None
@@ -339,7 +340,7 @@ if __name__ == "__main__":
     try:
         console.log("Initializing Pennsylvania Scraper...")
         scraper = PennsylvaniaScraper(
-            start_date="2024-05-13", end_date="2024-05-14"
+            start_date="2024-07-12", end_date="2024-07-14"
         )
         console.log("Pennsylvania Scraper initialized successfully.")
 

@@ -94,10 +94,12 @@ def layout(case_id):
                             placeholder="Type in the message",
                             type="Textarea",
                             minRows=10,
+                            autosize=True,
                         ),
                         width=8,
                     ),
-                ]
+                ],
+                className="pr-0",
             ),
             dbc.Row([dbc.Col(id="lead-single-message-status")]),
         ]
@@ -158,6 +160,7 @@ def layout(case_id):
                             placeholder="Type in internal notes",
                             type="Textarea",
                             minRows=10,
+                            autosize=True,
                         ),
                         width=8,
                     ),

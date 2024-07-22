@@ -2,7 +2,7 @@ import logging
 
 import dash
 import dash_mantine_components as dmc
-from dash import ALL, Input, Output, State, callback
+from dash import Input, Output, State, callback
 
 from src.components.cases.payments import get_invoice_history
 from src.connectors import payments as payments_connector
@@ -17,26 +17,44 @@ settings = get_settings()
     Output("case-manage-payments-price", "value"),
     Output("case-manage-payments-price", "data"),
     Input("case-manage-payments-price", "data"),
+    Input("case-manage-payments-price-submit", "n_clicks"),
+    Input("case-manage-payments-products", "value"),
+    State("case-manage-payments-price-amount", "value"),
     State("case-manage-payments-price", "value"),
-    State("case-manage-payments-products", "value"),
 )
-def case_manage_payments_price_create(price_list, price_selected, product_id):
+def case_manage_payments_price_create(
+    price_list,
+    button_submit,
+    product_id,
+    price_selected,
+    price_current,
+):
     payments_service = payments_connector.PaymentService()
 
-    if (price_selected is None or "price_" in str(price_selected)) and (
-        price_list is not None or price_list
+    ctx_trigger = dash.callback_context.triggered_id
+
+    if (
+        ctx_trigger is not None
+        and "case-manage-payments-price-submit" not in ctx_trigger
+        and not price_list
+        and "case-manage-payments-products" not in ctx_trigger
     ):
         return dash.no_update, dash.no_update
 
-    if price_selected is not None:
-        if "price_" not in str(price_selected):
+    if (
+        ctx_trigger is not None
+        and "case-manage-payments-price-submit" in ctx_trigger
+    ):
+        for price in price_list:
+            if str(price_selected) in price["label"]:
+                return price["value"], dash.no_update
+        if price_selected is not None:
             # Create the price
             payments_service = payments_connector.PaymentService()
             price = payments_service.create_price(
                 product_id=product_id,
-                amount=int(price_selected) * 100,
+                amount=int(price_selected * 100),
             )
-
             price_selected = price["id"]
 
     prices = payments_service.get_prices(product_id)

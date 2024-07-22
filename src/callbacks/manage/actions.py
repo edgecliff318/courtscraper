@@ -1,5 +1,5 @@
 import logging
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 import dash_mantine_components as dmc
 import pandas as pd
@@ -50,8 +50,8 @@ def create_case_card(case_data: dict):
 
     last_updated = case_data.get("update_time")
     if last_updated is None:
-        last_updated = case_data.get("create_time", datetime.now(UTC))
-    current_date = datetime.now(UTC)
+        last_updated = case_data.get("create_time", datetime.now(timezone.utc))
+    current_date = datetime.now(timezone.utc)
 
     # TO CST
     last_updated = current_date - last_updated
@@ -86,7 +86,7 @@ def create_case_card(case_data: dict):
     card_layout = [
         dmc.Group(
             [
-                dmc.Text(f"Case#{case_id}", weight=500),
+                dmc.Text(f"Case#{case_id}", fw=500),
                 dmc.Badge(
                     case_statuses.get(status, {}).get(
                         "short_description", status
@@ -95,40 +95,40 @@ def create_case_card(case_data: dict):
                     variant="light",
                 ),
             ],
-            position="apart",
-            spacing="xs",
+            justify="apart",
+            gap="xs",
         ),
         badges,
         dmc.Text(
             f"{full_name.lower().capitalize()}",
             size="sm",
-            color="dark",
+            c="dark",
         ),
         dmc.Group(
             [
                 dmc.Text(
                     f"{case_date.lower().capitalize()}",
                     size="sm",
-                    color=court_date_color,
+                    c=court_date_color,
                 ),
                 dmc.Text(
                     f"{location_name.lower().capitalize()}",
                     size="sm",
-                    color="dimmed",
+                    c="dimmed",
                 ),
             ],
-            position="apart",
-            spacing="xs",
+            justify="apart",
+            gap="xs",
         ),
         dmc.Text(
             f"{charges_description.lower().capitalize()}",
             size="sm",
-            color="dark",
+            c="dark",
         ),
         dmc.Text(
             f"Updated {last_updated_str} ago",
             size="xs",
-            color="dimmed",
+            c="dimmed",
         ),
     ]
 
@@ -146,8 +146,8 @@ def create_case_card(case_data: dict):
 
 def create_case_column(cases, title):
     """Generate a column of case cards with a title."""
-    return dmc.Col(
-        dmc.Navbar(
+    return dmc.GridCol(
+        dmc.Stack(
             p="md",
             children=[
                 html.H4(
@@ -160,11 +160,7 @@ def create_case_column(cases, title):
                 ),
             ],
         ),
-        xl=4,
-        lg=4,
-        md=12,
-        sm=12,
-        xs=12,
+        span={"base": 12, "xs": 12, "sm": 12, "md": 12, "lg": 4, "xl": 4},
     )
 
 
@@ -198,30 +194,64 @@ def create_case_div(cases):
     return html.Div(case_cards, style={"overflowY": "auto"})
 
 
+def filter_cases_by_court_date(cases, start_date, end_date):
+    if isinstance(start_date, str):
+        start_date = datetime.strptime(start_date, "%Y-%m-%d")
+    if isinstance(end_date, str):
+        end_date = datetime.strptime(end_date, "%Y-%m-%d")
+
+    filtered_cases = []
+    for case in cases:
+        court_dates = CaseDynamicFields().update_court_date(case, {})
+
+        if court_dates:
+            court_date = court_dates.get("court_date")
+            if court_date:
+                court_date = datetime.strptime(court_date, "%m/%d/%Y")
+                if start_date <= court_date <= end_date:
+                    filtered_cases.append(case)
+    return filtered_cases
+
+
 @callback(
     Output("case_card_col_todo", "children"),
     Input("court-selector", "value"),
+    Input("date-selector", "value"),
 )
-def render_actions_todo(court_code_list):
+def render_actions_todo(court_code_list, date_selector):
+    start_date, end_date = date_selector
     cases_list_todo = cases.get_cases(court_code_list, flag="todo")
+    cases_list_todo = filter_cases_by_court_date(
+        cases_list_todo, start_date, end_date
+    )
     return create_case_div(cases_list_todo)
 
 
 @callback(
     Output("case_card_col_pending", "children"),
     Input("court-selector", "value"),
+    Input("date-selector", "value"),
 )
-def render_actions_pending(court_code_list):
+def render_actions_pending(court_code_list, date_selector):
+    start_date, end_date = date_selector
     cases_list_pending = cases.get_cases(court_code_list, flag="pending")
+    cases_list_pending = filter_cases_by_court_date(
+        cases_list_pending, start_date, end_date
+    )
     return create_case_div(cases_list_pending)
 
 
 @callback(
     Output("case_card_col_closed", "children"),
     Input("court-selector", "value"),
+    Input("date-selector", "value"),
 )
-def render_actions_closed(court_code_list):
+def render_actions_closed(court_code_list, date_selector):
+    start_date, end_date = date_selector
     cases_list_closed = cases.get_cases(
         court_code_list, flag="closed", limit=30
+    )
+    cases_list_closed = filter_cases_by_court_date(
+        cases_list_closed, start_date, end_date
     )
     return create_case_div(cases_list_closed)

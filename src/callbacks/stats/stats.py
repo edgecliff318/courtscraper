@@ -8,7 +8,7 @@ from dash import Input, Output, callback, dcc
 
 from src.connectors.cloudtalk import fetch_call_history
 from src.core.config import get_settings
-from src.services import leads, messages
+from src.services import leads, messages, stats
 
 logger = logging.Logger(__name__)
 
@@ -73,6 +73,28 @@ def create_graph_bar_leads_state(df: pd.DataFrame):
     fig.update_layout(get_base_layout(), title_text="Leads by Source")
 
     return dcc.Graph(figure=fig)
+
+
+def create_ts_graph(df: pd.DataFrame, x, y, title):
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scatter(
+            x=df[x],
+            y=df[y],
+            mode="lines+markers",
+            name=title,
+            marker=dict(color=settings.colors_mapping["total"]),
+        )
+    )
+
+    fig.update_layout(
+        get_base_layout(),
+        title_text=title,
+        xaxis_title="Date",
+        yaxis_title="Total",
+    )
+
+    return dmc.Card(dcc.Graph(figure=fig))
 
 
 def create_graph_leads_status(df: pd.DataFrame):
@@ -216,27 +238,27 @@ def render_stats_card(kpi_name, kpi_value_formatted, kpi_unit):
                 dmc.Text(
                     kpi_name,
                     size="md",
-                    weight=600,
-                    color="dark",
+                    fw=600,
+                    c="dark",
                 ),
                 dmc.Group(
                     [
                         dmc.Title(
                             kpi_value_formatted,
                             order=1,
-                            color="indigo",
+                            c="indigo",
                         ),
                         dmc.Text(
                             kpi_unit,
-                            weight=500,
-                            color="dark",
+                            fw=500,
+                            c="dark",
                             mb=4,
                         ),
                     ],
                     align="flex-end",
                 ),
             ],
-            spacing="sm",
+            gap="sm",
             align="center",
         ),
     )
@@ -248,37 +270,37 @@ def render_message_summary(df: pd.DataFrame):
 
     return dmc.Grid(
         [
-            dmc.Col(
+            dmc.GridCol(
                 render_stats_card(
                     "Total Messages Sent",
                     f"{status_counts.get('sent', 0):,}",
                     "",
                 ),
-                md=3,
+                span={"base": 12, "md": 3},
             ),
-            dmc.Col(
+            dmc.GridCol(
                 render_stats_card(
                     "Stop Messages Received",
                     f"{status_counts.get('stop', 0):,}",
                     "",
                 ),
-                md=3,
+                span={"base": 12, "md": 3},
             ),
-            dmc.Col(
+            dmc.GridCol(
                 render_stats_card(
                     "Yes Messages Received",
                     f"{status_counts.get('yes', 0):,}",
                     "",
                 ),
-                md=3,
+                span={"base": 12, "md": 3},
             ),
-            dmc.Col(
+            dmc.GridCol(
                 render_stats_card(
                     "Other Messages",
                     f"{status_counts.get('other', 0):,}",
                     "",
                 ),
-                md=3,
+                span={"base": 12, "md": 3},
             ),
         ]
     )
@@ -291,29 +313,29 @@ def render_inbound_summary(data: pd.DataFrame):
 
     return dmc.Grid(
         [
-            dmc.Col(
+            dmc.GridCol(
                 render_stats_card(
                     "Total leads",
                     f"{total_leads:,}",
                     "leads",
                 ),
-                md=4,
+                span={"base": 12, "md": 4},
             ),
-            dmc.Col(
+            dmc.GridCol(
                 render_stats_card(
                     "New Leads",
                     f"{total_leads_by_status.get('new', 0):,}",
                     "leads",
                 ),
-                md=4,
+                span={"base": 12, "md": 4},
             ),
-            dmc.Col(
+            dmc.GridCol(
                 render_stats_card(
                     "Leads Processed",
                     f"{(total_leads - total_leads_by_status.get('new', 0)):,}",
                     "leads",
                 ),
-                md=4,
+                span={"base": 12, "md": 4},
             ),
         ]
     )
@@ -341,8 +363,8 @@ def render_scrapper_monitoring(dates, _):
 
     grid_layout = dmc.Grid(
         children=[
-            dmc.Col(children=graph_choropleth_leads_state, mx=1, span=5),
-            dmc.Col(children=graph_bar_leads_state, mx=1, span=5),
+            dmc.GridCol(children=graph_choropleth_leads_state, mx=1, span=5),
+            dmc.GridCol(children=graph_bar_leads_state, mx=1, span=5),
         ],
         gutter="xl",
         justify="space-between",
@@ -454,3 +476,112 @@ def render_call_monitoring(dates, n_clicks):
     graph_calls = create_graph_calls(pivot_df)
 
     return graph_calls
+
+
+@callback(
+    Output("overview-sales-summary", "children"),
+    Input("stats-date-selector", "value"),
+    Input("stats-refresh-button", "n_clicks"),
+)
+def render_sales_summary(dates, n_clicks):
+    # To datetime
+    start_date, end_date = [
+        datetime.strptime(date, "%Y-%m-%d") for date in dates
+    ]
+
+    sales = stats.SalesService()
+    sales_list = sales.get_items(
+        start_date=start_date,
+        end_date=end_date,
+    )
+
+    if not sales_list:
+        no_data_message = "No sales found for the selected period."
+        return no_data_message
+
+    df = pd.DataFrame([sale.model_dump() for sale in sales_list])
+
+    total_sales = df["amount"].sum()
+    total_sales_formatted = f"${total_sales:,.2f}"
+
+    total_sales_count = df["count"].sum()
+
+    sales_summary = render_stats_card(
+        "Total Sales",
+        total_sales_formatted,
+        "USD",
+    )
+
+    count_summary = render_stats_card(
+        "Total Sales Count",
+        f"{total_sales_count:,}",
+        "sales",
+    )
+
+    outbound_actions = df["outbound_actions_count"].sum()
+
+    outbound_actions_summary = render_stats_card(
+        "Outbound Actions",
+        f"{outbound_actions:,}",
+        "actions",
+    )
+
+    conversion_rate = total_sales_count / outbound_actions * 100
+
+    conversion_rate_summary = render_stats_card(
+        "Conversion Rate",
+        f"{conversion_rate:.2f}%",
+        "",
+    )
+
+    # Graph to show the evoluation of each
+    sales_graph = create_ts_graph(
+        df,
+        x="date",
+        y="amount",
+        title="Sales Evolution",
+    )
+
+    count = create_ts_graph(
+        df,
+        x="date",
+        y="count",
+        title="Sales Count Evolution",
+    )
+
+    outbound_actions = create_ts_graph(
+        df,
+        x="date",
+        y="outbound_actions_count",
+        title="Outbound Actions Evolution",
+    )
+
+    df["conversion_rate"] = df["count"] / df["outbound_actions_count"] * 100
+
+    conversion_rate = create_ts_graph(
+        df,
+        x="date",
+        y="conversion_rate",
+        title="Conversion Rate Evolution",
+    )
+
+    return dmc.Grid(
+        [
+            dmc.GridCol(
+                dmc.Stack([sales_summary, sales_graph]),
+                span={"base": 12, "md": 3},
+            ),
+            dmc.GridCol(
+                dmc.Stack([count_summary, count]),
+                span={"base": 12, "md": 3},
+            ),
+            dmc.GridCol(
+                dmc.Stack([outbound_actions_summary, outbound_actions]),
+                span={"base": 12, "md": 3},
+            ),
+            dmc.GridCol(
+                dmc.Stack([conversion_rate_summary, conversion_rate]),
+                span={"base": 12, "md": 3},
+            ),
+        ]
+    )

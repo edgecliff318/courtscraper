@@ -23,17 +23,36 @@ settings = get_settings()
     Output("template-selector", "data"),
     Input("url", "pathname"),
 )
-def get_templatess_list(url):
-    print("get_templatess_list")
+def get_templates_list(url):
 
-    templatess_all = get_templates()
+    templates_all = get_templates()
 
-    templatess_data = [
-        {"label": f"{p.id} - {p.name}".replace("_", " "), "value": p.id}
-        for p in templatess_all
-    ]
+    data = []
 
-    return templatess_data
+    for p in templates_all:
+        if p.category in [d["group"] for d in data]:
+            for d in data:
+                if d["group"] == p.category:
+                    d["items"].append(
+                        {
+                            "label": f"{p.id} - {p.name}".replace("_", " "),
+                            "value": p.id,
+                        }
+                    )
+        else:
+            data.append(
+                {
+                    "group": p.category,
+                    "items": [
+                        {
+                            "label": f"{p.id} - {p.name}".replace("_", " "),
+                            "value": p.id,
+                        }
+                    ],
+                }
+            )
+
+    return data
 
 
 @callback(
@@ -103,7 +122,7 @@ def render_template(templates_id):
     for key, value in data.items():
         if value["type"] == "Switch":
             grid.append(
-                dmc.Col(
+                dmc.GridCol(
                     dmc.Switch(
                         label=value["label"],
                         checked=getattr(template, key),
@@ -115,7 +134,7 @@ def render_template(templates_id):
 
         elif value["type"] == "Select":
             grid.append(
-                dmc.Col(
+                dmc.GridCol(
                     dmc.Select(
                         label=value["label"],
                         data=value["data"],
@@ -128,14 +147,14 @@ def render_template(templates_id):
 
         elif value["type"] == "Textarea":
             grid.append(
-                dmc.Col(
+                dmc.GridCol(
                     dmc.Textarea(
                         label=value["label"],
                         value=getattr(template, key),
                         id=key,
                         style={"minWidth": 500},
                         autosize=True,
-                        minRows=4,
+                        minRows=20,
                     ),
                     span=6,
                 )
@@ -143,7 +162,7 @@ def render_template(templates_id):
 
         elif value["type"] == "JsonInput":
             grid.append(
-                dmc.Col(
+                dmc.GridCol(
                     dmc.JsonInput(
                         label=value["label"],
                         value=getattr(template, key),
@@ -155,7 +174,7 @@ def render_template(templates_id):
 
         else:
             grid.append(
-                dmc.Col(
+                dmc.GridCol(
                     dmc.TextInput(
                         label=value["label"],
                         placeholder=value["placeholder"],

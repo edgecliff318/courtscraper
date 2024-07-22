@@ -8,6 +8,7 @@ from dash_iconify import DashIconify
 from flask import session
 
 from src.core.config import get_settings
+from src.services import cases
 from src.services.emails import GmailConnector
 
 logger = logging.getLogger(__name__)
@@ -27,28 +28,28 @@ def update_emails_list(pathname):
 
     gmail_connector = GmailConnector(user_id=user_id)
 
-    emails = gmail_connector.get_inbox_emails()
+    emails = gmail_connector.get_inbox_emails(total_results=50)
 
     header = dmc.Grid(
         [
-            dmc.Col(
+            dmc.GridCol(
                 dmc.Text(
                     "Sender",
-                    weight=700,
+                    fw=700,
                 ),
                 span=3,
             ),
-            dmc.Col(
+            dmc.GridCol(
                 dmc.Text(
                     "Subject",
-                    weight=700,
+                    fw=700,
                 ),
                 span=6,
             ),
-            dmc.Col(
+            dmc.GridCol(
                 dmc.Text(
                     "Date",
-                    weight=700,
+                    fw=700,
                 ),
                 span=2,
             ),
@@ -58,16 +59,16 @@ def update_emails_list(pathname):
     def render_email_row(email):
         return dmc.Grid(
             [
-                dmc.Col(
+                dmc.GridCol(
                     dmc.Text(
                         # Sender
                         f"{gmail_connector.render_email_sender(gmail_connector.get_sender(email))}",
-                        weight=700,
+                        fw=700,
                         size="sm",
                     ),
                     span=3,
                 ),
-                dmc.Col(
+                dmc.GridCol(
                     [
                         dmc.HoverCard(
                             shadow="md",
@@ -78,7 +79,7 @@ def update_emails_list(pathname):
                                     dmc.Text(
                                         # Subject
                                         f"{gmail_connector.get_email_subject(email)}",
-                                        weight=500,
+                                        fw=500,
                                         size="sm",
                                     ),
                                 ),
@@ -86,7 +87,7 @@ def update_emails_list(pathname):
                                     dmc.Text(
                                         # Subject
                                         f"{gmail_connector.get_snippet(email)}",
-                                        weight=500,
+                                        fw=500,
                                         size="sm",
                                     ),
                                     # Return to line
@@ -97,16 +98,16 @@ def update_emails_list(pathname):
                     ],
                     span=6,
                 ),
-                dmc.Col(
+                dmc.GridCol(
                     dmc.Text(
                         # Date
                         f"{gmail_connector.get_timestamp(email)}",
-                        weight=500,
+                        fw=500,
                         size="sm",
                     ),
                     span=2,
                 ),
-                dmc.Col(
+                dmc.GridCol(
                     html.A(
                         dmc.ActionIcon(
                             DashIconify(
@@ -129,7 +130,7 @@ def update_emails_list(pathname):
 
     return dmc.Stack(
         emails_renders,
-        spacing="md",
+        gap="md",
     )
 
 
@@ -187,3 +188,36 @@ def generate_email_reply(n_clicks, email, value):
         )
 
         return result["choices"][0]["message"]["content"]
+
+
+@callback(
+    Output("case-tag-emails-processed-status", "children"),
+    Input("case-tag-emails-processed", "n_clicks"),
+    State("case-id", "children"),
+    prevent_initial_call=True,
+)
+def tag_emails_processed(n_clicks, case_id):
+    user_id = session.get("profile", {}).get("name", None)
+
+    if user_id is None:
+        # Redirect to login page
+        return dash.no_update
+
+    case = cases.get_single_case(case_id)
+    gmail_connector = GmailConnector(user_id=user_id)
+
+    if case.emails is None:
+        return dmc.Alert(
+            "No emails to process",
+            color="red",
+            duration=3000,
+        )
+
+    for email in case.emails:
+        gmail_connector.move_email(email["id"], "Processed")
+
+    return dmc.Alert(
+        "Emails processed",
+        color="green",
+        duration=3000,
+    )

@@ -122,27 +122,27 @@ def render_stats_card(kpi_name, kpi_value_formatted, kpi_unit):
                 dmc.Text(
                     kpi_name,
                     size="md",
-                    weight=600,
-                    color="dark",
+                    fw=600,
+                    c="dark",
                 ),
                 dmc.Group(
                     [
                         dmc.Title(
                             kpi_value_formatted,
                             order=1,
-                            color="indigo",
+                            c="indigo",
                         ),
                         dmc.Text(
                             kpi_unit,
-                            weight=500,
-                            color="dark",
+                            fw=500,
+                            c="dark",
                             mb=4,
                         ),
                     ],
                     align="flex-end",
                 ),
             ],
-            spacing="sm",
+            gap="sm",
             align="center",
         ),
     )
@@ -154,37 +154,37 @@ def render_message_summary(df: pd.DataFrame):
 
     return dmc.Grid(
         [
-            dmc.Col(
+            dmc.GridCol(
                 render_stats_card(
                     "Total Messages Sent",
                     f"{status_counts.get('sent', 0):,}",
                     "",
                 ),
-                md=3,
+                span={"base": 12, "md": 3},
             ),
-            dmc.Col(
+            dmc.GridCol(
                 render_stats_card(
                     "Stop Messages Received",
                     f"{status_counts.get('stop', 0):,}",
                     "",
                 ),
-                md=3,
+                span={"base": 12, "md": 3},
             ),
-            dmc.Col(
+            dmc.GridCol(
                 render_stats_card(
                     "Yes Messages Received",
                     f"{status_counts.get('yes', 0):,}",
                     "",
                 ),
-                md=3,
+                span={"base": 12, "md": 3},
             ),
-            dmc.Col(
+            dmc.GridCol(
                 render_stats_card(
                     "Other Messages",
                     f"{status_counts.get('other', 0):,}",
                     "",
                 ),
-                md=3,
+                span={"base": 12, "md": 3},
             ),
         ]
     )
@@ -632,7 +632,7 @@ def conversation(df_conversation):
 
 
 @callback(
-    Output("modal-conversation", "is_open"),
+    Output("modal-conversation", "opened"),
     Output("modal-conversation-content", "children"),
     Input("monitoring-data-grid", "selectedRows"),
     State("monitoring-data", "data"),

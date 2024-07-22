@@ -46,3 +46,4 @@ class Scrapers(BaseModel):
     state: Optional[dict] = None
     start_date: Optional[int] = None
     end_date: Optional[int] = None
+    count: Optional[dict] = None

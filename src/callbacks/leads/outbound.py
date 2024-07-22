@@ -20,29 +20,29 @@ settings = get_settings()
 def render_inbound_summary(data: dict):
     return dmc.Grid(
         [
-            dmc.Col(
+            dmc.GridCol(
                 render_stats_card(
                     "New Leads",
                     f"{data.get('leads_added_today'):,}",
                     "leads",
                 ),
-                md=4,
+                span={"base": 12, "md": 4},
             ),
-            dmc.Col(
+            dmc.GridCol(
                 render_stats_card(
                     "Not Contacted Leads",
                     f"{data.get('not_contacted'):,}",
                     "leads",
                 ),
-                md=4,
+                span={"base": 12, "md": 4},
             ),
-            dmc.Col(
+            dmc.GridCol(
                 render_stats_card(
                     "Converted Leads",
                     f"{data.get('leads_converted'):,}",
                     "leads",
                 ),
-                md=4,
+                span={"base": 12, "md": 4},
             ),
         ]
     )
@@ -81,6 +81,7 @@ def render_leads(court_code_list, dates, status):
 
     df = df[
         [
+            "state",
             "case_id",
             "case_date",
             "first_name",
@@ -123,6 +124,7 @@ def render_leads(court_code_list, dates, status):
 
     df = df.rename(
         columns={
+            "state": "State",
             "first_name": "First Name",
             "last_name": "Last Name",
             "phone": "Phone",
@@ -140,6 +142,15 @@ def render_leads(court_code_list, dates, status):
     df["Case ID"] = df["Case ID"].map(lambda x: f"[{x}](/case/{x})")
 
     column_defs = [
+        {
+            "headerName": "State",
+            "field": "State",
+            "editable": False,
+            "filter": "agTextColumnFilter",
+            "sortable": True,
+            "resizable": True,
+            "flex": 1,
+        },
         {
             "headerName": "Case ID",
             "field": "Case ID",
@@ -272,12 +283,12 @@ def render_leads(court_code_list, dates, status):
                                         dmc.Text(
                                             f"{total_leads} Leads",
                                             size="sm",
-                                            color="gray",
+                                            c="gray",
                                         ),
                                         dmc.Text(
                                             f"{total_phones} Phones",
                                             size="sm",
-                                            color="gray",
+                                            c="gray",
                                         ),
                                         dmc.Button(
                                             "Cases Process",

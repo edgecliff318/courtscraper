@@ -29,9 +29,7 @@ def get_invoice_text(invoices):
             invoice_data = payments_service.get_invoice(invoice)
             invoice_link = invoice_data.hosted_invoice_url
             invoice_amount = invoice_data.amount_due / 100
-            invoice_message = (
-                f"<a href='{invoice_link}'>Invoice {invoice_amount:.2f} $</a>"
-            )
+            invoice_message = f"<a href='{invoice_link}'>Invoice</a>"
 
             invoice_text.append(invoice_message)
 
@@ -211,6 +209,7 @@ def get_email_params(
                 id={"type": f"modal-{role}-pars", "index": "body"},
                 value=body_filled,
                 minRows=20,
+                autosize=True,
             ),
             dmc.Text(
                 "Use <strong> text </strong> to bold the text", size="xs"
@@ -239,7 +238,27 @@ def get_documents(case_id):
     document_blobs = bucket.list_blobs(
         prefix=f"cases/{case_id}/", delimiter="/"
     )
+    filenames = [blob.name.split("/")[-1] for blob in document_blobs]
 
+    # Get casenet documents and if not in the list, add them
+    if case.documents is not None:
+        for document in case.documents:
+            try:
+                file_path = document.get("file_path")
+                if file_path:
+                    if file_path not in filenames:
+                        # Copy the file from the current path to the new path
+                        blob = bucket.blob(file_path)
+                        bucket.copy_blob(
+                            blob, bucket, f"cases/{case_id}/{file_path}"
+                        )
+            except Exception as e:
+                logger.error(f"Error copying the file: {e}")
+
+    # Reload the list of documents
+    document_blobs = bucket.list_blobs(
+        prefix=f"cases/{case_id}/", delimiter="/"
+    )
     documents = []
     for blob in document_blobs:
         source = "Uploaded/Generated"

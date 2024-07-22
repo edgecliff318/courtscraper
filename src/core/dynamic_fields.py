@@ -17,14 +17,13 @@ class CaseDynamicFields:
                 court_time = case.court_events[0].get("time", "")
 
             if len(case.court_events) > 1:
+                ## TODO: Log this
                 print("Multiple court events found for case: ", case.case_id)
 
             if court_date is not None:
                 case_data["court_date"] = court_date
                 case_data["court_time"] = court_time
                 return case_data
-
-        print("No court events found for case: ", case.case_id)
 
         if case.dockets is not None:
             for docket in case.dockets:

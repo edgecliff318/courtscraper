@@ -51,4 +51,7 @@ class DocumentGenerator:
     def get_context(self):
         doc = DocxTemplate(self.input_file)
         variables = doc.get_undeclared_template_variables()
+
+        # Sort the elements in the list
+        variables = sorted(variables)
         return variables

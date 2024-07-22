@@ -33,6 +33,7 @@ def get_next_step_modal_content(
                 type="Textarea",
                 minRows=10,
                 value=message,
+                autosize=True,
             ),
             html.Div(id="modal-next-step-output"),
             dmc.Group(
@@ -50,7 +51,7 @@ def get_next_step_modal_content(
                         id="modal-next-step-close-button",
                     ),
                 ],
-                position="right",
+                justify="right",
             ),
         ]
     )
@@ -60,6 +61,6 @@ def get_next_step_modal():
     return dmc.Modal(
         id="modal-next-step",
         size="lg",
-        zIndex=10000,
         children=get_next_step_modal_content(),
+        keepMounted=True,
     )

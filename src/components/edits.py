@@ -23,7 +23,7 @@ def render_edit_component(fields, collection, item_id, new=True):
 
     fields_columns = dmc.Grid(
         [
-            dmc.Col(
+            dmc.GridCol(
                 dmc.Stack(
                     [
                         field
@@ -31,10 +31,9 @@ def render_edit_component(fields, collection, item_id, new=True):
                         if i < len(fields_form) / 2
                     ]
                 ),
-                md=6,
-                span=12,
+                span={"base": 12, "md": 6},
             ),
-            dmc.Col(
+            dmc.GridCol(
                 dmc.Stack(
                     [
                         field
@@ -42,8 +41,7 @@ def render_edit_component(fields, collection, item_id, new=True):
                         if i >= len(fields_form) / 2
                     ]
                 ),
-                md=6,
-                span=12,
+                span={"base": 12, "md": 6},
             ),
         ]
     )
@@ -55,23 +53,23 @@ def render_edit_component(fields, collection, item_id, new=True):
                     "Save",
                     color="dark",
                     id="edit-component-save",
-                    leftIcon=DashIconify(icon="material-symbols:save"),
+                    leftSection=DashIconify(icon="material-symbols:save"),
                 ),
                 dmc.Button(
                     "Reset",
                     color="dark",
                     id="edit-component-reset",
-                    leftIcon=DashIconify(icon="material-symbols:reset"),
+                    leftSection=DashIconify(icon="material-symbols:reset"),
                 ),
                 dmc.Button(
                     "New",
                     color="dark",
                     id="edit-component-new",
-                    leftIcon=DashIconify(icon="carbon:reset"),
+                    leftSection=DashIconify(icon="carbon:reset"),
                     style={"display": "none" if new else "block"},
                 ),
             ],
-            position="right",
+            justify="right",
         ),
         html.Div(id="edit-component-output"),
         dmc.Divider(),

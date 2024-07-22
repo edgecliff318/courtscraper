@@ -9,7 +9,7 @@ from src.components.cases.status import case_statuses
 from src.core.config import get_settings
 from src.models.cases import Case
 from src.services import cases as cases_service
-from src.services import mycase as mycase_service
+from src.services import messages
 from src.services.participants import ParticipantsService
 
 logger = logging.getLogger(__name__)
@@ -55,6 +55,9 @@ def modal_next_step(data, n_clicks_close, n_clicks_update_status):
         return False, dash.no_update
 
     if data is None and trigger_id != "update-status-button":
+        return dash.no_update, dash.no_update
+
+    if trigger_id == "update-status-button" and n_clicks_update_status is None:
         return dash.no_update, dash.no_update
 
     if data is None:
@@ -132,7 +135,12 @@ def modal_next_step_submit(
                 title="No phone number found",
             )
 
-        mycase_service.send_sms_to_client_mycase(case_id, message, phone)
+        messages.send_message(
+            case_id,
+            message,
+            phone,
+            force_send=True,
+        )
 
         alert_message = "Case updated successfully and SMS sent"
 

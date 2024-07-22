@@ -10,12 +10,12 @@ dash.register_page(__name__, class_icon="ti ti-dashboard", order=2)
 def layout():
     skeleton_cards = dmc.Grid(
         children=[
-            dmc.Col(
+            dmc.GridCol(
                 dmc.Skeleton(
                     height="150px",
                     width="23vw",
                 ),
-                md=3,
+                span={"base": 12, "md": 3},
             )
             for i in range(4)
         ],
@@ -32,7 +32,7 @@ def layout():
         [
             dmc.Grid(
                 [
-                    dmc.Col(
+                    dmc.GridCol(
                         dmc.Card(
                             [
                                 stats_controls,
@@ -43,7 +43,21 @@ def layout():
                         span=12,
                         className="mb-2 p-1",
                     ),
-                    dmc.Col(
+                    dmc.GridCol(
+                        [
+                            dmc.Title("Sales Overview", order=2),
+                            dmc.Text(
+                                "Sales summary for customers that made a purchase."
+                            ),
+                            html.Div(
+                                children=skeleton_cards,
+                                id="overview-sales-summary",
+                            ),
+                        ],
+                        span=12,
+                        className="mb-2 p-1",
+                    ),
+                    dmc.GridCol(
                         [
                             dmc.Title("Inbound Overview", order=2),
                             dmc.Text(
@@ -57,7 +71,7 @@ def layout():
                         span=12,
                         className="mb-2 p-1",
                     ),
-                    dmc.Col(
+                    dmc.GridCol(
                         [
                             dmc.Title("Outbound Summary", order=2),
                             dmc.Text(
@@ -71,7 +85,7 @@ def layout():
                         span=12,
                         className="mb-2 p-1",
                     ),
-                    dmc.Col(
+                    dmc.GridCol(
                         dmc.Card(
                             [
                                 html.Div(
@@ -83,7 +97,7 @@ def layout():
                         span=12,
                         className="mb-2 p-1",
                     ),
-                    dmc.Col(
+                    dmc.GridCol(
                         dmc.Card(
                             [
                                 html.Div(
@@ -95,7 +109,7 @@ def layout():
                         span=12,
                         className="mb-2 p-1",
                     ),
-                    dmc.Col(
+                    dmc.GridCol(
                         dmc.Card(
                             [
                                 html.Div(

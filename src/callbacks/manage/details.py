@@ -55,7 +55,7 @@ def update_participants(case_id, participants):
                     color="dark",
                     variant="light",
                     size="xs",
-                    rightIcon=DashIconify(icon="carbon:view"),
+                    rightSection=DashIconify(icon="carbon:view"),
                 ),
                 href=f"/manage/participants/{p.id}",
             )

@@ -13,5 +13,22 @@ logger = logging.Logger(__name__)
 )
 def render_content_persona_details_selector(pathname):
     courts_list = courts.get_courts()
-    options = [{"label": c.name, "value": c.code} for c in courts_list]
-    return options
+    data = []
+    for court in courts_list:
+        if court.state in [d["group"] for d in data]:
+            for d in data:
+                if d["group"] == court.state:
+                    if court.code not in [i["value"] for i in d["items"]]:
+                        # TODO:Should be using a unique identifier here
+                        d["items"].append(
+                            {"label": court.name, "value": court.code}
+                        )
+        else:
+            data.append(
+                {
+                    "items": [{"label": court.name, "value": court.code}],
+                    "group": court.state,
+                }
+            )
+
+    return data

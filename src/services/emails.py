@@ -379,7 +379,7 @@ class GmailConnector(object):
                 userId="me",
                 id=email_id,
                 body={
-                    "addLabelIds": [destination],
+                    # "addLabelIds": [destination],
                     "removeLabelIds": ["INBOX"],
                 },
             ).execute()

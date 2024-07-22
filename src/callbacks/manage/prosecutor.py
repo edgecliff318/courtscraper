@@ -161,7 +161,7 @@ def modal_prosecutor_submit(n_clicks, pars, case_id, template, force_send):
         and template is not None
     ):
         attachments = ctx.states.get(
-            '{{"index":"attachments","type":"modal-prosecutor-pars"}}.value',
+            '{"index":"attachments","type":"modal-prosecutor-pars"}.value',
             [],
         )
         output, message = send_email(

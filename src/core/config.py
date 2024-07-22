@@ -96,7 +96,7 @@ class Settings(BaseSettings):
     DESCRIPTION: str = "Fubloo"
     PROJECT_NAME: str = "Fubloo"
 
-    DEBUG: bool = os.getenv("DEBUG", "false").lower() == "true"
+    # DEBUG: bool = os.getenv("DEBUG", "false").lower() == "true"
     LOGGING_LEVEL: str = os.getenv("LOGGING_LEVEL", "INFO")
 
     # Configuration
@@ -218,7 +218,7 @@ class Settings(BaseSettings):
     )
 
     # Gotenberg Configuration
-    GOTENBERG_URL: str = os.getenv("GOTENBERG_URL", "http://localhost:3001")
+    GOTENBERG_URL: str = os.getenv("GOTENBERG_URL", "http://localhost:58864")
 
     # Selenium Service
     SELENIUM_STANDALONE_URL: str = os.getenv(
