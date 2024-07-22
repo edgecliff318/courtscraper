@@ -5,7 +5,9 @@ import os
 import re
 from datetime import datetime, timedelta
 
+import pandas as pd
 import requests
+from commonregex import CommonRegex
 from rich.console import Console
 from tika import parser
 
@@ -117,6 +119,8 @@ class MDScraper(ScraperBase):
     def extract_data_points(self, record):
         case_dict = {}
         citation_splits = record.split("Citation")
+        console.log(f"Processing record: {record}")
+        cr = CommonRegex(record)
         try:
             case_id_name_splits = citation_splits[0].split("|||")
             case_dict["case_id"] = case_id_name_splits[0].strip()
@@ -130,58 +134,38 @@ class MDScraper(ScraperBase):
             case_dict["first_name"] = "N/A"
             case_dict["middle_name"] = "N/A"
             case_dict["last_name"] = "N/A"
+            case_dict["name_error"] = True
 
         try:
-            case_type_n__filling_date = (
-                citation_splits[1].strip(" - ").split("\n", 1)[0]
-            )
-            date_match = re.search(
-                r"(\d{2}/\d{2}/\d{4})", case_type_n__filling_date
-            )
-            filing_date = date_match.group(1).strip()
-            case_dict["filing_date"] = self.to_datetime(filing_date)
+            dates = cr.dates
+            case_dict["filing_date"] = self.to_datetime(dates[0])
+
         except Exception as e:
             console.log(f"Error in extracting filing_date: {e}")
-            console.log(
-                f"case_type_n__filling_date: {case_type_n__filling_date}"
-            )
             case_dict["filing_date"] = None
+            case_dict["filing_date_error"] = True
 
         try:
-            case_dict["case_type"] = case_type_n__filling_date[
-                : date_match.start()
-            ].strip()
-        except Exception as e:
-            console.log(f"Error in extracting case_type: {e}")
-            console.log(
-                f"case_type_n__filling_date: {case_type_n__filling_date}"
-            )
-            case_dict["case_type"] = "N/A"
-
-        try:
-            # complete address
-            complete_address_n_charges = (
-                citation_splits[1]
-                .strip(" - ")
-                .split("\n", 1)[1]
-                .split("\n\n\n\n")[0]
-                .strip("Defendant Address:")
-                .strip()
-            )
-            address_lines = complete_address_n_charges.split("Charges:")[
-                0
-            ].split("\n")
-            address_lines = [item for item in address_lines if item]
-
-            address_line_1 = (
-                address_lines[1].strip() if len(address_lines) > 1 else ""
-            )
-
-            address_city, address_state_zip = (
-                address_lines[2].split(", ")
-                if len(address_lines) > 2
-                else ("", "")
-            )
+            try:
+                # complete address
+                addresses = cr.street_addresses
+                address_line_1 = addresses[0]
+                # Get the data between the address and charges
+                address_city_zip = record.split(address_line_1)[1].split(
+                    "Charges:"
+                )[0]
+            except Exception as e:
+                # Split between Defendqnt Address: and Charges
+                address_text = record.split("Defendant Address:")[1].split(
+                    "Charges:"
+                )[0]
+                # Remove trailing \n and beginning \n
+                address_text = address_text.strip()
+                address_line_1 = address_text.split("\n")[1]
+                address_city_zip = address_text.split("\n")[-1]
+            address_city, address_state_zip = address_city_zip.replace(
+                "\n", ""
+            ).split(", ")
             address_state, address_zip_code = (
                 address_state_zip.split(" ")
                 if len(address_state_zip.split(" ")) == 2
@@ -194,26 +178,23 @@ class MDScraper(ScraperBase):
             case_dict["county"] = address_city
         except Exception as e:
             console.log(f"Error in extracting address: {e}")
-            console.log(
-                f"complete_address_n_charges: {complete_address_n_charges}"
-            )
             case_dict["address_city"] = "N/A"
             case_dict["address_line_1"] = "N/A"
             case_dict["address_zip"] = "N/A"
             case_dict["address_state"] = "N/A"
             case_dict["county"] = ""
+            case_dict["address_error"] = True
 
         try:
-            charges_text = complete_address_n_charges.split("Charges:")[
-                -1
-            ].strip()
+            charges_text = record.split("Charges:")[-1].strip()
             case_dict["charges"] = [
-                {"description": item for item in charges_text.split("\n")}
+                {"description": item} for item in charges_text.split("\n")
             ]
         except Exception as e:
             console.log(f"Error in extracting charges: {e}")
             console.log(f"charges_text: {charges_text}")
             case_dict["charges"] = [{"description": "N/A"}]
+            case_dict["charges_error"] = True
 
         county = case_dict["county"]
         case_dict["court_id"] = self.get_court_id(county)
@@ -227,6 +208,8 @@ class MDScraper(ScraperBase):
         case_dict["city"] = case_dict["address_city"]
         case_dict["zip_code"] = case_dict["address_zip"]
         case_dict["source"] = "md_general"
+        case_dict["state"] = "MD"
+        case_dict["record"] = record
 
         return case_dict
 
@@ -302,7 +285,8 @@ class MDScraper(ScraperBase):
                     console.log(f"Record Extraction Failed:\t{record}")
                     continue
                 master_list.append(data)
-
+        df = pd.DataFrame(master_list)
+        df.to_csv(f"md_general_{input_pdf}.csv", index=False)
         return master_list
 
     def scrape_cases_for_scraping_date(self, scraping_date):
@@ -343,7 +327,7 @@ class MDScraper(ScraperBase):
 
     async def scrape(self):
         """Main scraping function to handle the entire scraping process."""
-        last_scraping_date = self.state.get("last_filing_date", "2024-07-16")
+        last_scraping_date = self.state.get("last_filing_date", "2024-07-20")
         scraping_date = last_scraping_date
         not_found_count = 0
 
