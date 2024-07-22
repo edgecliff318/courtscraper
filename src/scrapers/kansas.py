@@ -10,6 +10,7 @@ from twocaptcha import TwoCaptcha
 
 from playwright.async_api import async_playwright
 from src.scrapers.base.scraper_base import ScraperBase
+from src.services.leads import LeadsService
 
 TWOCAPTCHA_API_KEY = os.getenv("TWOCAPTCHA_API_KEY")
 
@@ -148,27 +149,35 @@ class KansasScraper(ScraperBase):
             return datetime.strptime(date_str, "%m/%d/%Y")
 
     def split_full_name(self, name):
-        # Use regular expression to split on space, comma, hyphen, or period.
-        parts = re.split(r"[\s,\-\.]+", name)
-
         # Prepare variables for first, middle, and last names
         first_name = middle_name = last_name = ""
 
-        if len(parts) > 2:
-            first_name = parts[0]
-            middle_name = " ".join(parts[1:-1])
-            last_name = parts[-1]
-        elif len(parts) == 2:
-            first_name, last_name = parts
-        elif len(parts) == 1:
-            first_name = parts[0]
+        # Use regular expression to split on space, comma, hyphen, or period.
+        parts = re.split(r"[,]+", name)
+        if len(parts) > 1:
+            last_name = parts[0]
+
+            # Remove the first space from the second part
+            second_part = parts[1].lstrip()
+            second_part = re.split(r"[\s]+", second_part)
+
+            if len(second_part) > 1:
+                first_name = second_part[0]
+                middle_name = second_part[1]
+
+            else:
+                first_name = second_part[0]
 
         return first_name, middle_name, last_name
 
     async def init_browser(self):
         console.log("Initation of Browser...")
         pw = await async_playwright().start()
-        self.browser = await pw.chromium.launch(headless=False)
+        # Proxy 9090
+        self.browser = await pw.chromium.launch(
+            headless=False,
+            # args=["--proxy-server=socks5://localhost:9090"]
+        )
         context = await self.browser.new_context()
         self.page = await context.new_page()
         self.url = "https://prodportal.kscourts.org/ProdPortal/"
@@ -578,12 +587,19 @@ class KansasScraper(ScraperBase):
 
         case_dict2 = {
             "court_id": court_id,
+            "court_code": court_id,
             "filing_date": filing_date,
-            "offense_date": offense_date,
+            "case_date": offense_date,
             "city": city,
             "charges": charges,
+            "charges_description": (
+                charges[0]["offense_description"] if charges else None
+            ),
             "case_type": case_type,
             "case_status": case_status,
+            "status": "new",
+            "state": "KS",
+            "source": "kansas_courts",
         }
 
         case_dict = case_dict1.copy()
@@ -602,13 +618,29 @@ class KansasScraper(ScraperBase):
         await self.init_browser()
         await self.singin(user_name, password)
 
-        for city_code, last_case_id in self.state.items():
+        for city_code, last_case_id in sorted(
+            self.state.items(), key=lambda x: x[1], reverse=True
+        ):
             not_found_count = 0
 
-            while not_found_count < 10:
+            if last_case_id <= 500 and last_case_id == 0:
+                last_case_id = 500
+            consecutive_errors = 0
+
+            while not_found_count < 4:
                 current_date = datetime.now().strftime("%Y")
                 case_id = f"{city_code}-{current_date}-TR-{last_case_id:06d}"
-                output = await self.scrape_single(case_id)
+                # case_id = "BT-2024-TR-000010"
+                try:
+                    output = await self.scrape_single(case_id)
+                except Exception:
+                    console.log("issue with the scraping")
+                    consecutive_errors += 1
+                    await asyncio.sleep(60)
+
+                    if consecutive_errors >= 10:
+                        console.log("halting scraping")
+                        break
 
                 if output is None:
                     not_found_count += 1
@@ -616,6 +648,9 @@ class KansasScraper(ScraperBase):
                     not_found_count = 0
 
                 last_case_id += 1
+
+                if not_found_count == 5 and last_case_id == 505:
+                    last_case_id = 250
 
                 # Wait for 1 second
                 await asyncio.sleep(1)
@@ -627,15 +662,13 @@ class KansasScraper(ScraperBase):
         await self.browser.close()
 
     async def scrape_single(self, case_id):
-        case_dict = await self.get_case_detail(case_id)
-        if not case_dict:
-            console.log(f"Case {case_id} not found.")
-            return None
-        case_id = case_dict.get("case_id")
-
-        if self.check_if_exists(case_id):
+        if self.check_if_exists(case_id) and False:
             console.log(f"Case {case_id} already exists. Skipping...")
         else:
+            case_dict = await self.get_case_detail(case_id)
+            if not case_dict:
+                console.log(f"Case {case_id} not found.")
+                return None
             console.log(f"Inserting case {case_id}...")
             self.insert_case(case_dict)
             self.insert_lead(case_dict)
@@ -648,8 +681,35 @@ if __name__ == "__main__":
         "user_name": "Smahmudlaw@gmail.com",
         "password": "Shawn1993!",
     }
+    from src.services.cases import get_single_case
 
     kansasscraper = KansasScraper()
+
+    # ls = LeadsService()
+    # ls_list = ls.get_items(status="new")
+    # for ls_single in ls_list:
+    #     if (
+    #         ls_single.case_id is not None
+    #         and "2024-TR" in ls_single.case_id
+    #         and ls_single.state is None
+    #     ) or ls_single.state == "KS":
+    #         case_id = ls_single.case_id
+    #         case_data = get_single_case(case_id)
+    #         # Update court_code with court_id and state
+    #         ls.patch_item(
+    #             ls_single.id,
+    #             {
+    #                 "court_code": case_data.court_id,
+    #                 "state": "KS",
+    #                 "case_date": case_data.case_date or case_data.filing_date,
+    #                 "charges_description": (
+    #                     case_data.charges[0]["offense_description"]
+    #                     if case_data.charges
+    #                     else None
+    #                 ),
+    #             },
+    #         )
+    #     pass
 
     asyncio.run(kansasscraper.scrape(search_parameters))
     console.log("Done running", __file__, ".")

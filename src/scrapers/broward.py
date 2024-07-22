@@ -1,16 +1,20 @@
-import os
+""" Scraper for Broward County Court """
 import asyncio
 import re
+import os
+
 from playwright.async_api import async_playwright, TimeoutError
 from twocaptcha import TwoCaptcha
 from urllib.parse import urlparse, parse_qs
 from datetime import datetime
 from rich.console import Console
+from dotenv import load_dotenv
 
 from src.models.cases import Case
 from src.models.leads import Lead
 from src.scrapers.base.scraper_base import ScraperBase
 
+load_dotenv()
 TWOCAPTCHA_API_KEY = os.getenv('TWOCAPTCHA_API_KEY')
 console = Console()
 
@@ -24,54 +28,64 @@ class BrowardScraper(ScraperBase):
         self.url = "https://www.browardclerk.org/Web2"
     
     def split_full_name(self, name):
-        parts = re.split(r'[\s,\-\.]+', name)
-        first_name, middle_name, last_name = '', '', ''
-        
-        if len(parts) > 2:
-            first_name, middle_name, last_name = parts[0], ' '.join(parts[1:-1]), parts[-1]
-        elif len(parts) == 2:
-            first_name, last_name = parts[0], parts[1]
-        elif len(parts) == 1:
-            first_name = parts[0]
+        # Prepare variables for first, middle, and last names
+        first_name = middle_name = last_name = ""
+
+        # Use regular expression to split on space, comma, hyphen, or period.
+        parts = re.split(r"[,]+", name)
+        if len(parts) > 1:
+            last_name = parts[0]
+
+            # Remove the first space from the second part
+            second_part = parts[1].lstrip()
+            second_part = re.split(r"[\s]+", second_part)
+
+            if len(second_part) > 1:
+                first_name = second_part[0]
+                middle_name = second_part[1]
+
+            else:
+                first_name = second_part[0]
 
         return first_name, middle_name, last_name
 
-    def parse_full_address(self, full_address):
-        pattern = re.compile(
-            r'^(?P<address_line_1>[\w\s\#,\.-]+?)[\s,]+'
-            r'(?P<address_city>[A-Za-z\s]+?)[\s,]+'
-            r'(?P<address_state_code>[A-Z]{2})?[\s,]*'
-            r'(?P<address_zip>\d{5}(-\d{4})?|[A-Z0-9 ]{6,10})?$'
-        )
-        match = pattern.match(full_address.strip())
+    def parse_full_address(self, address_string):  
+        address_info = {"address_line_1": 'N/A', "address_city": 'N/A', "address_state_code": 'N/A', "address_zip": 'N/A'}  
 
-        if match:
-            return (
-                match.group('address_line_1').strip() if match.group('address_line_1') else "",
-                match.group('address_city').strip() if match.group('address_city') else "",
-                match.group('address_state_code').strip() if match.group('address_state_code') else "",
-                match.group('address_zip').strip() if match.group('address_zip') else "",
-            )
-        
-        # Fallback parsing for non-matching addresses
-        address_line_1, address_city, address_state_code, address_zip = "", "", "", ""
-        address_part = re.match(r'^(.*?)[\s,]{2}', full_address)
-        city_part = re.search(r',\s*([A-Za-z\s]+)\s*,?\s*[A-Z0-9]*', full_address)
-        state_zip_part = re.search(r'([A-Z]{2})?\s*(\d{5}(-\d{4})?|[A-Z0-9 ]{6,10})$', full_address.strip())
+        if address_string:  
+            # Split components based on comma  
+            address_parts = [part.strip() for part in address_string.split(',')]  
 
-        if address_part:
-            address_line_1 = address_part.group(1).strip()
-        if city_part:
-            address_city = city_part.group(1).strip()
-        if state_zip_part:
-            state_part, zip_part = state_zip_part.group(1), state_zip_part.group(2)
-            if state_part:
-                address_state_code = state_part.strip()
-            if zip_part:
-                address_zip = zip_part.strip()
+            # Find zip by looking for a group of 5 digits  
+            zip_search = re.search(r'(\b\d{5}\b)', address_string)  
+            if zip_search:  
+                address_info["address_zip"] = zip_search.group(0)  
+                # remove zip from address_parts if found  
+                for i, part in enumerate(address_parts):  
+                    if address_info["address_zip"] in part:  
+                        address_parts[i] = re.sub(address_info["address_zip"], '', part).strip()  
 
-        return address_line_1, address_city, address_state_code, address_zip
+            # Find state by looking for a group of 2 letters surrounded by whitespace or at start/end of string  
+            state_search = re.search(r'(^|(?<=\s))([A-Z]{2})($|(?=\s))', address_string)  
+            if state_search:  
+                address_info["address_state_code"] = state_search.group(0)  
+                # remove state from address_parts if found  
+                for i, part in enumerate(address_parts):  
+                    if address_info["address_state_code"] in part:  
+                        address_parts[i] = re.sub(address_info["address_state_code"], '', part).strip()  
 
+            # If still we have 2 parts assume they are address and city  
+            if len(address_parts) == 2:  
+                address_info["address_line_1"], address_info["address_city"] = address_parts  
+
+            elif len(address_parts) == 1 and ' ' in address_parts[0]:  # If we are left with a single part containing a space, guess it might address line and city  
+                address_info["address_line_1"], address_info["address_city"] = address_parts[0].rsplit(' ', 1)  # separates last word assuming it might be city  
+
+            elif len(address_parts) == 1:  # assume this is the city if only one part left  
+                address_info["address_city"] = address_parts[0]  
+
+        return address_info["address_line_1"], address_info["address_city"], address_info["address_state_code"], address_info["address_zip"]
+      
     async def get_site_key(self):
         iframe = await self.page.query_selector('iframe[title="reCAPTCHA"]')
         iframe_src = await iframe.get_attribute('src')
@@ -82,30 +96,42 @@ class BrowardScraper(ScraperBase):
     async def init_browser(self):
         console.log("Initiating Browser...")
         pw = await async_playwright().start()
-        self.browser = await pw.chromium.launch(headless=False)
+        # Proxy 9090
+        self.browser = await pw.chromium.launch(
+            headless=True,
+            # args=["--proxy-server=socks5://localhost:9090"]
+        )
         context = await self.browser.new_context()
         self.page = await context.new_page()
         await self.page.goto(self.url)
 
     async def solve_captcha(self):
-        site_key = await self.get_site_key()
-        response = self.solver.recaptcha(sitekey=site_key, url=self.url)
-        return response['code']
+        recaptcha_element = await self.page.query_selector('#RecaptchaField3')
+        if recaptcha_element:
+            site_key = await self.get_site_key()
+            response = self.solver.recaptcha(
+                sitekey=site_key,
+                url=self.url
+            )
+            code = response['code']
+            response_textarea = await recaptcha_element.query_selector('#g-recaptcha-response-2')
+            if response_textarea:
+                await response_textarea.evaluate('el => el.value = "{}"'.format(code))
+            else:
+                print("The 'g-recaptcha-response' textarea was not found.")
 
-    async def input_captcha_code(self, captcha_code):
-        recaptcha_element = await self.page.query_selector('#g-recaptcha-response')
-        await recaptcha_element.evaluate(f'el => el.value = "{captcha_code}"')
-        submit_button = await self.page.query_selector('#CaseNumberSearchResults')
-        await submit_button.click()
+            submit_button = await self.page.query_selector('#CaseNumberSearchResults')
+            if submit_button:
+                await submit_button.click()
+            else:
+                print("The 'submit' button was not found.")
 
     async def input_case_id(self, case_id):
         await self.page.goto(self.url)
         await self.page.click("a:has-text('Case Number')")
         case_number_element = await self.page.query_selector('#CaseNumber')
         await case_number_element.fill(f"{case_id}")
-
-        captcha_code = await self.solve_captcha()
-        await self.input_captcha_code(captcha_code)
+        await self.solve_captcha()
 
     async def get_court_id(self):
         court_code = "FL_Broward"
@@ -117,14 +143,21 @@ class BrowardScraper(ScraperBase):
                 "code": court_code,
                 "county_code": county_code,
                 "enabled": True,
-                "name": f"Arkansas, {county_name}",
+                "name": f"Florida, {county_name}",
                 "state": "FL",
                 "type": "TI",
+                "source": "FL_Broward county",
+                "county": "browawrd"
             }
             self.insert_court(self.courts[court_code])
 
         return court_code
 
+    async def get_charges_description(self):
+        element = await self.page.query_selector("#tblCharges tbody tr td:nth-child(4) b")  
+        charges_description = await element.inner_text()
+        return charges_description  
+    
     async def get_charges(self):
         return await self.page.evaluate('''() => {
             let results = [];
@@ -225,9 +258,21 @@ class BrowardScraper(ScraperBase):
             dob_element = await self.page.query_selector('td >> text="DOB:"')
             dob = await dob_element.evaluate('(element) => element.nextSibling.nodeValue.trim()')
             date_components = dob.split("/")
-            birth_date, year_of_birth = f"{date_components[0]}/{date_components[1]}", date_components[2]
+            birth_date, year_of_birth = dob, date_components[2]
         except Exception:
             birth_date, year_of_birth = "", ""
+        
+        try:
+            gender_element = await self.page.query_selector('td >> text="Gender:"')
+            sex = await gender_element.evaluate('(element) => element.nextSibling.nodeValue.trim()')
+        except Exception:
+            gender = ""
+
+        try:
+            race_element = await self.page.query_selector('td >> text="Race:"')
+            race = await race_element.evaluate('(element) => element.nextSibling.nodeValue.trim()')
+        except Exception:
+            race = ""
 
         try:
             address = await self.get_address()
@@ -250,14 +295,21 @@ class BrowardScraper(ScraperBase):
         except:
             charges = []
 
+        try: 
+            charges_description = await self.get_charges_description()
+        except:
+            charges_description = ""
+
         case_dict = {
                 "case_id": case_id,
                 "court_id": court_code,
+                "court_code": court_code,
                 "address_line_1": address_line_1,
                 "address_city": address_city,
                 "address_state_code": address_state_code,
                 "address_zip": address_zip,
                 "filing_date": filing_date,
+                "case_date": filing_date,
                 "offense_date": offense_date,
                 "first_name": first_name,
                 "middle_name": middle_name,
@@ -265,22 +317,33 @@ class BrowardScraper(ScraperBase):
                 "gender": gender,
                 "birth_date": birth_date,
                 "year_of_birth": year_of_birth,
-                "charges": charges
+                "charges": charges,
+                "charges_description": charges_description,
+                "race": race,
+                "sex": sex,
+                "state": "FL",
+                "status": "new"
             }
         return case_dict
 
     async def scrape(self):
         last_case_id_nb = self.state.get("last_case_id_nb", 1500)
+        last_case_id_nb = int(last_case_id_nb)
         case_id_nb = last_case_id_nb
         not_found_count = 0
         current_year = datetime.now().year
 
         await self.init_browser()  
 
-        while not_found_count <= 10:
+        while True:
             try:
+                if not_found_count > 10:
+                    console.log("Too many case ids not found. Ending the search.")
+                    break
+
+                case_id_nb = last_case_id_nb
                 case_id_full = f"{str(current_year)[2:]}{str(case_id_nb).zfill(6)}TI10A"
-                case_id_nb += 1
+                last_case_id_nb += 1
 
                 console.log(f"Current searching case_id-{case_id_full}")
 
@@ -289,23 +352,27 @@ class BrowardScraper(ScraperBase):
                     continue
 
                 await self.input_case_id(case_id_full)
+
                 case_details = await self.detail_search(case_id_full)
                 if not case_details:
                     console.log(f"Case {case_id_full} not found. Skipping ...")
                     not_found_count += 1
                     continue
-
-                last_case_id_nb = case_id_nb
+                console.log("case_details", case_details)
+                not_found_count = 0
                 console.log(f"Inserting case {case_id_full}...")
-                self.insert_case(case_details)
+                self.insert_case(case_details)        
+                console.log(
+                    f"Inserted case {case_id_full}"
+                )
                 self.insert_lead(case_details)
+                console.log(
+                    f"Inserted lead {case_id_full}"
+                )
                 self.state["last_case_id_nb"] = last_case_id_nb
                 self.update_state()
-            except TimeoutError:
-                console.log("Timeout error. Retrying...")
-                await self.page.wait_for_timeout(2000)
             except Exception as e:
-                console.log(f"Failed to insert case - {e}")
+                console.log(f"Failed to scaraping - {e}")
                 continue
 
 if __name__ == "__main__":

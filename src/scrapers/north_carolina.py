@@ -1,36 +1,46 @@
+""" Scraper for North Carolina Court """
+import asyncio
 import requests
+import os
 import pandas as pd
+
 from playwright.async_api import async_playwright, TimeoutError
 from urllib.parse import urlparse, parse_qs
 from datetime import date, datetime, time
 from tempfile import NamedTemporaryFile
 from rich.console import Console
-from rich.progress import Progress
 
 from models.cases import Case
 from models.leads import Lead
 from src.scrapers.base.scraper_base import ScraperBase
 
-import os
 from twocaptcha import TwoCaptcha
+
 TWOCAPTCHA_API_KEY = os.getenv('TWOCAPTCHA_API_KEY')
 
 console = Console()
+
 class NorthCarolinaScraper(ScraperBase):
     solver = TwoCaptcha(TWOCAPTCHA_API_KEY)
 
     async def init_browser(self):
         console.log("Initation of Browser...")
         pw = await async_playwright().start()
-        self.browser = await pw.chromium.launch(headless=False)
+        # Proxy 9090
+        self.browser = await pw.chromium.launch(
+            headless=True,
+            # args=["--proxy-server=socks5://localhost:9090"]
+        )
+
         context = await self.browser.new_context()
         self.page = await context.new_page()
         await self.page.goto(self.url)
     
-    async def search_by_case_number(self, case_number, county_number):
+    async def search_by_case_number(self, case_number):
+        await self.page.goto(self.url)
         console.log("Submitting Search Query...")
         search_input_element = await self.page.query_selector("#caseCriteria_SearchCriteria")
-        await search_input_element.fill(f"{case_number}-{county_number}")
+        await search_input_element.fill(f"{case_number}-500")
 
         recaptcha_element = await self.page.query_selector('div.g-recaptcha')
         if recaptcha_element:
@@ -67,6 +77,7 @@ class NorthCarolinaScraper(ScraperBase):
                 "key": key
             }
         )
+
         case_detail = res.json().get("CaseSummaryHeader")
         case_id = case_detail.get("CaseNumber")
         court_id = str(case_detail.get("NodeId"))
@@ -97,6 +108,7 @@ class NorthCarolinaScraper(ScraperBase):
         if res.status_code != 200:
             return {}
         charges_info = res.json().get("Charges")
+
         if len(charges_info) == 0:
             return {}
         
@@ -128,6 +140,7 @@ class NorthCarolinaScraper(ScraperBase):
 
         if res.status_code != 200:
             return {}
+        
         parties = res.json().get("Parties")
         if len(parties) == 0:
             return {}
@@ -139,6 +152,7 @@ class NorthCarolinaScraper(ScraperBase):
             }
             for party in parties
         ]
+
         defendant = [party for party in parties if party.get("ConnectionType") == "Defendant"][0]
 
         return {
@@ -146,7 +160,8 @@ class NorthCarolinaScraper(ScraperBase):
             "first_name": defendant.get("NameFirst"),
             "last_name": defendant.get("NameLast"),
             "middle_name": defendant.get("NameMid"),
-            "gender": defendant.get("Gender"),
+            "sex": defendant.get("Gender"),
+            "race": defendant.get("Race"),
             "birth_date": defendant.get("DateofBirth"),
             "address_line_1": defendant.get("Addresses")[0].get("AddressLine1"),
             "address_city": defendant.get("Addresses")[0].get("City"),
@@ -154,39 +169,82 @@ class NorthCarolinaScraper(ScraperBase):
             "address_state_code": defendant.get("Addresses")[0].get("State"),
         }
     
-    async def scrape(self, search_parameters):
-        case_number = search_parameters.get("case_number")
-        county_number = search_parameters.get("county_number")
+    async def get_case_details(self, key):
+        basic_info = self.get_basic_info(key)
+        charges_info = self.get_charges_info(key)
+        parties_info = self.get_parties_info(key)
+        
+        case_dict = {
+            **basic_info,
+            **charges_info,
+            **parties_info
+        }
+
+        case_dict["court_code"] =case_dict["court_id"]
+        case_dict["status"] = "new"
+        case_dict["case_date"] = case_dict["court_id"]
+        case_dict["charges_description"] = ", ".join([charge.get("charge_desc") for charge in case_dict.get("charges")])
+        case_dict["state"] = "NC"
+        case_dict["source"] = "North carolina state"
+        if case_dict["birth_date"]:
+            try:
+                case_dict['year_of_birth'] = case_dict['birth_date'].split("/")[0]  
+            except:
+                case_dict['year_of_birth'] = None
+        return case_dict
+    
+    async def scrape(self):
+        last_case_id_nb = self.state.get("last_case_id_nb", 1)
+        case_id_nb = last_case_id_nb
+        not_found_count = 0
+        current_year = datetime.now().year
         
         self.url = "https://portal-nc.tylertech.cloud/Portal/Home/Dashboard/29"
         await self.init_browser()
-        case_keys = await self.search_by_case_number(case_number, county_number)
 
-        console.log("Extracting Case Information...")
-        
-        for key in case_keys:
-            basic_info = self.get_basic_info(key)
-            charges_info = self.get_charges_info(key)
-            parties_info = self.get_parties_info(key)
-            
-            case_dict = {
-                **basic_info,
-                **charges_info,
-                **parties_info
-            }
-            with Progress() as progress:
-                task = progress.add_task(
-                    "[red]Inserting cases...", total=len(case_dict)
-                )
+        while True:
+            try:
+                if not_found_count > 10:
+                    console.log("Too many case_id not found. Ending the search.")
+                    break     
+
+                case_id_nb = last_case_id_nb
+                case_id_full = f"{str(current_year)[2:]}CR{str(case_id_nb).zfill(6)}"
+                last_case_id_nb += 1
+                self.state["last_case_id_nb"] = last_case_id_nb
+                # self.update_state()
+
+                console.log(f"Current searching case_id-{case_id_full}")
+
+                if self.check_if_exists(case_id_full):
+                    console.log(f"Case {case_id_full} already exists. Skipping ...")
+                    continue
+
+                case_keys = await self.search_by_case_number(case_id_full)
+
+                if not case_keys:
+                    console.log(f"Case {case_id_full} not found. Skipping ...")
+                    not_found_count += 1
+                    continue
+                not_found_count = 0
+
+                console.log("Extracting Case Information...")
                 
-                case_id = case_dict.get("case_id")
-                if self.check_if_exists(case_id):
-                    console.log(
-                        f"Case {case_id} already exists. Skipping..."
-                    )
-                    progress.update(task, advance=1)
-                else:
+                for key in case_keys:
+                    case_dict = await self.get_case_details(key)
                     self.insert_case(case_dict)
+                    console.log(
+                        f"Inserted case {case_id_full}"
+                    )
                     self.insert_lead(case_dict)
-        
-        await self.browser.close()
+                    console.log(
+                        f"Inserted lead {case_id_full}"
+                    )
+            except Exception as e:
+                console.log(f"Failed to scaraping - {e}")
+                continue
+
+if __name__ == "__main__":
+    ncscraper = NorthCarolinaScraper()
+    asyncio.run(ncscraper.scrape())
+    console.log("Done running", __file__, ".")

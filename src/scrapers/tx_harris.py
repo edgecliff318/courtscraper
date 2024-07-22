@@ -7,8 +7,6 @@ from bs4 import BeautifulSoup
 from rich.console import Console
 from rich.progress import Progress
 
-from src.models.cases import Case
-from src.models.leads import Lead
 from src.scrapers.base.scraper_base import ScraperBase
 
 console = Console()
@@ -214,4 +212,4 @@ class TXHarrisCountyScraper(ScraperBase):
 
 if __name__ == "__main__":
     txscraper = TXHarrisCountyScraper()
-    txscraper.scrape({"start_date": "07/14/2024", "end_date": "07/14/2024"})
+    txscraper.scrape({"start_date": "07/21/2024", "end_date": "07/21/2024"})
