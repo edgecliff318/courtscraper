@@ -209,6 +209,22 @@ async def retrieve_leads_async(
     error_count = 0
 
     while True:
+        # Run the loop at random second modulo 25 seconds
+        username_mapping = {
+            "schcoo1": 0,
+            "SMeyer24": 3,
+            "mahsam1": 6,
+            "branic1": 9,
+            "johnic1": 12,
+        }
+
+        # Get current time in seconds
+        current_time = datetime.datetime.now().second
+
+        while current_time % 15 != username_mapping.get(username):
+            time.sleep(0.2)
+            current_time = datetime.datetime.now().second
+
         lead = leads_service.get_last_lead(status="prioritized")
         prioritized = True
         if lead is None:
