@@ -340,7 +340,7 @@ if __name__ == "__main__":
     try:
         console.log("Initializing Pennsylvania Scraper...")
         scraper = PennsylvaniaScraper(
-            start_date="2024-07-12", end_date="2024-07-14"
+            start_date="2024-07-20", end_date="2024-07-21"
         )
         console.log("Pennsylvania Scraper initialized successfully.")
 

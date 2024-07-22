@@ -11,9 +11,22 @@ from rich.console import Console
 from src.loader.leads import CaseNet
 from src.models import cases as cases_model
 from src.models import leads as leads_model
+from src.scrapers.arkansas import ArkansasScraper
+from src.scrapers.broward import BrowardScraper
 from src.scrapers.il_cook import IlCook
+from src.scrapers.indiana import IndianaScraper
+from src.scrapers.kansas import KansasScraper
+from src.scrapers.ks_johnson import KSJohnson
+from src.scrapers.minnesota import MinnesotaScraper
 from src.scrapers.mo_mshp import MOHighwayPatrol
+from src.scrapers.north_carolina import NorthCarolinaScraper
+from src.scrapers.north_carolina_superior import ScraperNCSuperior
+from src.scrapers.oklahoma import OklahomaScraper
+from src.scrapers.palm_beach import PalmBeachScraper
 from src.scrapers.tx_harris import TXHarrisCountyScraper
+from src.scrapers.tx_travis import ScraperTXTravisSuperior
+from src.scrapers.va_courts import VirginiaScraper
+from src.scrapers.west_virginia import WestVirginiaScraper
 from src.services import cases as cases_service
 from src.services import leads as leads_service
 from src.services.courts import get_courts
@@ -225,6 +238,118 @@ def retrieve_cases_tx_harris():
     )
 
 
+def retrieve_cases_arkansas():
+    console.log("Arkansas Scraper")
+    arkansasscraper = ArkansasScraper()
+    console.log("Retrieving the configuration from Firebase")
+    arkansasscraper.scrape()
+
+
+def retrieve_cases_indiana():
+    console.log("Indiana State Scraper")
+    indianascraper = IndianaScraper()
+    filed_date = "04/12/2024"
+    search_parameters = {"filed_date": filed_date}
+    indianascraper.scrape(search_parameters)
+
+
+def retrieve_cases_oklahoma():
+    console.log("Oklahoma Scraper")
+    oklahomascraper = OklahomaScraper()
+    filed_date = "03/25/2024"
+    oklahomascraper.scrape({"filed_date": filed_date})
+
+
+def retrieve_cases_tx_travis():
+    console.log("Travis County, Tx State Scraper")
+    travissuperiorscraper = ScraperTXTravisSuperior()
+    search_parameters = {
+        "firstName": "John",
+        "lastName": "Washington",
+        "dob": None,
+    }
+    travissuperiorscraper.scrape(search_parameters)
+
+
+def retrieve_cases_nc_superior():
+    console.log("NC Superior Scraper")
+    ncsuperiorscraper = ScraperNCSuperior()
+    search_parameters = {
+        "firstName": "Adam",
+        "lastName": "Smith",
+        "dob": "12/19/1967",
+    }
+    ncsuperiorscraper.scrape(search_parameters)
+
+
+async def retrieve_cases_minnesota():
+    console.log("Minnesota State Scraper")
+    minnesotascraper = MinnesotaScraper()
+    search_parameters = {"case_id": "27-VB-24-69261"}
+    await minnesotascraper.scrape(search_parameters)
+
+
+async def retrieve_cases_palm_beach():
+    console.log("Palm Beach County Scraper")
+    palmbeachscraper = PalmBeachScraper()
+    search_parameters = {
+        "court_types": "Criminal Traffic",
+        "offense_begin_date": "05/05/2024",
+    }
+    await palmbeachscraper.scrape(search_parameters)
+
+
+async def retrieve_cases_broward():
+    console.log("Broward County, Florida Scraper")
+    browardscraper = BrowardScraper()
+    await browardscraper.scrape()
+
+
+async def retrieve_cases_district_court():
+    console.log("District Court Scraper")
+    VirginiaScraper = VirginiaScraper()
+    await VirginiaScraper.scrape()
+
+
+async def retrieve_cases_west_virginia():
+    console.log("West Virginia Scraper")
+    westvirginiascraper = WestVirginiaScraper()
+    name = "AB"
+    await westvirginiascraper.scrape({"name": name})
+
+
+async def retrieve_cases_kansas():
+    console.log("Kansas Scraper")
+    kansasscraper = KansasScraper()
+    search_parameters = {
+        "user_name": "Smahmudlaw@gmail.com",
+        "password": "Shawn1993!",
+        "case_id": "WY-2024-TR-001995",
+    }
+    await kansasscraper.scrape(search_parameters)
+
+
+async def retrieve_cases_north_carolina():
+    console.log("North Carolina State Scraper")
+    northcarolinascraper = NorthCarolinaScraper()
+    search_parammeters = {"case_number": "24CR000001", "county_number": "500"}
+    await northcarolinascraper.scrape(search_parammeters)
+
+
+async def retrieve_cases_minnesota():
+    console.log("Minnesota State Scraper")
+    minnesotascraper = MinnesotaScraper()
+    search_parameters = {"case_id": "27-VB-24-69261"}
+    await minnesotascraper.scrape(search_parameters)
+
+
+async def retrieve_cases_johnson():
+    console.log("Johnson County, KS State Scraper")
+    johnsonscraper = KSJohnson()
+    search_parameters = {"user_name": "30275", "password": "TTDpro2024TTD!"}
+    await johnsonscraper.scrape(search_parameters)
+
+
 def retrieve_cases(source="mo_case_net"):
     """
     Scrap the casenet website
@@ -242,8 +367,47 @@ def retrieve_cases(source="mo_case_net"):
         console.log("MO Case Net Scraper - Criminal")
         retrieve_cases_mo_casenet("Criminal")
     elif source == "tx_harris":
-        console.log("TX Harris County Scraper")
+        console.log("Harris County, Texas Scraper")
         retrieve_cases_tx_harris()
+    elif source == "arkansas":
+        console.log("Arkansas State Scraper")
+        retrieve_cases_arkansas()
+    elif source == "oklahoma":
+        console.log("Oklahoma State Scraper")
+        retrieve_cases_oklahoma()
+    elif source == "tx_travis":
+        console.log("Travis County, Texas State Scraper")
+        retrieve_cases_tx_travis()
+    elif source == "nc_superior":
+        console.log("Travis County, Texas State Scraper")
+        retrieve_cases_nc_superior()
+    elif source == "west_virginia":
+        console.log("West_Virginia State Scraper")
+        asyncio.run(retrieve_cases_west_virginia())
+    elif source == "broward":
+        console.log("Broward County Scraper")
+        asyncio.run(retrieve_cases_broward())
+    elif source == "kansas":
+        console.log("Kansas State Scraper")
+        asyncio.run(retrieve_cases_kansas())
+    elif source == "district_court":
+        console.log("District Court Scraper")
+        asyncio.run(retrieve_cases_district_court())
+    elif source == "indiana":
+        console.log("Indiana Scraper")
+        asyncio.run(retrieve_cases_indiana())
+    elif source == "palm_beach":
+        console.log("Palm Beach Scraper")
+        asyncio.run(retrieve_cases_palm_beach())
+    elif source == "north_carolina":
+        console.log("North Carolina Scraper")
+        asyncio.run(retrieve_cases_north_carolina())
+    elif source == "minnesota":
+        console.log("Minnesota Scraper")
+        asyncio.run(retrieve_cases_minnesota())
+    elif source == "ks_johnson":
+        console.log("Johnson County, Kansas State Scraper")
+        asyncio.run(retrieve_cases_johnson())
 
 
 if __name__ == "__main__":

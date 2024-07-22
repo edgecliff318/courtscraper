@@ -1,302 +1,250 @@
-""" Scraper for North Carolina Superior Court """
-import json
-import os.path
-import sys
-
+""" Scraper for North Carolina Court """
+import asyncio
 import requests
-from bs4 import BeautifulSoup
+import os
+import pandas as pd
 
-from src.scrapers.base import InitializedSession, NameNormalizer, ScraperBase
+from playwright.async_api import async_playwright, TimeoutError
+from urllib.parse import urlparse, parse_qs
+from datetime import date, datetime, time
+from tempfile import NamedTemporaryFile
+from rich.console import Console
 
-sys.path.append(
-    os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
-    + "/libraries"
-)
+from models.cases import Case
+from models.leads import Lead
+from src.scrapers.base.scraper_base import ScraperBase
 
-sys.path.append(
-    os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
-)
+from twocaptcha import TwoCaptcha
 
+TWOCAPTCHA_API_KEY = os.getenv('TWOCAPTCHA_API_KEY')
 
-class ScraperNCSuperior(ScraperBase):
-    """NC Superior Court scraper"""
+console = Console()
 
-    HEADERS = {"Content-Type": "application/x-www-form-urlencoded"}
-    BASE_URL = "https://webapps.doc.state.nc.us/opi/"
-    SEARCH_RESULT_URL = (
-        "https://webapps.doc.state.nc.us/opi/offendersearch.do?method=list"
-    )
-    SEARCH_URL = (
-        "https://webapps.doc.state.nc.us/opi/offendersearch.do?method=view"
-    )
+class NorthCarolinaScraper(ScraperBase):
+    solver = TwoCaptcha(TWOCAPTCHA_API_KEY)
 
-    def scrape(self, search_parameters):
-        """Entry point for lambda.
-
-        Query should look like this:
-
-        {
-            "lastName": "Smith",
-            "firstName": "Adam",
-            "dob": "12/19/1967"
-        }
-        https://<endpoint>?queryStringParameters
-        """
-        last_name = search_parameters["lastName"]
-        first_name = search_parameters["firstName"]
-        dob = search_parameters["dob"]
-        return self.search_in_nc(first_name, last_name, dob)
-
-    GLOBAL_SESSION = InitializedSession(headers=HEADERS)
-
-    def parse_offender_information(self, soup):
-        """Get offender information by parsing rendered HTML page
-
-        This function returns an object.
-        """
-        offender_information = {}
-        offender_informaion_table = soup.find(
-            "table", class_="displaydatatable"
+    async def init_browser(self):
+        console.log("Initation of Browser...")
+        pw = await async_playwright().start()
+        # Proxy 9090
+        self.browser = await pw.chromium.launch(
+            headless=True,
+            # args=["--proxy-server=socks5://localhost:9090"]
         )
-        if not offender_informaion_table:
-            return {}
-        for row in offender_informaion_table.findAll("tr"):
-            cells = row.findAll("td")
-            print(cells)
-            if len(cells) == 1 and "Printable Version" not in row.text.strip():
-                offender_information["Full Name"] = row.text.strip()
-            elif len(cells) == 2 and cells[0].text.strip() != "":
-                offender_information[cells[0].text.strip()] = cells[
-                    1
-                ].text.strip()
 
-        return offender_information
+        context = await self.browser.new_context()
+        self.page = await context.new_page()
+        await self.page.goto(self.url)
+    
+    async def search_by_case_number(self, case_number):
+        await self.page.goto(self.url)
+        console.log("Submitting Search Query...")
+        search_input_element = await self.page.query_selector("#caseCriteria_SearchCriteria")
+        await search_input_element.fill(f"{case_number}-500")
 
-    def parse_names_of_record(self, soup):
-        """Get names of record by parsing rendered HTML page
-
-        This function returns an array.
-        """
-        offender_names = []
-        offender_names_table = soup.find("table", class_="datainput")
-        if not offender_names_table:
-            return {}
-        for row in offender_names_table.findAll("tr"):
-            cells = row.findAll("td")
-            if row.has_key("class") and row["class"][0] != "tableRowHeader":
-                last_name = cells[0].text.strip()
-                suffix = cells[1].text.strip()
-                first_name = cells[2].text.strip()
-                middle_name = cells[3].text.strip()
-                name_type = cells[4].text.strip()
-                offender_names.append(
-                    {
-                        "last_name": last_name,
-                        "suffix": suffix,
-                        "first_name": first_name,
-                        "middle_name": middle_name,
-                        "name_type": name_type,
-                    }
-                )
-
-        return offender_names
-
-    def parse_sentence_table(self, table):
-        """Get sentence information by parsing rendered table element
-
-        This function returns an object.
-        """
-        sentence_information = {}
-        sentence_information_table = table.find(
-            "table", class_="innerdisplaytable"
-        )
-        if not sentence_information_table:
-            return {}
-        key = ""
-        for row in sentence_information_table.findAll("tr"):
-            if "align" in row.attrs and row.attrs["align"] == "center":
-                for cell in row.findAll("td"):
-                    if "align" in cell.attrs:
-                        if cell.attrs["align"] == "right":
-                            key = cell.text.strip()
-                        elif cell.attrs["align"] == "left" and key != "":
-                            sentence_information[key] = cell.text.strip()
-            elif row.find("td", class_="sentencepanel"):
-                data_table = row.find("table", class_="datainput")
-                sentence_information["commitments"] = []
-                for data_row in data_table.findAll("tr"):
-                    cells = data_row.findAll("td")
-                    if data_row.has_key("class") and (
-                        data_row["class"][0] == "tableRowOdd"
-                        or data_row["class"][0] == "tableRowEven"
-                    ):
-                        commitment = cells[0].text.strip()
-                        docket = cells[1].text.strip()
-                        offense = cells[2].text.strip()
-                        offense_date = cells[3].text.strip()
-                        commitment_type = cells[4].text.strip()
-                        class_code = cells[5].text.strip()
-                        sentence_information["commitments"].append(
-                            {
-                                "Commitment": commitment,
-                                "Docket#": docket,
-                                "Offense (Qualifier)": offense,
-                                "Offense Date": offense_date,
-                                "Type": commitment_type,
-                                "Sentencing Penalty Class Code": class_code,
-                            }
-                        )
-        return sentence_information
-
-    def parse_sentence_history(self, soup):
-        """Get sentence history by parsing rendered HTML page
-
-        This function returns an array.
-        """
-        offender_sentences = []
-
-        for sentence_table in soup.findAll(
-            "table", class_="sentencedisplaytable"
-        ):
-            offender_sentences.append(
-                self.parse_sentence_table(sentence_table)
+        recaptcha_element = await self.page.query_selector('div.g-recaptcha')
+        if recaptcha_element:
+            site_key = await recaptcha_element.get_attribute('data-sitekey')
+            response = self.solver.recaptcha(
+                sitekey=site_key,
+                url=self.url
             )
+            code = response['code']
+            response_textarea = await recaptcha_element.query_selector('textarea#g-recaptcha-response')
+            if response_textarea:
+                await response_textarea.evaluate('el => el.value = "{}"'.format(code))
+            else:
+                print("The 'g-recaptcha-response' textarea was not found.")
 
-        return offender_sentences
+        submit_button = await self.page.query_selector('input#btnSSSubmit')
+        if submit_button:
+            await submit_button.click()
+        else:
+            print("The 'btnSearch' button was not found.")
+        
+        await self.page.wait_for_selector("#CasesGrid", state="attached", timeout=10000)
+        
+        caselinks = await self.page.query_selector_all("a.caseLink")
+        case_keys = [await caselink.get_attribute("data-url") for caselink in caselinks]
+        case_keys = [parse_qs(urlparse(case_keys).query).get('id', [None])[0] for case_keys in case_keys]
 
-    def get_offender_detail(self, soup):
-        """Get every information of offender detail by parsing rendered HTML page
+        return case_keys
 
-        This function returns an object.
-        """
+    def get_basic_info(self, key):
+        res = requests.get(
+            url="https://portal-nc.tylertech.cloud/app/RegisterOfActionsService/CaseSummariesSlim",
+            params={
+                "key": key
+            }
+        )
+
+        case_detail = res.json().get("CaseSummaryHeader")
+        case_id = case_detail.get("CaseNumber")
+        court_id = str(case_detail.get("NodeId"))
+        filed_date = datetime.strptime(case_detail.get("FiledOn"), "%m/%d/%Y")if case_detail.get("FiledOn") else None
+        court_date = datetime.strptime( case_detail.get("AppearBy"), "%m/%d/%Y") if case_detail.get("AppearBy") else None
+        court_desc = case_detail.get("NodeName")
+        description = case_detail.get("Style")
+        judge = case_detail.get("Judge")
+
         return {
-            "offender_information": self.parse_offender_information(soup),
-            "names_of_record": self.parse_names_of_record(soup),
-            "sentence_history": self.parse_sentence_history(soup),
+            "case_id": case_id,
+            "court_id": court_id,
+            "filing_date": filed_date,
+            "court_date": court_date,
+            "court_desc": court_desc,
+            "description": description,
+            "judge": judge
         }
 
-    def parse_search_results(self, soup):
-        """Parse rendered HTML page for search result and get de-duped offenders
+    def get_charges_info(self, key):
+        res = requests.get(
+            url=f"https://portal-nc.tylertech.cloud/app/RegisterOfActionsService/Charges('{key}')",
+            params={
+                "mode": "portalembed"
+            }
+        )
+        
+        if res.status_code != 200:
+            return {}
+        charges_info = res.json().get("Charges")
 
-        This function returns an array.
-        """
-        offenders = []
-        offender_keys = []
-        offender_table = soup.find("table", class_="resultstable")
-        if not offender_table:
-            return []
-        offender_rows = offender_table.findAll("tr")
-        for offender_row in offender_rows:
-            cells = offender_row.findAll("td")
-            if offender_row.has_key("class") and (
-                offender_row["class"][0] == "tableRowOdd"
-                or offender_row["class"][0] == "tableRowEven"
-            ):
-                offender_number = cells[0].text.strip()
-                if offender_number in offender_keys:
-                    continue
-                offender_keys.append(offender_number)
-                last_name = cells[1].text.strip()
-                name_suffix = cells[2].text.strip()
-                first_name = cells[3].text.strip()
-                middle_name = cells[4].text.strip()
-                gender = cells[5].text.strip()
-                race = cells[6].text.strip()
-                birth_date = cells[7].text.strip()
-                age = cells[8].text.strip()
-                offender_url = ""
-                if cells[0].find("a"):
-                    offender_url = (
-                        self.BASE_URL + cells[0].find("a").attrs["href"]
-                    )
-                offenders.append(
-                    {
-                        "offender_number": offender_number,
-                        "last_name": last_name,
-                        "name_suffix": name_suffix,
-                        "first_name": first_name,
-                        "middle_name": middle_name,
-                        "gender": gender,
-                        "race": race,
-                        "birth_date": birth_date,
-                        "age": age,
-                        "offender_url": offender_url,
-                    }
-                )
-        return offenders
+        if len(charges_info) == 0:
+            return {}
+        
+        offense_date = datetime.strptime( charges_info[0].get("OffenseDate"), "%m/%d/%Y") if charges_info[0].get("OffenseDate") else None
+        charges = [
+            {
+                "charge_desc": charge.get("ChargeOffense").get("ChargeOffenseDescription"),
+                "degree": charge.get("ChargeOffense").get("Degree"),
+                "fine": charge.get("ChargeOffense").get("FineAmount"),
+                "statute": charge.get("ChargeOffense").get("Statute"),
+            }
+            for charge in charges_info
+        ]
 
-    def search_in_nc(self, first_name, last_name, dob):
-        """Scrape the web site using the given search criteria.
+        return {
+            "charges": charges, 
+            "offense_date": offense_date
+        }
+    
+    def get_parties_info(self, key):
+        res = requests.get(
+            url=f"https://portal-nc.tylertech.cloud/app/RegisterOfActionsService/Parties('{key}')",
+            params={
+                "mode": "portalembed",
+                "$top": 50,
+                "$skip": 0
+            }   
+        )
 
-        This function either returns an object with
-        a field called "result" which is an array of cases, or
-        an object with a field called "error" with a error string
-        e.g. { "result": [...] } or { "error": "..." }
-        """
+        if res.status_code != 200:
+            return {}
+        
+        parties = res.json().get("Parties")
+        if len(parties) == 0:
+            return {}
+        
+        participants = [
+            {
+                "role": party.get("ConnectionType"),
+                "name": party.get("FormattedName"),
+            }
+            for party in parties
+        ]
 
-        first_name = NameNormalizer(first_name).normalized()
-        last_name = NameNormalizer(last_name).normalized()
-        if dob:
-            dob = dob.strip()
+        defendant = [party for party in parties if party.get("ConnectionType") == "Defendant"][0]
 
-        try:
-            r = self.GLOBAL_SESSION.post(
-                self.SEARCH_RESULT_URL,
-                {
-                    "heightTotalInchesMinimum": "0",
-                    "heightTotalInchesMaximum": "0",
-                    "activeFilter": "1",
-                    "searchLastName": "Smith",
-                    "searchFirstName": "Adam",
-                    "searchMiddleName": "",
-                    "searchOffenderId": "",
-                    "searchGender": "",
-                    "searchRace": "",
-                    "ethnicity": "",
-                    "searchDOB": "12/19/1967",
-                    "searchDOBRange": "0",
-                    "ageMinimum": "",
-                    "ageMaximum": "",
-                },
-            )
-        except requests.ConnectionError as e:
-            print("Connection failure : " + str(e))
-            print("Verification with InsightFinder credentials Failed")
-            return {"error": str(e)}
-        soup = BeautifulSoup(r.text, features="html.parser")
+        return {
+            "participants": participants,
+            "first_name": defendant.get("NameFirst"),
+            "last_name": defendant.get("NameLast"),
+            "middle_name": defendant.get("NameMid"),
+            "sex": defendant.get("Gender"),
+            "race": defendant.get("Race"),
+            "birth_date": defendant.get("DateofBirth"),
+            "address_line_1": defendant.get("Addresses")[0].get("AddressLine1"),
+            "address_city": defendant.get("Addresses")[0].get("City"),
+            "address_zip": defendant.get("Addresses")[0].get("PostalCode"),
+            "address_state_code": defendant.get("Addresses")[0].get("State"),
+        }
+    
+    async def get_case_details(self, key):
+        basic_info = self.get_basic_info(key)
+        charges_info = self.get_charges_info(key)
+        parties_info = self.get_parties_info(key)
+        
+        case_dict = {
+            **basic_info,
+            **charges_info,
+            **parties_info
+        }
 
-        # parse html response and get the matched cases
-        offenders = self.parse_search_results(soup)
-        result = []
-        for offender in offenders:
+        case_dict["court_code"] =case_dict["court_id"]
+        case_dict["status"] = "new"
+        case_dict["case_date"] = case_dict["court_id"]
+        case_dict["charges_description"] = ", ".join([charge.get("charge_desc") for charge in case_dict.get("charges")])
+        case_dict["state"] = "NC"
+        case_dict["source"] = "North carolina state"
+        if case_dict["birth_date"]:
             try:
-                r = self.GLOBAL_SESSION.get(offender["offender_url"])
-                soup = BeautifulSoup(r.text, features="html.parser")
-                offender["detail"] = self.get_offender_detail(soup)
-            except requests.ConnectionError as e:
-                print("Connection failure : " + str(e))
-                print("Verification with InsightFinder credentials Failed")
-            result.append(offender)
-        return {"result": result}
-        # print(json.dumps(result, indent=4, sort_keys=True))
-        # if 'error' in result:
-        #     return {'error': result['error']}
-        # else:
-        #     return {'result': result['cases']}
+                case_dict['year_of_birth'] = case_dict['birth_date'].split("/")[0]  
+            except:
+                case_dict['year_of_birth'] = None
+        return case_dict
+    
+    async def scrape(self):
+        last_case_id_nb = self.state.get("last_case_id_nb", 1)
+        case_id_nb = last_case_id_nb
+        not_found_count = 0
+        current_year = datetime.now().year
+        
+        self.url = "https://portal-nc.tylertech.cloud/Portal/Home/Dashboard/29"
+        await self.init_browser()
 
+        while True:
+            try:
+                if not_found_count > 10:
+                    console.log("Too many case_id not found. Ending the search.")
+                    break     
+
+                case_id_nb = last_case_id_nb
+                case_id_full = f"{str(current_year)[2:]}CR{str(case_id_nb).zfill(6)}"
+                last_case_id_nb += 1
+                self.state["last_case_id_nb"] = last_case_id_nb
+                # self.update_state()
+
+                console.log(f"Current searching case_id-{case_id_full}")
+
+                if self.check_if_exists(case_id_full):
+                    console.log(f"Case {case_id_full} already exists. Skipping ...")
+                    continue
+
+                case_keys = await self.search_by_case_number(case_id_full)
+
+                if not case_keys:
+                    console.log(f"Case {case_id_full} not found. Skipping ...")
+                    not_found_count += 1
+                    continue
+                not_found_count = 0
+
+                console.log("Extracting Case Information...")
+                
+                for key in case_keys:
+                    case_dict = await self.get_case_details(key)
+                    self.insert_case(case_dict)
+                    console.log(
+                        f"Inserted case {case_id_full}"
+                    )
+                    self.insert_lead(case_dict)
+                    console.log(
+                        f"Inserted lead {case_id_full}"
+                    )
+            except Exception as e:
+                console.log(f"Failed to scaraping - {e}")
+                continue
 
 if __name__ == "__main__":
-    print(
-        json.dumps(
-            ScraperNCSuperior().scrape(
-                search_parameters={
-                    "firstName": "Adam",
-                    "lastName": "Smith",
-                    "dob": "12/19/1967",
-                }
-            )["result"],
-            indent=4,
-            sort_keys=True,
-        )
-    )
-    print("Done running", __file__, ".")
+    ncscraper = NorthCarolinaScraper()
+    asyncio.run(ncscraper.scrape())
+    console.log("Done running", __file__, ".")

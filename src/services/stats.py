@@ -56,11 +56,11 @@ if __name__ == "__main__":
         .fillna(0)
     )
 
-    df.loc[
-        df["outbound_actions_count"] <= df["count"], "outbound_actions_count"
-    ] = df.loc[
-        df["outbound_actions_count"] > df["count"], "outbound_actions_count"
-    ].mean()
+    # df.loc[
+    #     df["outbound_actions_count"] <= df["count"], "outbound_actions_count"
+    # ] = df.loc[
+    #     df["outbound_actions_count"] > df["count"], "outbound_actions_count"
+    # ].mean()
 
     for index, row in df.iterrows():
         print(row["id"])

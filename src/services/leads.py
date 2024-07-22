@@ -75,7 +75,7 @@ def get_single_lead(case_id):
     lead = (
         db.collection("leads")
         .select([f for f in leads.Lead.model_fields.keys() if f != "report"])
-        .where("case_id", "==", case_id)
+        .where(filter=FieldFilter("case_id", "==", case_id))
         .stream()
     )
     lead = list(lead)
