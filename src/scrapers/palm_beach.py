@@ -363,7 +363,6 @@ class PalmBeachScraper(ScraperBase):
                         await self.wait_for_page_load()
 
                         already_processed.append(page_order)
-                        print("Added to already processed...")
 
                         if len(already_processed) / 100 == 1:
                             # if 100 records collected restart because we face captcha always
