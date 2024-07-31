@@ -22,7 +22,7 @@ TWOCAPTCHA_API_KEY = os.getenv('TWOCAPTCHA_API_KEY')
 
 console = Console()
 
-class PalmBeachScraper(ScraperBase):
+class FLPalmBeachScraper(ScraperBase):
     solver = TwoCaptcha(TWOCAPTCHA_API_KEY)
 
     def increase_date_by_one_day(self, date_str):

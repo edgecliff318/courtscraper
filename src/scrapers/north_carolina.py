@@ -193,7 +193,7 @@ class NorthCarolinaScraper(ScraperBase):
                 case_dict["year_of_birth"] = None
         return case_dict
 
-    async def scrape(self, search_parameter):
+    async def scrape(self):
         last_case_id_nb = self.state.get("last_case_id_nb", 1)
         case_id_nb = last_case_id_nb
         not_found_count = 0

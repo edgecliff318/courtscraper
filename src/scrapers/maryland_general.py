@@ -19,7 +19,7 @@ console = Console()
 settings = get_settings()
 
 
-class MDScraper(ScraperBase):
+class MDGeneralScraper(ScraperBase):
     def __init__(self):
         super().__init__()
         self.courts = {}
