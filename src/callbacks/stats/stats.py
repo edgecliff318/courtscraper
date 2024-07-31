@@ -44,18 +44,11 @@ def get_base_layout():
 
 def create_graph_bar_leads_state(df: pd.DataFrame):
     df["date"] = pd.to_datetime(df["last_updated"]).dt.date
-    df["source"].fillna("mo_casenet", inplace=True)
-    source_rename_dict = {
-        "il_cook": "IL Cook County",
-        "mo_casenet": "MO Casenet",
-        "mo_mshp": "MO Highway Patrol",
-    }
-    df["source"] = df["source"].map(source_rename_dict)
+    df["state"].fillna("MO", inplace=True)
     pivot_df = df.pivot_table(
-        index="date", columns="source", values="last_updated", aggfunc="count"
+        index="date", columns="state", values="last_updated", aggfunc="count"
     )
     pivot_df = pivot_df.fillna(0)
-    pivot_df["total"] = pivot_df.sum(axis=1)
     pivot_df = pivot_df.reset_index()
 
     columns = list(set(pivot_df.columns.to_list()) - set(["date"]))
@@ -66,7 +59,6 @@ def create_graph_bar_leads_state(df: pd.DataFrame):
                 x=pivot_df["date"],
                 y=pivot_df[state],
                 name=state,
-                marker_color=settings.colors_mapping.get(state, "#FF5733"),
             )
         )
 
@@ -123,24 +115,34 @@ def create_graph_leads_status(df: pd.DataFrame):
         "processing": "Processing",
         "stop": "Stop",
     }
+    df["state"].fillna("MO", inplace=True)
     fig = go.Figure()
-    for status in status_columns:
+    df_grouped = (
+        df.groupby(["state", "status"])
+        .case_id.count()
+        .reset_index()
+        .rename(columns={"case_id": "count"})
+    )
+
+    statuses = df_grouped["status"].unique()
+
+    for status in statuses:
+        df_status = df_grouped[df_grouped["status"] == status]
         fig.add_trace(
             go.Bar(
-                x=[renamed_status_columns[status]],
-                y=[df[df["status"] == status].shape[0]],
-                name=status,
-                marker_color=settings.colors_mapping[status],
+                x=df_status["state"],
+                y=df_status["count"],
+                name=renamed_status_columns.get(status, status),
             )
         )
 
     fig.update_layout(
         get_base_layout(),
-        title_text="Leads by Status",
-        xaxis_title="Status",
-        yaxis_title="Leads",
+        title_text="Grouped Data by State and Status",
+        xaxis_title="State",
+        yaxis_title="State",
         legend_title="Status",
-        barmode="stack",
+        barmode="group",
         coloraxis_colorbar=dict(
             thicknessmode="pixels",
             thickness=15,
