@@ -381,7 +381,6 @@ def retrieve_cases(source="mo_case_net"):
     elif source == "broward":
         console.log("Broward County Scraper")
         asyncio.run(retrieve_cases_broward())
-
     elif source == "indiana":
         console.log("Indiana Scraper")
         asyncio.run(retrieve_cases_indiana())
