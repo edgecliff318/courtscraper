@@ -78,6 +78,7 @@ def render_leads(court_code_list, dates, status):
         ]
 
     df["case_date"] = df["case_date"].dt.strftime("%m/%d/%Y")
+    df["state"] = df["state"].fillna("MO")
 
     df = df[
         [
