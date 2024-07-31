@@ -11,6 +11,58 @@ from src.models import leads
 logger = logging.getLogger(__name__)
 
 
+def get_leads_stats(
+    start_date=None,
+    end_date=None,
+    source=None,
+):
+    fields = {
+        "id",
+        "case_id",
+        "phone",
+        "violation",
+        "court",
+        "state",
+        "status",
+        "case_date",
+        "source",
+    }
+    leads_list = db.collection("leads").select(
+        [f for f in leads.Lead.model_fields.keys() if f in fields]
+    )
+
+    if start_date is not None:
+        if source == "website":
+            # Transform start_date to timestamp in ms
+            if isinstance(start_date, str):
+                start_date = pd.to_datetime(start_date)
+            start_date = start_date.timestamp() * 1000
+            leads_list = leads_list.where("creation_date", ">=", start_date)
+        else:
+            if isinstance(start_date, str):
+                start_date = pd.to_datetime(start_date)
+            leads_list = leads_list.where("case_date", ">=", start_date)
+
+    if end_date is not None:
+        if source == "website":
+            # Transform end_date to timestamp in ms
+            if isinstance(end_date, str):
+                end_date = pd.to_datetime(end_date) + pd.Timedelta(days=1)
+            end_date = end_date.timestamp() * 1000
+            leads_list = leads_list.where("creation_date", "<=", end_date)
+        else:
+            if isinstance(end_date, str):
+                end_date = pd.to_datetime(end_date)
+            leads_list = leads_list.where("case_date", "<=", end_date)
+
+    if source is not None:
+        leads_list = leads_list.where("source", "==", source)
+
+    leads_list = leads_list.stream()
+
+    return [lead.to_dict() for lead in leads_list]
+
+
 def get_leads(
     court_code_list=None,
     start_date=None,
@@ -361,11 +413,8 @@ class Lock(BaseService):
 
 
 if __name__ == "__main__":
-    today = datetime.now()
-    lead = get_last_lead(
-        start_date=today - timedelta(days=7),
-        end_date=today + timedelta(days=1),
-        status="new",
-        limit=1,
-    )
-    print(lead)
+    leads = get_leads_stats(source="pennsylvania")
+
+    for l in leads:
+        if l.get("state") != "PA":
+            patch_lead(case_id=l.get("case_id"), state="PA")
