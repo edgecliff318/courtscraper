@@ -43,10 +43,10 @@ def get_base_layout():
 
 
 def create_graph_bar_leads_state(df: pd.DataFrame):
-    df["date"] = pd.to_datetime(df["last_updated"]).dt.date
+    df["date"] = pd.to_datetime(df["case_date"]).dt.date
     df["state"].fillna("MO", inplace=True)
     pivot_df = df.pivot_table(
-        index="date", columns="state", values="last_updated", aggfunc="count"
+        index="date", columns="state", values="case_date", aggfunc="count"
     )
     pivot_df = pivot_df.fillna(0)
     pivot_df = pivot_df.reset_index()
@@ -124,9 +124,13 @@ def create_graph_leads_status(df: pd.DataFrame):
         .rename(columns={"case_id": "count"})
     )
 
+    # Exclude closed
+
     statuses = df_grouped["status"].unique()
 
     for status in statuses:
+        if status in ("closed",):
+            continue
         df_status = df_grouped[df_grouped["status"] == status]
         fig.add_trace(
             go.Bar(
@@ -153,7 +157,7 @@ def create_graph_leads_status(df: pd.DataFrame):
             ticks="outside",
             dtick=1000,
         ),
-        showlegend=False,
+        showlegend=True,
     )
 
     return dcc.Graph(figure=fig)
@@ -351,13 +355,15 @@ def render_inbound_summary(data: pd.DataFrame):
 )
 def render_scrapper_monitoring(dates, _):
     start_date, end_date = dates
-    leads_list = leads.get_leads(start_date=start_date, end_date=end_date)
+    leads_list = leads.get_leads_stats(
+        start_date=start_date, end_date=end_date
+    )
 
     if not leads_list:
         no_data_message = "No leads found for the selected period."
         return no_data_message, no_data_message
 
-    df = pd.DataFrame([lead.model_dump() for lead in leads_list])
+    df = pd.DataFrame(leads_list)
 
     graph_leads_status = create_graph_leads_status(df)
     graph_choropleth_leads_state = create_graph_choropleth_leads_state(df)
@@ -434,9 +440,9 @@ def render_inbound_monitoring(dates, n_clicks):
 
     df_messages = fetch_messages_status(start_date, end_date)
 
-    leads_list = leads.get_leads(start_date=start_date, end_date=end_date)
-    fields = {"id", "phone", "violation", "court", "state", "status"}
-    leads_list = [lead.model_dump(include=fields) for lead in leads_list]
+    leads_list = leads.get_leads_stats(
+        start_date=start_date, end_date=end_date
+    )
     df_leads = pd.DataFrame(leads_list)
 
     inbound_summary = render_inbound_summary(df_leads)
