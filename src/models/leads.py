@@ -8,6 +8,7 @@ leads_statuses = [
     {"label": "All", "value": "all"},
     {"label": "New", "value": "new"},
     {"label": "Prioritized", "value": "prioritized"},
+    {"label": "Prioritized BeenVerified", "value": "prioritized_bv"},
     {
         "label": "Not Contacted",
         "value": "not_contacted",
