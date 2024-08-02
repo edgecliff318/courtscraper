@@ -237,6 +237,7 @@ def create_graph_most_recent_error(start_date, end_date):
                 "status": message.status,
                 "from_": message.from_,
                 "to": message.to,
+                "body": message.body,
             }
             for message in twilio_messages
         ]
@@ -270,30 +271,236 @@ def create_graph_most_recent_error(start_date, end_date):
         lambda x: color_scale[int((len(color_scale) - 1) * x / max_count)]
     )
 
-    y_values = list(range(1, len(error_counts["Error"]) + 1))
+    # Analysis DF
+    df_analysis = df[df["direction"] == "outbound-api"]
 
-    fig = go.Figure()
+    df_grouped = df_analysis.pivot_table(
+        index="body",
+        columns="error_message",
+        values="account_sid",
+        aggfunc="count",
+    )
 
-    fig.add_trace(
-        go.Bar(
-            y=y_values,
-            x=error_counts["Count"],
-            name="Error",
-            marker_color=error_counts["color"],
-            text=error_counts["Error"],
-            textposition="inside",
-            orientation="h",
-            width=0.8,
+    # Add a tag if "Carrier violation" is higher than 10% of the total for each row
+    df_grouped["Carrier violation"] = df_grouped["Carrier violation"].fillna(0)
+    df_grouped["Total"] = df_grouped.sum(axis=1)
+    df_grouped["Carrier violation %"] = (
+        df_grouped["Carrier violation"] / df_grouped["Total"]
+    ).fillna(0)
+
+    df_grouped["Focus"] = (
+        df_grouped["Carrier violation"] > 0.1 * df_grouped["Total"]
+    )
+    df_grouped = df_grouped.reset_index()
+
+    def render_message(row):
+        content = dmc.Card(
+            dmc.Stack(
+                [
+                    dmc.Group(
+                        [
+                            dmc.Text(
+                                "Statistics",
+                                size="sm",
+                                fw=600,
+                                c="dark",
+                            ),
+                            dmc.Text(
+                                f"Total: {row.Total:.0f}", size="sm", c="dark"
+                            ),
+                            dmc.Text(
+                                f"Carrier violation: {row['Carrier violation']:.0f}",
+                                size="sm",
+                                c="dark",
+                            ),
+                            dmc.Text(
+                                f"Carrier violation %: {row['Carrier violation %']:.2%}",
+                                size="sm",
+                                c="dark",
+                            ),
+                            dmc.ActionIcon(
+                                DashIconify(
+                                    icon=(
+                                        "ic:round-error"
+                                        if row.Focus
+                                        else "ic:round-done"
+                                    ),
+                                    width=20,
+                                ),
+                                id="button",
+                                radius="md",
+                                size="lg",
+                                mr=17,
+                                variant="light",
+                                color="red" if row.Focus else "green",
+                            ),
+                        ],
+                        justify="left",
+                    ),
+                    dmc.Text(row.body, size="xs"),
+                ]
+            ),
+            withBorder=True,
+            shadow="sm",
+            radius="md",
         )
+        return content
+
+    # Table with the
+    errors_by_message = dmc.Stack(
+        [
+            dmc.Title("Errors by message", order=2, fw=600, c="dark"),
+            dmc.Stack(
+                [render_message(row) for _, row in df_grouped.iterrows()]
+            ),
+        ]
     )
 
-    fig.update_layout(
-        get_base_layout(),
-        title="Most Recent Error",
-        xaxis_title="Count",
-        yaxis_title="Error",
+    df_grouped_phone_nbs = df_analysis.pivot_table(
+        index="from_",
+        columns="error_message",
+        values="account_sid",
+        aggfunc="count",
     )
-    return dcc.Graph(figure=fig)
+
+    df_grouped_phone_nbs.fillna(0, inplace=True)
+    df_grouped_phone_nbs["Total"] = df_grouped_phone_nbs.sum(axis=1)
+
+    error_columns = [
+        col
+        for col in df_grouped_phone_nbs.columns
+        if col != "Total" and col != "No Error"
+    ]
+
+    for col in df_grouped_phone_nbs.columns:
+        if col not in ["Total"]:
+            df_grouped_phone_nbs[f"{col} %"] = (
+                df_grouped_phone_nbs[col] / df_grouped_phone_nbs["Total"]
+            )
+
+    df_grouped_phone_nbs["Focus"] = (
+        df_grouped_phone_nbs["Carrier violation"]
+        > 0.1 * df_grouped_phone_nbs["Total"]
+    )
+
+    df_grouped_phone_nbs = df_grouped_phone_nbs.reset_index()
+
+    def render_phone_number(row):
+        content = dmc.Card(
+            dmc.Group(
+                [
+                    dmc.Text(
+                        f"Statistics for {row.from_}",
+                        size="sm",
+                        fw=600,
+                        c="dark",
+                    ),
+                    dmc.Text(f"Total: {row.Total:.0f}", size="sm", c="dark"),
+                    dmc.Text(
+                        f"Carrier violation: {row['Carrier violation']:.0f}",
+                        size="sm",
+                        c="dark",
+                    ),
+                    dmc.Text(
+                        f"Carrier violation %: {row['Carrier violation %']:.2%}",
+                        size="sm",
+                        c="dark",
+                    ),
+                    dmc.ActionIcon(
+                        DashIconify(
+                            icon=(
+                                "ic:round-error"
+                                if row.Focus
+                                else "ic:round-done"
+                            ),
+                            width=20,
+                        ),
+                        id="button",
+                        radius="md",
+                        size="lg",
+                        mr=17,
+                        variant="light",
+                        color="red" if row.Focus else "green",
+                    ),
+                ],
+                justify="left",
+            ),
+            withBorder=True,
+            shadow="sm",
+            radius="md",
+        )
+        return content
+
+    # Global Results
+    df_grouped_global = df_analysis.groupby("error_message").size()
+    df_grouped_global = df_grouped_global.reset_index()
+    df_grouped_global.columns = ["Error", "Count"]
+    df_grouped_global = df_grouped_global.sort_values(
+        by="Count", ascending=True
+    )
+
+    total = df_grouped_global["Count"].sum()
+    carrier_violation = df_grouped_global[
+        df_grouped_global["Error"] == "Carrier violation"
+    ]["Count"].values[0]
+
+    focus = carrier_violation > 0.1 * total
+
+    global_results = dmc.Stack(
+        [
+            dmc.Title("Global Results", order=2, fw=600, c="dark"),
+            dmc.Group(
+                [
+                    dmc.Text(
+                        "Statistics",
+                        size="sm",
+                        fw=600,
+                        c="dark",
+                    ),
+                    dmc.Text(f"Total: {total:.0f}", size="sm", c="dark"),
+                    dmc.Text(
+                        f"Carrier violation: {carrier_violation:.0f}",
+                        size="sm",
+                        c="dark",
+                    ),
+                    dmc.Text(
+                        f"Carrier violation %: {carrier_violation / total:.2%}",
+                        size="sm",
+                        c="dark",
+                    ),
+                    dmc.ActionIcon(
+                        DashIconify(
+                            icon=(
+                                "ic:round-error" if focus else "ic:round-done"
+                            ),
+                            width=20,
+                        ),
+                        id="button",
+                        radius="md",
+                        size="lg",
+                        mr=17,
+                        variant="light",
+                        color="red" if focus else "green",
+                    ),
+                ],
+                justify="left",
+            ),
+        ],
+    )
+
+    errors_by_phone = dmc.Stack(
+        [
+            dmc.Title("Errors by phone number", order=2, fw=600, c="dark"),
+            dmc.Stack(
+                [
+                    render_phone_number(row)
+                    for _, row in df_grouped_phone_nbs.iterrows()
+                ]
+            ),
+        ]
+    )
+
+    return dmc.Stack([global_results, errors_by_message, errors_by_phone])
 
 
 @callback(
@@ -335,7 +542,9 @@ def graph_status_sms(dates, direction):
 def graph_most_recent_error(dates, direction):
     (start_date, end_date) = dates
 
-    return create_graph_most_recent_error(start_date, end_date)
+    output = create_graph_most_recent_error(start_date, end_date)
+
+    return output
 
 
 @callback(
