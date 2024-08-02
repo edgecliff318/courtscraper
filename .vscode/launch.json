@@ -55,7 +55,7 @@
                 "retrieve-leads",
                 "--source=lexis_nexis_phone_finder",
                 "--username=schcoo1",
-                "--password=TTDpro2024!"
+                "--password=TTDpro2024!!!"
             ],
             "console": "integratedTerminal",
             "justMyCode": false
@@ -69,7 +69,7 @@
                 "retrieve-leads",
                 "--source=lexis_nexis_phone_finder",
                 "--username=SMeyer24",
-                "--password=TTDpro2024!!"
+                "--password=TTDpro2024!!!"
             ],
             "console": "integratedTerminal",
             "justMyCode": false
@@ -83,7 +83,7 @@
                 "retrieve-leads",
                 "--source=lexis_nexis_phone_finder",
                 "--username=mahsam1",
-                "--password=TTDpro2024!"
+                "--password=TTDpro2024!!!"
             ],
             "console": "integratedTerminal",
             "justMyCode": false
@@ -97,7 +97,7 @@
                 "retrieve-leads",
                 "--source=lexis_nexis_phone_finder",
                 "--username=branic1",
-                "--password=TTDpro2024!"
+                "--password=TTDpro2024!!!"
             ],
             "console": "integratedTerminal",
             "justMyCode": false
@@ -111,7 +111,7 @@
                 "retrieve-leads",
                 "--source=lexis_nexis_phone_finder",
                 "--username=johnic1",
-                "--password=TTDpro2024!"
+                "--password=TTDpro2024!!!"
             ],
             "console": "integratedTerminal",
             "justMyCode": false
@@ -127,7 +127,7 @@
             "console": "integratedTerminal",
             "justMyCode": false
         },
-         {
+        {
             "name": "Upload to Cloud Talk",
             "type": "python",
             "request": "launch",
