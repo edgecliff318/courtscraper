@@ -10,8 +10,8 @@ from datetime import date, datetime, time
 from tempfile import NamedTemporaryFile
 from rich.console import Console
 
-from models.cases import Case
-from models.leads import Lead
+from src.models.cases import Case
+from src.models.leads import Lead
 from src.scrapers.base.scraper_base import ScraperBase
 
 from twocaptcha import TwoCaptcha
@@ -81,7 +81,11 @@ class NorthCarolinaScraper(ScraperBase):
         case_detail = res.json().get("CaseSummaryHeader")
         case_id = case_detail.get("CaseNumber")
         court_id = str(case_detail.get("NodeId"))
-        filed_date = datetime.strptime(case_detail.get("FiledOn"), "%m/%d/%Y")if case_detail.get("FiledOn") else None
+        filing_date = (
+            datetime.strptime(case_detail.get("FiledOn"), "%m/%d/%Y")
+            if case_detail.get("FiledOn")
+            else None
+        )
         court_date = datetime.strptime( case_detail.get("AppearBy"), "%m/%d/%Y") if case_detail.get("AppearBy") else None
         court_desc = case_detail.get("NodeName")
         description = case_detail.get("Style")
@@ -90,11 +94,13 @@ class NorthCarolinaScraper(ScraperBase):
         return {
             "case_id": case_id,
             "court_id": court_id,
-            "filing_date": filed_date,
+            "court_code": court_id,
+            "filing_date": filing_date,
+            "case_date": filing_date,
             "court_date": court_date,
             "court_desc": court_desc,
             "description": description,
-            "judge": judge
+            "judge": judge,
         }
 
     def get_charges_info(self, key):
@@ -114,18 +120,14 @@ class NorthCarolinaScraper(ScraperBase):
         
         offense_date = datetime.strptime( charges_info[0].get("OffenseDate"), "%m/%d/%Y") if charges_info[0].get("OffenseDate") else None
         charges = [
-            {
-                "charge_desc": charge.get("ChargeOffense").get("ChargeOffenseDescription"),
-                "degree": charge.get("ChargeOffense").get("Degree"),
-                "fine": charge.get("ChargeOffense").get("FineAmount"),
-                "statute": charge.get("ChargeOffense").get("Statute"),
-            }
+            {"description": charge.get("ChargeOffense").get("ChargeOffenseDescription")}
             for charge in charges_info
         ]
 
         return {
-            "charges": charges, 
-            "offense_date": offense_date
+            "charges": charges,
+            "charges_description": " ".join([item["description"] for item in charges]),
+            "offense_date": offense_date,
         }
     
     def get_parties_info(self, key):
@@ -167,6 +169,7 @@ class NorthCarolinaScraper(ScraperBase):
             "address_city": defendant.get("Addresses")[0].get("City"),
             "address_zip": defendant.get("Addresses")[0].get("PostalCode"),
             "address_state_code": defendant.get("Addresses")[0].get("State"),
+            "county": "",
         }
     
     async def get_case_details(self, key):
@@ -180,19 +183,16 @@ class NorthCarolinaScraper(ScraperBase):
             **parties_info
         }
 
-        case_dict["court_code"] =case_dict["court_id"]
         case_dict["status"] = "new"
-        case_dict["case_date"] = case_dict["court_id"]
-        case_dict["charges_description"] = ", ".join([charge.get("charge_desc") for charge in case_dict.get("charges")])
         case_dict["state"] = "NC"
         case_dict["source"] = "North carolina state"
         if case_dict["birth_date"]:
             try:
-                case_dict['year_of_birth'] = case_dict['birth_date'].split("/")[0]  
+                case_dict["year_of_birth"] = case_dict["birth_date"].split("/")[0]
             except:
-                case_dict['year_of_birth'] = None
+                case_dict["year_of_birth"] = None
         return case_dict
-    
+
     async def scrape(self):
         last_case_id_nb = self.state.get("last_case_id_nb", 1)
         case_id_nb = last_case_id_nb
@@ -206,7 +206,7 @@ class NorthCarolinaScraper(ScraperBase):
             try:
                 if not_found_count > 10:
                     console.log("Too many case_id not found. Ending the search.")
-                    break     
+                    break
 
                 case_id_nb = last_case_id_nb
                 case_id_full = f"{str(current_year)[2:]}CR{str(case_id_nb).zfill(6)}"
@@ -232,6 +232,7 @@ class NorthCarolinaScraper(ScraperBase):
                 
                 for key in case_keys:
                     case_dict = await self.get_case_details(key)
+                    print(case_dict)
                     self.insert_case(case_dict)
                     console.log(
                         f"Inserted case {case_id_full}"
@@ -241,7 +242,7 @@ class NorthCarolinaScraper(ScraperBase):
                         f"Inserted lead {case_id_full}"
                     )
             except Exception as e:
-                console.log(f"Failed to scaraping - {e}")
+                console.log(f"Failed to scraping - {e}")
                 continue
 
 if __name__ == "__main__":
