@@ -18,7 +18,7 @@ load_dotenv()
 TWOCAPTCHA_API_KEY = os.getenv('TWOCAPTCHA_API_KEY')
 console = Console()
 
-class BrowardScraper(ScraperBase):
+class FLBrowardScraper(ScraperBase):
     def __init__(self):
         super().__init__()
         self.solver = TwoCaptcha(TWOCAPTCHA_API_KEY)
@@ -347,11 +347,11 @@ class BrowardScraper(ScraperBase):
 
                 console.log(f"Current searching case_id-{case_id_full}")
 
-                if self.check_if_exists(case_id_full):
-                    console.log(f"Case {case_id_full} already exists. Skipping ...")
-                    continue
+                # if self.check_if_exists(case_id_full):
+                #     console.log(f"Case {case_id_full} already exists. Skipping ...")
+                #     continue
 
-                await self.input_case_id(case_id_full)
+                # await self.input_case_id(case_id_full)
 
                 case_details = await self.detail_search(case_id_full)
                 if not case_details:
@@ -365,6 +365,8 @@ class BrowardScraper(ScraperBase):
                 console.log(
                     f"Inserted case {case_id_full}"
                 )
+
+                print(f"case_dict-{case_details}")
                 self.insert_lead(case_details)
                 console.log(
                     f"Inserted lead {case_id_full}"

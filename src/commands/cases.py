@@ -12,7 +12,7 @@ from src.loader.leads import CaseNet
 from src.models import cases as cases_model
 from src.models import leads as leads_model
 from src.scrapers.arkansas import ArkansasScraper
-from src.scrapers.broward import BrowardScraper
+from src.scrapers.fl_broward import FLBrowardScraper
 from src.scrapers.il_cook import IlCook
 from src.scrapers.indiana import IndianaScraper
 from src.scrapers.kansas import KansasScraper
@@ -22,7 +22,7 @@ from src.scrapers.mo_mshp import MOHighwayPatrol
 from src.scrapers.north_carolina import NorthCarolinaScraper
 from src.scrapers.north_carolina_superior import ScraperNCSuperior
 from src.scrapers.oklahoma import OklahomaScraper
-from src.scrapers.fl_palm_beach import PalmBeachScraper
+from src.scrapers.fl_palm_beach import FLPalmBeachScraper
 from src.scrapers.tx_harris import TXHarrisCountyScraper
 from src.scrapers.tx_travis import ScraperTXTravisSuperior
 from src.scrapers.va_courts import VirginiaScraper
@@ -292,14 +292,14 @@ async def retrieve_cases_minnesota():
 
 async def retrieve_cases_fl_palm_beach():
     console.log("Palm Beach County Scraper")
-    palmbeachscraper = FLPalmBeachScraper()
-    await palmbeachscraper.scrape()
+    flpalmbeachscraper = FLPalmBeachScraper()
+    await flpalmbeachscraper.scrape()
 
 
 async def retrieve_cases_broward():
     console.log("Broward County, Florida Scraper")
-    browardscraper = BrowardScraper()
-    await browardscraper.scrape()
+    flbrowardscraper = FLBrowardScraper()
+    await flbrowardscraper.scrape()
 
 
 async def retrieve_cases_virginia_district():
@@ -313,7 +313,6 @@ async def retrieve_cases_west_virginia():
     westvirginiascraper = WestVirginiaScraper()
     name = "AB"
     await westvirginiascraper.scrape({"name": name})
-
 
 async def retrieve_cases_kansas():
     console.log("Kansas Scraper")
@@ -378,9 +377,9 @@ def retrieve_cases(source="mo_case_net"):
     elif source == "nc_superior":
         console.log("Travis County, Texas State Scraper")
         retrieve_cases_nc_superior()
-    elif source == "broward":
-        console.log("Broward County Scraper")
-        asyncio.run(retrieve_cases_broward())
+    elif source == "fl_broward":
+        console.log("Flordia State Broward County Scraper")
+        asyncio.run(retrieve_cases_fl_broward())
     elif source == "indiana":
         console.log("Indiana Scraper")
         asyncio.run(retrieve_cases_indiana())
