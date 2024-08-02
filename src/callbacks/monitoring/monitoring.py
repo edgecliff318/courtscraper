@@ -500,7 +500,7 @@ def create_graph_most_recent_error(start_date, end_date):
         ]
     )
 
-    return dmc.Stack([global_results, errors_by_message, errors_by_phone])
+    return dmc.Stack([global_results, errors_by_phone, errors_by_message])
 
 
 @callback(
