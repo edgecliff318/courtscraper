@@ -175,7 +175,7 @@ class KansasScraper(ScraperBase):
         pw = await async_playwright().start()
         # Proxy 9090
         self.browser = await pw.chromium.launch(
-            headless=False,
+            headless=True,
             # args=["--proxy-server=socks5://localhost:9090"]
         )
         context = await self.browser.new_context()

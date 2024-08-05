@@ -249,10 +249,7 @@ def retrieve_cases_arkansas():
 def retrieve_cases_indiana():
     console.log("Indiana State Scraper")
     indianascraper = IndianaScraper()
-    filed_date = "04/12/2024"
-    search_parameters = {"filed_date": filed_date}
-    indianascraper.scrape(search_parameters)
-
+    indianascraper.scrape()
 
 def retrieve_cases_oklahoma():
     console.log("Oklahoma Scraper")

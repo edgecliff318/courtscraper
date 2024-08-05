@@ -465,9 +465,11 @@ class ScraperMOCourt(ScraperBase):
 
         try:
             # Getting all the details
-            case_info["charges_description"] = case_detail.get(
-                "charges", [{"charge_description": ""}]
-            )[0].get("charge_description", "")
+            charges = case_detail.get("charges", [{"charge_description": ""}])  
+            if charges and all(isinstance(item, dict) and 'charge_description' in item for item in charges):  
+                case_info["charges_description"] =  " ".join([item.get('charge_description','') for item in charges])  
+            else:  
+                case_info["charges_description"] = ""
             case_info["case_date"] = case_detail.get("filing_date", "")
             case_info.update(case_detail)
             case_info["court_code"] = court.code

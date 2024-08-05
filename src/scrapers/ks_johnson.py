@@ -135,7 +135,7 @@ class KSJohnson(ScraperBase):
             console.log("Initialization of Browser...")
             self.playwright = await async_playwright().start()
             self.browser = await self.playwright.chromium.launch(
-                headless=False, slow_mo=50
+                headless=True, slow_mo=50
             )
             self.context = await self.browser.new_context()
             self.page = await self.context.new_page()
