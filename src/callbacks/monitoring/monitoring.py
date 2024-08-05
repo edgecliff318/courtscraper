@@ -274,6 +274,9 @@ def create_graph_most_recent_error(start_date, end_date):
     # Analysis DF
     df_analysis = df[df["direction"] == "outbound-api"]
 
+    if df_analysis.empty:
+        return dmc.Text("No data to display")
+
     df_grouped = df_analysis.pivot_table(
         index="body",
         columns="error_message",
@@ -282,6 +285,10 @@ def create_graph_most_recent_error(start_date, end_date):
     )
 
     # Add a tag if "Carrier violation" is higher than 10% of the total for each row
+
+    if "Carrier violation" not in df_grouped.columns:
+        df_grouped["Carrier violation"] = 0
+
     df_grouped["Carrier violation"] = df_grouped["Carrier violation"].fillna(0)
     df_grouped["Total"] = df_grouped.sum(axis=1)
     df_grouped["Carrier violation %"] = (
@@ -378,6 +385,9 @@ def create_graph_most_recent_error(start_date, end_date):
                 df_grouped_phone_nbs[col] / df_grouped_phone_nbs["Total"]
             )
 
+    if "Carrier violation" not in df_grouped_phone_nbs.columns:
+        df_grouped_phone_nbs["Carrier violation"] = 0
+
     df_grouped_phone_nbs["Focus"] = (
         df_grouped_phone_nbs["Carrier violation"]
         > 0.1 * df_grouped_phone_nbs["Total"]
@@ -440,9 +450,13 @@ def create_graph_most_recent_error(start_date, end_date):
     )
 
     total = df_grouped_global["Count"].sum()
-    carrier_violation = df_grouped_global[
-        df_grouped_global["Error"] == "Carrier violation"
-    ]["Count"].values[0]
+
+    if "Carrier violation" not in df_grouped_global["Error"].values:
+        carrier_violation = 0
+    else:
+        carrier_violation = df_grouped_global[
+            df_grouped_global["Error"] == "Carrier violation"
+        ]["Count"].values[0]
 
     focus = carrier_violation > 0.1 * total
 
