@@ -25,7 +25,7 @@ from src.scrapers.oklahoma import OklahomaScraper
 from src.scrapers.fl_palm_beach import FLPalmBeachScraper
 from src.scrapers.tx_harris import TXHarrisCountyScraper
 from src.scrapers.tx_travis import ScraperTXTravisSuperior
-from src.scrapers.va_courts import VirginiaScraper
+from src.scrapers.virginia import VirginiaScraper
 from src.scrapers.west_virginia import WestVirginiaScraper
 from src.scrapers.maryland_general import MDGeneralScraper
 from src.services import cases as cases_service
@@ -292,18 +292,16 @@ async def retrieve_cases_fl_palm_beach():
     flpalmbeachscraper = FLPalmBeachScraper()
     await flpalmbeachscraper.scrape()
 
-
-async def retrieve_cases_broward():
+async def retrieve_cases_fl_broward():
     console.log("Broward County, Florida Scraper")
     flbrowardscraper = FLBrowardScraper()
     await flbrowardscraper.scrape()
 
 
-async def retrieve_cases_virginia_district():
-    console.log("Virginia State District Court Scraper")
-    va_district_scraper = VADistrictScraper()
-    await va_district_scraper.scrape()
-
+async def retrieve_cases_virginia():
+    console.log("Virginia State Scraper")
+    virginiascraper = VirginiaScraper()
+    await virginiascraper.scrape()
 
 async def retrieve_cases_west_virginia():
     console.log("West Virginia Scraper")
@@ -389,6 +387,9 @@ def retrieve_cases(source="mo_case_net"):
     elif source == "north_carolina":
         console.log("North Carolina Scraper")
         asyncio.run(retrieve_cases_north_carolina())
+    elif source == "virginia":
+        console.log("Virginia Scraper")
+        asyncio.run(retrieve_cases_virginia())
     elif source == "kansas":
         console.log("Kansas State Scraper")
         asyncio.run(retrieve_cases_kansas())
