@@ -379,14 +379,14 @@ def create_graph_most_recent_error(start_date, end_date):
         if col != "Total" and col != "No Error"
     ]
 
+    if "Carrier violation" not in df_grouped_phone_nbs.columns:
+        df_grouped_phone_nbs["Carrier violation"] = 0
+
     for col in df_grouped_phone_nbs.columns:
         if col not in ["Total"]:
             df_grouped_phone_nbs[f"{col} %"] = (
                 df_grouped_phone_nbs[col] / df_grouped_phone_nbs["Total"]
             )
-
-    if "Carrier violation" not in df_grouped_phone_nbs.columns:
-        df_grouped_phone_nbs["Carrier violation"] = 0
 
     df_grouped_phone_nbs["Focus"] = (
         df_grouped_phone_nbs["Carrier violation"]
