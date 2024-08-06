@@ -229,6 +229,12 @@ class LexisNexisPhoneFinder:
     ):
         if zip is not None:
             zip = str(zip).replace(".0", "")
+
+        # Remove the numbers from the city
+        city = re.sub(r"\d+", "", city)
+
+        # Re,ove th
+        zip = re.sub(r"\D", "", zip)
         page = await self.start()
         # Wait 5 seconds
         await page.wait_for_timeout(5000)

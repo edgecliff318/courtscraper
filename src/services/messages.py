@@ -1,6 +1,7 @@
 import datetime
 import logging
 import random
+import re
 import textwrap
 import typing as t
 from datetime import timedelta
@@ -278,10 +279,18 @@ def send_message(
     # Send message
     if method == "twilio":
         phone_contact_service = PhoneContactService()
-        last_message = phone_contact_service.get_single_item(phone)
-        if last_message is not None and not force_send:
+        # Remove all special characters from the phone number
+        phone_formatted = re.sub(r"[^0-9]", "", phone)
+
+        last_message = phone_contact_service.get_single_item(phone_formatted)
+        last_message_not_formatted = phone_contact_service.get_single_item(
+            phone
+        )
+        if (
+            last_message is not None or last_message_not_formatted is not None
+        ) and not force_send:
             console.log(
-                f"Skipping message to {phone} as it was recently sent. Use --force to send anyway"
+                f"Skipping message to {phone_formatted} as it was recently sent. Use --force to send anyway"
             )
             raise Exception("Skipped as lead already contacted")
 
@@ -305,7 +314,7 @@ def send_message(
         creation_date = twilio_message.date_sent
 
         phone_contact_service.set_item(
-            phone,
+            phone_formatted,
             messages.PhoneContact(
                 phone=phone,
                 last_contacted=datetime.datetime.now(),
