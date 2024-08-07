@@ -318,7 +318,6 @@ async def retrieve_cases_kansas():
     }
     await kansasscraper.scrape(search_parameters)
 
-
 async def retrieve_cases_north_carolina():
     console.log("North Carolina State Scraper")
     northcarolinascraper = NorthCarolinaScraper()
@@ -372,12 +371,12 @@ def retrieve_cases(source="mo_case_net"):
     elif source == "nc_superior":
         console.log("Travis County, Texas State Scraper")
         retrieve_cases_nc_superior()
+    elif source == "indiana":
+        console.log("Indiana Scraper")
+        retrieve_cases_indiana()
     elif source == "fl_broward":
         console.log("Flordia State Broward County Scraper")
         asyncio.run(retrieve_cases_fl_broward())
-    elif source == "indiana":
-        console.log("Indiana Scraper")
-        asyncio.run(retrieve_cases_indiana())
     elif source == "minnesota":
         console.log("Minnesota Scraper")
         asyncio.run(retrieve_cases_minnesota())
