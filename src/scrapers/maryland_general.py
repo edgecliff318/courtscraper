@@ -1,22 +1,18 @@
-""" Scraper for Maryland General Court """
+"""Scraper for Maryland General Court"""
 
 import asyncio
 import os
 import re
 from datetime import datetime, timedelta
 
-import pandas as pd
 import requests
-from commonregex import CommonRegex
 from rich.console import Console
 from tika import parser
 
-from src.core.config import get_settings
 from src.scrapers.base.scraper_base import ScraperBase
 
 # Configure logging
 console = Console()
-settings = get_settings()
 
 
 class MDGeneralScraper(ScraperBase):
@@ -28,9 +24,34 @@ class MDGeneralScraper(ScraperBase):
         self.url = "https://www.mdcourts.gov/mdec/publiccases"
 
     def is_valid_number(self, x):
-        return any(char.isdigit() for char in x) and any(
-            char.isalpha() for char in x
-        )
+        return any(char.isdigit() for char in x) and any(char.isalpha() for char in x)
+
+    def construct_pdf_path(self, input_pdf: str):
+        """construct_pdf_path will construct complete file path from file name
+
+        Args:
+            input_pdf (str): file name
+
+        Returns:
+            str: full file path
+        """
+        # get the directory of the current script
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        # create full file path
+        full_path = os.path.join(script_dir, input_pdf)
+        return full_path
+
+    def is_valid_date(self, date_string):
+        """Checks if the date string matches the format YYYY-MM-DD.
+
+        Args:
+            date_string: The date string to check.
+
+        Returns:
+            True if the date string matches the format, False otherwise.
+        """
+        date_regex = r"^\d{4}-\d{2}-\d{2}$"
+        return bool(re.match(date_regex, date_string))
 
     def to_datetime(self, date_str):
         if date_str is None:
@@ -103,7 +124,9 @@ class MDGeneralScraper(ScraperBase):
                         )
                     else:
                         # on last page slice text the remaining text and append number
-                        next_record = f"{number}|||{page[page.index(number) + len(number) :]}"
+                        next_record = (
+                            f"{number}|||{page[page.index(number) + len(number) :]}"
+                        )
 
                     return (number, next_record)
         # return null if no match found means we are on last section
@@ -119,8 +142,6 @@ class MDGeneralScraper(ScraperBase):
     def extract_data_points(self, record):
         case_dict = {}
         citation_splits = record.split("Citation")
-        console.log(f"Processing record: {record}")
-        cr = CommonRegex(record)
         try:
             case_id_name_splits = citation_splits[0].split("|||")
             case_dict["case_id"] = case_id_name_splits[0].strip()
@@ -129,43 +150,46 @@ class MDGeneralScraper(ScraperBase):
             case_dict["first_name"] = first_name
             case_dict["middle_name"] = middle_name
             case_dict["last_name"] = last_name
-        except Exception as e:
-            console.log(f"Error in extracting case_id and name: {e}")
+        except:
             case_dict["first_name"] = "N/A"
             case_dict["middle_name"] = "N/A"
             case_dict["last_name"] = "N/A"
-            case_dict["name_error"] = True
 
         try:
-            dates = cr.dates
-            case_dict["filing_date"] = self.to_datetime(dates[0])
-
-        except Exception as e:
-            console.log(f"Error in extracting filing_date: {e}")
+            case_type_n__filling_date = (
+                citation_splits[1].strip(" - ").split("\n", 1)[0]
+            )
+            date_match = re.search(r"(\d{2}/\d{2}/\d{4})", case_type_n__filling_date)
+            filing_date = date_match.group(1).strip()
+            case_dict["filing_date"] = self.to_datetime(filing_date)
+        except:
             case_dict["filing_date"] = None
-            case_dict["filing_date_error"] = True
 
         try:
-            try:
-                # complete address
-                addresses = cr.street_addresses
-                address_line_1 = addresses[0]
-                # Get the data between the address and charges
-                address_city_zip = record.split(address_line_1)[1].split(
-                    "Charges:"
-                )[0]
-            except Exception as e:
-                # Split between Defendqnt Address: and Charges
-                address_text = record.split("Defendant Address:")[1].split(
-                    "Charges:"
-                )[0]
-                # Remove trailing \n and beginning \n
-                address_text = address_text.strip()
-                address_line_1 = address_text.split("\n")[1]
-                address_city_zip = address_text.split("\n")[-1]
-            address_city, address_state_zip = address_city_zip.replace(
-                "\n", ""
-            ).split(", ")
+            case_dict["case_type"] = case_type_n__filling_date[
+                : date_match.start()
+            ].strip()
+        except:
+            case_dict["case_type"] = "N/A"
+
+        try:
+            # complete address
+            complete_address_n_charges = (
+                citation_splits[1]
+                .strip(" - ")
+                .split("\n", 1)[1]
+                .split("\n\n\n\n")[0]
+                .strip("Defendant Address:")
+                .strip()
+            )
+            address_lines = complete_address_n_charges.split("Charges:")[0].split("\n")
+            address_lines = [item for item in address_lines if item]
+
+            address_line_1 = address_lines[1].strip() if len(address_lines) > 1 else ""
+
+            address_city, address_state_zip = (
+                address_lines[2].split(", ") if len(address_lines) > 2 else ("", "")
+            )
             address_state, address_zip_code = (
                 address_state_zip.split(" ")
                 if len(address_state_zip.split(" ")) == 2
@@ -177,24 +201,19 @@ class MDGeneralScraper(ScraperBase):
             case_dict["address_state"] = address_state.strip()
             case_dict["county"] = address_city
         except Exception as e:
-            console.log(f"Error in extracting address: {e}")
             case_dict["address_city"] = "N/A"
             case_dict["address_line_1"] = "N/A"
             case_dict["address_zip"] = "N/A"
             case_dict["address_state"] = "N/A"
             case_dict["county"] = ""
-            case_dict["address_error"] = True
 
         try:
-            charges_text = record.split("Charges:")[-1].strip()
+            charges_text = complete_address_n_charges.split("Charges:")[-1].strip()
             case_dict["charges"] = [
-                {"description": item} for item in charges_text.split("\n")
+                {"description": item for item in charges_text.split("\n")}
             ]
         except Exception as e:
-            console.log(f"Error in extracting charges: {e}")
-            console.log(f"charges_text: {charges_text}")
             case_dict["charges"] = [{"description": "N/A"}]
-            case_dict["charges_error"] = True
 
         county = case_dict["county"]
         case_dict["court_id"] = self.get_court_id(county)
@@ -207,9 +226,7 @@ class MDGeneralScraper(ScraperBase):
         case_dict["address"] = case_dict["address_line_1"]
         case_dict["city"] = case_dict["address_city"]
         case_dict["zip_code"] = case_dict["address_zip"]
-        case_dict["source"] = "md_general"
-        case_dict["state"] = "MD"
-        case_dict["record"] = record
+        case_dict["source"] = "Maryland General"
 
         return case_dict
 
@@ -219,36 +236,32 @@ class MDGeneralScraper(ScraperBase):
         new_date_obj = date_obj + timedelta(days=1)
         return new_date_obj.strftime("%Y-%m-%d")
 
-    def get_full_path(self, filename):
-        # get the directory of the current script
-        dir_path = os.path.join(settings.DATA_PATH, "md_general")
+    def extract_pdf(self, input_pdf: str) -> list:
+        """extract PDF and return list of dict
 
-        # create the directory if it doesn't exist
-        if not os.path.exists(dir_path):
-            os.makedirs(dir_path)
+        Args:
+            input_pdf (str): pdf file path
 
-        # full path of the file
-        full_path = os.path.join(
-            settings.DATA_PATH, "md_general", f"{filename}.pdf"
-        )
-        return full_path
-
-    def extract_pdf(self, input_pdf):
+        Returns:
+            list: extracted list of dictionaries
         """
-        extract PDF and return list of dict
-        """
-        full_path = self.get_full_path(input_pdf)
         # Parse the PDF content
         try:
-            raw = parser.from_file(full_path)
+            raw = parser.from_file(input_pdf)
+        except FileNotFoundError:
+            print(f"File not found: {input_pdf}")
+            return []
         except Exception as err:
-            console.log(f"Failed to Load PDF\t{input_pdf}\t{err}")
-            return {}
+            print(f"Failed to Load PDF\t{input_pdf}\t{err}")
+            return []
+
         # read content
-        text = raw["content"]
+        text = raw.get("content")  # type: ignore
+
         if not text:
-            console.log(f"No Content Found:\t{text}")
-            return False
+            print(f"No Content Found in PDF:\t{text}")
+            return []
+
         # strip extra spaces
         text = text.strip()
 
@@ -256,17 +269,15 @@ class MDGeneralScraper(ScraperBase):
         page_pattern = r"Run Date: \d{1,2}/\d{1,2}/\d{4} \d{1,2}:\d{2} [AP]M"
         pages = re.split(page_pattern, text)
         if not pages:
-            console.log(f"No Page Found:\t{len(text)}")
-            return False
+            print(f"No Page Found:\t{len(text)}")
+            return []
         # ignore last item
         pages = pages[:-1]
 
         master_list = []
         for i, page in enumerate(pages):
             try:
-                page = page.split("Case Number Style Case Type File Date")[
-                    -1
-                ].strip()
+                page = page.split("Case Number Style Case Type File Date")[-1].strip()
 
                 # extract records on each page
                 records = self.extract_records(page)
@@ -274,60 +285,79 @@ class MDGeneralScraper(ScraperBase):
                 records = [item for item in records[1].split("$$$")]
 
                 if not records:
-                    console.log(f"No records Found:\t{len(records)}")
+                    print(f"No records Found:\t{len(records)}")
                     break
-            except Exception as e:
+            except Exception:
                 continue
 
             for j, record in enumerate(records):
                 data = self.extract_data_points(record)
                 if not data:
-                    console.log(f"Record Extraction Failed:\t{record}")
+                    print(f"Record Extraction Failed:\t{record}")
                     continue
                 master_list.append(data)
-        df = pd.DataFrame(master_list)
-        df.to_csv(f"md_general_{input_pdf}.csv", index=False)
+
         return master_list
 
     def scrape_cases_for_scraping_date(self, scraping_date):
-        url = f"https://www.mdcourts.gov/data/case/file{scraping_date}.pdf"
-        console.log(f"Downloading PDF file for {scraping_date}...")
-        console.log(f"URL: {url}")
-        filename = f"file{scraping_date}.pdf"
-
-        # create full file path
-        full_path = self.get_full_path(filename)
-
+        if self.is_valid_date(scraping_date):
+            # construct pdf url from date
+            url = f"https://www.mdcourts.gov/data/case/file{scraping_date}.pdf"
+            print(url)
+        else:
+            print(f"Invalid Input Date:\t{scraping_date}")
+            return []
+        # make request to pdf url
         try:
             response = requests.get(url)
+        except requests.RequestException as err:
+            print(f"Request Exception Occurred At PDF Url:\t{url}\t{err}")
+            return []
+        except Exception as err:
+            print(f"Exception Occurred At PDF Url:\t{url}\t{err}")
+            return []
 
-            if response.status_code == 200:
-                with open(full_path, "wb") as f:
+        if response.status_code == 200:
+            # construct file name on successful request
+            file_name = f"file{scraping_date}.pdf"
+            # construct full file path
+            full_pdf_path = self.construct_pdf_path(file_name)
+
+            # make directory if not exists
+            os.makedirs(os.path.dirname(full_pdf_path), exist_ok=True)
+
+            # save pdf
+            try:
+                with open(full_pdf_path, "wb") as f:
                     f.write(response.content)
-                console.log(f"PDF file has been downloaded at: {full_path}")
+                print(f"PDF file has been downloaded at: {full_pdf_path}")
+            except OSError as err:
+                print(f"Error writing PDF to file: {err}")
+            except Exception as err:
+                print(f"Unexpected error: {err}")
 
-                input_pdf = f"file{scraping_date}.pdf"
-                case_dicts = self.extract_pdf(input_pdf)
-                console.log(
-                    "Successfully extracted case_list for  scraping_date",
-                    scraping_date,
+            if os.path.exists(full_pdf_path):
+                # file exists
+                case_dicts = self.extract_pdf(full_pdf_path)
+                print(
+                    f"Successfully extracted case_list for  scraping_date:\t{scraping_date}"
                 )
-                return case_dicts
             else:
-                console.log(
-                    f"Failed to download file, status code: {response.status_code}"
-                )
-
-                # Check if the file exists
-                if os.path.exists(full_path):
-                    input_pdf = f"file{scraping_date}.pdf"
-
-        except requests.RequestException as e:
-            console.log(e)
+                # file doesn't exist
+                case_dicts = []
+        elif response.status_code == 404:
+            # Status code 404 means file not exist on the url
+            print(f"404 File Not Found. Url: {url}")
+            case_dicts = []
+        else:
+            # request not successful. Status code not 200
+            print(f"Failed to download file, status code: {response.status_code}")
+            case_dicts = []
+        return case_dicts
 
     async def scrape(self):
-        """Main scraping function to handle the entire scraping process."""
-        last_scraping_date = self.state.get("last_filing_date", "2024-07-20")
+        """ Main scraping function to handle the entire scraping process. """
+        last_scraping_date = self.state.get("last_filing_date", "2024-07-16")
         scraping_date = last_scraping_date
         not_found_count = 0
 
@@ -336,24 +366,22 @@ class MDGeneralScraper(ScraperBase):
                 if not_found_count > 10:
                     console.log("Too many dates not found. Ending the search.")
                     break
-                last_scraping_date = self.increase_date_by_one_day(
-                    last_scraping_date
-                )
+                last_scraping_date = self.increase_date_by_one_day(last_scraping_date)
                 scraping_date = last_scraping_date
 
                 self.state["last_scraping_date"] = last_scraping_date
                 # self.update_state()
 
-                case_dicts = self.scrape_cases_for_scraping_date(scraping_date)
+                case_dicts= self.scrape_cases_for_scraping_date(scraping_date)
                 if case_dicts is None:
                     console.log(f" {scraping_date} not found. Skipping ...")
                     not_found_count += 1
                     continue
-
+                                
                 not_found_count = 0
 
                 for case_dict in case_dicts:
-                    console.log("case_dict", case_dict)
+                    print("case_dict", case_dict)
                     case_id = case_dict["case_id"]
                     if self.check_if_exists(case_id):
                         console.log(
@@ -373,5 +401,5 @@ class MDGeneralScraper(ScraperBase):
 
 
 if __name__ == "__main__":
-    scraper = MDScraper()
-    asyncio.run(scraper.scrape())
+    mdgeneralscraper = MDGeneralScraper()
+    asyncio.run(mdgeneralscraper.scrape())

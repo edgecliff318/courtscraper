@@ -413,11 +413,11 @@ class VirginiaScraper(ScraperBase):
                     not_found_count = 0
 
                     console.log(f"Inserting case {case_id_full}...")
-
                     self.insert_case(case_dict)
-                    console.log(f"Inserted case {case_id_full}")
 
+                    console.log(f"Inserted case {case_id_full}")
                     self.insert_lead(case_dict)
+                    
                     console.log(
                         f"Inserted lead {case_id_full} - Date {filing_date}"
                     )
@@ -431,6 +431,6 @@ class VirginiaScraper(ScraperBase):
 
 
 if __name__ == "__main__":
-    district_court_scraper = VirginiaScraper()
-    asyncio.run(district_court_scraper.scrape())
+    virginiascraper = VirginiaScraper()
+    asyncio.run(virginiascraper.scrape())
     console.log("Done running", __file__, ".")

@@ -16,6 +16,8 @@ from src.models.cases import Case
 from src.models.leads import Lead
 from src.scrapers.base import ScraperBase
 
+from dotenv import load_dotenv
+load_dotenv()
 from twocaptcha import TwoCaptcha
 
 TWOCAPTCHA_API_KEY = os.getenv('TWOCAPTCHA_API_KEY')
