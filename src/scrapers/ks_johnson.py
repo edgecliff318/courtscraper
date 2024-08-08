@@ -16,13 +16,6 @@ console = Console()
 
 
 class KSJohnson(ScraperBase):
-    def __init__(self, username, password) -> None:
-        """
-        Initialize the KSJohnson scraper with the given email, password, and case ID.
-        """
-        super().__init__(username, password)
-        console.log(f"Initializing {self.__class__.__name__}...")
-        self.courts = {}
 
     @staticmethod
     def split_race_sex_dob(race_sex_dob: str) -> Tuple[str, str, str]:
@@ -346,7 +339,7 @@ class KSJohnson(ScraperBase):
             console.log(f"Error during fetching case details: {e}")
             raise
 
-    async def scrape(self) -> None:
+    async def scrape(self, search_parameters) -> None:
         """
         Main scraping function that orchestrates the entire scraping process.
 
@@ -354,8 +347,10 @@ class KSJohnson(ScraperBase):
             search_parameters (dict): The search parameters including username and password.
         """
         console.log("Connecting...")
+        user_name = search_parameters.get("username")
+        password = search_parameters.get("password")
         # Initialize the browser and login
-        await self.initialize_browser(self.username, self.password)
+        await self.initialize_browser(user_name, password)
 
         # Initialize counters and state
         last_case_id_nb = self.state.get("last_case_id_nb", 1)
@@ -363,6 +358,7 @@ class KSJohnson(ScraperBase):
         case_id_nb = last_case_id_nb
         not_found_count = 0
         current_year = datetime.now().year
+        self.courts = {}
         while True:
             try:
                 if not_found_count > 10:
@@ -385,7 +381,7 @@ class KSJohnson(ScraperBase):
                 # Search and get case details
                 await self.search_details(case_id_full)
                 case_details = await self.get_case_details(case_id_full)
-
+                console.log("case_details", case_details)
                 if not case_details:
                     console.log(f"Case {case_id_full} not found. Skipping ...")
                     not_found_count += 1
@@ -405,11 +401,3 @@ class KSJohnson(ScraperBase):
             except Exception as e:
                 console.log(f"Failed to insert case - {e}")
                 continue
-
-
-if __name__ == "__main__":
-    username = "30275"
-    password = "TTDpro2024TTD!"
-    ks_johnson_scraper = KSJohnson(username, password)
-    asyncio.run(ks_johnson_scraper.scrape())
-    console.log("Done running", __file__, ".")
