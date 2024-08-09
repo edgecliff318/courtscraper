@@ -245,7 +245,6 @@ def retrieve_cases_arkansas():
     console.log("Retrieving the configuration from Firebase")
     arkansasscraper.scrape()
 
-
 def retrieve_cases_indiana():
     console.log("Indiana State Scraper")
     indianascraper = IndianaScraper()
@@ -257,7 +256,6 @@ def retrieve_cases_oklahoma():
     filed_date = "03/25/2024"
     oklahomascraper.scrape({"filed_date": filed_date})
 
-
 def retrieve_cases_tx_travis():
     console.log("Travis County, Tx State Scraper")
     travissuperiorscraper = ScraperTXTravisSuperior()
@@ -267,7 +265,6 @@ def retrieve_cases_tx_travis():
         "dob": None,
     }
     travissuperiorscraper.scrape(search_parameters)
-
 
 def retrieve_cases_nc_superior():
     console.log("NC Superior Scraper")
@@ -279,13 +276,11 @@ def retrieve_cases_nc_superior():
     }
     ncsuperiorscraper.scrape(search_parameters)
 
-
 async def retrieve_cases_minnesota():
     console.log("Minnesota State Scraper")
     minnesotascraper = MinnesotaScraper()
     search_parameters = {"case_id": "27-VB-24-69261"}
     await minnesotascraper.scrape(search_parameters)
-
 
 async def retrieve_cases_fl_palm_beach():
     console.log("Palm Beach County Scraper")
@@ -296,7 +291,6 @@ async def retrieve_cases_fl_broward():
     console.log("Broward County, Florida Scraper")
     flbrowardscraper = FLBrowardScraper()
     await flbrowardscraper.scrape()
-
 
 async def retrieve_cases_virginia():
     console.log("Virginia State Scraper")
@@ -323,7 +317,6 @@ async def retrieve_cases_north_carolina():
     northcarolinascraper = NorthCarolinaScraper()
     await northcarolinascraper.scrape()
 
-
 async def retrieve_cases_minnesota():
     console.log("Minnesota State Scraper")
     minnesotascraper = MinnesotaScraper()
@@ -337,7 +330,7 @@ async def retrieve_cases_maryland_general():
 async def retrieve_cases_ks_johnson():
     console.log("Johnson County, KS State Scraper")
     johnsonscraper = KSJohnson()
-    search_parameters = {"user_name": "30275", "password": "TTDpro2024TTD!"}
+    search_parameters = {"username": "30275", "password": "TTDpro2024TTD!"}
     await johnsonscraper.scrape(search_parameters)
 
 def retrieve_cases(source="mo_case_net"):
