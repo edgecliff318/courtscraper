@@ -101,7 +101,7 @@ class FLBrowardScraper(ScraperBase):
             headless=True,
             # args=["--proxy-server=socks5://localhost:9090"]
         )
-        context = await self.browser.new_context()
+        context = await self.browser.new_context(user_agent='Mozilla/5.0 (Windows NT 10.0;Win64) AppleWebkit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36')
         self.page = await context.new_page()
         await self.page.goto(self.url)
 
@@ -351,7 +351,7 @@ class FLBrowardScraper(ScraperBase):
                 #     console.log(f"Case {case_id_full} already exists. Skipping ...")
                 #     continue
 
-                # await self.input_case_id(case_id_full)
+                await self.input_case_id(case_id_full)
 
                 case_details = await self.detail_search(case_id_full)
                 if not case_details:
