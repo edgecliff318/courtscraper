@@ -2,10 +2,18 @@ from src.db import db
 from src.models import courts
 
 
-def get_courts(enabled: bool = True):
-    courts_list = (
-        db.collection("courts").where("enabled", "==", enabled).stream()
-    )
+def get_courts(enabled: bool = True, state=None):
+    if state:
+        courts_list = (
+            db.collection("courts")
+            .where("enabled", "==", enabled)
+            .where("state", "==", state)
+            .stream()
+        )
+    else:
+        courts_list = (
+            db.collection("courts").where("enabled", "==", enabled).stream()
+        )
     return [courts.Court(id=m.id, **m.to_dict()) for m in courts_list]
 
 
