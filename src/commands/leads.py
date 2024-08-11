@@ -176,10 +176,14 @@ def retrieve_leads(
     source: str = "beenverified",
     username: str = None,
     password: str = None,
+    stop_after: bool = False,
 ):
     asyncio.run(
         retrieve_leads_async(
-            source=source, username=username, password=password
+            source=source,
+            username=username,
+            password=password,
+            stop_after=stop_after,
         )
     )
 
@@ -188,6 +192,7 @@ async def retrieve_leads_async(
     source: str = "beenverified",
     username: str = None,
     password: str = None,
+    stop_after: bool = False,
 ):
     # Get all processing leads and change them to new
     # leads_processing = leads_service.get_leads(
@@ -233,6 +238,8 @@ async def retrieve_leads_async(
 
         if lead is None:
             console.log("No new leads found")
+            if stop_after:
+                return
             time.sleep(300)
             continue
 
