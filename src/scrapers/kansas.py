@@ -174,7 +174,7 @@ class KansasScraper(ScraperBase):
         console.log("Initation of Browser...")
         pw = await async_playwright().start()
         # Proxy 9090
-        self.browser = await pw.chromium.launch(
+        self.browser = await pw.webkit.launch(
             headless=True,
             # args=["--proxy-server=socks5://localhost:9090"]
         )
@@ -389,9 +389,6 @@ class KansasScraper(ScraperBase):
             # Append the current charge dictionary to the charges list
             charges.append(charge_dict)
 
-        for charge in charges:
-            console.log(charge)
-
         return charges
 
     async def get_county(self):
@@ -532,9 +529,9 @@ class KansasScraper(ScraperBase):
         return court_code
 
     async def get_case_detail(self, case_id):
-        case_dict1 = await self.case_name_search(case_id)
+        case_name_dict = await self.case_name_search(case_id)
 
-        if case_dict1 is None:
+        if case_name_dict is None:
             return None
 
         label_text = "Filed"
@@ -585,7 +582,7 @@ class KansasScraper(ScraperBase):
         except Exception:
             date_element = None
 
-        case_dict2 = {
+        case_detail_dict = {
             "court_id": court_id,
             "court_code": court_id,
             "filing_date": filing_date,
@@ -602,8 +599,8 @@ class KansasScraper(ScraperBase):
             "source": "kansas_courts",
         }
 
-        case_dict = case_dict1.copy()
-        for key, value in case_dict2.items():
+        case_dict = case_name_dict.copy()
+        for key, value in case_detail_dict.items():
             if key in case_dict:
                 case_dict[key] += value
             else:
@@ -662,7 +659,7 @@ class KansasScraper(ScraperBase):
         await self.browser.close()
 
     async def scrape_single(self, case_id):
-        if self.check_if_exists(case_id) and False:
+        if self.check_if_exists(case_id):
             console.log(f"Case {case_id} already exists. Skipping...")
         else:
             case_dict = await self.get_case_detail(case_id)
