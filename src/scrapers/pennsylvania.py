@@ -6,9 +6,9 @@ import uuid
 from pathlib import Path
 
 import pandas as pd
-from playwright.async_api import async_playwright
 from rich.console import Console
 
+from playwright.async_api import async_playwright
 from src.scrapers.base import ScraperBase
 
 sys.path.append(
@@ -151,9 +151,6 @@ class PennsylvaniaScraper(ScraperBase):
             column_value = await item.inner_text()
             case_details[column_name] = column_value
 
-        # State
-        case_details["state"] = "PA"
-
         # Define year_of_birth
         try:
             if case_details.get("birth_date") != "":
@@ -173,6 +170,8 @@ class PennsylvaniaScraper(ScraperBase):
             console.print(
                 f"An error occurred while parsing year of birth: {str(e)}"
             )
+
+        case_details["state"] = "PA"
 
         return case_details
 
@@ -245,6 +244,7 @@ class PennsylvaniaScraper(ScraperBase):
                             case_details["court_id"] = court_code
                             case_details["court_code"] = court_code
                             case_details["source"] = "pennsylvania"
+                            case_details["state"] = "PA"
                             # Transfor case_date to datetime
                             if (
                                 case_details.get("case_date") is not None
@@ -287,7 +287,10 @@ class PennsylvaniaScraper(ScraperBase):
         browser = None
         try:
             console.log("Launching browser...")
-            browser = await pw.chromium.launch(headless=True)
+            browser = await pw.chromium.launch(
+                headless=True,
+                # args=["--proxy-server=socks5://localhost:9090"]
+            )
             page = await browser.new_page()
             console.log("Browser launched successfully.")
 
@@ -340,7 +343,7 @@ if __name__ == "__main__":
     try:
         console.log("Initializing Pennsylvania Scraper...")
         scraper = PennsylvaniaScraper(
-            start_date="2024-07-20", end_date="2024-07-21"
+            start_date="2024-07-29", end_date="2024-07-30"
         )
         console.log("Pennsylvania Scraper initialized successfully.")
 
