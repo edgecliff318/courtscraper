@@ -9,7 +9,11 @@ import requests
 from rich.console import Console
 from tika import parser
 
+from src.core.config import get_settings
 from src.scrapers.base.scraper_base import ScraperBase
+
+#initialize settings
+settings = get_settings()
 
 # Configure logging
 console = Console()
@@ -38,7 +42,7 @@ def construct_pdf_path(input_pdf: str):
         str: full file path
     """
     # get the directory of the current script
-    script_dir = os.path.dirname(os.path.abspath(__file__))
+    script_dir = settings.DATA_PATH
     # create full file path
     full_path = os.path.join(script_dir, input_pdf)
     return full_path
