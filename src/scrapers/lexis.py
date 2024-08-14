@@ -1,38 +1,22 @@
-import asyncio
 import datetime
-
-# Update python path to include the parent directory
-# Update python path to include the parent directory
 import json
+import logging
 import os
 import re
-import sys
-from datetime import timedelta
 
-import pandas as pd
 from rich.console import Console
 
 from playwright.async_api import async_playwright
-from src.models import Case, Lead
-from src.services.cases import get_single_case
 from src.services.emails import GmailConnector
 from src.services.leads import (
     LeadsService,
-    get_last_lead,
-    get_leads,
-    patch_lead,
 )
 from src.services.settings import ScrapersService
 
 console = Console()
 
-sys.path.append("..")
 
-# # os.environ["ROOT_PATH"] = "/Users/aennassiri/Projects/Personal/ticket-washer"
-# os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = (
-#     "/Users/aennassiri/Projects/Personal/ticket-washer/configuration/fubloo-app-1f213ca274de.json"
-# )
-# LEXIS_NEXIS_SESSION = "/Users/aennassiri/Projects/Personal/ticket-washer/notebooks/playwright/.auth/lexis.json"
+logger = logging.getLogger(__name__)
 
 leads_service = LeadsService()
 
@@ -47,7 +31,8 @@ class LexisNexisPhoneFinder:
         username=None,
         password=None,
         email="ttdwoman@gmail.com",
-        proxy="socks5://localhost:9090",
+        proxy=None,
+        # proxy="socks5://localhost:9090",
     ) -> None:
         self.storage_state = storage_state
         self.username = username
@@ -63,10 +48,12 @@ class LexisNexisPhoneFinder:
         pw = await async_playwright().start()
 
         if self.proxy is not None:
+            logger.info("Using proxy")
             self.browser = await pw.chromium.launch(
                 headless=True, args=["--proxy-server=socks5://localhost:9090"]
             )
         else:
+            logger.info("Not using proxy")
             self.browser = await pw.chromium.launch(headless=True)
 
         if new_context:

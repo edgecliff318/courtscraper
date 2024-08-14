@@ -15,7 +15,7 @@ if __name__ == "__main__":
     sales = SalesService()
 
     # Read the dataframe
-    df = pd.read_csv("sales.csv")
+    df = pd.read_csv("sales_august_12.csv")
 
     # Parse and insert
     df["customer_id"] = "ttd"
