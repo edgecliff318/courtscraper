@@ -216,8 +216,13 @@ class ArkansasScraper(ScraperBase):
             case_dict["case_date"] = filing_date
 
             if parties:
+                defendant_name = ""  
+                for person in parties:  
+                    if person['role'] == 'DEFENDANT':  
+                        defendant_name = person['name']  
+                        break
                 first_name, middle_name, last_name = self.split_full_name(
-                    parties[0].get("name")
+                    defendant_name
                 )
                 case_dict.update(
                     {

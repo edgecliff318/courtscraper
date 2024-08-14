@@ -253,8 +253,7 @@ def retrieve_cases_indiana():
 def retrieve_cases_oklahoma():
     console.log("Oklahoma Scraper")
     oklahomascraper = OklahomaScraper()
-    filed_date = "03/25/2024"
-    oklahomascraper.scrape({"filed_date": filed_date})
+    oklahomascraper.scrape()
 
 def retrieve_cases_tx_travis():
     console.log("Travis County, Tx State Scraper")
@@ -279,8 +278,7 @@ def retrieve_cases_nc_superior():
 async def retrieve_cases_minnesota():
     console.log("Minnesota State Scraper")
     minnesotascraper = MinnesotaScraper()
-    search_parameters = {"case_id": "27-VB-24-69261"}
-    await minnesotascraper.scrape(search_parameters)
+    await minnesotascraper.scrape()
 
 async def retrieve_cases_fl_palm_beach():
     console.log("Palm Beach County Scraper")

@@ -53,7 +53,8 @@ class FLPalmBeachScraper(ScraperBase):
         context = await self.browser.new_context()
         self.page = await context.new_page()
         self.url = "https://appsgp.mypalmbeachclerk.com/eCaseView/landingpage.aspx"
-        
+        self.courts = {}
+
         await self.page.goto(self.url)
         await self.wait_for_page_load()
         
@@ -61,7 +62,7 @@ class FLPalmBeachScraper(ScraperBase):
         if guest_element:
             await guest_element.click()
         else:
-            print("The 'guest' button was not found. Quiting...")
+            console.log("The 'guest' button was not found. Quiting...")
             await self.browser.close()
 
     async def resolve_captcha(self, recaptcha_element):
@@ -79,13 +80,33 @@ class FLPalmBeachScraper(ScraperBase):
         if response_textarea:
             await response_textarea.evaluate('el => el.value = "{}"'.format(code))
         else:
-            print("The 'g-recaptcha-response' textarea was not found.")
+            console.log("The 'g-recaptcha-response' textarea was not found.")
         submit_button = await self.page.query_selector("input#cphBody_cmdContinue")
         if submit_button:
             await submit_button.click()
         else:
-            print("The 'submit' button was not found.")
-        print("Captcha Resolved")
+            console.log("The 'submit' button was not found.")
+        console.log("Captcha Resolved")
+
+    async def get_court_id(self):
+        court_code = "FL_Palm_Beach"
+        county_name = "Palm_Beach"
+        county_code = "Palm_Beach"
+
+        if court_code not in self.courts:
+            self.courts[court_code] = {
+                "code": court_code,
+                "county_code": county_code,
+                "enabled": True,
+                "name": f"Florida, {county_name}",
+                "state": "FL",
+                "type": "TI",
+                "source": "FL Palm Beach county",
+                "county": "Palm_Beach"
+            }
+            self.insert_court(self.courts[court_code])
+
+        return court_code
 
     async def find_solve_captcha(self):
         """
@@ -95,15 +116,15 @@ class FLPalmBeachScraper(ScraperBase):
             # resolve captcha if found
             recaptcha_element = await self.page.query_selector("div.g-recaptcha")
         except Exception as _:
-            print("No Captcha Element")
+            console.log("No Captcha Element")
             recaptcha_element = False
 
         if recaptcha_element:
-            print("Resolving Captcha")
+            console.log("Resolving Captcha")
             await self.resolve_captcha(recaptcha_element)
             await self.wait_for_page_load()
         else:
-            print("Captcha Not Found!")
+            console.log("Captcha Not Found!")
 
     async def wait_for_page_load(self):
         """
@@ -136,8 +157,7 @@ class FLPalmBeachScraper(ScraperBase):
         console.log("Getting courts...")
         court_names = await self.page.query_selector_all("input[name='courtName']")
         court_ids = await self.page.query_selector_all("input[name='courtFips']")
-        print(f"court ids-{court_names}")
-        print(f"court ids-{court_ids}")
+
         courts = []
         for court_id, court_name in zip(court_ids, court_names):
             court = {
@@ -148,13 +168,15 @@ class FLPalmBeachScraper(ScraperBase):
 
         return courts
 
-    async def search_by_case_number(self,court_types, offense_begin_date):
+    async def search_by_case_number(self, court_types, offense_begin_date):
         """
         search_by_case_number will wait for page load
         call find_solve_captcha to solve captcha if any
         then fill data and click search
         """
         # await page load
+        search_url = "https://appsgp.mypalmbeachclerk.com/eCaseView/search.aspx"
+        await self.page.goto(search_url)
         await self.wait_for_page_load()
 
         # check solve captcha
@@ -174,7 +196,7 @@ class FLPalmBeachScraper(ScraperBase):
             # await page load
             await self.wait_for_page_load()
         else:
-            print("The 'search' button was not found.")
+            console.log("The 'search' button was not found.")
 
     async def detail_search(self, order):
         """
@@ -185,7 +207,7 @@ class FLPalmBeachScraper(ScraperBase):
         await self.wait_for_page_load()
 
         case_id = await self.page.inner_text(f'#cphBody_gvResults_lbCaseNumber_{order}')
-        court_id = case_id.split('-')[0]
+        court_id = await self.get_court_id()
         await self.page.click(f'#cphBody_gvResults_lbCaseNumber_{order}', timeout = 6000)
 
         # await page load
@@ -194,39 +216,76 @@ class FLPalmBeachScraper(ScraperBase):
         # check solve captcha
         await self.find_solve_captcha()
 
-        first_name = await self.get_next_cell_text(self.page, "First Name")
-        middle_name =  await self.get_next_cell_text(self.page, "Middle Name")
-        last_name =  await self.get_next_cell_text(self.page, "Last Name")
+        first_name, middle_name, last_name = "", "", ""
+        try:
+            first_name = await self.get_next_cell_text(self.page, "First Name")
+        except Exception as e:
+            console.log("Error while getting first name: ", e)
+
+        try:
+            middle_name =  await self.get_next_cell_text(self.page, "Middle Name")
+        except Exception as e:
+            console.log("Error while getting middle name: ", e)
+
+        try:
+            last_name =  await self.get_next_cell_text(self.page, "Last Name")
+        except Exception as e:
+            console.log("Error while getting last name: ", e)
 
         status = "new"  # The status should be always new
         state = "FL"
-        race = await self.get_next_cell_text(self.page, "Race")
-        sex = await self.get_next_cell_text(self.page, "Sex")
 
-        date_parts = (await self.get_next_cell_text(self.page, "DOB")).split('/')
-        if date_parts != ['']:
-            birth_date = f"{date_parts[0]}/{date_parts[1]}" 
-            year_of_birth = date_parts[2]
-        else:
-            birth_date = ""
-            year_of_birth = ""
-        filing_date =  await self.get_next_cell_text(self.page, "Filing Date")
-        filing_date = (
-            datetime.strptime(filing_date, "%m/%d/%Y").date().strftime("%Y-%m-%d")
-            if filing_date
-            else ""
-        )
-        offense_date =  await self.get_next_cell_text(self.page, "Offense Date")
+        race, sex = "", ""
+        try:
+            race = await self.get_next_cell_text(self.page, "Race")
+        except Exception as e:
+            console.log("Error while getting race: ", e)
 
-        # fetch charges by changing section
-        charges = await self.get_charges()
+        try:
+            sex = await self.get_next_cell_text(self.page, "Sex")
+        except Exception as e:
+            console.log("Error while getting sex: ", e)
+
+        birth_date = ""
+        year_of_birth = ""
+        try:
+            date_parts = (await self.get_next_cell_text(self.page, "DOB")).split('/')
+            if date_parts != ['']:
+                birth_date = f"{date_parts[0]}/{date_parts[1]}" 
+                year_of_birth = date_parts[2]
+        except Exception as e:
+            console.log("Error while getting birth date and year_of birt: ", e)
+        
+        filing_date = None
+        try:
+            filing_date =  await self.get_next_cell_text(self.page, "Filing Date")
+            filing_date = (
+                datetime.strptime(filing_date, "%m/%d/%Y").date().strftime("%Y-%m-%d")
+                if filing_date
+                else ""
+            )
+        except Exception as e:
+            console.log("Error while getting filing date: ", e)
+
+        offense_date = None
+        try:
+            offense_date =  await self.get_next_cell_text(self.page, "Offense Date")
+        except Exception as e:
+            console.log("Error while getting offense date: ", e)
+        
+        charges = []
+        try:
+            # fetch charges by changing section
+            charges = await self.get_charges()
+        except Exception as e:
+            console.log("Error while getting charges: ", e)
         await self.page.evaluate("window.history.back()")
-        print("Went Back...")
+        console.log("Went Back...")
 
         await self.page.click("//a[@title='Party Names'][contains(@class,'nav-link')]")
         await self.page.wait_for_load_state("networkidle")
         await self.page.evaluate("window.history.back()")
-        print("Went Back...")
+        console.log("Went Back...")
 
         case_dict = {
             "case_id": case_id,
@@ -245,7 +304,7 @@ class FLPalmBeachScraper(ScraperBase):
             "case_date": filing_date,
             "offense_date": offense_date,
             "charges": charges,
-            "charges_description": " ".join([item["description"] for item in charges]),
+            "charges_description": " ".join([item["description"] if item else "" for item in charges]),
             "address_line_1": "",
             "address_city": "",
             "address_state_code": "",
@@ -278,27 +337,26 @@ class FLPalmBeachScraper(ScraperBase):
     async def scrape(self):
         # to track records to skip duplicates
         already_processed = []
-        retry_counter = 0
         await self.init_browser()
-        retry_counter += 1
 
         court_types = "Criminal Traffic"
-        last_offense_begin_date = self.state.get("last_offense_begin_date", "2024-07-10")
+        last_offense_begin_date = self.state.get("last_offense_begin_date", "2024-07-22")
         offense_begin_date = last_offense_begin_date
         not_found_count = 0
+        page_no = 1
+
         while True:
             try:
-                if not_found_count > 10:
+                console.log("not_found_count", not_found_count)
+                if not_found_count > 10: 
                     console.log(
                         "Too many filing dates not found. Ending the search."
                     )
                     break
-                
                 last_offense_begin_date = self.increase_date_by_one_day(last_offense_begin_date)
                 offense_begin_date = last_offense_begin_date
 
-                self.state["last_offense_begin_date"] = last_offense_begin_date
-                # self.update_state()
+                console.log("last_offense_begin_date", last_offense_begin_date)
                 await self.search_by_case_number(court_types, offense_begin_date)
 
                 # await page load
@@ -307,81 +365,76 @@ class FLPalmBeachScraper(ScraperBase):
                 records_per_page = 50
                 # calculate total pages on basis of records per page
                 total_pages_count = int(200 / records_per_page)
+                console.log("total_pages_count", total_pages_count)
                 try:
                     # select per page records
                     await self.page.locator("#cphBody_cmbPageSize").select_option(
                         f"{records_per_page}"
                     )
                 except Exception as _:
-                    print("Failed to find and select all results. Exiting...")
-                    return False
+                    console.log("Failed to find and select all results. Exiting...")
+                    not_found_count += 1
+                    continue
 
                 page_no = 1
-
                 while True:
                     # loop to traverse pagination
-                    print(f"Processing Page No:\t{page_no}")
-                    order = 0
+                    console.log(f"Processing Page No:\t{page_no}")
+                    order = -1
                     while order < records_per_page:
+                        order += 1
+                        console.log("order", order)
                         # loop to traverse cases
                         page_order = (page_no, order)
                         if page_order in already_processed:
-                            print(f"Already Processed:\t{page_order}")
+                            console.log(f"Already Processed:\t{page_order}")
                             order += 1
                             continue
 
-                        print(f"Processing:\t{page_order}")
-                        case_dict = await self.detail_search(order)
-
-                        if not case_dict:
+                        console.log(f"Processing:\t{page_order}")
+                        try:
+                            case_dict = await self.detail_search(order)
+                        except Exception as e:
+                            console.log("Error while getting case details: ", e)
                             console.log(
                                 f"Case not found. Skipping ..."
                             )
                             not_found_count += 1
                             continue
-
+                        console.log("case_dict", case_dict)
                         not_found_count = 0
 
-                        if case_dict:       
-                            case_id = case_dict["case_id"]
-                            if self.check_if_exists(case_id):
-                                console.log(
-                                    f"Case {case_id} already exists. Skipping..."
-                                )
-                                continue
-                        
-                            console.log(f"Inserting case {case_id}...")
-                            self.insert_case(case_dict)
-                            console.log(f"Inserted case for {case_id})")
-                            self.insert_lead(case_dict)
-                            console.log(f"Inserted lead for {case_id}")
+                        case_id = case_dict["case_id"]
+                        if self.check_if_exists(case_id):
+                            console.log(
+                                f"Case {case_id} already exists. Skipping..."
+                            )
+                            await self.page.evaluate("window.history.back()")
+                            console.log("Went Back...")
+                            continue
+                    
+                        console.log(f"Inserting case {case_id}...")
+                        self.insert_case(case_dict)
+                        console.log(f"Inserted case for {case_id})")
+                        self.insert_lead(case_dict)
+                        console.log(f"Inserted lead for {case_id}")
 
-                        print(f"Order No:\t{order+1}")
-                        order += 1
+                        console.log(f"Order No:\t{order}")
                         await self.page.evaluate("window.history.back()")
-                        print("Went Back...")
+                        console.log("Went Back...")
 
                         # await page load
                         await self.wait_for_page_load()
 
                         already_processed.append(page_order)
-                        print("Added to already processed...")
-
-                        if len(already_processed) / 100 == 1:
-                            # if 100 records collected restart because we face captcha always
-                            await self.browser.close()
-                            # so we need to quit from two while loops order and page no
-                            order = float("inf")
-                            print("Set order To: INF")
-                            page_no = float("inf")
-                            print("Set page_no To: INF")
-                            # this will break both while conditions
+                        console.log("Added to already processed...")
 
                     # page while loop break condition
                     page_no += 1
                     if page_no <= total_pages_count:
                         # find next page element
                         await self.page.locator(f"//tr/td/a[text()={page_no}]").click()
+                        print("Successfully clikeced page_no", page_no)
                         # await page load
                         await self.wait_for_page_load()
                         # check solve captcha
@@ -389,6 +442,9 @@ class FLPalmBeachScraper(ScraperBase):
                     else:
                         # break when page reaches last page
                         break
+
+                    self.state["last_offense_begin_date"] = last_offense_begin_date
+                    self.update_state()
 
             except Exception as e:
                 console.log(f"Failed while scraping - {e}")

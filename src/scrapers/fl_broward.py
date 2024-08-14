@@ -337,6 +337,7 @@ class FLBrowardScraper(ScraperBase):
 
         while True:
             try:
+                console.log("not_found_count", not_found_count)
                 if not_found_count > 10:
                     console.log("Too many case ids not found. Ending the search.")
                     break
@@ -347,17 +348,18 @@ class FLBrowardScraper(ScraperBase):
 
                 console.log(f"Current searching case_id-{case_id_full}")
 
-                # if self.check_if_exists(case_id_full):
-                #     console.log(f"Case {case_id_full} already exists. Skipping ...")
-                #     continue
+                if self.check_if_exists(case_id_full):
+                    console.log(f"Case {case_id_full} already exists. Skipping ...")
+                    continue
 
                 await self.input_case_id(case_id_full)
-
-                case_details = await self.detail_search(case_id_full)
-                if not case_details:
+                try:
+                    case_details = await self.detail_search(case_id_full)
+                except:
                     console.log(f"Case {case_id_full} not found. Skipping ...")
                     not_found_count += 1
                     continue
+
                 console.log("case_details", case_details)
                 not_found_count = 0
                 console.log(f"Inserting case {case_id_full}...")
@@ -376,8 +378,3 @@ class FLBrowardScraper(ScraperBase):
             except Exception as e:
                 console.log(f"Failed to scaraping - {e}")
                 continue
-
-if __name__ == "__main__":
-    browardscraper = BrowardScraper()
-    asyncio.run(browardscraper.scrape())
-    console.log("Done running", __file__, ".")

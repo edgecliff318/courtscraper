@@ -32,7 +32,7 @@ class KSJohnson(ScraperBase):
         match = re.match(pattern, race_sex_dob)
         if match:
             return match.group(1), match.group(2), match.group(3)
-        return None, None, None
+        return "", "", ""
 
     @staticmethod
     def check_and_convert_date(date_string: str) -> datetime:
@@ -247,7 +247,8 @@ class KSJohnson(ScraperBase):
                 race, sex, dob = self.split_race_sex_dob(race_sex_dob)
             except Exception:
                 race, sex, dob == ""
-
+            
+            console.log("dob: ", dob)
             birth_date = self.check_and_convert_date(dob)
 
             year_of_birth = birth_date.year if birth_date else ""
@@ -314,9 +315,7 @@ class KSJohnson(ScraperBase):
                     birth_date.strftime("%Y-%m-%d") if birth_date else ""
                 ),
                 "year_of_birth": year_of_birth,
-                "filling_date": (
-                    filling_date.strftime("%Y-%m-%d") if filling_date else ""
-                ),
+                "filling_date": filling_date,
                 "case_date": filling_date,
                 "charges": charges,
                 "charges_description": (
