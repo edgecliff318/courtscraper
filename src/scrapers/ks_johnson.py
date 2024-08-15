@@ -61,60 +61,56 @@ class KSJohnson(ScraperBase):
         console.log("The string is not in a recognizable datetime format.")
         return None
 
-    @staticmethod
-    def parse_full_address(full_address: str) -> Tuple[str, str, str, str]:
-        """
-        Parses a full address string into its components: address line 1, city, state code, and zip code.
+    @staticmethod    
+    def parse_full_address(address_string):  
+        # Initialize with default values  
+        address_info = {  
+            "address_line_1": "UNKNOWN",  
+            "address_city": "UNKNOWN",  
+            "address_state_code": "UNKNOWN",  
+            "address_zip": "00000"  
+        }  
 
-        Args:
-            full_address (str): The full address string.
+        if not isinstance(address_string, str) or not address_string.strip():  
+            return address_info  
 
-        Returns:
-            Tuple[str, str, str, str]: A tuple containing address line 1, city, state code, and zip code.
-        """
-        pattern = re.compile(
-            r"^(?P<address_line_1>[\w\s\#,\.-]+?)[\s,]+"
-            r"(?P<address_city>[A-Za-z\s]+?)[\s,]+"
-            r"(?P<address_state_code>[A-Z]{2})?[\s,]*"
-            r"(?P<address_zip>\d{5}(-\d{4})?|[A-Z0-9 ]{6,10})?$"
-        )
-        match = pattern.match(full_address.strip())
+        # Split components based on commas, avoiding empty parts  
+        address_parts = [part.strip() for part in address_string.split(',') if part.strip()]  
 
-        if match:
-            return (
-                match.group("address_line_1").strip(),
-                match.group("address_city").strip(),
-                match.group("address_state_code").strip(),
-                match.group("address_zip").strip(),
-            )
-        else:
-            # Attempt partial matching if full regex doesn't work
-            address_part = re.match(r"^(.*?)[\s,]{2}", full_address)
-            city_part = re.search(
-                r",\s*([A-Za-z\s]+)\s*,?\s*[A-Z0-9]*", full_address
-            )
-            state_zip_part = re.search(
-                r"([A-Z]{2})?\s*(\d{5}(-\d{4})?|[A-Z0-9 ]{6,10})$",
-                full_address.strip(),
-            )
+        # Attempt to extract ZIP code  
+        zip_search = re.search(r'\b\d{5}(?:-\d{4})?\b', address_string)  
+        if zip_search:  
+            address_info["address_zip"] = zip_search.group(0)  
+            address_parts = [part.replace(address_info["address_zip"], '').strip() for part in address_parts]  
 
-            address_line_1 = (
-                address_part.group(1).strip() if address_part else ""
-            )
-            address_city = city_part.group(1).strip() if city_part else ""
-            state_code = (
-                state_zip_part.group(1).strip()
-                if state_zip_part and state_zip_part.group(1)
-                else ""
-            )
-            zip_code = (
-                state_zip_part.group(2).strip()
-                if state_zip_part and state_zip_part.group(2)
-                else ""
-            )
+        # Attempt to extract state code  
+        # Modified statement for state check, ensures it matches only part of the address that stands alone  
+        for part in address_parts:  
+            state_search = re.search(r'\b([A-Z]{2})\b', part)  
+            if state_search and state_search.group(1):  
+                address_info["address_state_code"] = state_search.group(1)  
+                address_parts = [part.replace(address_info["address_state_code"], '').strip() for part in address_parts]  
+                break  # State code found, exit loop  
 
-            return address_line_1, address_city, state_code, zip_code
+        # Process remaining parts  
+        if len(address_parts) >= 3:  
+            address_info["address_line_1"] = address_parts[0]  
+            address_info["address_city"] = address_parts[1]  
 
+        elif len(address_parts) == 2:  
+            address_info["address_line_1"] = address_parts[0]  
+            address_info["address_city"] = address_parts[1]  
+
+        elif len(address_parts) == 1:  
+            # Assume single remaining part is the address line if zip and state were extracted confidently  
+            if address_info["address_state_code"] != "UNKNOWN" or address_info["address_zip"] != "UNKNOWN":  
+                address_info["address_line_1"] = address_parts[0]  
+            else:  
+                # Fall back assumption: single part without zip/state is city  
+                address_info["address_city"] = address_parts[0]  
+
+        return address_info["address_line_1"], address_info["address_city"], address_info["address_state_code"], address_info["address_zip"]   
+    
     async def initialize_browser(self, user_name: str, password: str) -> None:
         """
         Initializes the browser and logs into the website.
@@ -191,153 +187,172 @@ class KSJohnson(ScraperBase):
         Returns:
             dict: A dictionary containing the case details.
         """
+        # get court_id
+        court_id = ""
         try:
-            # get court_id
             court_id = await self.get_court_id(case_id)
-
-            # get judge
-            try:
-                judge = await self.page.locator(
-                    "xpath=/html/body/form/table[1]/tbody/tr[2]/td[4]/input"
-                ).input_value()
-            except Exception:
-                judge = ""
-
-            # get status
-            try:
-                status = await self.page.locator(
-                    "xpath=/html/body/form/table[1]/tbody/tr[2]/td[8]/input"
-                ).input_value()
-            except Exception:
-                status = ""
-
-            # get last_name
-            try:
-                last_name = await self.page.locator(
-                    "xpath=/html/body/form/table[1]/tbody/tr[3]/td[2]/input"
-                ).input_value()
-            except Exception:
-                last_name = ""
-
-            # get first_name
-            try:
-                first_name = await self.page.locator(
-                    "xpath=/html/body/form/table[1]/tbody/tr[3]/td[4]/input"
-                ).input_value()
-            except Exception:
-                first_name = ""
-
-            # get middle_name
-            try:
-                middle_name = await self.page.locator(
-                    "xpath=/html/body/form/table[1]/tbody/tr[3]/td[6]/input"
-                ).input_value()
-            except Exception:
-                middle_name = ""
-
-            # get race, sex, dob of defendant
-            try:
-                race_sex_dob = await self.page.locator(
-                    "xpath=/html/body/form/table/tbody/tr[4]/td[2]/input"
-                ).input_value()
-            except Exception:
-                race_sex_dob = ""
-
-            try:
-                race, sex, dob = self.split_race_sex_dob(race_sex_dob)
-            except Exception:
-                race, sex, dob == ""
-            
-            console.log("dob: ", dob)
-            birth_date = self.check_and_convert_date(dob)
-
-            year_of_birth = birth_date.year if birth_date else ""
-
-            # Get defendant details
-            # Convert case filing date
-            try:
-                original_filling_date = await self.page.inner_html(
-                    "#Form1 > table:nth-child(5) > tbody > tr:nth-child(2) > td:nth-child(3)"
-                )
-            except Exception:
-                original_filling_date = ""
-            filling_date = self.check_and_convert_date(original_filling_date)
-
-            try:
-                section = await self.page.inner_html(
-                    "#Form1 > table:nth-child(5) > tbody > tr:nth-child(2) > td:nth-child(2)"
-                )
-            except Exception:
-                section = ""
-
-            try:
-                title = await self.page.inner_html(
-                    "#Form1 > table:nth-child(5) > tbody > tr:nth-child(2) > td:nth-child(4)"
-                )
-            except Exception:
-                title = ""
-
-            charges = [
-                {
-                    "section": section,
-                    "date": filling_date,
-                    "offense_description": title,
-                }
-            ]
-
-            await self.page.click("#cmdDefendentInfo")
-
-            # Get addrss details
-            try:
-                address = await self.page.inner_html(
-                    "body > table > tbody > tr:nth-child(2) > td:nth-child(1)"
-                )
-            except:
-                address = ""
-            address_line_1, address_city, address_state_code, address_zip = (
-                self.parse_full_address(address)
-            )
-
-            # Create case details dictionary
-            case_details = {
-                "case_id": case_id,
-                "court_id": court_id,
-                "court_code": court_id,
-                "last_name": last_name,
-                "first_name": first_name,
-                "middle_name": middle_name,
-                "judge": judge,
-                "status": "new",
-                "state": "KS",
-                "race": race,
-                "sex": sex,
-                "birth_date": (
-                    birth_date.strftime("%Y-%m-%d") if birth_date else ""
-                ),
-                "year_of_birth": year_of_birth,
-                "filling_date": filling_date,
-                "case_date": filling_date,
-                "charges": charges,
-                "charges_description": (
-                    charges[0]["offense_description"] if charges else None
-                ),
-                "address_line_1": address_line_1,
-                "address_city": address_city,
-                "address_state_code": address_state_code,
-                "address_zip": address_zip,
-                "address": address_line_1,
-                "city": address_city,
-                "zip_code": address_zip,
-                "county": "Johnson",
-                "state": "KS",
-                "source": "kansas_johnson_county",
-            }
-
-            return case_details
         except Exception as e:
-            console.log(f"Error during fetching case details: {e}")
-            raise
+            console.log("Error while getting court id: ", e)
 
+        # get judge
+        judge = ""
+        try:
+            judge = await self.page.locator(
+                "xpath=/html/body/form/table[1]/tbody/tr[2]/td[4]/input"
+            ).input_value()
+        except Exception as e:
+            console.log("Error while getting judge: ", e)
+
+        # get status
+        status = ""
+        try:
+            status = await self.page.locator(
+                "xpath=/html/body/form/table[1]/tbody/tr[2]/td[8]/input"
+            ).input_value()
+        except Exception:
+            console.log("Error while getting status: ", e)
+
+        # get last_name
+        last_name = ""
+        try:
+            last_name = await self.page.locator(
+                "xpath=/html/body/form/table[1]/tbody/tr[3]/td[2]/input"
+            ).input_value()
+        except Exception:
+            console.log("Error while getting last name: ", e)
+
+        # get first_name
+        first_name = ""
+        try:
+            first_name = await self.page.locator(
+                "xpath=/html/body/form/table[1]/tbody/tr[3]/td[4]/input"
+            ).input_value()
+        except Exception:
+            console.log("Error while getting first name: ", e)
+
+        # get middle_name
+        middle_name = ""
+        try:
+            middle_name = await self.page.locator(
+                "xpath=/html/body/form/table[1]/tbody/tr[3]/td[6]/input"
+            ).input_value()
+        except Exception:
+            console.log("Error while getting middle name: ", e)
+
+        # get race, sex, dob of defendant
+        race_sex_dob = ""
+        try:
+            race_sex_dob = await self.page.locator(
+                "xpath=/html/body/form/table/tbody/tr[4]/td[2]/input"
+            ).input_value()
+        except Exception:
+            console.log("Error while getting race, sex, dob of defendant: ", e)
+
+        # Convert race, sex, dob of defendant
+        race, sex, dob = "", "", ""
+        try:
+            race, sex, dob = self.split_race_sex_dob(race_sex_dob)
+        except Exception:
+            console.log("Error while converting race, sex, dob of defendant: ", e)
+        console.log("race, sex, dob of defendant: ", race, sex, dob)
+
+        # Convert dob to birth_date and year_of_birth
+        birth_date = None
+        try:
+            birth_date = self.check_and_convert_date(dob)
+        except Exception:
+            console.log("Error while converting dob to birth_date and year_of_birth: ", e)
+        
+        year_of_birth = ""
+        try:
+            year_of_birth = birth_date.year if birth_date else ""
+        except Exception as e:
+            console.log("Error while getting year_of_birth: ", e)
+
+        # Get defendant details
+        # Convert case filing date
+        original_filling_date = ""
+        filling_date = None
+        try:
+            original_filling_date = await self.page.inner_html(
+                "#Form1 > table:nth-child(5) > tbody > tr:nth-child(2) > td:nth-child(3)"
+            )
+        except Exception:
+            original_filling_date = ""
+        filling_date = self.check_and_convert_date(original_filling_date)
+
+        # Get sections
+        section = ""
+        try:
+            section = await self.page.inner_html(
+                "#Form1 > table:nth-child(5) > tbody > tr:nth-child(2) > td:nth-child(2)"
+            )
+        except Exception as e:
+            console.log("Error while getting section: ", e)
+
+        # Get title
+        title = ""
+        try:
+            title = await self.page.inner_html(
+                "#Form1 > table:nth-child(5) > tbody > tr:nth-child(2) > td:nth-child(4)"
+            )
+        except Exception:
+            console.log("Error while getting title: ", e)
+
+        charges = [
+            {
+                "section": section,
+                "date": filling_date,
+                "offense_description": title,
+            }
+        ]
+
+        await self.page.click("#cmdDefendentInfo")
+
+        address = ""
+        # Get addrss details
+        try:
+            address = await self.page.inner_html(
+                "body > table > tbody > tr:nth-child(2) > td:nth-child(1)"
+            )
+        except:
+            console.log("Error while getting address: ", e)
+
+        address_line_1, address_city, address_state_code, address_zip = self.parse_full_address(address)
+        
+        # Create case details dictionary
+        case_dict = {
+            "case_id": case_id,
+            "court_id": court_id,
+            "court_code": court_id,
+            "last_name": last_name,
+            "first_name": first_name,
+            "middle_name": middle_name,
+            "judge": judge,
+            "status": "new",
+            "state": "KS",
+            "race": race,
+            "sex": sex,
+            "birth_date": str(birth_date),
+            "year_of_birth": year_of_birth,
+            "filling_date": filling_date,
+            "case_date": filling_date,
+            "charges": charges,
+            "charges_description": " ".join([item["offense_description"] if item else "" for item in charges]),
+            "address_line_1": address_line_1,
+            "address_city": address_city,
+            "address_state_code": address_state_code,
+            "address_zip": address_zip,
+            "address": address_line_1,
+            "city": address_city,
+            "zip_code": address_zip,
+            "county": "Johnson",
+            "state": "KS",
+            "source": "kansas_johnson_county",
+        }
+
+        return case_dict
+    
     async def scrape(self, search_parameters) -> None:
         """
         Main scraping function that orchestrates the entire scraping process.
@@ -353,9 +368,8 @@ class KSJohnson(ScraperBase):
 
         # Initialize counters and state
         last_case_id_nb = self.state.get("last_case_id_nb", 1)
-
-        case_id_nb = last_case_id_nb
         not_found_count = 0
+
         current_year = datetime.now().year
         self.courts = {}
         while True:
@@ -364,11 +378,14 @@ class KSJohnson(ScraperBase):
                     console.log("Too many cases not found. Ending the search.")
                     break
 
+                case_id_nb = last_case_id_nb
+                last_case_id_nb += 1
+
                 # Construct the case ID
                 case_id_full = (
                     f"{str(current_year)[2:]}TC{str(case_id_nb).zfill(5)}"
                 )
-                case_id_nb += 1
+
 
                 # Check if the case already exists
                 if self.check_if_exists(case_id_full):
@@ -376,21 +393,25 @@ class KSJohnson(ScraperBase):
                         f"Case {case_id_full} already exists. Skipping ..."
                     )
                     continue
-
+                
+                case_dict = {}
                 # Search and get case details
-                await self.search_details(case_id_full)
-                case_details = await self.get_case_details(case_id_full)
-                console.log("case_details", case_details)
-                if not case_details:
-                    console.log(f"Case {case_id_full} not found. Skipping ...")
+                try:
+                    await self.search_details(case_id_full)
+                    case_dict = await self.get_case_details(case_id_full)
+                except Exception as e:
+                    console.log(f"Case {case_id_full} not found. Skipping ...", e)
                     not_found_count += 1
                     continue
 
+                console.log("Scraped case_dict successfully!")
                 # Update and insert case details
-                last_case_id_nb = case_id_nb
-                console.log(f"Inserting case {case_id_full}...")
-                self.insert_case(case_details)
-                self.insert_lead(case_details)
+                console.log(f"Inserting case for {case_id_full}...")
+                self.insert_case(case_dict)
+                console.log(f"Inserting lead for {case_id_full})")
+                self.insert_lead(case_dict)
+                console.log("Inserted case and lead for ", case_id_full)
+
                 self.state["last_case_id_nb"] = last_case_id_nb
                 self.update_state()
                 await self.page.wait_for_timeout(2000)
