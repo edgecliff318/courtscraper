@@ -371,7 +371,7 @@ class FLBrowardScraper(ScraperBase):
 
                 console.log(f"Inserting case for {case_id_full}...")
                 self.insert_case(case_details)    
-                console.log(f"Inserting case for {case_id_full}...")  
+                console.log(f"Inserting lead for {case_id_full}...")  
                 self.insert_lead(case_details)
                 console.log("Inserted case and lead for ", case_id_full)
 
