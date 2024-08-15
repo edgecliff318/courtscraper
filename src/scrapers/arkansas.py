@@ -258,10 +258,10 @@ class ArkansasScraper(ScraperBase):
     def scrape(self):
         """Main scraping function to handle the entire scraping process."""
         last_filing_date = self.state.get("last_filing_date", "2024-07-10")
-        filing_date = last_filing_date
         not_found_count = 0
         while True:
             try:
+                console.log("not_found_count", not_found_count)
                 cases = []
                 if not_found_count > 10:
                     console.log(
@@ -269,6 +269,8 @@ class ArkansasScraper(ScraperBase):
                     )
                     break
 
+                filing_date = last_filing_date
+                last_filing_date = self.increase_date_by_one_day(last_filing_date)
                 case_data = self.scrape_cases_for_filing_date(filing_date)
 
                 if case_data is None:
@@ -277,7 +279,7 @@ class ArkansasScraper(ScraperBase):
                     continue
 
                 not_found_count = 0
-                console.log(f"Downloading case details for {last_filing_date}")
+                console.log(f"Downloading case details for {filing_date}")
                 cases.extend(case_data)
 
                 console.log(f"Total {len(cases)} cases")
@@ -291,25 +293,22 @@ class ArkansasScraper(ScraperBase):
                         )
                         continue
 
-                    console.log(f"Inserting case {case_id}...")
+                    console.log(f"Inserting case for {case_id}...")
                     self.insert_case(case_dict)
-                    console.log(f"Inserted case for {case_id})")
+                    console.log(f"Inserting lead for {case_id})")
                     self.insert_lead(case_dict)
-                    console.log(f"Inserted lead for {case_id}")
+                    console.log("Inserted case and lead for ", case_id)
 
-                self.state["last_filing_date"] = filing_date
+                self.state["last_filing_date"] = last_filing_date
                 # If date less than today update
                 if pd.to_datetime(filing_date) < pd.to_datetime("today"):
                     self.update_state()
                 else:
                     break
 
-                filing_date = self.increase_date_by_one_day(filing_date)
-
             except Exception as e:
                 console.log(f"Failed to insert case - {e}")
                 continue
-
 
 if __name__ == "__main__":
     arkansasscraper = ArkansasScraper()
